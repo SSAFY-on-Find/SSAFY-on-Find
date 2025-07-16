@@ -298,7 +298,6 @@ ORDER BY created DESC
 > * **고객과 협력**을 계약 협상보다,
 > * **변화에 대응**을 계획 따르기보다 더 가치 있게 여긴다.
 
-🔗 출처: [https://agilemanifesto.org/iso/ko/manifesto.html](https://agilemanifesto.org/iso/ko/manifesto.html)
 
 ### 🔁 Scrum 프로세스
 
@@ -392,12 +391,6 @@ ORDER BY created DESC
 * **자동화 실습**: 이슈 생성 시 특정 조건이면 자동 배정
 * **JQL 필터 실습**: 나만의 필터 만들어 저장 & 재사용
 
----
 
-## 🔚 마무리
-
-이번 수업을 통해 Jira를 단순한 이슈관리 툴이 아닌,
-**DevOps 기반 협업 문화의 핵심 도구**로 활용하는 방법을 배웠습니다.
-이를 토대로 팀 프로젝트 또는 실무에 적용해보세요!
 
 
