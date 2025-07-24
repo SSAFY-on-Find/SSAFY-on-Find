@@ -3,6 +3,9 @@ spring:
     activate:
       on-profile: local
 
+  sql:
+    init:
+      mode: always
   datasource:
     url: jdbc:mysql://localhost:${MYSQL_HOST_PORT}/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true
     username: ${MYSQL_USER}
@@ -17,6 +20,7 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
         show_sql: true
+    defer-datasource-initialization: true
 
   data:
     redis:
