@@ -1,9 +1,8 @@
 package com.sonfind.chelsea.global.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mapping.model.SnakeCaseFieldNamingStrategy;
-import org.springframework.data.mongodb.MongoManagedTypes;
-import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 
@@ -12,17 +11,12 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
  * 변수명과 필드명이 상이할 시 `@Field` Annotation을 사용하여 커스텀을 수행하시면 됩니다.
  */
 @Configuration
-public class MongoConfig extends AbstractMongoClientConfiguration {
-	@Override
-	protected String getDatabaseName() {
-		return "sof";  // spring.data.mongodb.database 대신
-	}
+public class MongoConfig {
 
-	@Override
-	public MongoMappingContext mongoMappingContext(
-		MongoCustomConversions customConversions,
-		MongoManagedTypes mongoManagedTypes) {
-		MongoMappingContext ctx = super.mongoMappingContext(customConversions, mongoManagedTypes);
+	@Bean
+	public MongoMappingContext mongoMappingContext(MongoCustomConversions conversions) {
+		MongoMappingContext ctx = new MongoMappingContext();
+		ctx.setSimpleTypeHolder(conversions.getSimpleTypeHolder());
 		ctx.setFieldNamingStrategy(new SnakeCaseFieldNamingStrategy());
 		return ctx;
 	}
