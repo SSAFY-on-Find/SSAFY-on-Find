@@ -2,12 +2,12 @@ package com.sonfind.chelsea.domain.notification;
 
 import java.util.Date;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.sonfind.chelsea.types.NotificationStatus;
 
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,14 +23,13 @@ import lombok.NoArgsConstructor;
  * @field createdAt: 알림 생성 시간
  * @field updatedAt: 알림 수정 시간
  */
-@Document(collection = "Notifications")
+@Document(collection = "notifications")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class NotificationDocument {
 	@Id
-	@Field("notification_id")
 	private long id;
 
 	@Field("notification_publisher")
