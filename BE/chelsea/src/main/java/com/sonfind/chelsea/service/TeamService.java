@@ -1,5 +1,11 @@
 package com.sonfind.chelsea.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.sonfind.chelsea.domain.teams.Position;
 import com.sonfind.chelsea.domain.teams.Recruitment;
 import com.sonfind.chelsea.domain.teams.Team;
@@ -7,12 +13,8 @@ import com.sonfind.chelsea.domain.teams.Track;
 import com.sonfind.chelsea.dto.teams.CreateTeamRequest;
 import com.sonfind.chelsea.repository.RecruitmentRepository;
 import com.sonfind.chelsea.repository.TeamRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -62,6 +64,5 @@ public class TeamService {
 	// 	return mateRepository.findBySessionId(sessionId)
 	// 		.orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 	// }
-
 
 }
