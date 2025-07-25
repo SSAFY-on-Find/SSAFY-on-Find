@@ -20,6 +20,12 @@ public class WebSecurityConfig {
 			.requestMatchers(HttpMethod.GET, "/api/v1/mates").permitAll()
 			.requestMatchers("/api/v1/mates/events").permitAll()
 			.requestMatchers(HttpMethod.GET, "/api/v1/teams").permitAll()
+			.requestMatchers(
+				"/swagger-ui/**",
+				"/swagger-ui.html",
+				"/v3/api-docs/**",
+				"/webjars/**"
+			).permitAll()
 			.anyRequest().authenticated());
 
 		return httpSecurity.build();
