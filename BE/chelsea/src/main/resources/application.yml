@@ -4,5 +4,11 @@ spring:
   profiles:
     include:
       - local
+      - swagger
   config:
     import: optional:file:.env[.properties]
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
