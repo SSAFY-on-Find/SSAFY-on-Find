@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
 	private static AuthService authService;
@@ -31,7 +31,7 @@ public class AuthController {
 				.header("Set-Cookie", "sessionId=" + mateId)
 				.build();
 		}
-		
+
 		//학번 조회가 안되는 경우 예외 처리
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 	}
