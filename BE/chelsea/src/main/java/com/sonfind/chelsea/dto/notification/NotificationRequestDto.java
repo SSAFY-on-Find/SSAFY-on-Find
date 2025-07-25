@@ -1,4 +1,4 @@
-package com.sonfind.chelsea.dto;
+package com.sonfind.chelsea.dto.notification;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
