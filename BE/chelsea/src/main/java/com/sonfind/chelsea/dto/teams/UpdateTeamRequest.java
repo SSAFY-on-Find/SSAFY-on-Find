@@ -7,12 +7,12 @@ import com.sonfind.chelsea.domain.teams.Track;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-//data없앴음
 @Getter
 @NoArgsConstructor
-public class CreateTeamRequest {
-	private String teamName;
+public class UpdateTeamRequest {
+
 	private String description;
-	private Track track; //enum으로 수정
+	private Track track;
 	private List<WishPosition> wishPositions;
 }
+

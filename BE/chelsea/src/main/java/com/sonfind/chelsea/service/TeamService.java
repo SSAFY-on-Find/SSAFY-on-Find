@@ -6,12 +6,11 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sonfind.chelsea.domain.teams.Position;
 import com.sonfind.chelsea.domain.teams.Recruitment;
 import com.sonfind.chelsea.domain.teams.Team;
-import com.sonfind.chelsea.domain.teams.Track;
 import com.sonfind.chelsea.dto.teams.CreateTeamRequest;
-import com.sonfind.chelsea.repository.RecruitmentRepository;
+import com.sonfind.chelsea.dto.teams.UpdateTeamRequest;
+import com.sonfind.chelsea.dto.teams.WishPosition;
 import com.sonfind.chelsea.repository.TeamRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -21,48 +20,57 @@ import lombok.RequiredArgsConstructor;
 public class TeamService {
 
 	private final TeamRepository teamRepository;
-	private final RecruitmentRepository recruitmentRepository;
 
-	//mate 관련 코드 모두 주석 처리
+	//공통: Mate 로직 추가해야 함
+
+	//팀 생성
+	//팀명 자동 생성 메서드 만들어야함
 	@Transactional
 	public Long createTeam(CreateTeamRequest request) {
-		// Mate mate = findMateBySessionId(sessionId);
-		//
-		// if(mate.getTeam() != null){
-		// 	throw new IllegalStateException("이미 팀에 소속된 사용자는 팀을 생성할 수 없습니다.");
-		// }
 
-		Track track = Track.valueOf(request.getTrack().toUpperCase());
-
+		// Team 엔티티 생성
 		Team team = Team.builder()
 			.name(request.getTeamName())
 			.description(request.getDescription())
-			.track(Track.valueOf(request.getTrack().toUpperCase())) // enum 변환
+			.track(request.getTrack())
 			.build();
 
-		List<Recruitment> recruitments = request.getWishPositions().stream()
-			.map(wish -> Recruitment.builder()
-				.position(Position.valueOf(wish.getPosition().toUpperCase())) // enum 변환
-				.remainingCount(wish.getCount())
+		// Recruitment 리스트 변환
+		List<Recruitment> recruitments = toRecruitments(request.getWishPositions(), team);
+		team.updatePositions(recruitments);
+
+		return teamRepository.save(team).getTeamId();
+	}
+
+	//팀 수정
+	@Transactional
+	public void updateTeamInfo(Long teamId, String sessionId, UpdateTeamRequest request) {
+		Team team = teamRepository.findById(teamId)
+			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 팀입니다."));
+
+		if (request.getDescription() != null) {
+			team.updateDescription(request.getDescription());
+		}
+
+		if (request.getTrack() != null) {
+			team.updateTrack(request.getTrack());
+		}
+
+		if (request.getWishPositions() != null) {
+			List<Recruitment> recruitments = toRecruitments(request.getWishPositions(), team);
+			team.updatePositions(recruitments);
+		}
+	}
+
+	//wishPositionDto를 recruitment entity로 변환
+	private List<Recruitment> toRecruitments(List<WishPosition> wishes, Team team) {
+		return wishes.stream()
+			.map(w -> Recruitment.builder()
+				.position(w.getPosition())
+				.remainingCount(w.getCount())
 				.team(team)
 				.build())
 			.collect(Collectors.toList());
-
-		team.setRecruitments(recruitments);
-		Team savedTeam = teamRepository.save(team);
-
-		// mate.setTeam(team);
-		// mateRepository.save(mate);
-
-		return savedTeam.getId();
 	}
-
-	// mate 만들어지면 이 부분 바꿔야 함
-	//임시로 만들었음
-	// private Mate findMateBySessionId(String sessionId) {
-	// 	//sessionId로 Mate 찾음
-	// 	return mateRepository.findBySessionId(sessionId)
-	// 		.orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
-	// }
 
 }

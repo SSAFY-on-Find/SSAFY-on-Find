@@ -31,7 +31,7 @@ public class AuthController {
 				.header("Set-Cookie", "sessionId=" + mateId)
 				.build();
 		}
-		
+
 		//학번 조회가 안되는 경우 예외 처리
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 	}
