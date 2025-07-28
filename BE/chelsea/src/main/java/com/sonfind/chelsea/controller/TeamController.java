@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/teams")
+@RequestMapping("/teams")
 public class TeamController {
 
 	private final TeamService teamService;

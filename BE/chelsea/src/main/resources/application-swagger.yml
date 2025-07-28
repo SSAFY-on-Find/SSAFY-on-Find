@@ -1,0 +1,14 @@
+springdoc:
+  packages-to-scan: com.sonfind.chelsea
+  default-consumes-media-type: application/json;charset=UTF-8
+  default-produces-media-type: application/json;charset=UTF-8
+  swagger-ui:
+    path: /swagger-ui
+    doc-expansion: list # 문서 확장 방식 설정 -> none, list(default), full
+    filter: true # 필터 기능 활성화
+    disable-swagger-default-url: true
+    display-request-duration: true
+    operations-sorter: method  # operation 정렬방식 설정 -> alpha, method, order
+    deep-linking: true
+    syntax-highlight:
+      activated: true
