@@ -1,5 +1,6 @@
 package com.sonfind.chelsea.domain.teams;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -24,11 +25,14 @@ public class Recruitment {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	@Column(name = "recruitment_id")
+	private Long recruitmentId;
 
 	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
 	private Position position;
 
+	//nullable 할까요..?
 	private int remainingCount;
 
 	@ManyToOne(fetch = FetchType.LAZY)
