@@ -38,7 +38,7 @@ public class TeamService {
 		Team team = teamRepository.save(noTeamName);
 
 		//자동 팀명 생성(e.g. 001-팀)
-		String autoName = String.format("%03d-팀", team.getTeamId());
+		String autoName = String.format("팀 %03d", team.getTeamId());
 		team.updateName(autoName);
 
 		// Recruitment 리스트 변환
