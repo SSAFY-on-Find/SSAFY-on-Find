@@ -24,22 +24,28 @@ public class TeamService {
 	//공통: Mate 로직 추가해야 함
 
 	//팀 생성
-	//팀명 자동 생성 메서드 만들어야함
+	//팀 명 자동생성 추가
 	@Transactional
 	public Long createTeam(CreateTeamRequest request) {
 
-		// Team 엔티티 생성
-		Team team = Team.builder()
-			.name(request.getTeamName())
+		//팀 명 없이 일단 저장
+		Team noTeamName = Team.builder()
+			.name("")
 			.description(request.getDescription())
 			.track(request.getTrack())
 			.build();
+
+		Team team = teamRepository.save(noTeamName);
+
+		//자동 팀명 생성(e.g. 001-팀)
+		String autoName = String.format("%03d-팀", team.getTeamId());
+		team.updateName(autoName);
 
 		// Recruitment 리스트 변환
 		List<Recruitment> recruitments = toRecruitments(request.getWishPositions(), team);
 		team.updatePositions(recruitments);
 
-		return teamRepository.save(team).getTeamId();
+		return team.getTeamId();
 	}
 
 	//팀 수정

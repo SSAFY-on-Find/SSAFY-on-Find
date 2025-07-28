@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class CreateTeamRequest {
-	private String teamName;
 	private String description;
 	private Track track; //enum으로 수정
 	private List<WishPosition> wishPositions;

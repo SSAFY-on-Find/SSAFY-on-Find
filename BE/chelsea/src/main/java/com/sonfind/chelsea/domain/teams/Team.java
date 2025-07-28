@@ -37,7 +37,7 @@ public class Team {
 	private Long teamId;
 
 	//팀명, 팀 설명, 팀 트랙 유효성 추가
-	//팀 명 자동 생성으로 중복 불가
+	//팀 명 자동 생성
 	@Column(nullable = false)
 	private String name;
 
@@ -60,6 +60,7 @@ public class Team {
 	//orphanRemoval 제거
 	//List 초기화: NPE 방지 & 하이버네이트 호환성
 	@OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
+	@Builder.Default
 	private List<Recruitment> recruitments = new ArrayList<>();
 
 	public void updateDescription(String description) {
@@ -73,6 +74,10 @@ public class Team {
 	public void updatePositions(List<Recruitment> newRecruitments) {
 		this.recruitments.clear();
 		this.recruitments.addAll(newRecruitments);
+	}
+
+	public void updateName(String name) {
+		this.name = name;
 	}
 }
 
