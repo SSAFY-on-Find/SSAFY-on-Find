@@ -1,6 +1,6 @@
 import "@/index.css";
-import Dashboard from "@/pages/DashboardPage/DashboardPage";
-import MyTeam from "@/pages/MyTeamPage/MyTeamPage";
+import Dashboard from "@/pages/DashboardPage";
+import MyTeam from "@/pages/MyTeamPage";
 import { Routes, Route } from "react-router-dom";
 
 function App() {
