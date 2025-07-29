@@ -1,11 +1,11 @@
-package com.sonfind.chelsea.domain.auth;
+package com.sonfind.chelsea.domain.student;
 
 import static lombok.AccessLevel.*;
 
+import com.sonfind.chelsea.global.domain.BaseEntity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,15 +15,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PRIVATE)
 @Getter
-public class Auth {
+public class Student extends BaseEntity {
 	@Id
-	@Column(name = "mate_id")
-	private long mateId;
+	@Column(name = "student_id")
+	private long studentId;
 
 	private String name;
 
-	@Enumerated(EnumType.STRING)
-	private Major major;
+	@Column(name = "major_yn")
+	private boolean majorYn;
 
 	@Column(name = "team_id")
 	private Long teamId;

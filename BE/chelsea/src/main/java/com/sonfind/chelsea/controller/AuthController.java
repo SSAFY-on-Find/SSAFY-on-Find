@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sonfind.chelsea.domain.auth.Auth;
-import com.sonfind.chelsea.service.AuthService;
+import com.sonfind.chelsea.domain.student.Student;
+import com.sonfind.chelsea.service.StudentService;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -18,17 +18,17 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/auth")
 public class AuthController {
 
-	private static AuthService authService;
+	private static StudentService studentService;
 
 	@PostMapping("/sing-in")
-	public ResponseEntity<Object> singup(@RequestBody Long mateId, HttpSession session) {
+	public ResponseEntity<Object> singup(@RequestBody Long studentId, HttpSession session) {
 
-		Auth auth = authService.findByMateId(mateId);
-		if (auth != null) {
-			session.setAttribute("loginUser", mateId);
+		Student student = studentService.findByStudentId(studentId);
+		if (student != null) {
+			session.setAttribute("loginUser", studentId);
 
 			return ResponseEntity.ok()
-				.header("Set-Cookie", "sessionId=" + mateId)
+				.header("Set-Cookie", "sessionId=" + studentId)
 				.build();
 		}
 
