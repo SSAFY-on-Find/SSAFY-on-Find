@@ -1,8 +1,14 @@
+import "@/index.css";
+import Dashboard from "@/pages/DashboardPage";
+import MyTeam from "@/pages/MyTeamPage";
+import { Routes, Route } from "react-router-dom";
+
 function App() {
   return (
-    <div className="bg-main">
-      <p className="text-background">Hello World</p>
-    </div>
+    <Routes>
+      <Route path="/" element={<Dashboard />} />
+      <Route path="/myteam" element={<MyTeam />} />
+    </Routes>
   );
 }
 
