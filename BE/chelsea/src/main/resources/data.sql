@@ -1,100 +1,192 @@
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025001, '김서준', 'MAJOR', NULL);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025002, '이하윤', 'NONMAJOR', 3);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025003, '박지호', 'MAJOR', 1);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025004, '최서아', 'NONMAJOR', 5);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025005, '정은우', 'MAJOR', NULL);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025006, '강지안', 'NONMAJOR', 2);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025007, '조유준', 'MAJOR', 8);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025008, '윤하은', 'NONMAJOR', 4);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025009, '장시우', 'MAJOR', NULL);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025010, '임수아', 'NONMAJOR', 7);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025011, '한도윤', 'MAJOR', 1);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025012, '오채원', 'NONMAJOR', 6);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025013, '서예준', 'MAJOR', NULL);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025014, '신유나', 'NONMAJOR', 9);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025015, '권민준', 'MAJOR', 2);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025016, '황다은', 'NONMAJOR', 5);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025017, '안주원', 'MAJOR', NULL);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025018, '송지우', 'NONMAJOR', 10);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025019, '유하준', 'MAJOR', 3);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025020, '전서윤', 'NONMAJOR', 1);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025021, '정서아', 'MAJOR', NULL);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025022, '강지안', 'NONMAJOR', 8);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025023, '최은우', 'MAJOR', 4);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025024, '김하윤', 'NONMAJOR', 2);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025025, '이시우', 'MAJOR', NULL);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025026, '박서준', 'NONMAJOR', 7);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025027, '조지호', 'MAJOR', 5);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025028, '윤수아', 'NONMAJOR', 3);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025029, '장유준', 'MAJOR', NULL);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025030, '임채원', 'NONMAJOR', 1);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025031, '한민준', 'MAJOR', 6);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025032, '오유나', 'NONMAJOR', 9);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025033, '서하준', 'MAJOR', NULL);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025034, '신지우', 'NONMAJOR', 2);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025035, '권도윤', 'MAJOR', 4);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025036, '황서윤', 'NONMAJOR', 8);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025037, '안예준', 'MAJOR', NULL);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025038, '송다은', 'NONMAJOR', 1);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025039, '유주원', 'MAJOR', 10);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025040, '전하은', 'NONMAJOR', 3);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025041, '오지호', 'MAJOR', NULL);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025042, '한서아', 'NONMAJOR', 5);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025043, '임은우', 'MAJOR', 7);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025044, '장하윤', 'NONMAJOR', 6);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025045, '윤서준', 'MAJOR', NULL);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025046, '조지안', 'NONMAJOR', 4);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025047, '강시우', 'MAJOR', 2);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025048, '정수아', 'NONMAJOR', 8);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025049, '최유준', 'MAJOR', NULL);
-INSERT INTO auth (mate_id, name, major, team_id)
-VALUES (2025050, '박채원', 'NONMAJOR', 1);
+-- ==================================================================
+-- 상위 코드 (main_code) 데이터
+-- ==================================================================
+INSERT INTO main_code (MAIN_CODE, MAIN_CODE_NAME, MAIN_CODE_DESCRIPTION, USE_YN, created_by, created_at)
+VALUES ('TRK', '트랙', '트랙 종류', true, '0001234', NOW()),
+       ('POS', '포지션', '포지션 종류', true, '0001234', NOW()),
+       ('GOAL', '목표', '프로젝트 목표 종류', true, '0001234', NOW()),
+       ('TECH', '기술 스택', '기술 스택 종류', true, '0001234', NOW()),
+       ('MBTI', 'MBTI', '성격 유형 지표', true, '0001234', NOW()),
+       ('RULE', '규칙', '팀 빌딩 규칙', true, '0001234', NOW());
+
+
+-- ==================================================================
+-- 하위 코드 (sub_code) 데이터
+-- ==================================================================
+
+-- == TRK (트랙) ==
+INSERT INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
+VALUES ('TRK001', 'TRK', '웹 기술', '웹 기술을(를) 나타내는 코드. (코드: TRK001)', true, '0001234', NOW()),
+       ('TRK002', 'TRK', '웹 디자인', '웹 디자인을(를) 나타내는 코드. (코드: TRK002)', true, '0001234', NOW()),
+       ('TRK003', 'TRK', 'AIOT', 'AIOT을(를) 나타내는 코드. (코드: TRK003)', true, '0001234', NOW()),
+       ('TRK004', 'TRK', 'MOBILE', 'MOBILE을(를) 나타내는 코드. (코드: TRK004)', true, '0001234', NOW());
+
+-- == POS (포지션) ==
+INSERT INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
+VALUES ('POS001', 'POS', '프론트', '프론트을(를) 나타내는 코드. (코드: POS001)', true, '0001234', NOW()),
+       ('POS002', 'POS', '백엔드', '백엔드을(를) 나타내는 코드. (코드: POS002)', true, '0001234', NOW()),
+       ('POS003', 'POS', '풀스택', '풀스택을(를) 나타내는 코드. (코드: POS003)', true, '0001234', NOW()),
+       ('POS004', 'POS', '인프라', '인프라을(를) 나타내는 코드. (코드: POS004)', true, '0001234', NOW()),
+       ('POS005', 'POS', '임베디드', '임베디드을(를) 나타내는 코드. (코드: POS005)', true, '0001234', NOW()),
+       ('POS006', 'POS', '모바일', '모바일을(를) 나타내는 코드. (코드: POS006)', true, '0001234', NOW()),
+       ('POS007', 'POS', 'AI', 'AI을(를) 나타내는 코드. (코드: POS007)', true, '0001234', NOW());
+
+-- == GOAL (목표) ==
+INSERT INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
+VALUES ('GOAL001', 'GOAL', '포트폴리오', '포트폴리오을(를) 나타내는 코드. (코드: GOAL001)', true, '0001234', NOW()),
+       ('GOAL002', 'GOAL', '수상', '수상을(를) 나타내는 코드. (코드: GOAL002)', true, '0001234', NOW()),
+       ('GOAL003', 'GOAL', '취업', '취업을(를) 나타내는 코드. (코드: GOAL003)', true, '0001234', NOW());
+
+-- == MBTI (성격 유형 지표) ==
+INSERT INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
+VALUES ('MBTI001', 'MBTI', 'INTJ', 'INTJ을(를) 나타내는 코드. (코드: MBTI001)', true, '0001234', NOW()),
+       ('MBTI002', 'MBTI', 'INTP', 'INTP을(를) 나타내는 코드. (코드: MBTI002)', true, '0001234', NOW()),
+       ('MBTI003', 'MBTI', 'ENTJ', 'ENTJ을(를) 나타내는 코드. (코드: MBTI003)', true, '0001234', NOW()),
+       ('MBTI004', 'MBTI', 'ENTP', 'ENTP을(를) 나타내는 코드. (코드: MBTI004)', true, '0001234', NOW()),
+       ('MBTI005', 'MBTI', 'INFJ', 'INFJ을(를) 나타내는 코드. (코드: MBTI005)', true, '0001234', NOW()),
+       ('MBTI006', 'MBTI', 'INFP', 'INFP을(를) 나타내는 코드. (코드: MBTI006)', true, '0001234', NOW()),
+       ('MBTI007', 'MBTI', 'ENFJ', 'ENFJ을(를) 나타내는 코드. (코드: MBTI007)', true, '0001234', NOW()),
+       ('MBTI008', 'MBTI', 'ENFP', 'ENFP을(를) 나타내는 코드. (코드: MBTI008)', true, '0001234', NOW()),
+       ('MBTI009', 'MBTI', 'ISTJ', 'ISTJ을(를) 나타내는 코드. (코드: MBTI009)', true, '0001234', NOW()),
+       ('MBTI010', 'MBTI', 'ISFJ', 'ISFJ을(를) 나타내는 코드. (코드: MBTI010)', true, '0001234', NOW()),
+       ('MBTI011', 'MBTI', 'ESTJ', 'ESTJ을(를) 나타내는 코드. (코드: MBTI011)', true, '0001234', NOW()),
+       ('MBTI012', 'MBTI', 'ESFJ', 'ESFJ을(를) 나타내는 코드. (코드: MBTI012)', true, '0001234', NOW()),
+       ('MBTI013', 'MBTI', 'ISTP', 'ISTP을(를) 나타내는 코드. (코드: MBTI013)', true, '0001234', NOW()),
+       ('MBTI014', 'MBTI', 'ISFP', 'ISFP을(를) 나타내는 코드. (코드: MBTI014)', true, '0001234', NOW()),
+       ('MBTI015', 'MBTI', 'ESTP', 'ESTP을(를) 나타내는 코드. (코드: MBTI015)', true, '0001234', NOW()),
+       ('MBTI016', 'MBTI', 'ESFP', 'ESFP을(를) 나타내는 코드. (코드: MBTI016)', true, '0001234', NOW());
+
+-- == TECH (기술 스택) ==
+INSERT INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
+VALUES ('TECH001', 'TECH', 'React', 'React을(를) 나타내는 코드. (코드: TECH001)', true, '0001234', NOW()),
+       ('TECH002', 'TECH', 'Vue.js', 'Vue.js을(를) 나타내는 코드. (코드: TECH002)', true, '0001234', NOW()),
+       ('TECH003', 'TECH', 'Angular', 'Angular을(를) 나타내는 코드. (코드: TECH003)', true, '0001234', NOW()),
+       ('TECH004', 'TECH', 'Svelte', 'Svelte을(를) 나타내는 코드. (코드: TECH004)', true, '0001234', NOW()),
+       ('TECH005', 'TECH', 'Next.js', 'Next.js을(를) 나타내는 코드. (코드: TECH005)', true, '0001234', NOW()),
+       ('TECH006', 'TECH', 'Nuxt.js', 'Nuxt.js을(를) 나타내는 코드. (코드: TECH006)', true, '0001234', NOW()),
+       ('TECH007', 'TECH', 'TypeScript', 'TypeScript을(를) 나타내는 코드. (코드: TECH007)', true, '0001234', NOW()),
+       ('TECH008', 'TECH', 'JavaScript', 'JavaScript을(를) 나타내는 코드. (코드: TECH008)', true, '0001234', NOW()),
+       ('TECH009', 'TECH', 'HTML5', 'HTML5을(를) 나타내는 코드. (코드: TECH009)', true, '0001234', NOW()),
+       ('TECH010', 'TECH', 'CSS3', 'CSS3을(를) 나타내는 코드. (코드: TECH010)', true, '0001234', NOW()),
+       ('TECH011', 'TECH', 'Sass', 'Sass을(를) 나타내는 코드. (코드: TECH011)', true, '0001234', NOW()),
+       ('TECH012', 'TECH', 'TailwindCSS', 'TailwindCSS을(를) 나타내는 코드. (코드: TECH012)', true, '0001234', NOW()),
+       ('TECH013', 'TECH', 'Styled Component', 'Styled Component을(를) 나타내는 코드. (코드: TECH013)', true, '0001234', NOW()),
+       ('TECH014', 'TECH', 'Bootstrap', 'Bootstrap을(를) 나타내는 코드. (코드: TECH014)', true, '0001234', NOW()),
+       ('TECH015', 'TECH', 'Spring Boot', 'Spring Boot을(를) 나타내는 코드. (코드: TECH015)', true, '0001234', NOW()),
+       ('TECH016', 'TECH', 'Node.js', 'Node.js을(를) 나타내는 코드. (코드: TECH016)', true, '0001234', NOW()),
+       ('TECH017', 'TECH', 'Express', 'Express을(를) 나타내는 코드. (코드: TECH017)', true, '0001234', NOW()),
+       ('TECH018', 'TECH', 'Nest.js', 'Nest.js을(를) 나타내는 코드. (코드: TECH018)', true, '0001234', NOW()),
+       ('TECH019', 'TECH', 'Django', 'Django을(를) 나타내는 코드. (코드: TECH019)', true, '0001234', NOW()),
+       ('TECH020', 'TECH', 'Flask', 'Flask을(를) 나타내는 코드. (코드: TECH020)', true, '0001234', NOW()),
+       ('TECH021', 'TECH', 'FastAPI', 'FastAPI을(를) 나타내는 코드. (코드: TECH021)', true, '0001234', NOW()),
+       ('TECH022', 'TECH', 'Ruby on Rails', 'Ruby on Rails을(를) 나타내는 코드. (코드: TECH022)', true, '0001234', NOW()),
+       ('TECH023', 'TECH', 'ASP.NET Core', 'ASP.NET Core을(를) 나타내는 코드. (코드: TECH023)', true, '0001234', NOW()),
+       ('TECH024', 'TECH', 'PHP', 'PHP을(를) 나타내는 코드. (코드: TECH024)', true, '0001234', NOW()),
+       ('TECH025', 'TECH', 'Java', 'Java을(를) 나타내는 코드. (코드: TECH025)', true, '0001234', NOW()),
+       ('TECH026', 'TECH', 'Kotlin', 'Kotlin을(를) 나타내는 코드. (코드: TECH026)', true, '0001234', NOW()),
+       ('TECH027', 'TECH', 'Python', 'Python을(를) 나타내는 코드. (코드: TECH027)', true, '0001234', NOW()),
+       ('TECH028', 'TECH', 'Go', 'Go을(를) 나타내는 코드. (코드: TECH028)', true, '0001234', NOW()),
+       ('TECH029', 'TECH', 'C#', 'C#을(를) 나타내는 코드. (코드: TECH029)', true, '0001234', NOW()),
+       ('TECH030', 'TECH', 'Elixir', 'Elixir을(를) 나타내는 코드. (코드: TECH030)', true, '0001234', NOW()),
+       ('TECH031', 'TECH', 'RESTful API', 'RESTful API을(를) 나타내는 코드. (코드: TECH031)', true, '0001234', NOW()),
+       ('TECH032', 'TECH', 'GraphQL', 'GraphQL을(를) 나타내는 코드. (코드: TECH032)', true, '0001234', NOW()),
+       ('TECH033', 'TECH', 'gRPC', 'gRPC을(를) 나타내는 코드. (코드: TECH033)', true, '0001234', NOW()),
+       ('TECH034', 'TECH', 'WebSocket', 'WebSocket을(를) 나타내는 코드. (코드: TECH034)', true, '0001234', NOW()),
+       ('TECH035', 'TECH', 'SSE', 'SSE을(를) 나타내는 코드. (코드: TECH035)', true, '0001234', NOW()),
+       ('TECH036', 'TECH', 'MySQL', 'MySQL을(를) 나타내는 코드. (코드: TECH036)', true, '0001234', NOW()),
+       ('TECH037', 'TECH', 'MariaDB', 'MariaDB을(를) 나타내는 코드. (코드: TECH037)', true, '0001234', NOW()),
+       ('TECH038', 'TECH', 'PostgreSQL', 'PostgreSQL을(를) 나타내는 코드. (코드: TECH038)', true, '0001234', NOW()),
+       ('TECH039', 'TECH', 'SQLite', 'SQLite을(를) 나타내는 코드. (코드: TECH039)', true, '0001234', NOW()),
+       ('TECH040', 'TECH', 'MS-SQL', 'MS-SQL을(를) 나타내는 코드. (코드: TECH040)', true, '0001234', NOW()),
+       ('TECH041', 'TECH', 'Oracle', 'Oracle을(를) 나타내는 코드. (코드: TECH041)', true, '0001234', NOW()),
+       ('TECH042', 'TECH', 'MongoDB', 'MongoDB을(를) 나타내는 코드. (코드: TECH042)', true, '0001234', NOW()),
+       ('TECH043', 'TECH', 'DynamoDB', 'DynamoDB을(를) 나타내는 코드. (코드: TECH043)', true, '0001234', NOW()),
+       ('TECH044', 'TECH', 'Flutter', 'Flutter을(를) 나타내는 코드. (코드: TECH044)', true, '0001234', NOW()),
+       ('TECH045', 'TECH', 'React Native', 'React Native을(를) 나타내는 코드. (코드: TECH045)', true, '0001234', NOW()),
+       ('TECH046', 'TECH', 'Ionic', 'Ionic을(를) 나타내는 코드. (코드: TECH046)', true, '0001234', NOW()),
+       ('TECH047', 'TECH', 'Android (Java/Kotlin)', 'Android (Java/Kotlin)을(를) 나타내는 코드. (코드: TECH047)', true, '0001234',
+        NOW()),
+       ('TECH048', 'TECH', 'Objective-C', 'Objective-C을(를) 나타내는 코드. (코드: TECH048)', true, '0001234', NOW()),
+       ('TECH049', 'TECH', 'Swift', 'Swift을(를) 나타내는 코드. (코드: TECH049)', true, '0001234', NOW()),
+       ('TECH050', 'TECH', 'Kotlin Multiplatform Mobile (KMM)',
+        'Kotlin Multiplatform Mobile (KMM)을(를) 나타내는 코드. (코드: TECH050)', true, '0001234', NOW()),
+       ('TECH051', 'TECH', 'Xamarin', 'Xamarin을(를) 나타내는 코드. (코드: TECH051)', true, '0001234', NOW()),
+       ('TECH052', 'TECH', 'C', 'C을(를) 나타내는 코드. (코드: TECH052)', true, '0001234', NOW()),
+       ('TECH053', 'TECH', 'C++', 'C++을(를) 나타내는 코드. (코드: TECH053)', true, '0001234', NOW()),
+       ('TECH054', 'TECH', 'FreeRTOS', 'FreeRTOS을(를) 나타내는 코드. (코드: TECH054)', true, '0001234', NOW()),
+       ('TECH055', 'TECH', 'Zephyr', 'Zephyr을(를) 나타내는 코드. (코드: TECH055)', true, '0001234', NOW()),
+       ('TECH056', 'TECH', 'Arduino Platform', 'Arduino Platform을(를) 나타내는 코드. (코드: TECH056)', true, '0001234', NOW()),
+       ('TECH057', 'TECH', 'MicroPython', 'MicroPython을(를) 나타내는 코드. (코드: TECH057)', true, '0001234', NOW()),
+       ('TECH058', 'TECH', 'MQTT', 'MQTT을(를) 나타내는 코드. (코드: TECH058)', true, '0001234', NOW()),
+       ('TECH059', 'TECH', 'Docker', 'Docker을(를) 나타내는 코드. (코드: TECH059)', true, '0001234', NOW()),
+       ('TECH060', 'TECH', 'Kubernetes', 'Kubernetes을(를) 나타내는 코드. (코드: TECH060)', true, '0001234', NOW()),
+       ('TECH061', 'TECH', 'Nginx', 'Nginx을(를) 나타내는 코드. (코드: TECH061)', true, '0001234', NOW()),
+       ('TECH062', 'TECH', 'Apache', 'Apache을(를) 나타내는 코드. (코드: TECH062)', true, '0001234', NOW()),
+       ('TECH063', 'TECH', 'Jenkins', 'Jenkins을(를) 나타내는 코드. (코드: TECH063)', true, '0001234', NOW()),
+       ('TECH064', 'TECH', 'GitHub Actions', 'GitHub Actions을(를) 나타내는 코드. (코드: TECH064)', true, '0001234', NOW()),
+       ('TECH065', 'TECH', 'RabbitMQ', 'RabbitMQ을(를) 나타내는 코드. (코드: TECH065)', true, '0001234', NOW()),
+       ('TECH066', 'TECH', 'Redis', 'Redis을(를) 나타내는 코드. (코드: TECH066)', true, '0001234', NOW()),
+       ('TECH067', 'TECH', 'Kafka', 'Kafka을(를) 나타내는 코드. (코드: TECH067)', true, '0001234', NOW()),
+       ('TECH068', 'TECH', 'OpenSearch', 'OpenSearch을(를) 나타내는 코드. (코드: TECH068)', true, '0001234', NOW()),
+       ('TECH069', 'TECH', 'Elasticsearch', 'Elasticsearch을(를) 나타내는 코드. (코드: TECH069)', true, '0001234', NOW()),
+       ('TECH070', 'TECH', 'Rush (Monorepo tool)', 'Rush (Monorepo tool)을(를) 나타내는 코드. (코드: TECH070)', true, '0001234',
+        NOW());
+
+-- == RULE (팀 빌딩 규칙) ==
+INSERT INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
+VALUES ('RULE001', 'RULE', 'SIZE_LIMIT', '6인 1팀 원칙', true, '0001234', NOW()),
+       ('RULE002', 'RULE', 'MIN_MAJOR', '전공자 2인 이상', true, '0001234', NOW()),
+       ('RULE003', 'RULE', 'MIN_NON_MAJOR', '비전공자 2인 이상', true, '0001234', NOW()),
+       ('RULE004', 'RULE', 'BUILD_END_DATE', '팀 빌딩 종료 시간', true, '0001234', NOW());
+
+INSERT INTO student (student_id, name, major, team_id, created_by, created_at)
+VALUES (1300001, '김서준', 'MAJOR', NULL, '0001234', NOW()),
+       (1300002, '이하윤', 'NONMAJOR', 3, '0001234', NOW()),
+       (1300003, '박지호', 'MAJOR', 1, '0001234', NOW()),
+       (1300004, '최서아', 'NONMAJOR', 5, '0001234', NOW()),
+       (1300005, '정은우', 'MAJOR', NULL, '0001234', NOW()),
+       (1300006, '강지안', 'NONMAJOR', 2, '0001234', NOW()),
+       (1300007, '조유준', 'MAJOR', 8, '0001234', NOW()),
+       (1300008, '윤하은', 'NONMAJOR', 4, '0001234', NOW()),
+       (1300009, '장시우', 'MAJOR', NULL, '0001234', NOW()),
+       (1300010, '임수아', 'NONMAJOR', 7, '0001234', NOW()),
+       (1300011, '한도윤', 'MAJOR', 1, '0001234', NOW()),
+       (1300012, '오채원', 'NONMAJOR', 6, '0001234', NOW()),
+       (1300013, '서예준', 'MAJOR', NULL, '0001234', NOW()),
+       (1300014, '신유나', 'NONMAJOR', 9, '0001234', NOW()),
+       (1300015, '권민준', 'MAJOR', 2, '0001234', NOW()),
+       (1300016, '황다은', 'NONMAJOR', 5, '0001234', NOW()),
+       (1300017, '안주원', 'MAJOR', NULL, '0001234', NOW()),
+       (1300018, '송지우', 'NONMAJOR', 10, '0001234', NOW()),
+       (1300019, '유하준', 'MAJOR', 3, '0001234', NOW()),
+       (1300020, '전서윤', 'NONMAJOR', 1, '0001234', NOW()),
+       (1300021, '정서아', 'MAJOR', NULL, '0001234', NOW()),
+       (1300022, '강지안', 'NONMAJOR', 8, '0001234', NOW()),
+       (1300023, '최은우', 'MAJOR', 4, '0001234', NOW()),
+       (1300024, '김하윤', 'NONMAJOR', 2, '0001234', NOW()),
+       (1300025, '이시우', 'MAJOR', NULL, '0001234', NOW()),
+       (1300026, '박서준', 'NONMAJOR', 7, '0001234', NOW()),
+       (1300027, '조지호', 'MAJOR', 5, '0001234', NOW()),
+       (1300028, '윤수아', 'NONMAJOR', 3, '0001234', NOW()),
+       (1300029, '장유준', 'MAJOR', NULL, '0001234', NOW()),
+       (1300030, '임채원', 'NONMAJOR', 1, '0001234', NOW()),
+       (1300031, '한민준', 'MAJOR', 6, '0001234', NOW()),
+       (1300032, '오유나', 'NONMAJOR', 9, '0001234', NOW()),
+       (1300033, '서하준', 'MAJOR', NULL, '0001234', NOW()),
+       (1300034, '신지우', 'NONMAJOR', 2, '0001234', NOW()),
+       (1300035, '권도윤', 'MAJOR', 4, '0001234', NOW()),
+       (1300036, '황서윤', 'NONMAJOR', 8, '0001234', NOW()),
+       (1300037, '안예준', 'MAJOR', NULL, '0001234', NOW()),
+       (1300038, '송다은', 'NONMAJOR', 1, '0001234', NOW()),
+       (1300039, '유주원', 'MAJOR', 10, '0001234', NOW()),
+       (1300040, '전하은', 'NONMAJOR', 3, '0001234', NOW()),
+       (1300041, '오지호', 'MAJOR', NULL, '0001234', NOW()),
+       (1300042, '한서아', 'NONMAJOR', 5, '0001234', NOW()),
+       (1300043, '임은우', 'MAJOR', 7, '0001234', NOW()),
+       (1300044, '장하윤', 'NONMAJOR', 6, '0001234', NOW()),
+       (1300045, '윤서준', 'MAJOR', NULL, '0001234', NOW()),
+       (1300046, '조지안', 'NONMAJOR', 4, '0001234', NOW()),
+       (1300047, '강시우', 'MAJOR', 2, '0001234', NOW()),
+       (1300048, '정수아', 'NONMAJOR', 8, '0001234', NOW()),
+       (1300049, '최유준', 'MAJOR', NULL, '0001234', NOW()),
+       (1300050, '박채원', 'NONMAJOR', 1, '0001234', NOW());
