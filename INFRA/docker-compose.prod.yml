@@ -1,0 +1,65 @@
+services:
+  chelsea-app:
+    container_name: ${APP_CONTAINER_NAME}
+    build:
+      context: ../BE/chelsea
+    restart: always
+    ports:
+      - '${APP_HOST_PORT}:8090'
+    depends_on:
+      - mysql
+      - redis
+      - mongodb
+    env_file:
+      - .prod.env
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+    networks:
+      - product_api_server_network
+
+  mysql:
+    image: mysql:${MYSQL_VERSION}
+    container_name: ${MYSQL_CONTAINER_NAME}
+    restart: always
+    volumes:
+      - ./mysql/data:/data
+    networks:
+      - product_api_server_network
+    ports:
+      - '${MYSQL_HOST_PORT}:3306'
+    env_file:
+      - .prod.env
+
+  redis:
+    image: redis:${REDIS_VERSION}
+    container_name: ${REDIS_CONTAINER_NAME}
+    restart: always
+    ports:
+      - '${REDIS_HOST_PORT}:6379'
+    networks:
+      - product_api_server_network
+    volumes:
+      - ./redis/data:/data
+
+  mongodb:
+    image: mongo:${MONGO_VERSION}
+    container_name: ${MONGO_CONTAINER_NAME}
+    restart: always
+    ports:
+      - '${MONGO_HOST_PORT}:27017'
+    networks:
+      - product_api_server_network
+    volumes:
+      - ./mongodb/data:/data
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_DB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_DB_PASSWORD}
+
+volumes:
+  mysql_data:
+  redis_data:
+  mongo_data:
+
+networks:
+  product_api_server_network:
+      
