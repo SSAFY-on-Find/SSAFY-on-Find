@@ -55,4 +55,3 @@ public class Team {
 		this.recruitments = recruitments;
 	}
 }
-

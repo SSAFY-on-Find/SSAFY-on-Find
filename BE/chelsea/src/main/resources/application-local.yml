@@ -1,5 +1,6 @@
 spring:
   config:
+    import: optional:file:.env[.properties]
     activate:
       on-profile: local
 
@@ -28,6 +29,11 @@ spring:
       port: ${REDIS_HOST_PORT}
     mongodb:
       uri: mongodb://${MONGO_DB_USER}:${MONGO_DB_PASSWORD}@localhost:${MONGO_HOST_PORT}/${MONGO_DB_NAME}?authSource=admin
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
 
 logging:
   level:

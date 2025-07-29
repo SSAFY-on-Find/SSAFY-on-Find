@@ -39,4 +39,3 @@ public class TeamController {
 		return ResponseEntity.created(location).body(body);
 	}
 }
-
