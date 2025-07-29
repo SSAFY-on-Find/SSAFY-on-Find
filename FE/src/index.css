@@ -1,7 +1,21 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+@import "tailwindcss";
 
-@import "tailwindcss/preflight";   /* 기본 Reset + Normalize */
-@import "tailwindcss/utilities";   /* 모든 유틸리티 클래스 */
+@theme {  
+  --color-main: #6C5CE7;
+  --color-background: #FAFAFA;
+  --color-text: #1A1A1A;
+  --color-subtext: #A3A3A3;
+  --color-line: #E6E6E6;
+  --color-error: #FF2B37;
+  --color-frontend: #EA580C;
+  --color-backend: #0891B2;
+  --color-fullstack: #F59E0B;
+  --color-embedded: #16A34A;
+  --color-infra: #64748B;
+  --color-ai: #D946EF;
+  --color-mobile: #EC4899;
+}
 
 html {
   font-family: 'Pretendard', sans-serif;
