@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PRIVATE)
 @Getter
-public class Student extends BaseEntity {
+public class Students extends BaseEntity {
 	@Id
 	@Column(name = "student_id")
 	private long studentId;

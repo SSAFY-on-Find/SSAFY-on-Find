@@ -139,7 +139,7 @@ VALUES ('RULE001', 'RULE', 'SIZE_LIMIT', '6인 1팀 원칙', true, '0001234', NO
        ('RULE003', 'RULE', 'MIN_NON_MAJOR', '비전공자 2인 이상', true, '0001234', NOW()),
        ('RULE004', 'RULE', 'BUILD_END_DATE', '팀 빌딩 종료 시간', true, '0001234', NOW());
 
-INSERT INTO student (student_id, name, major_yn, team_id, created_by, created_at)
+INSERT INTO students (student_id, name, major_yn, team_id, created_by, created_at)
 VALUES (1300001, '김서준', TRUE, NULL, '0001234', NOW()),
        (1300002, '이하윤', FALSE, 3, '0001234', NOW()),
        (1300003, '박지호', TRUE, 1, '0001234', NOW()),

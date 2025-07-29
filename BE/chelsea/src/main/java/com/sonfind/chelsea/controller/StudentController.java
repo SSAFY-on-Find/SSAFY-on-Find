@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sonfind.chelsea.domain.student.Student;
+import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.service.StudentService;
 
 import jakarta.servlet.http.HttpSession;
@@ -15,15 +15,15 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/auth")
-public class AuthController {
+@RequestMapping("/students")
+public class StudentController {
 
 	private static StudentService studentService;
 
 	@PostMapping("/sing-in")
 	public ResponseEntity<Object> singup(@RequestBody Long studentId, HttpSession session) {
 
-		Student student = studentService.findByStudentId(studentId);
+		Students student = studentService.findByStudentId(studentId);
 		if (student != null) {
 			session.setAttribute("loginUser", studentId);
 

@@ -4,7 +4,7 @@ import static lombok.AccessLevel.*;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.sonfind.chelsea.domain.student.Student;
+import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.global.domain.BaseEntity;
 import com.sonfind.chelsea.global.domain.SubCode;
 
@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PRIVATE)
 @Getter
-public class Mates extends BaseEntity {
+public class StudentInfo extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +34,7 @@ public class Mates extends BaseEntity {
 
 	@OneToOne
 	@JoinColumn(name = "student_id", referencedColumnName = "student_id")
-	Student student;
+	Students student;
 
 	private String techStack;
 

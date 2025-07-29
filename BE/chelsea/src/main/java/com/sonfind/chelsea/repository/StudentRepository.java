@@ -5,9 +5,9 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.sonfind.chelsea.domain.student.Student;
+import com.sonfind.chelsea.domain.student.Students;
 
 @Repository
-public interface StudentRepository extends JpaRepository<Student, Long> {
-	Optional<Student> findByStudentId(Long studentId); // 원시형 vs wrapper 형?
+public interface StudentRepository extends JpaRepository<Students, Long> {
+	Optional<Students> findByStudentId(Long studentId); // 원시형 vs wrapper 형?
 }
