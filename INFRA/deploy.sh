@@ -27,7 +27,7 @@ docker pull ${IMAGE_TO_DEPLOY}
 
 echo "${IMAGE_TO_DEPLOY}로부터 새 컨테이너를 실행합니다."
 
-docker run -d -p 8080:8090 --name ${CONTAINER_NAME} -e SPRING_PROFILES_ACTIVE=prod ${IMAGE_TO_DEPLOY}
+docker run -d -p 8090:8090 --name ${CONTAINER_NAME} -e SPRING_PROFILES_ACTIVE=prod ${IMAGE_TO_DEPLOY}
 
 echo "--- 배포가 성공적으로 완료되었습니다! ---"
 
