@@ -1,4 +1,4 @@
-import { Search, Mailbox } from 'lucide-react';
+import { Mailbox,Search } from 'lucide-react';
 
 function DeadlineNotification() {
   return (
