@@ -5,6 +5,13 @@ import java.util.Map;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import com.sonfind.chelsea.dto.notification.ApplicationPublisherData;
+import com.sonfind.chelsea.dto.notification.ApplicationSubscriberData;
+import com.sonfind.chelsea.dto.notification.NotificationContent;
+import com.sonfind.chelsea.dto.notification.NotificationEventResponseDto;
+import com.sonfind.chelsea.dto.notification.NotificationIdentity;
+import com.sonfind.chelsea.dto.notification.ReceiveApplicationResponseDto;
+import com.sonfind.chelsea.dto.notification.SentApplicationResponseDto;
 import com.sonfind.chelsea.service.SseService;
 
 import lombok.RequiredArgsConstructor;
@@ -44,22 +51,109 @@ public class NotificationEventListener {
 	}
 
 	// APPLICATION(개인 -> 팀 지원)
-	private static Map<String, Object> createApplicationPubPayload(NotificationEvent e) {
-		return Map.of(
-			"event", "application_requested",
-			"title", e.getPubType() + "님이 지원",
-			"message", e.getPubType() + "님이 " + e.getSubType() + "에 지원했습니다.",
-			"timestamp", System.currentTimeMillis()
-		);
+	private static NotificationEventResponseDto createApplicationPubPayload(NotificationEvent e) {
+		// String pubName = studentFacade.getStudentName(e.getPubId());
+		// String subName = studentFacade.getStudentName(e.getSubId());
+		// String pubTrack = studentFacade.getStudentTrack(e.getPubId());
+		// String subTrack = teamFacade.getTeamTrack(e.getSubId());
+		String pubName = "김싸피";
+		String subName = "팀 A";
+		String subTrack = "웹기술";
+
+		// 발신자 기본 정보
+		NotificationIdentity pubIdentity = NotificationIdentity.builder()
+			.id(e.getPubId())
+			.name(pubName)
+			.type(e.getPubType())
+			.build();
+
+		// 발신자 추가 정보
+		NotificationContent common = NotificationContent.builder()
+			.notificationTitle("e.getPublisher().getNotificationTitle()")
+			.notificationMessage("e.getPublisher().getNotificationMessage()")
+			.build();
+
+		// ② ApplicationPublisherData 빌더에 담기
+		ApplicationPublisherData pubInfo = ApplicationPublisherData.builder()
+			.notificationIdentity(pubIdentity)
+			.notificationContent(common)
+			.build();
+
+		// 수신자 정보
+		NotificationIdentity subInfo = NotificationIdentity.builder()
+			.id(e.getSubId())
+			.name(subName)
+			.type(e.getSubType())
+			.track(subTrack)
+			.build();
+
+		// data 페이로드 생성
+		SentApplicationResponseDto pubData = SentApplicationResponseDto.builder()
+			.publisher(pubInfo)
+			.subscriber(subInfo)
+			.build();
+
+		// ③ 최종 응답 DTO
+		return NotificationEventResponseDto.builder()
+			.id(e.getNotificationId())
+			.event(e.getClass().toString())
+			.type(e.getType())         // APPLICATION 으로
+			.time(e.getUpdatedAt().toString())
+			.data(pubData)
+			.build();
 	}
 
-	private static Map<String, Object> createApplicationSubPayload(NotificationEvent e) {
-		return Map.of(
-			"event", "application_requested",
-			"title", e.getSubType() + "의 지원",
-			"message", e.getSubType() + "에서 " + e.getPubType() + "님의 지원을 받았습니다.",
-			"timestamp", System.currentTimeMillis()
-		);
+	private static NotificationEventResponseDto createApplicationSubPayload(NotificationEvent e) {
+		// String pubName = studentFacade.getStudentName(e.getPubId());
+		// String subName = studentFacade.getStudentName(e.getSubId());
+		// String pubTrack = studentFacade.getStudentTrack(e.getPubId());
+		// String subTrack = teamFacade.getTeamTrack(e.getSubId());
+		String pubName = "김싸피";
+		String pubTrack = "웹기술";
+		String subName = "팀 A";
+		String subTrack = "웹기술";
+
+		// 발신자 기본 정보
+		NotificationIdentity pubIdentity = NotificationIdentity.builder()
+			.id(e.getPubId())
+			.name(pubName)
+			.type(e.getPubType())
+			.track(pubTrack)
+			.build();
+
+		// ② ApplicationPublisherData 빌더에 담기
+		ApplicationPublisherData pubInfo = ApplicationPublisherData.builder()
+			.notificationIdentity(pubIdentity)
+			.isMajor(true)
+			.position("BE")
+			.build();
+
+		// 수신자 정보
+		NotificationIdentity subInfo = NotificationIdentity.builder()
+			.id(e.getSubId())
+			.name(subName)
+			.type(e.getSubType())
+			.build();
+
+		// 수신자 추가 정보
+		NotificationContent subMsg = NotificationContent.builder()
+			.notificationTitle("e.getSubscriber().getNotificationTitle()")
+			.notificationMessage("e.getSubscriber().getNotificationMessage()")
+			.build();
+
+		// data 페이로드 생성
+		ReceiveApplicationResponseDto subData = ReceiveApplicationResponseDto.builder()
+			.publisher(pubInfo)
+			.subscriber(subInfo)
+
+		// ③ 최종 응답 DTO
+		return NotificationEventResponseDto.builder()
+			.id(e.getNotificationId())
+			.event(e.getClass().toString())
+			.type(e.getType())         // APPLICATION 으로
+			.time(e.getUpdatedAt().toString())
+			.data(pubData)
+			.build();
 	}
 
 	// INVITATION(팀 -> 개인 초대)
