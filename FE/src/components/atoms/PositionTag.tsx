@@ -1,28 +1,28 @@
 interface IPositionTag {
-  positionName: string;
+  positionName: string
 }
 const getPositionColor = (positionName: string) => {
   switch (positionName) {
     case "프론트":
-      return "text-frontend";
+      return "text-frontend"
     case "백엔드":
-      return "text-backend";
+      return "text-backend"
     case "인프라":
-      return "text-infra";
+      return "text-infra"
     case "모바일":
-      return "text-mobile";
+      return "text-mobile"
     case "임베디드":
-      return "text-embedded";
+      return "text-embedded"
     case "풀스텍":
-      return "text-fullstack";
+      return "text-fullstack"
     case "AI":
-      return "text-ai";
+      return "text-ai"
     default:
-      return "text-main";
+      return "text-main"
   }
-};
+}
 export const PositionTag = ({ positionName }: IPositionTag) => {
-  const textColor = getPositionColor(positionName);
+  const textColor = getPositionColor(positionName)
   return (
     <>
       <div
@@ -31,5 +31,5 @@ export const PositionTag = ({ positionName }: IPositionTag) => {
         {positionName}
       </div>
     </>
-  );
-};
+  )
+}

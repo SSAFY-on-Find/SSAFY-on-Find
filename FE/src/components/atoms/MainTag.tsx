@@ -1,6 +1,6 @@
 type tagProps = {
-  tagContent: string | undefined;
-};
+  tagContent: string | undefined
+}
 
 export const MainTag = ({ tagContent }: tagProps) => {
   return (
@@ -9,5 +9,5 @@ export const MainTag = ({ tagContent }: tagProps) => {
         {tagContent}
       </div>
     </>
-  );
-};
+  )
+}
