@@ -2,11 +2,10 @@ FROM gradle:jdk21 AS builder
 
 WORKDIR /home/gradle
 
-COPY BE/build.gradle BE/settings.gradle ./
-COPY BE/gradlew ./
-COPY BE/gradle ./gradle
-
-COPY BE/src ./src
+COPY build.gradle settings.gradle ./
+COPY gradlew ./
+COPY gradle ./gradle
+COPY src ./src
 
 RUN chmod +x ./gradlew && ./gradlew build --no-daemon
 

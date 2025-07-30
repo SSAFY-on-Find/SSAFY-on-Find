@@ -28,7 +28,7 @@ pipeline {
             steps {
                 script {
                     def imageTag = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
-                    sh "docker build -f INFRA/BE.Dockerfile -t ${env.BE_IMAGE_NAME}:${imageTag} BE/"
+                    sh "docker build -f INFRA/BE.Dockerfile -t ${env.BE_IMAGE_NAME}:${imageTag} BE/chelsea"
                     sh "docker tag ${env.BE_IMAGE_NAME}:${imageTag} ${env.BE_IMAGE_NAME}:latest"
                 }
             }
