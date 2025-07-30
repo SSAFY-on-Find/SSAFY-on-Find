@@ -14,7 +14,7 @@ FROM eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 
-COPY --from=builder /home/gradle/build/libs/*.jar app.jar
+COPY --from=builder /home/gradle/build/libs/*-SNAPSHOT.jar app.jar
 
 ENV SPRING_PROFILES_ACTIVE=prod
 
