@@ -4,39 +4,52 @@ import java.util.Date;
 
 import com.sonfind.chelsea.types.NotificationDomainType;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import com.sonfind.chelsea.types.NotificationStatus;
+import com.sonfind.chelsea.types.RecipientRole;
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 /**
- * Notification Document의 하위 객체
- * 알림 송/수신자에 대한 정보를 저장하는 객체
+ * Notification 상태 정보를 저장하는 Document
+ * @field id: NotificationStatusDocument의 고유 ID
+ * @field notificationId: 참조하는 NotificationDocument의 ID
+ * @field studentId: 발신자 또는 수신자의 ID
+ * @field role: 알림 발신/수신 역할 (eg. PUBLISHER, SUBSCRIBER)
+ * @field status: 알림 상태 (eg. PENDING, ACCEPTED 등)
+ * @field isRead: 읽음 여부
+ * @field readAt: 읽은 시각
+ * @field notificationTitle: 사용자별로 다른 알림 제목
+ * @field notificationMessage: 사용자별로 다른 알림 메시지
+ * @field createdAt: Document 생성 시각
+ * @field updatedAt: Document 업데이트 시각
  *
- * @field id: pubId 혹은 subId
- * @field type: pubType 혹은 subType -> ["TEAM", "MATE"]
- * @field isRead: 알림 읽음 여부
- * @field readAt: 알림 읽음 시간(isRead가 true일 때만 값이 존재)(eg. 2023-10-01T12:00:00Z)
- * @field notificationTitle: 알람 발송 제목(eg. 김싸피님의 지원)
- * @field notificationMessage: 알람 발신 메시지(eg. 김싸피(BE, 전공)님이 팀A에 합류를 요청했습니다.)
  */
+@Document(collection = "notification_statuses")
 @Getter
-@RequiredArgsConstructor
+@NoArgsConstructor
 @AllArgsConstructor
-public class NotificationParticipant {
-	private final long id;
+@Builder
+public class NotificationStatusDocument {
+	@Id
+	private long id;
 
-	private final NotificationDomainType type;
+	@Field("notification_id")
+	private long notificationId;
 
-	@Setter
+	@Field("student_id")
+	private long studentId;
+
+	private RecipientRole role;
+	private NotificationStatus status;
+
 	private boolean isRead;
-
-	@Setter
 	private Date readAt;
 
-	@Setter
 	private String notificationTitle;
-
-	@Setter
 	private String notificationMessage;
+
+	private Date createdAt;
+	private Date updatedAt;
 }
