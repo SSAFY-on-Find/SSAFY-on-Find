@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum NotificationDomainType {
 	TEAM("team"),
-	MATE("mate");
+	STUDENT("student");
 
 	private final String domainType;
 
