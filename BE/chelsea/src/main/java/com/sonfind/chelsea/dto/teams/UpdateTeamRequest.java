@@ -2,8 +2,8 @@ package com.sonfind.chelsea.dto.teams;
 
 import java.util.List;
 
-import com.sonfind.chelsea.domain.teams.Track;
-
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,8 +11,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UpdateTeamRequest {
 
+	@NotBlank
 	private String description;
-	private Track track;
-	private List<WishPosition> wishPositions;
+
+	@NotBlank
+	private String trackCode;
+
+	@NotEmpty
+	private List<String> positions;
 }
 

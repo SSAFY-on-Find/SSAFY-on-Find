@@ -23,7 +23,7 @@ public class SwaggerConfig {
 				.contact(new Contact().name("Sonfind").email("ssafy@ssafy.com"))
 			)
 			.servers(List.of(
-				new Server().url("http://localhost:8080/").description("Local Server")
+				new Server().url("http://localhost:8080/api/v1").description("Local Server")
 			));
 	}
 }
