@@ -31,10 +31,13 @@ public class NotificationService {
 	 */
 	public Long saveNotification(NotificationRequestDto dto) throws BadRequestException {
 		// dto에서 발신자와 수신자의 정보를 추출하여 NotificationParticipant 객체를 생성.
-		NotificationParticipant pub = new NotificationParticipant(dto.getPubId(), NotificationDomainType.from(dto.getPubType()));
-		NotificationParticipant sub = new NotificationParticipant(dto.getSubId(), NotificationDomainType.from(dto.getSubType()));
+		NotificationParticipant pub = new NotificationParticipant(dto.getPubId(),
+			NotificationDomainType.from(dto.getPubType()));
+		NotificationParticipant sub = new NotificationParticipant(dto.getSubId(),
+			NotificationDomainType.from(dto.getSubType()));
 
-		if (notificationRepository.existsByPublisherIdAndPublisherTypeAndSubscriberIdAndSubscriberTypeAndStatus(pub.getId(), pub.getType(), sub.getId(), sub.getType(), NotificationStatus.PENDING)) {
+		if (notificationRepository.existsByPublisherIdAndPublisherTypeAndSubscriberIdAndSubscriberTypeAndStatus(
+			pub.getId(), pub.getType(), sub.getId(), sub.getType(), NotificationStatus.PENDING)) {
 			log.info("Notification already exists");
 			throw new BadRequestException("Notification already exists! code=" + HttpStatus.BAD_REQUEST);
 		}
@@ -86,7 +89,7 @@ public class NotificationService {
 			NotificationDocument savedNotification = notificationRepository.save(notification);
 			log.info("Notification saved successfully: {}", savedNotification);
 			return savedNotification.getId();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			log.error("Failed to save notification: {}", e.getMessage());
 			throw new BadRequestException("Failed to save notification! code=" + HttpStatus.INTERNAL_SERVER_ERROR);
 		}

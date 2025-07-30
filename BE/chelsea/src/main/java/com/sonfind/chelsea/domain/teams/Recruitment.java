@@ -39,4 +39,3 @@ public class Recruitment {
 	@JoinColumn(name = "team_id")
 	private Team team;
 }
-
