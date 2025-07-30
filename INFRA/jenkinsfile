@@ -7,9 +7,11 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout Source Code') {
             steps {
-                git branch: 'test-master', url: 'https://lab.ssafy.com/s13-webmobile1-sub1/S13P11A704.git'
+                git branch: 'test-master',
+                    credentialsId: 'jenkins_token', 
+                    url: 'https://lab.ssafy.com/s13-webmobile1-sub1/S13P11A704.git'
             }
         }
 
