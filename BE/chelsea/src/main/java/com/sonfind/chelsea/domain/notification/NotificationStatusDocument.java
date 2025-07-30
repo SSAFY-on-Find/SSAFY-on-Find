@@ -38,8 +38,8 @@ public class NotificationStatusDocument {
 	@Field("notification_id")
 	private long notificationId;
 
-	@Field("student_id")
-	private long studentId;
+	@Field("target_id")
+	private long targetId;
 
 	private RecipientRole role;
 	private NotificationStatus status;

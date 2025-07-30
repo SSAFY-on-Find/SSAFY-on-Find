@@ -2,12 +2,11 @@ package com.sonfind.chelsea.domain.notification;
 
 import java.util.Date;
 
+import com.sonfind.chelsea.types.NotificationDomainType;
 import com.sonfind.chelsea.types.NotificationType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-
-import com.sonfind.chelsea.types.NotificationStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +18,10 @@ import lombok.NoArgsConstructor;
  * @field id: NotificationDocument의 고유 ID
  * @field groupId: 같은 이벤트 묶음 ID
  * @field type: 알림 종류 (예: Application, Invitation 등)
+ * @field publisherId: 알림 발신자 ID
+ * @field publisherType: 알림 발신자 도메인 타입 (예: STUDENT, TEAM )
+ * @field subscriberId: 알림 수신자 ID
+ * @field subscriberType: 알림 수신자 도메인 타입 (예: STUDENT, TEAM )
  * @field createdAt: 알림 생성 시간
  * @field updatedAt: 알림 정보 업데이트 시간
  */
@@ -31,8 +34,20 @@ public class NotificationDocument {
 	@Id
 	private long id;
 
-	private Long groupId;                 // 같은 이벤트 묶음
-	private NotificationType type;        // INVITE, MESSAGE 등
+	private Long groupId;
+	private NotificationType type;
+
+	@Field("publisher_id")
+	private long publisherId;
+	@Field("publisher_type")
+	private NotificationDomainType publisherType;
+
+
+	@Field("subscriber_id")
+	private long subscriberId;
+	@Field("subscriber_type")
+	private NotificationDomainType subscriberType;
+
 	private Date createdAt;
 	private Date updatedAt;
 }
