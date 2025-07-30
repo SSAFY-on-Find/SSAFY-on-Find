@@ -1,3 +1,6 @@
 spring:
   application:
     name: chelsea
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE}
