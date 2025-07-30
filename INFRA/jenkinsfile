@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+                image 'dminus251/jenkins-docker-agent:latest'
+                label 'docker-node-agent'
+        }
+    }
 
     environment {
         DOCKERHUB_USERNAME = "pug9483"
@@ -7,6 +12,15 @@ pipeline {
     }
 
     stages {
+        stage('Check Docker Installation') {
+            steps {
+                script {
+                    sh 'which docker'
+                    sh 'docker --version'
+                }
+            }
+        }
+        
         stage('Checkout Source Code') {
             steps {
                 git branch: 'test-master',
