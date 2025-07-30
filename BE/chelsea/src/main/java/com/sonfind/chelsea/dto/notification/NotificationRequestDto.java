@@ -6,8 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class NotificationRequestDto {
-	private Long subId;
-	private String subType;
-	private Long pubId;
-	private String pubType;
+  private Long subId;
+  private String subType;
+  private Long pubId;
+  private String pubType;
 }
