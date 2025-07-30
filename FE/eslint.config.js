@@ -28,7 +28,6 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       
-      // 자동 수정 가능한 기본 규칙들
       'prefer-const': 'error',
       'no-extra-semi': 'error',
       'no-lone-blocks': 'error',
@@ -36,7 +35,6 @@ export default tseslint.config(
       'no-else-return': 'error',
       '@typescript-eslint/no-unused-vars': 'warn',
       
-      // Import 자동 정렬
       'simple-import-sort/imports': [
         'error',
         {
@@ -51,16 +49,6 @@ export default tseslint.config(
         },
       ],
       'simple-import-sort/exports': 'error',
-      
-      // 상대경로를 @ 절대경로로 자동 변환
-      'no-relative-import-paths/no-relative-import-paths': [
-        'error',
-        { 
-          allowSameFolder: true,  // 같은 폴더 ./는 허용
-          rootDir: 'src',
-          prefix: '@'
-        }
-      ],
     },
   },
 )
