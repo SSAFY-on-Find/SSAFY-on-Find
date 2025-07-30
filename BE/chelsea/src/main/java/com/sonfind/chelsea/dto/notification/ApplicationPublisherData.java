@@ -1,17 +1,17 @@
 package com.sonfind.chelsea.dto.notification;
 
-import com.sonfind.chelsea.types.NotificationDomainType;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 @Builder
-public class ApplicationPublisherDataBase extends BaseNotificationData {
-	
-	public ApplicationPublisherData(Long id, String name, NotificationDomainType type, String track,
-		String notificationTitle,
-		String notificationMessage) {
-		super(id, name, type, track, notificationTitle, notificationMessage);
-	}
+public class ApplicationPublisherData {
+	@JsonUnwrapped
+	private NotificationIdentity notificationIdentity;
+	@JsonUnwrapped
+	private NotificationContent notificationContent;
 }

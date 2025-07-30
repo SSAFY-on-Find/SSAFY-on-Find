@@ -1,20 +1,20 @@
 package com.sonfind.chelsea.dto.notification;
 
-import com.sonfind.chelsea.types.NotificationDomainType;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 @Builder
-public class InvitationSubscriberDataBase extends BaseNotificationData {
+public class InvitationSubscriberData {
+	@JsonUnwrapped
+	private NotificationIdentity notificationIdentity;
+	@JsonUnwrapped
+	private NotificationContent notificationContent;
 	private Boolean isMajor;
 	private String position;
 
-	public InvitationSubscriberDataBase(Long id, String name, NotificationDomainType type, String track,
-		String notificationTitle, String notificationMessage, Boolean isMajor, String position) {
-		super(id, name, type, track, notificationTitle, notificationMessage);
-		this.isMajor = isMajor;
-		this.position = position;
-	}
 }

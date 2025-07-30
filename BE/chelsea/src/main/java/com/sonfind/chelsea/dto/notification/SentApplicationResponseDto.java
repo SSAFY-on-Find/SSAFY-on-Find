@@ -13,7 +13,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 @Builder
-public class ApplicationPublisherResponseDto {
+public class SentApplicationResponseDto {
 	// publisher: 개인 -> 알림 수신자
 	private ApplicationPublisherData publisher;
 	// subscriber: 팀 -> 알림에 수신자 정보를 담아 전송하기 위한 DTO

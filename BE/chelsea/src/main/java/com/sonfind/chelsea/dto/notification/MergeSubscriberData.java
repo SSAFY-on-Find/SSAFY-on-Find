@@ -1,6 +1,6 @@
 package com.sonfind.chelsea.dto.notification;
 
-import com.sonfind.chelsea.types.NotificationDomainType;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,14 +9,12 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 @Builder
-public class MergeSubscriberDataBase implements BaseNotificationData {
-	private Long id;
-	private String name;
-	private NotificationDomainType type;
-	private String track;
+public class MergeSubscriberData {
+	@JsonUnwrapped
+	private NotificationIdentity notificationIdentity;
+	@JsonUnwrapped
+	private NotificationContent notificationContent;
 	private int memberCount;
 	private int major;
 	private int nonMajor;
-	private String notificationTitle;
-	private String notificationMessage;
 }
