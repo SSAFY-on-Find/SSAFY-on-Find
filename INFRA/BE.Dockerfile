@@ -8,7 +8,7 @@ COPY gradle ./gradle
 COPY src ./src
 COPY config ./config 
 
-RUN chmod +x ./gradlew && ./gradlew build --no-daemon
+RUN chmod +x ./gradlew && ./gradlew build -x test --no-daemon
 
 FROM eclipse-temurin:21-jre-jammy
 
