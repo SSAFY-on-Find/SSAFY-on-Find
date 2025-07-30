@@ -1,5 +1,6 @@
 package com.sonfind.chelsea.controller;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,17 +19,18 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/students")
 public class StudentController {
 
-	private static StudentService studentService;
+	private final StudentService studentService;
 
-	@PostMapping("/sing-in")
-	public ResponseEntity<Object> singup(@RequestBody Long studentId, HttpSession session) {
+	@PostMapping("/sign-in")
+	public ResponseEntity<Object> signup(@RequestBody Long studentId, HttpSession session) {
 
 		Students student = studentService.findByStudentId(studentId);
 		if (student != null) {
 			session.setAttribute("loginUser", studentId);
 
 			return ResponseEntity.ok()
-				.header("Set-Cookie", "sessionId=" + studentId)
+				.header(HttpHeaders.SET_COOKIE,
+					"sessionId=" + studentId + "; Path=/; HttpOnly")
 				.build();
 		}
 

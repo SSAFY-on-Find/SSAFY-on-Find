@@ -10,11 +10,13 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PRIVATE)
 @Getter
+@Setter
 public class Students extends BaseEntity {
 	@Id
 	@Column(name = "student_id")

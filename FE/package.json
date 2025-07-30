@@ -7,18 +7,30 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "format": "prettier --write",
+    "lint:fix": "eslint --fix",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "npx prettier --write",
+      "npx eslint --fix --config ./FE/eslint.config.js"
+    ]
   },
   "dependencies": {
     "@headlessui/react": "^2.2.6",
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/react-query": "^5.83.0",
+    "@types/react-router-dom": "^5.3.3",
     "axios": "^1.11.0",
     "lucide-react": "^0.532.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-loading-skeleton": "^3.5.0",
+    "react-router-dom": "^7.7.1",
     "socket.io": "^4.8.1",
+    "v6": "^0.0.0",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
@@ -28,10 +40,17 @@
     "@vitejs/plugin-react": "^4.6.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.30.1",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-no-relative-import-paths": "^1.6.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
     "globals": "^16.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
     "postcss": "^8.5.6",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4.1.11",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.35.1",

@@ -1,26 +1,26 @@
-import { MainTag } from "./components/atoms/MainTag";
-import { PositionTag } from "./components/atoms/PositionTag";
+import { Route,Routes } from "react-router-dom"
 
-const test1 = ["자바", "비전공"];
+import Dashboard from "@/pages/DashboardPage"
+import MyTeam from "@/pages/MyTeamPage"
+
+import "@/index.css"
+
+const test1 = ["자바", "비전공"]
 const test2 = [
-  ["프론트", "POS001"],
-  ["백엔드", "POS001"],
-  ["풀스택", "POS001"],
-  ["임베디드", "POS001"],
-  ["모바일", "POS001"],
-  ["AI", "POS001"],
-];
+	["프론트", "POS001"],
+	["백엔드", "POS001"],
+	["풀스택", "POS001"],
+	["임베디드", "POS001"],
+	["모바일", "POS001"],
+	["AI", "POS001"],
+]
 function App() {
-  return (
-    <>
-      {test1.map((t) => (
-        <MainTag tagContent={t} />
-      ))}
-      {test2.map((t) => (
-        <PositionTag positionName={t[0]} />
-      ))}
-    </>
-  );
+	return (
+		<Routes>
+			<Route path="/" element={<Dashboard />} />
+			<Route path="/myteam" element={<MyTeam />} />
+		</Routes>
+	)
 }
 
-export default App;
+export default App
