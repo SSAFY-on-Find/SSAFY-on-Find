@@ -8,12 +8,14 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "prepare": "cd .. && husky FE/.husky"
+    "format": "prettier --write",
+    "lint:fix": "eslint --fix",
+    "prepare": "husky"
   },
-    "lint-staged": {
-     "*.{ts,tsx}": [
-      "prettier --write",
-      "eslint --fix"
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "npx prettier --write",
+      "npx eslint --fix --config ./FE/eslint.config.js"
     ]
   },
   "dependencies": {
@@ -38,6 +40,7 @@
     "@vitejs/plugin-react": "^4.6.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.30.1",
+    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
