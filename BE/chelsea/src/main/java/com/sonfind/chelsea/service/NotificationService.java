@@ -29,12 +29,15 @@ public class NotificationService {
 	 * NotificationDocument 객체를 생성하여 MongoDB에 저장합니다.
 	 * @param dto
 	 */
-	public Long saveNotification(NotificationRequestDto dto) throws BadRequestException {
+	public NotificationDocument saveNotification(NotificationRequestDto dto) throws BadRequestException {
 		// dto에서 발신자와 수신자의 정보를 추출하여 NotificationParticipant 객체를 생성.
-		NotificationParticipant pub = new NotificationParticipant(dto.getPubId(), NotificationDomainType.from(dto.getPubType()));
-		NotificationParticipant sub = new NotificationParticipant(dto.getSubId(), NotificationDomainType.from(dto.getSubType()));
+		NotificationParticipant pub = new NotificationParticipant(dto.getPubId(),
+			NotificationDomainType.from(dto.getPubType()));
+		NotificationParticipant sub = new NotificationParticipant(dto.getSubId(),
+			NotificationDomainType.from(dto.getSubType()));
 
-		if (notificationRepository.existsByPublisherIdAndPublisherTypeAndSubscriberIdAndSubscriberTypeAndStatus(pub.getId(), pub.getType(), sub.getId(), sub.getType(), NotificationStatus.PENDING)) {
+		if (notificationRepository.existsByPublisherIdAndPublisherTypeAndSubscriberIdAndSubscriberTypeAndStatus(
+			pub.getId(), pub.getType(), sub.getId(), sub.getType(), NotificationStatus.PENDING)) {
 			log.info("Notification already exists");
 			throw new BadRequestException("Notification already exists! code=" + HttpStatus.BAD_REQUEST);
 		}
@@ -42,8 +45,8 @@ public class NotificationService {
 		/**
 		 * TODO: 알림 발신자와 수신자 구분 방식 고려
 		 * - 1. TEAM_TEAM: 팀 합치기 제안
-		 * - 2. MATE_TEAM: 팀에 지원
-		 * - 3. TEAM_MATE: 팀에 초대
+		 * - 2. STUDENT_TEAM: 팀에 지원
+		 * - 3. TEAM_STUDENT: 팀에 초대
 		 * 와 같은 ENUM을 하나 더 생성하여 분기 고려 중입니다.
 		 * 이 부분은 추후에 개선할 예정입니다. 혹시 더 좋은 의견이 있으시면 코드리뷰로 남겨주시면 감사하겠습니다
 		 */
@@ -55,13 +58,13 @@ public class NotificationService {
 			// 수신자
 			sub.setNotificationTitle("OOO" + "의 합치기 제안");
 			sub.setNotificationMessage("OOO" + "에서 팀 합치기를 제안했습니다.");
-		} else if (pub.getType() == NotificationDomainType.MATE && sub.getType() == NotificationDomainType.TEAM) {
+		} else if (pub.getType() == NotificationDomainType.STUDENT && sub.getType() == NotificationDomainType.TEAM) {
 			pub.setNotificationTitle("OOO" + "에 지원");
 			pub.setNotificationMessage("OOO" + "에 지원했습니다.");
 
 			sub.setNotificationTitle("OOO" + "님의 지원");
 			sub.setNotificationMessage("OOO" + "님이 지원했습니다.");
-		} else if (pub.getType() == NotificationDomainType.TEAM && sub.getType() == NotificationDomainType.MATE) {
+		} else if (pub.getType() == NotificationDomainType.TEAM && sub.getType() == NotificationDomainType.STUDENT) {
 			pub.setNotificationTitle("OOO" + "님에게 초대");
 			pub.setNotificationMessage("OOO" + "님을 팀에 초대했습니다.");
 
@@ -85,8 +88,8 @@ public class NotificationService {
 				.build();
 			NotificationDocument savedNotification = notificationRepository.save(notification);
 			log.info("Notification saved successfully: {}", savedNotification);
-			return savedNotification.getId();
-		} catch(Exception e) {
+			return savedNotification;
+		} catch (Exception e) {
 			log.error("Failed to save notification: {}", e.getMessage());
 			throw new BadRequestException("Failed to save notification! code=" + HttpStatus.INTERNAL_SERVER_ERROR);
 		}
