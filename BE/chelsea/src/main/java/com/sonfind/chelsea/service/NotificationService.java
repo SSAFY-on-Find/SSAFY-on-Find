@@ -1,6 +1,7 @@
 package com.sonfind.chelsea.service;
 
 import java.util.Date;
+import java.util.Map;
 
 import org.apache.coyote.BadRequestException;
 import org.bson.types.ObjectId;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.sonfind.chelsea.domain.notification.NotificationDocument;
 import com.sonfind.chelsea.domain.notification.NotificationStatusDocument;
 import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
+import com.sonfind.chelsea.facade.StudentFacade;
 import com.sonfind.chelsea.repository.NotificationRepository;
 import com.sonfind.chelsea.repository.NotificationStatusRepository;
 import com.sonfind.chelsea.types.NotificationDomainType;
@@ -27,6 +29,8 @@ public class NotificationService {
 
 	private final NotificationRepository notificationRepo;
 	private final NotificationStatusRepository statusRepo;
+	private final StudentFacade studentFacade;
+	private final NotificationContentService contentService;
 
 	/**
 	 * 알림을 저장
@@ -36,11 +40,11 @@ public class NotificationService {
 	 */
 	public NotificationDocument saveNotification(NotificationRequestDto dto) throws BadRequestException {
 		// String → Enum 변환 (대소문자 구분이 있다면 toUpperCase() 등으로 맞춰주세요)
-		NotificationType typeEnum =
+		NotificationType type =
 			NotificationType.valueOf(dto.getType().toUpperCase());
-		NotificationDomainType pubTypeEnum =
+		NotificationDomainType pubType =
 			NotificationDomainType.valueOf(dto.getPubType().toUpperCase());
-		NotificationDomainType subTypeEnum =
+		NotificationDomainType subType =
 			NotificationDomainType.valueOf(dto.getSubType().toUpperCase());
 
 		Date now = new Date();
@@ -54,11 +58,11 @@ public class NotificationService {
 
 		// NotificationDocument 객체를 생성
 		NotificationDocument notificationLog = NotificationDocument.builder()
-			.type(typeEnum)
+			.type(type)
 			.publisherId(dto.getPubId())
-			.publisherType(pubTypeEnum)
+			.publisherType(pubType)
 			.subscriberId(dto.getSubId())
-			.subscriberType(subTypeEnum)
+			.subscriberType(subType)
 			.createdAt(now)
 			.updatedAt(now)
 			.build();
@@ -67,21 +71,63 @@ public class NotificationService {
 		NotificationDocument savedNotification = notificationRepo.save(notificationLog);
 		log.info("알림이 저장되었습니다: {}", savedNotification.getId());
 
-		// 알림 상태를 PENDING으로 저장
-		NotificationStatusDocument pub = NotificationStatusDocument.builder()
-			.notificationId(savedNotification.getId())
-			.targetId(savedNotification.getPublisherId())
-			.role(RecipientRole.PUBLISHER)
-			.status(NotificationStatus.PENDING)
-			.isRead(true)
-			.readAt(currentDate)
-			.notificationTitle("dto.getNotificationTitle()")
-			.notificationMessage("dto.getNotificationMessage()")
-			.createdAt(currentDate)
-			.updatedAt(currentDate)
-			.build();
+		switch (type) {
+			case APPLICATION, INVITATION, MERGE -> {
+				// 발신자(팀 or 개인) → createStatus 내부에서 deriveTargetIds로 팀원 브로드캐스트도 처리
+				NotificationStatusDocument pub = createStatus(savedNotification, now, RecipientRole.PUBLISHER);
+				// 수신자(팀 or 개인)
+				NotificationStatusDocument sub = createStatus(savedNotification, now, RecipientRole.SUBSCRIBER);
+
+				statusRepo.save(pub);
+				statusRepo.save(sub);
+			}
+			default -> throw new IllegalArgumentException("지원하지 않는 NotificationType: " + type);
+		}
+
+		log.info("알림 상태가 저장되었습니다: {}, {}", savedNotification.getId(), type);
 	}
 
+	/**
+	 * 알림 상태를 생성합니다.
+	 * 발신자와 수신자의 역할에 따라 알림 상태를 설정하고,
+	 * 알림 제목과 메시지를 생성합니다.
+	 * 발신자의 경우 읽음 상태로 설정하고, 읽은 시각을 현재 날짜로 설정합니다.
+	 * 수신자의 경우 읽음 상태는 false로 설정하고,
+	 * 읽은 시각은 null로 설정합니다.
+	 * @param notif: NotificationDocument - 알림  문서 객체
+	 * @param now: Date - 현재 날짜
+	 * @param role: RecipientRole - 알림 발신자 또는 수신자의 역할 (PUBLISHER 또는 SUBSCRIBER)
+	 * @return NotificationStatusDocument -알림 상태 문서 객체
+	 */
+	private NotificationStatusDocument createStatus(
+		NotificationDocument notif,
+		Date now,
+		RecipientRole role
+	) {
+		long targetId = (role == RecipientRole.PUBLISHER)
+			? notif.getPublisherId()
+			: notif.getSubscriberId();
+
+		// 컨텍스트 맵 준비
+		Map<String, Object> ctx = Map.of(
+			"publisher", studentFacade.findByStudentIdForSse(notif.getPublisherId()),
+			"subscriber", studentFacade.findByStudentIdForSse(notif.getSubscriberId())
+		);
+
+		return NotificationStatusDocument.builder()
+			.notificationId(notif.getId())
+			.targetId(targetId)
+			.role(role)
+			.status(NotificationStatus.PENDING)
+			.isRead(role == RecipientRole.PUBLISHER)
+			.readAt(role == RecipientRole.PUBLISHER ? now : null)
+			.notificationTitle(contentService.buildTitle(notif.getType(), role, ctx))
+			.notificationMessage(contentService.buildMessage(notif.getType(), role, ctx))
+			.createdAt(now)
+			.updatedAt(now)
+			.build();
+	}
+ 
 	/**
 	 * 알림을 저장하기 전에, 가장 최근에 업데이트된 알림을 찾음
 	 * @param dto
@@ -121,6 +167,10 @@ public class NotificationService {
 		}
 	}
 
+	/**
+	 * 현재 날짜를 반환합니다.
+	 * @return Date - 현재 날짜
+	 */
 	private Date getCurrentDate() {
 		return new Date();
 	}
