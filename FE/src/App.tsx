@@ -2,7 +2,10 @@ import { Route, Routes } from "react-router-dom"
 
 import { Header, SideBar } from "@/layout"
 import Dashboard from "@/pages/DashboardPage"
+import MyProfile from "@/pages/MyProfilePage"
 import MyTeam from "@/pages/MyTeamPage"
+import StudentList from "@/pages/StudentListPage"
+import TeamList from "@/pages/TeamListPage"
 
 import "@/index.css"
 
@@ -16,6 +19,9 @@ function App() {
 					<Routes>
 						<Route path="/" element={<Dashboard />} />
 						<Route path="/myteam" element={<MyTeam />} />
+						<Route path="/teamlist" element={<TeamList />} />
+						<Route path="/studentlist" element={<StudentList />} />
+						<Route path="/myprofile" element={<MyProfile />} />
 					</Routes>
 				</main>
 			</div>
