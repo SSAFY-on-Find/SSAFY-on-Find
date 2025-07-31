@@ -1,10 +1,12 @@
 package com.sonfind.chelsea.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.sonfind.chelsea.domain.student.Students;
+import com.sonfind.chelsea.dto.student.StudentForNotificationResponseDto;
 import com.sonfind.chelsea.repository.StudentRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -27,4 +29,26 @@ public class StudentService {
 		return student;
 	}
 
+	public StudentForNotificationResponseDto findByStudentIdForSse(long studentId) {
+		Optional<Students> authOptional = studentRepository.findByStudentId(studentId);
+
+		if (!authOptional.isPresent()) {
+			throw new IllegalArgumentException("존재하지 않는 학생입니다.");
+		}
+		Students student = authOptional.get();
+
+		return StudentForNotificationResponseDto.builder()
+			.studentId(student.getStudentId())
+			.name(student.getName())
+			.isMajor(getIsMajor(student))
+			.build();
+	}
+
+	private static String getIsMajor(Students student) {
+		return student.getMajorYn() ? "전공" : "비전공";
+	}
+
+	public List<Students> findAllByTeamId(Long teamId) {
+		return studentRepository.findAllByTeamId(teamId);
+	}
 }
