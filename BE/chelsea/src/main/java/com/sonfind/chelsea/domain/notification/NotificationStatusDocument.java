@@ -5,7 +5,6 @@ import java.util.Date;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.sonfind.chelsea.types.NotificationStatus;
 import com.sonfind.chelsea.types.RecipientRole;
@@ -39,27 +38,19 @@ public class NotificationStatusDocument {
 	@Id
 	private ObjectId id;
 
-	@Field("notification_id")
 	private ObjectId notificationId;
 
-	@Field("target_id")
 	private long targetId;
 
 	private RecipientRole role;
 	private NotificationStatus status;
 
-	@Field("is_read")
 	private boolean isRead;
-	@Field("read_at")
 	private Date readAt;
 
-	@Field("notification_title")
 	private String notificationTitle;
-	@Field("notification_message")
 	private String notificationMessage;
 
-	@Field("created_at")
 	private Date createdAt;
-	@Field("updated_at")
 	private Date updatedAt;
 }

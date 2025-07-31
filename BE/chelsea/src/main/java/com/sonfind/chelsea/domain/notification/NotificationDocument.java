@@ -5,7 +5,6 @@ import java.util.Date;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.sonfind.chelsea.types.NotificationDomainType;
 import com.sonfind.chelsea.types.NotificationType;
@@ -36,22 +35,15 @@ public class NotificationDocument {
 	@Id
 	private ObjectId id;
 
-	@Field("group_id")
 	private ObjectId groupId;
 	private NotificationType type;
 
-	@Field("publisher_id")
 	private long publisherId;
-	@Field("publisher_type")
 	private NotificationDomainType publisherType;
 
-	@Field("subscriber_id")
 	private long subscriberId;
-	@Field("subscriber_type")
 	private NotificationDomainType subscriberType;
 
-	@Field("created_at")
 	private Date createdAt;
-	@Field("updated_at")
 	private Date updatedAt;
 }
