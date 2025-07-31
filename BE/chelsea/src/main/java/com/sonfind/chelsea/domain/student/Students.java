@@ -16,7 +16,6 @@ import lombok.Setter;
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PRIVATE)
 @Getter
-@Setter
 public class Students extends BaseEntity {
 	@Id
 	@Column(name = "student_id")
@@ -27,6 +26,7 @@ public class Students extends BaseEntity {
 	@Column(name = "major_yn")
 	private boolean majorYn;
 
+	@Setter
 	@Column(name = "team_id")
 	private Long teamId;
 }

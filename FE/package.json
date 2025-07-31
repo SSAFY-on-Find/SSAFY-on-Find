@@ -10,12 +10,12 @@
     "preview": "vite preview",
     "format": "prettier --write",
     "lint:fix": "eslint --fix",
-    "prepare": "husky"
+    "prepare": "cd ../ && husky FE/.husky"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "npx prettier --write",
-      "npx eslint --fix --config ./FE/eslint.config.js"
+      "npx prettier --write --config ./FE/.prettierrc.json",
+      "npx eslint --fix --config ./FE/./eslint.config.js"
     ]
   },
   "dependencies": {
