@@ -21,15 +21,16 @@ const getPositionColor = (positionName: string) => {
       return "text-main"
   }
 }
-export const PositionTag = ({ positionName }: IPositionTag) => {
+function PositionTag({ positionName }: IPositionTag) {
   const textColor = getPositionColor(positionName)
   return (
     <>
       <div
-        className={` ${textColor} px-[11px] py-[3px] border-2 border-subtext/30 rounded-full text-sm font-bold inline-block`}
+        className={` ${textColor} border-subtext/30 inline-block rounded-full border-2 px-[11px] py-[3px] text-sm font-bold`}
       >
         {positionName}
       </div>
     </>
   )
 }
+export default PositionTag

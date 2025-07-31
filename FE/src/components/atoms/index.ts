@@ -1,0 +1,6 @@
+export { default as GhostTag } from "./GhostTag "
+export { default as MainTag } from "./MainTag"
+export { default as NormalTag } from "./NormalTag"
+export { default as PositionTag } from "./PositionTag"
+export { default as SideMainTag } from "./SideMainTag"
+export { default as WhiteTag } from "./WhiteTag"

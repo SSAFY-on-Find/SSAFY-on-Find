@@ -1,13 +1,20 @@
 type tagProps = {
-  tagContent: string | undefined
+  tagContent?: string
+  fillBg?: boolean
 }
 
-export const MainTag = ({ tagContent }: tagProps) => {
+function MainTag({ tagContent, fillBg = false }: tagProps) {
+  if (!tagContent) return null
+  const colorApply = fillBg ? "bg-main text-white" : "bg-transparent text-main"
   return (
     <>
-      <div className="bg-main text-white px-[11px] py-[4px]  rounded-full text-sm font-medium inline-block">
+      <div
+        className={`${colorApply} border-main inline-block rounded-full border-2 px-[11px] py-[3px] text-sm font-bold`}
+      >
         {tagContent}
       </div>
     </>
   )
 }
+
+export default MainTag
