@@ -5,7 +5,7 @@ IMAGE_TO_DEPLOY=$1
 
 CONTAINER_NAME="chelsea-be-app"
 NETWORK_NAME="product_api_server_network"
-ENV_FILE_PATH="/home/ubuntu/.prod.env"
+ENV_FILE_PATH="/home/ubuntu/.env"
 
 if [ -z "$IMAGE_TO_DEPLOY" ]; then
   echo "오류: 배포할 Docker 이미지가 지정되지 않았습니다."
