@@ -1,6 +1,6 @@
 import { Route, Routes } from "react-router-dom"
 
-import { Header } from "@/layout"
+import { Header, SideBar } from "@/layout"
 import Dashboard from "@/pages/DashboardPage"
 import MyTeam from "@/pages/MyTeamPage"
 
@@ -10,12 +10,15 @@ function App() {
 	return (
 		<div className="App">
 			<Header />
-			<main className="mt-[64px]">
-				<Routes>
-					<Route path="/" element={<Dashboard />} />
-					<Route path="/myteam" element={<MyTeam />} />
-				</Routes>
-			</main>
+			<div className="mt-[64px]">
+				<SideBar />
+				<main className="ml-[200px] border border-main">
+					<Routes>
+						<Route path="/" element={<Dashboard />} />
+						<Route path="/myteam" element={<MyTeam />} />
+					</Routes>
+				</main>
+			</div>
 		</div>
 	)
 }
