@@ -9,6 +9,8 @@ public class MyTeamDetailResponse extends TeamDetailResponse {
 	private boolean rule001; //SIZE_LIMIT <= 6
 	private boolean rule002; //MIN_MAJOR >= 2
 	private boolean rule003; //MIN_NON_MAJOR >= 2
+	private int majorCount;
+	private int nonMajorCount;
 	//대기 요청 목록
 	//팀 채팅
 
@@ -16,7 +18,9 @@ public class MyTeamDetailResponse extends TeamDetailResponse {
 		TeamDetailResponse base,
 		boolean rule001,
 		boolean rule002,
-		boolean rule003
+		boolean rule003,
+		int majorCount,
+		int nonMajorCount
 		//대기 요청 목록
 		//팀 채팅
 	) {
