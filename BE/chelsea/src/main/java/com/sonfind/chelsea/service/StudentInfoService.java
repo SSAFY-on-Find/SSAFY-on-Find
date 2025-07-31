@@ -9,6 +9,7 @@ import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 import com.sonfind.chelsea.domain.studentInfo.UploadedFile;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoCreateRequestDto;
+import com.sonfind.chelsea.dto.studentInfo.StudentInfoForNotificationResponseDto;
 import com.sonfind.chelsea.global.domain.SubCode;
 import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
@@ -32,6 +33,27 @@ public class StudentInfoService {
 		UploadedFile uploadPortfolio = savePortfolio(portfolio);
 		StudentInfo studentInfo = saveStudentInfo(studentId, requestDto, profileImageUrl, uploadPortfolio);
 		studentInfoRepository.save(studentInfo);
+	}
+
+	/**
+	 * 학생 ID로 학생 정보를 조회하는 메소드(SSE용)
+	 * @param studentId
+	 * @return StudentInfoForNotificationResponseDto(학생 ID, 포지션, 트랙, 프로필 이미지 URL)
+	 * @throws IllegalArgumentException 해당 학생의 정보가 없을 경우
+	 */
+	public StudentInfoForNotificationResponseDto findByStudentId(Long studentId) {
+		StudentInfo findStuInfo = studentInfoRepository.findByStudentId(studentId);
+
+		if (findStuInfo == null) {
+			throw new IllegalArgumentException("해당 학생의 정보가 없습니다. studentId: " + studentId);
+		}
+
+		return StudentInfoForNotificationResponseDto.builder()
+			.studentId(studentId)
+			.position(getSubCodeByValue(findStuInfo.getPositionCode().getSubCode()).getSubCodeName())
+			.track(getSubCodeByValue(findStuInfo.getTrackCode().getSubCode()).getSubCodeName())
+			.profileImageUrl(findStuInfo.getProfileImageUrl())
+			.build();
 	}
 
 	private StudentInfo saveStudentInfo(Long studentId, StudentInfoCreateRequestDto requestDto, String profileImageUrl,
@@ -95,5 +117,4 @@ public class StudentInfoService {
 
 		return subCodeRepository.findBySubCode(subCode);
 	}
-
 }
