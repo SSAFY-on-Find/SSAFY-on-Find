@@ -8,12 +8,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.sonfind.chelsea.domain.mates.StudentInfo;
 import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.domain.teams.Recruitment;
 import com.sonfind.chelsea.domain.teams.Team;
 import com.sonfind.chelsea.dto.teams.CreateTeamRequest;
+import com.sonfind.chelsea.dto.teams.MemberDto;
+import com.sonfind.chelsea.dto.teams.RecruitmentDto;
+import com.sonfind.chelsea.dto.teams.TeamDetailResponse;
 import com.sonfind.chelsea.dto.teams.UpdateTeamRequest;
 import com.sonfind.chelsea.global.domain.SubCode;
+import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
 import com.sonfind.chelsea.repository.TeamRepository;
@@ -27,6 +32,7 @@ public class TeamService {
 	private final TeamRepository teamRepository;
 	private final SubCodeRepository subCodeRepository;
 	private final StudentRepository studentRepository;
+	private final StudentInfoRepository studentInfoRepository;
 	private final StudentService studentService;
 
 	//팀 생성
@@ -109,6 +115,42 @@ public class TeamService {
 		}
 	}
 
+	//타 팀 상세조회
+	@Transactional
+	public TeamDetailResponse getTeamDetail(Long teamId) {
+		//존재하는 팀인지 확인
+		Team team = teamRepository.findById(teamId)
+			.orElseThrow(() -> new ResponseStatusException(
+				HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다."));
+
+		//Recruitments 정보
+		List<RecruitmentDto> recruitments = team.getRecruitments().stream()
+			.map(r -> new Recruitment(r.getPosition().getSubCodeName()))
+			.collect(Collectors.toList());
+
+		//팀원(member) 정보
+		List<MemberDto> members = studentInfoRepository.findAllByStudent_TeamId(teamId).stream()
+			.map(this::mapToMemberDto)
+			.collect(Collectors.toList());
+
+		return new TeamDetailResponse(
+			team.getTeamId(),
+			team.getName(),
+			team.getDescription(),
+			team.getTrack().getSubCode(),
+			team.getTrack().getSubCodeName(),
+			recruitments,
+			members.size(),
+			members
+		);
+	}
+
+	//내 팀 상세조회
+	// @Transactional
+	// public MyTeamDetailResponse getMyTeamDetailResponse(Long teamId, Long studentId) {
+	//
+	// }
+
 	//String positioncodes를 recruitment 리스트로 변환
 	private List<Recruitment> toRecruitments(List<String> positionCodes, Team team) {
 		return positionCodes.stream()
@@ -125,4 +167,13 @@ public class TeamService {
 			.collect(Collectors.toList());
 	}
 
+	private MemberDto mapToMemberDto(StudentInfo info) {
+		return new MemberDto(
+			info.getStudent().getStudentId(),
+			info.getStudent().getName(),
+			info.getStudent().isMajorYn(),
+			info.getProfileImageUrl(), //프로필 이미지는 왜 getStudent 안하고 바로 가져오는지?
+			info.getPosition().getSubCodeName()
+		);
+	}
 }
