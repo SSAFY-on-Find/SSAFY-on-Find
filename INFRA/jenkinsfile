@@ -66,7 +66,7 @@ pipeline {
                         def ec2_host = 'ubuntu@i13a704.p.ssafy.io'
                         sh "scp -o StrictHostKeyChecking=no ./INFRA/docker-compose.prod.yml ${ec2_host}:/home/ubuntu/app/docker-compose.prod.yml"
                         sh "scp -o StrictHostKeyChecking=no ./INFRA/deploy.sh ${ec2_host}:/home/ubuntu/app/deploy.sh"
-                        sh "ssh -o StrictHostKeyChecking=no ${ec2_host} 'chmod +x /home/ubuntu/app/deploy.sh && /home/ubuntu/app/deploy.sh ${env.BE_IMAGE_NAME}:${env.imageTag} ${env.FE_IMAGE_NAME}:${env.imageTag}'"
+                        sh "ssh -o StrictHostKeyChecking=no ${ec2_host} 'cd /home/ubuntu/app && chmod +x ./deploy.sh && ./deploy.sh ${env.BE_IMAGE_NAME}:${imageTag} ${env.FE_IMAGE_NAME}:${imageTag}'"
                     }
                 }
             }

@@ -1,4 +1,7 @@
 #!/bin/bash
+set -e 
+
+cd "$(dirname "$0")"
 
 export BE_DOCKER_IMAGE=$1
 export FE_DOCKER_IMAGE=$2
