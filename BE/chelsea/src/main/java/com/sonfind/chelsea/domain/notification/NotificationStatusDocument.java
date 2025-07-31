@@ -2,20 +2,24 @@ package com.sonfind.chelsea.domain.notification;
 
 import java.util.Date;
 
-import com.sonfind.chelsea.types.NotificationDomainType;
-
-import com.sonfind.chelsea.types.NotificationStatus;
-import com.sonfind.chelsea.types.RecipientRole;
-import lombok.*;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
+import com.sonfind.chelsea.types.NotificationStatus;
+import com.sonfind.chelsea.types.RecipientRole;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * Notification 상태 정보를 저장하는 Document
  * @field id: NotificationStatusDocument의 고유 ID
  * @field notificationId: 참조하는 NotificationDocument의 ID
- * @field studentId: 발신자 또는 수신자의 ID
+ * @field targetId: 알림 대상 ID (발신자 또는 수신자 ID)
  * @field role: 알림 발신/수신 역할 (eg. PUBLISHER, SUBSCRIBER)
  * @field status: 알림 상태 (eg. PENDING, ACCEPTED 등)
  * @field isRead: 읽음 여부
@@ -33,10 +37,10 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Builder
 public class NotificationStatusDocument {
 	@Id
-	private long id;
+	private ObjectId id;
 
 	@Field("notification_id")
-	private long notificationId;
+	private ObjectId notificationId;
 
 	@Field("target_id")
 	private long targetId;
@@ -44,12 +48,18 @@ public class NotificationStatusDocument {
 	private RecipientRole role;
 	private NotificationStatus status;
 
+	@Field("is_read")
 	private boolean isRead;
+	@Field("read_at")
 	private Date readAt;
 
+	@Field("notification_title")
 	private String notificationTitle;
+	@Field("notification_message")
 	private String notificationMessage;
 
+	@Field("created_at")
 	private Date createdAt;
+	@Field("updated_at")
 	private Date updatedAt;
 }
