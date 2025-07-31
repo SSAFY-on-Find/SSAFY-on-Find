@@ -39,7 +39,7 @@ pipeline {
                 stage("Build FE Image") {
                     steps {
                         script {
-                            sh "docker build -f INFRA/FE.Dockerfile -t ${env.FE_IMAGE_NAME}:${env.imageTag} FE/chelsea"
+                            sh "docker build -f INFRA/FE.Dockerfile -t ${env.FE_IMAGE_NAME}:${env.imageTag} FE"
                             sh "docker tag ${env.FE_IMAGE_NAME}:${env.imageTag} ${env.FE_IMAGE_NAME}:latest"
                         }
                     }
