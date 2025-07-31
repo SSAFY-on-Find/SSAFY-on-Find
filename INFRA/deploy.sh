@@ -8,6 +8,6 @@ echo "Deploying Frontend Image: ${FE_DOCKER_IMAGE}"
 
 docker-compose pull
 
-docker-compose up -d --force-recreate
+docker-compose up -d --force-recreate backend frontend
 
 echo "Deployment completed."
