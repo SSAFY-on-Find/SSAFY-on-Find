@@ -8,7 +8,7 @@ NETWORK_NAME="product_api_server_network"
 ENV_FILE_PATH="/home/ubuntu/.prod.env"
 
 if [ -z "$IMAGE_TO_DEPLOY" ]; then
-  echo "오류: 배포할 Docker 이미지가 지정되지 않았습니다.
+  echo "오류: 배포할 Docker 이미지가 지정되지 않았습니다."
   exit 1
 fi
 
