@@ -3,12 +3,12 @@ FROM node:22.17.1-alpine AS builder
 WORKDIR /app
 
 # FE 폴더의 package.json 복사
-COPY FE/package*.json ./
+COPY package*.json ./
 
 RUN npm install
 
 # FE 폴더 전체 복사
-COPY FE/ ./
+COPY . ./
 
 RUN npm run build
 
