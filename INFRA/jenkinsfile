@@ -4,6 +4,8 @@ pipeline {
     environment {
         DOCKERHUB_USERNAME = "pug9483"
         BE_IMAGE_NAME = "${DOCKERHUB_USERNAME}/chelsea-be-app"
+        FE_IMAGE_NAME = "${DOCKERHUB_USERNAME}/chelsea-fe-app"
+        imageTag = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
     }
 
     stages {
@@ -24,21 +26,34 @@ pipeline {
             }
         }
 
-        stage("Build BE Image") {
-            steps {
-                script {
-                    def imageTag = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
-                    sh "docker build -f INFRA/BE.Dockerfile -t ${env.BE_IMAGE_NAME}:${imageTag} BE/chelsea"
-                    sh "docker tag ${env.BE_IMAGE_NAME}:${imageTag} ${env.BE_IMAGE_NAME}:latest"
+        stage('Build Docker Images') {
+            parallel {
+                stage("Build BE Image") {
+                    steps {
+                        script {
+                            sh "docker build -f INFRA/BE.Dockerfile -t ${env.BE_IMAGE_NAME}:${env.imageTag} BE/chelsea"
+                            sh "docker tag ${env.BE_IMAGE_NAME}:${env.imageTag} ${env.BE_IMAGE_NAME}:latest"
+                        }
+                    }
+                }
+                stage("Build FE Image") {
+                    steps {
+                        script {
+                            sh "docker build -f INFRA/FE.Dockerfile -t ${env.FE_IMAGE_NAME}:${env.imageTag} FE/chelsea"
+                            sh "docker tag ${env.FE_IMAGE_NAME}:${env.imageTag} ${env.FE_IMAGE_NAME}:latest"
+                        }
+                    }
                 }
             }
         }
+
 
         stage('Push to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-token', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh "echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin"
                     sh "docker push --all-tags ${env.BE_IMAGE_NAME}"
+                    sh "docker push --all-tags ${env.FE_IMAGE_NAME}"
                 }
             }
         }
@@ -49,8 +64,8 @@ pipeline {
                     def imageTag = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
                     sshagent(credentials: ['ec2-deploy-key']) {
                         def ec2_host = 'ubuntu@i13a704.p.ssafy.io'
-                        sh "scp -o StrictHostKeyChecking=no ./INFRA/deploy.sh ${ec2_host}:/home/ubuntu/deploy.sh"
-                        sh "ssh -o StrictHostKeyChecking=no ${ec2_host} 'chmod +x /home/ubuntu/deploy.sh && /home/ubuntu/deploy.sh ${env.BE_IMAGE_NAME}:latest'"
+                        sh "scp -o StrictHostKeyChecking=no ./INFRA/deploy.sh ${ec2_host}:/home/ubuntu/app/deploy.sh"
+                        sh "ssh -o StrictHostKeyChecking=no ${ec2_host} 'chmod +x /home/ubuntu/app/deploy.sh && /home/ubuntu/app/deploy.sh ${env.BE_IMAGE_NAME}:${env.imageTag} ${env.FE_IMAGE_NAME}:${env.imageTag}'"
                     }
                 }
             }
