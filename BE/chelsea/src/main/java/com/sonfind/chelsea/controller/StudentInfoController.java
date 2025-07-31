@@ -1,0 +1,50 @@
+package com.sonfind.chelsea.controller;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.sonfind.chelsea.dto.studentInfo.StudentInfoCreateRequestDto;
+import com.sonfind.chelsea.service.StudentInfoService;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/me")
+public class StudentInfoController {
+
+	private final StudentInfoService studentInfoService;
+
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<Map<String, Object>> createStudentInfo(
+		@Parameter(content = @Content(mediaType = "application/json"))
+		@Valid @RequestPart StudentInfoCreateRequestDto requestDto,
+
+		@RequestPart(value = "profile", required = false) MultipartFile profile,
+		@RequestPart(value = "portfolio", required = false) MultipartFile portfolio,
+		@CookieValue("sessionId") Long studentId
+	) throws IOException {
+
+		studentInfoService.createStudentInfo(studentId, requestDto, profile, portfolio);
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCSS");
+		
+		return ResponseEntity.status(HttpStatus.CREATED).body(body);
+	}
+
+}

@@ -1,13 +1,14 @@
 -- ==================================================================
 -- 상위 코드 (main_code) 데이터
 -- ==================================================================
-INSERT INTO main_code (MAIN_CODE, MAIN_CODE_NAME, MAIN_CODE_DESCRIPTION, USE_YN, created_by, created_at)
+INSERT IGNORE INTO main_code (MAIN_CODE, MAIN_CODE_NAME, MAIN_CODE_DESCRIPTION, USE_YN, created_by, created_at)
 VALUES ('TRK', '트랙', '트랙 종류', true, '0001234', NOW()),
        ('POS', '포지션', '포지션 종류', true, '0001234', NOW()),
        ('GOAL', '목표', '프로젝트 목표 종류', true, '0001234', NOW()),
        ('TECH', '기술 스택', '기술 스택 종류', true, '0001234', NOW()),
        ('MBTI', 'MBTI', '성격 유형 지표', true, '0001234', NOW()),
-       ('RULE', '규칙', '팀 빌딩 규칙', true, '0001234', NOW());
+       ('RULE', '규칙', '팀 빌딩 규칙', true, '0001234', NOW()),
+       ('CLS','반','소속 반 종류', true, '0001234', NOW());
 
 
 -- ==================================================================
@@ -15,14 +16,14 @@ VALUES ('TRK', '트랙', '트랙 종류', true, '0001234', NOW()),
 -- ==================================================================
 
 -- == TRK (트랙) ==
-INSERT INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
+INSERT IGNORE INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
 VALUES ('TRK001', 'TRK', '웹 기술', '웹 기술을(를) 나타내는 코드. (코드: TRK001)', true, '0001234', NOW()),
        ('TRK002', 'TRK', '웹 디자인', '웹 디자인을(를) 나타내는 코드. (코드: TRK002)', true, '0001234', NOW()),
        ('TRK003', 'TRK', 'AIOT', 'AIOT을(를) 나타내는 코드. (코드: TRK003)', true, '0001234', NOW()),
        ('TRK004', 'TRK', 'MOBILE', 'MOBILE을(를) 나타내는 코드. (코드: TRK004)', true, '0001234', NOW());
 
 -- == POS (포지션) ==
-INSERT INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
+INSERT IGNORE INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
 VALUES ('POS001', 'POS', '프론트', '프론트을(를) 나타내는 코드. (코드: POS001)', true, '0001234', NOW()),
        ('POS002', 'POS', '백엔드', '백엔드을(를) 나타내는 코드. (코드: POS002)', true, '0001234', NOW()),
        ('POS003', 'POS', '풀스택', '풀스택을(를) 나타내는 코드. (코드: POS003)', true, '0001234', NOW()),
@@ -32,13 +33,13 @@ VALUES ('POS001', 'POS', '프론트', '프론트을(를) 나타내는 코드. (�
        ('POS007', 'POS', 'AI', 'AI을(를) 나타내는 코드. (코드: POS007)', true, '0001234', NOW());
 
 -- == GOAL (목표) ==
-INSERT INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
+INSERT IGNORE INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
 VALUES ('GOAL001', 'GOAL', '포트폴리오', '포트폴리오을(를) 나타내는 코드. (코드: GOAL001)', true, '0001234', NOW()),
        ('GOAL002', 'GOAL', '수상', '수상을(를) 나타내는 코드. (코드: GOAL002)', true, '0001234', NOW()),
        ('GOAL003', 'GOAL', '취업', '취업을(를) 나타내는 코드. (코드: GOAL003)', true, '0001234', NOW());
 
 -- == MBTI (성격 유형 지표) ==
-INSERT INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
+INSERT IGNORE INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
 VALUES ('MBTI001', 'MBTI', 'INTJ', 'INTJ을(를) 나타내는 코드. (코드: MBTI001)', true, '0001234', NOW()),
        ('MBTI002', 'MBTI', 'INTP', 'INTP을(를) 나타내는 코드. (코드: MBTI002)', true, '0001234', NOW()),
        ('MBTI003', 'MBTI', 'ENTJ', 'ENTJ을(를) 나타내는 코드. (코드: MBTI003)', true, '0001234', NOW()),
@@ -57,7 +58,7 @@ VALUES ('MBTI001', 'MBTI', 'INTJ', 'INTJ을(를) 나타내는 코드. (코드: M
        ('MBTI016', 'MBTI', 'ESFP', 'ESFP을(를) 나타내는 코드. (코드: MBTI016)', true, '0001234', NOW());
 
 -- == TECH (기술 스택) ==
-INSERT INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
+INSERT IGNORE INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
 VALUES ('TECH001', 'TECH', 'React', 'React을(를) 나타내는 코드. (코드: TECH001)', true, '0001234', NOW()),
        ('TECH002', 'TECH', 'Vue.js', 'Vue.js을(를) 나타내는 코드. (코드: TECH002)', true, '0001234', NOW()),
        ('TECH003', 'TECH', 'Angular', 'Angular을(를) 나타내는 코드. (코드: TECH003)', true, '0001234', NOW()),
@@ -104,8 +105,7 @@ VALUES ('TECH001', 'TECH', 'React', 'React을(를) 나타내는 코드. (코드:
        ('TECH044', 'TECH', 'Flutter', 'Flutter을(를) 나타내는 코드. (코드: TECH044)', true, '0001234', NOW()),
        ('TECH045', 'TECH', 'React Native', 'React Native을(를) 나타내는 코드. (코드: TECH045)', true, '0001234', NOW()),
        ('TECH046', 'TECH', 'Ionic', 'Ionic을(를) 나타내는 코드. (코드: TECH046)', true, '0001234', NOW()),
-       ('TECH047', 'TECH', 'Android (Java/Kotlin)', 'Android (Java/Kotlin)을(를) 나타내는 코드. (코드: TECH047)', true, '0001234',
-        NOW()),
+       ('TECH047', 'TECH', 'Android (Java/Kotlin)', 'Android (Java/Kotlin)을(를) 나타내는 코드. (코드: TECH047)', true, '0001234',NOW()),
        ('TECH048', 'TECH', 'Objective-C', 'Objective-C을(를) 나타내는 코드. (코드: TECH048)', true, '0001234', NOW()),
        ('TECH049', 'TECH', 'Swift', 'Swift을(를) 나타내는 코드. (코드: TECH049)', true, '0001234', NOW()),
        ('TECH050', 'TECH', 'Kotlin Multiplatform Mobile (KMM)',
@@ -132,14 +132,24 @@ VALUES ('TECH001', 'TECH', 'React', 'React을(를) 나타내는 코드. (코드:
        ('TECH070', 'TECH', 'Rush (Monorepo tool)', 'Rush (Monorepo tool)을(를) 나타내는 코드. (코드: TECH070)', true, '0001234',
         NOW());
 
+-- == CLS (소속 반 종류) ==
+INSERT IGNORE INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
+VALUES ('CLS001', 'CLS', '1반', '1반을(를) 나타내는 코드. (코드: CLS001)', true, '0001234', NOW()),
+       ('CLS002', 'CLS', '2반', '2반을(를) 나타내는 코드. (코드: CLS002)', true, '0001234', NOW()),
+       ('CLS003', 'CLS', '3반', '3반을(를) 나타내는 코드. (코드: CLS003)', true, '0001234', NOW()),
+       ('CLS004', 'CLS', '4반', '4반을(를) 나타내는 코드. (코드: CLS004)', true, '0001234', NOW()),
+       ('CLS005', 'CLS', '5반', '5반을(를) 나타내는 코드. (코드: CLS005)', true, '0001234', NOW()),
+       ('CLS006', 'CLS', '6반', '6반을(를) 나타내는 코드. (코드: CLS006)', true, '0001234', NOW()),
+       ('CLS007', 'CLS', '7반', '7반을(를) 나타내는 코드. (코드: CLS007)', true, '0001234', NOW());
+
 -- == RULE (팀 빌딩 규칙) ==
-INSERT INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
+INSERT IGNORE INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
 VALUES ('RULE001', 'RULE', 'SIZE_LIMIT', '6인 1팀 원칙', true, '0001234', NOW()),
        ('RULE002', 'RULE', 'MIN_MAJOR', '전공자 2인 이상', true, '0001234', NOW()),
        ('RULE003', 'RULE', 'MIN_NON_MAJOR', '비전공자 2인 이상', true, '0001234', NOW()),
        ('RULE004', 'RULE', 'BUILD_END_DATE', '팀 빌딩 종료 시간', true, '0001234', NOW());
 
-INSERT INTO students (student_id, name, major_yn, team_id, created_by, created_at)
+INSERT IGNORE INTO students (student_id, name, major_yn, team_id, created_by, created_at)
 VALUES (1300001, '김서준', TRUE, NULL, '0001234', NOW()),
        (1300002, '이하윤', FALSE, 3, '0001234', NOW()),
        (1300003, '박지호', TRUE, 1, '0001234', NOW()),
