@@ -15,4 +15,6 @@ public interface SubCodeRepository extends JpaRepository<SubCode, String> {
 	List<SubCode> findByMainCode_MainCode(String mainCode);
 
 	SubCode findBySubCode(String subCode);
+
+	List<SubCode> findAllBySubCodeIn(List<String> subCodes);
 }
