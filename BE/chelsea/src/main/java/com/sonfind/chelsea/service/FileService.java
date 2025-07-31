@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.sonfind.chelsea.domain.studentInfo.UploadedFile;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -45,6 +47,33 @@ public class FileService {
 		String saveFilename = uuid + extension;
 
 		return saveFilename;
+	}
+
+	public String saveProfileImage(MultipartFile profile) throws IOException {
+
+		String imageSaveUrl = "";
+
+		if (profile == null || profile.isEmpty()) {
+			//없으면 기본 이미지 처리
+		} else {
+			imageSaveUrl = uploadFile(profile, "profiles");
+		}
+		return imageSaveUrl;
+	}
+
+	public UploadedFile savePortfolio(MultipartFile portfolio) throws IOException {
+
+		if (portfolio == null || portfolio.isEmpty()) {
+			return null;
+		}
+
+		String portfolioOriImageName = portfolio.getOriginalFilename();
+		String savedFilename = uploadFile(portfolio, "portfolios");
+
+		return UploadedFile.builder()
+			.originalFileName(portfolioOriImageName)
+			.savedFileName(savedFilename)
+			.build();
 	}
 
 }
