@@ -4,7 +4,7 @@ spring:
       on-profile: prod
 
   datasource:
-    url: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=true&requireSSL=true
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -22,13 +22,15 @@ spring:
     redis:
       host: redis
       port: 6379
+      password: ${REDIS_PASSWORD}
     mongodb:
       uri: mongodb://${MONGO_DB_USER}:${MONGO_DB_PASSWORD}@mongodb:27017/${MONGO_DB_NAME}?authSource=admin
 
 logging:
   level:
     com.sonfind.chelsea: INFO
-    org.hibernate.SQL: INFO
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql: WARN
 
 server:
   port: 8090

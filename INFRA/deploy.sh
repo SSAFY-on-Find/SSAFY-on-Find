@@ -4,9 +4,11 @@ set -e
 IMAGE_TO_DEPLOY=$1
 
 CONTAINER_NAME="chelsea-be-app"
+NETWORK_NAME="product_api_server_network"
+ENV_FILE_PATH="/home/ubuntu/.prod.env"
 
 if [ -z "$IMAGE_TO_DEPLOY" ]; then
-  echo "오류: 배포할 Docker 이미지가 지정되지 않았습니다. 사용법: ./deploy.sh <이미지이름:태그>"
+  echo "오류: 배포할 Docker 이미지가 지정되지 않았습니다.
   exit 1
 fi
 
@@ -27,7 +29,12 @@ docker pull ${IMAGE_TO_DEPLOY}
 
 echo "${IMAGE_TO_DEPLOY}로부터 새 컨테이너를 실행합니다."
 
-docker run -d -p 8090:8090 --name ${CONTAINER_NAME} -e SPRING_PROFILES_ACTIVE=prod ${IMAGE_TO_DEPLOY}
+docker run -d \
+  -p 8090:8090 \
+  --name ${CONTAINER_NAME} \
+  --network ${NETWORK_NAME} \
+  --env-file ${ENV_FILE_PATH} \
+  ${IMAGE_TO_DEPLOY}
 
 echo "--- 배포가 성공적으로 완료되었습니다! ---"
 
