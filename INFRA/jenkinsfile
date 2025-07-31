@@ -50,7 +50,7 @@ pipeline {
                     sshagent(credentials: ['ec2-deploy-key']) {
                         def ec2_host = 'ubuntu@i13a704.p.ssafy.io'
                         sh "scp -o StrictHostKeyChecking=no ./INFRA/deploy.sh ${ec2_host}:/home/ubuntu/deploy.sh"
-                        sh "ssh -o StrictHostKeyChecking=no ${ec2_host} 'chmod +x /home/ubuntu/deploy.sh && /home/ubuntu/deploy.sh ${env.BE_IMAGE_NAME}:${imageTag}'"
+                        sh "ssh -o StrictHostKeyChecking=no ${ec2_host} 'chmod +x /home/ubuntu/deploy.sh && /home/ubuntu/deploy.sh ${env.BE_IMAGE_NAME}:latest'"
                     }
                 }
             }
