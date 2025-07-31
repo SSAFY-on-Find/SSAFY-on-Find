@@ -1,4 +1,4 @@
-package com.sonfind.chelsea.domain.mates;
+package com.sonfind.chelsea.domain.studentInfo;
 
 import static lombok.AccessLevel.*;
 
@@ -8,7 +8,9 @@ import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.global.domain.BaseEntity;
 import com.sonfind.chelsea.global.domain.SubCode;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
@@ -20,11 +22,13 @@ import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PRIVATE)
+@SuperBuilder
 @Getter
 public class StudentInfo extends BaseEntity {
 
@@ -43,24 +47,26 @@ public class StudentInfo extends BaseEntity {
 	@Column(name = "profile_image_url")
 	private String profileImageUrl;
 
-	private String description;
+	@Embedded
+	@AttributeOverride(name = "savedFileName", column = @Column(name = "portfolio_saved_filename"))
+	@AttributeOverride(name = "originalFileName", column = @Column(name = "portfolio_original_filename"))
+	private UploadedFile portfolio;
 
-	@Column(name = "portfolio_url")
-	private String portfolioUrl;
+	private String description;
 
 	@ManyToOne
 	@JoinColumn(name = "track_code")
-	private SubCode track;
+	private SubCode trackCode;
 
 	@ManyToOne
 	@JoinColumn(name = "position_code")
-	private SubCode position;
+	private SubCode positionCode;
 
 	@ManyToOne
 	@JoinColumn(name = "goal_code")
-	private SubCode goal;
+	private SubCode goalCode;
 
 	@ManyToOne
 	@JoinColumn(name = "mbti_code")
-	private SubCode mbti;
+	private SubCode mbtiCode;
 }
