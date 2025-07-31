@@ -12,7 +12,7 @@ function NavBtn({ navIcon: Icon, navTitle, to }: INavProps) {
 		<NavLink
       to={to}
       className={({ isActive }) =>
-        `flex items-center gap-2 px-4 py-2 rounded-md font-semibold transition-colors ${
+        `flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-colors ${
           isActive
             ? "bg-main text-background"
             : "text-subtext hover:bg-main/10"
@@ -20,7 +20,7 @@ function NavBtn({ navIcon: Icon, navTitle, to }: INavProps) {
       }
     >
       <Icon className="w-5 h-5" />
-      <div className="text-base font-medium">{navTitle}</div>
+      <div className="text-sm">{navTitle}</div>
     </NavLink>
     )
 }
