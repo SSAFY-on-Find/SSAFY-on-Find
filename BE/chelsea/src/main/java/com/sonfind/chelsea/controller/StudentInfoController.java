@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoCreateRequestDto;
+import com.sonfind.chelsea.dto.studentInfo.StudentInfoResponseDto;
 import com.sonfind.chelsea.service.StudentInfoService;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -42,9 +44,23 @@ public class StudentInfoController {
 		studentInfoService.createStudentInfo(studentId, requestDto, profile, portfolio);
 
 		Map<String, Object> body = new HashMap<>();
-		body.put("status", "SUCCSS");
-		
+		body.put("status", "SUCCESS");
+
 		return ResponseEntity.status(HttpStatus.CREATED).body(body);
+	}
+
+	@GetMapping
+	public ResponseEntity<Map<String, Object>> getStudentInfo(
+		@CookieValue("sessionId") Long studentId
+	) {
+
+		StudentInfoResponseDto studentInfo = studentInfoService.getStudentInfo(studentId);
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", studentInfo);
+
+		return ResponseEntity.ok().body(body);
 	}
 
 }

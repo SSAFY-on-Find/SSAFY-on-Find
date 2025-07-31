@@ -2,11 +2,14 @@ package com.sonfind.chelsea.domain.student;
 
 import static lombok.AccessLevel.*;
 
+import com.sonfind.chelsea.domain.teams.Team;
 import com.sonfind.chelsea.global.domain.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +19,6 @@ import lombok.Setter;
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PRIVATE)
 @Getter
-@Setter
 public class Students extends BaseEntity {
 	@Id
 	@Column(name = "student_id")
@@ -27,6 +29,8 @@ public class Students extends BaseEntity {
 	@Column(name = "major_yn")
 	private Boolean majorYn;
 
-	@Column(name = "team_id")
-	private Long teamId;
+	@ManyToOne
+	@Setter
+	@JoinColumn(name = "team_id", referencedColumnName = "team_id")
+	private Team team;
 }
