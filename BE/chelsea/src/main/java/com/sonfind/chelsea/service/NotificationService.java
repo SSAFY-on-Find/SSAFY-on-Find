@@ -85,6 +85,8 @@ public class NotificationService {
 		}
 
 		log.info("알림 상태가 저장되었습니다: {}, {}", savedNotification.getId(), type);
+
+		return savedNotification;
 	}
 
 	/**
@@ -127,7 +129,7 @@ public class NotificationService {
 			.updatedAt(now)
 			.build();
 	}
- 
+
 	/**
 	 * 알림을 저장하기 전에, 가장 최근에 업데이트된 알림을 찾음
 	 * @param dto
