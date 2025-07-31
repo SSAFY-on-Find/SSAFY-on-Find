@@ -25,7 +25,7 @@ public class Students extends BaseEntity {
 	private String name;
 
 	@Column(name = "major_yn")
-	private boolean majorYn;
+	private Boolean majorYn;
 
 	@Column(name = "team_id")
 	private Long teamId;
