@@ -1,8 +1,11 @@
 import { Route, Routes } from "react-router-dom"
 
-import { Header } from "@/layout"
+import { Header, SideBar } from "@/layout"
 import Dashboard from "@/pages/DashboardPage"
+import MyProfile from "@/pages/MyProfilePage"
 import MyTeam from "@/pages/MyTeamPage"
+import StudentList from "@/pages/StudentListPage"
+import TeamList from "@/pages/TeamListPage"
 
 import ComponentTestPage from "./components/ComponentTestPage"
 
@@ -12,13 +15,19 @@ function App() {
   return (
     <div className="App">
       <Header />
-      <main className="mt-[64px]">
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/myteam" element={<MyTeam />} />
-          <Route path="/component-test" element={<ComponentTestPage />} />
-        </Routes>
-      </main>
+      <div className="mt-[64px]">
+        <SideBar />
+        <main className="border-main ml-[200px] border">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/myteam" element={<MyTeam />} />
+            <Route path="/teamlist" element={<TeamList />} />
+            <Route path="/studentlist" element={<StudentList />} />
+            <Route path="/myprofile" element={<MyProfile />} />
+            <Route path="/component-test" element={<ComponentTestPage />} />
+          </Routes>
+        </main>
+      </div>
     </div>
   )
 }

@@ -29,11 +29,11 @@ interface IHeaderProps {
 function Header({ classCode = "7" }: IHeaderProps) {
 	return (
 		<header className="fixed top-0 left-0 z-50 flex h-[64px] w-full items-center justify-center gap-3 bg-white px-5 py-4 shadow-xs">
-			<div className="text-main flex h-full w-1/7 items-center justify-start gap-2">
+			<div className="text-main flex h-full w-[200px] items-center justify-start gap-2">
 				<Search />
 				<h1 className="text-l font-bold">SSAFY On Find</h1>
 			</div>
-			<div className="flex h-full w-6/7 items-center justify-between">
+			<div className="flex h-full flex-1 items-center justify-between">
 				<h1 className="text-text text-xl font-bold">서울 {classCode}반</h1>
 				<div className="flex h-full items-center justify-center gap-3">
 					<DeadlineNotification />
