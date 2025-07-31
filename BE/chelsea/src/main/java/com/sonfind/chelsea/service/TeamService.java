@@ -8,20 +8,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.sonfind.chelsea.domain.mates.StudentInfo;
 import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.domain.teams.Recruitment;
 import com.sonfind.chelsea.domain.teams.Team;
 import com.sonfind.chelsea.dto.teams.CreateTeamRequest;
-import com.sonfind.chelsea.dto.teams.MemberDto;
-import com.sonfind.chelsea.dto.teams.RecruitmentDto;
-import com.sonfind.chelsea.dto.teams.TeamDetailResponse;
 import com.sonfind.chelsea.dto.teams.UpdateTeamRequest;
 import com.sonfind.chelsea.global.domain.SubCode;
-import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
 import com.sonfind.chelsea.repository.TeamRepository;
+import com.sonfind.chelsea.repository.studentInfo.StudentInfoRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,7 +37,7 @@ public class TeamService {
 
 		//팀에 속해 있는 교육생은 팀 생성 못함
 		Students student = studentService.findByStudentId(studentId);
-		if (student.getTeamId() != null) {
+		if (student.getTeam().getTeamId() != null) {
 			throw new ResponseStatusException(
 				HttpStatus.FORBIDDEN, "이미 팀에 속해있습니다");
 		}
@@ -72,7 +68,7 @@ public class TeamService {
 		}
 
 		//학생 teamId 저장
-		student.setTeamId(team.getTeamId());
+		student.setTeam(team);
 		studentRepository.save(student);
 
 		return team.getTeamId();
@@ -84,7 +80,7 @@ public class TeamService {
 
 		//팀에 속해 있지 않은 교육생은 수정 불가
 		Students student = studentService.findByStudentId(studentId);
-		if (!teamId.equals(student.getTeamId())) {
+		if (!teamId.equals(student.getTeam().getTeamId())) {
 			throw new ResponseStatusException(
 				HttpStatus.FORBIDDEN, "팀에 속해 있지 않은 교육생은 수정할 수 없습니다."
 			);
@@ -116,34 +112,34 @@ public class TeamService {
 	}
 
 	//타 팀 상세조회
-	@Transactional
-	public TeamDetailResponse getTeamDetail(Long teamId) {
-		//존재하는 팀인지 확인
-		Team team = teamRepository.findById(teamId)
-			.orElseThrow(() -> new ResponseStatusException(
-				HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다."));
-
-		//Recruitments 정보
-		List<RecruitmentDto> recruitments = team.getRecruitments().stream()
-			.map(r -> new Recruitment(r.getPosition().getSubCodeName()))
-			.collect(Collectors.toList());
-
-		//팀원(member) 정보
-		List<MemberDto> members = studentInfoRepository.findAllByStudent_TeamId(teamId).stream()
-			.map(this::mapToMemberDto)
-			.collect(Collectors.toList());
-
-		return new TeamDetailResponse(
-			team.getTeamId(),
-			team.getName(),
-			team.getDescription(),
-			team.getTrack().getSubCode(),
-			team.getTrack().getSubCodeName(),
-			recruitments,
-			members.size(),
-			members
-		);
-	}
+	//@Transactional
+	// public TeamDetailResponse getTeamDetail(Long teamId) {
+	// 	//존재하는 팀인지 확인
+	// 	Team team = teamRepository.findById(teamId)
+	// 		.orElseThrow(() -> new ResponseStatusException(
+	// 			HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다."));
+	//
+	// 	//Recruitments 정보
+	// 	List<RecruitmentDto> recruitments = team.getRecruitments().stream()
+	// 		.map(r -> new Recruitment(r.getPosition().getSubCodeName()))
+	// 		.collect(Collectors.toList());
+	//
+	// 	//팀원(member) 정보
+	// 	List<MemberDto> members = studentInfoRepository.findAllByStudent_TeamId(teamId).stream()
+	// 		.map(this::mapToMemberDto)
+	// 		.collect(Collectors.toList());
+	//
+	// 	return new TeamDetailResponse(
+	// 		team.getTeamId(),
+	// 		team.getName(),
+	// 		team.getDescription(),
+	// 		team.getTrack().getSubCode(),
+	// 		team.getTrack().getSubCodeName(),
+	// 		recruitments,
+	// 		members.size(),
+	// 		members
+	// 	);
+	// }
 
 	//내 팀 상세조회
 	// @Transactional
@@ -166,14 +162,14 @@ public class TeamService {
 			})
 			.collect(Collectors.toList());
 	}
-
-	private MemberDto mapToMemberDto(StudentInfo info) {
-		return new MemberDto(
-			info.getStudent().getStudentId(),
-			info.getStudent().getName(),
-			info.getStudent().isMajorYn(),
-			info.getProfileImageUrl(), //프로필 이미지는 왜 getStudent 안하고 바로 가져오는지?
-			info.getPosition().getSubCodeName()
-		);
-	}
+	//
+	// private MemberDto mapToMemberDto(StudentInfo info) {
+	// 	return new MemberDto(
+	// 		info.getStudent().getStudentId(),
+	// 		info.getStudent().getName(),
+	// 		info.getStudent().isMajorYn(),
+	// 		info.getProfileImageUrl(), //프로필 이미지는 왜 getStudent 안하고 바로 가져오는지?
+	// 		info.getPosition().getSubCodeName()
+	// 	);
+	// }
 }
