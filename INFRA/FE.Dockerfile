@@ -2,9 +2,25 @@ FROM node:22.17.1-alpine AS builder
 
 WORKDIR /app
 
-COPY FE/package.json FE/package-lock.json* ./
+# FE 폴더의 package.json 복사
+COPY FE/package*.json ./
+
 RUN npm install
 
-COPY FE/ .
+# FE 폴더 전체 복사
+COPY FE/ ./
 
 RUN npm run build
+
+FROM nginx:alpine
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+RUN rm /etc/nginx/conf.d/default.conf
+
+# nginx.conf 경로도 수정
+COPY INFRA/nginx.conf /etc/nginx/conf.d/
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
