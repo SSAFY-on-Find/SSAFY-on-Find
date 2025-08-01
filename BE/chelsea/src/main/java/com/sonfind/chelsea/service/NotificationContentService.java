@@ -3,7 +3,7 @@ package com.sonfind.chelsea.service;
 import org.springframework.stereotype.Service;
 
 import com.sonfind.chelsea.domain.notification.NotificationDocument;
-import com.sonfind.chelsea.types.NotificationContext;
+import com.sonfind.chelsea.dto.notification.NotificationContext;
 import com.sonfind.chelsea.types.RecipientRole;
 
 @Service

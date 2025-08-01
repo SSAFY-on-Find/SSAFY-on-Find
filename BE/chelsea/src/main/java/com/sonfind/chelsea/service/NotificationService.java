@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 
 import com.sonfind.chelsea.domain.notification.NotificationDocument;
 import com.sonfind.chelsea.domain.notification.NotificationStatusDocument;
+import com.sonfind.chelsea.dto.notification.NotificationContext;
 import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
 import com.sonfind.chelsea.facade.StudentFacade;
 import com.sonfind.chelsea.repository.NotificationRepository;
 import com.sonfind.chelsea.repository.NotificationStatusRepository;
-import com.sonfind.chelsea.types.NotificationContext;
 import com.sonfind.chelsea.types.NotificationDomainType;
 import com.sonfind.chelsea.types.NotificationStatus;
 import com.sonfind.chelsea.types.NotificationType;
