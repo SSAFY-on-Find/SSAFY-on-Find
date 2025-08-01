@@ -1,6 +1,10 @@
-import { CheckTag,MainTag, MajorTag, NormalTag, PositionTag, WhiteTag } from "./atoms"
+import { useState } from "react"
+
+import { CheckTag, MainTag, MajorTag, NormalTag, PositionTag, WhiteTag } from "./atoms"
 
 export default function ComponentTestPage() {
+  const [postion001, setCheck1] = useState(false)
+  const [postion002, setCheck2] = useState(false)
   return (
     <div className="">
       <div className="bg-background p-5">
@@ -11,9 +15,9 @@ export default function ComponentTestPage() {
         <PositionTag positionName={"백엔드"}></PositionTag>
         <PositionTag positionName={"풀스택"}></PositionTag>
         <PositionTag positionName={"모바일"}></PositionTag>
-        <CheckTag tagContent={"체크태그"} fillBg={true}></CheckTag>
+        <CheckTag tagContent={"체크태그"} onToggle={setCheck1} isChecked={postion001}></CheckTag>
+        <CheckTag tagContent={"체크태그"} onToggle={setCheck2} isChecked={postion002}></CheckTag>
         <PositionTag positionName={"임베디드"}></PositionTag>
-        <CheckTag tagContent={"체크태그"}></CheckTag>
         <PositionTag positionName={"AI"}></PositionTag>
         <MajorTag tagContent={"전공태그"}></MajorTag>
       </div>
