@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Notification 관련 불변 정보를 저장하는 Document
@@ -35,6 +36,7 @@ public class NotificationDocument {
 	@Id
 	private ObjectId id;
 
+	@Setter
 	private ObjectId groupId;
 	private NotificationType type;
 
