@@ -78,6 +78,8 @@ public class NotificationService {
 				NotificationStatusDocument sub = createStatus(savedNotification, now, RecipientRole.SUBSCRIBER);
 
 				statusRepo.save(pub);
+				savedNotification.setGroupId(pub.getId());
+				savedNotification = notificationRepo.save(savedNotification);
 				statusRepo.save(sub);
 			}
 			default -> throw new IllegalArgumentException("지원하지 않는 NotificationType: " + type);
