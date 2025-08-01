@@ -41,11 +41,11 @@ public class NotificationService {
 	public NotificationDocument saveNotification(NotificationRequestDto dto) throws BadRequestException {
 		// String → Enum 변환 (대소문자 구분이 있다면 toUpperCase() 등으로 맞춰주세요)
 		NotificationType type =
-			NotificationType.valueOf(dto.getType().toUpperCase());
+			NotificationType.valueOf(dto.type().toUpperCase());
 		NotificationDomainType pubType =
-			NotificationDomainType.valueOf(dto.getPubType().toUpperCase());
+			NotificationDomainType.valueOf(dto.pubType().toUpperCase());
 		NotificationDomainType subType =
-			NotificationDomainType.valueOf(dto.getSubType().toUpperCase());
+			NotificationDomainType.valueOf(dto.subType().toUpperCase());
 
 		// 이벤트 발행 시점의 현재 날짜를 가져옴
 		Date now = getCurrentDate();
@@ -58,9 +58,9 @@ public class NotificationService {
 		// NotificationDocument 객체를 생성
 		NotificationDocument notificationLog = NotificationDocument.builder()
 			.type(type)
-			.publisherId(dto.getPubId())
+			.publisherId(dto.pubId())
 			.publisherType(pubType)
-			.subscriberId(dto.getSubId())
+			.subscriberId(dto.subId())
 			.subscriberType(subType)
 			.createdAt(now)
 			.updatedAt(now)
@@ -143,10 +143,10 @@ public class NotificationService {
 	private NotificationDocument findLatestNotification(NotificationRequestDto dto) throws BadRequestException {
 		// 가장 최근에 업데이트된 알림을 찾음
 		NotificationDocument lastUpdatedLog = notificationRepo.findLatest(
-			dto.getPubId(),
-			dto.getPubType(),
-			dto.getSubId(),
-			dto.getSubType()
+			dto.pubId(),
+			dto.pubType(),
+			dto.subId(),
+			dto.subType()
 		);
 
 		if (lastUpdatedLog == null) {
