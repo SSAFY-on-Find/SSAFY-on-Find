@@ -1,0 +1,34 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Build Frontend') {
+            steps {
+                echo "FE 파이프라인: 빌드를 시작합니다."
+                nodejs(nodeJSInstallationName: 'node-21') {
+                    sh 'npm install'
+                    sh 'npm run build'
+                }
+                echo "FE 빌드가 완료되었습니다."
+            }
+        }
+        stage('Deploy Frontend') {
+            steps {
+                echo "EC2로 FE 빌드 결과물을 배포합니다."
+                withCredentials([
+                    sshUserPrivateKey(credentialsId: 'ssh-credentials'), 
+                    string(credentialsId: 'ec2-server-address', variable: 'EC2_SERVER')
+                ]) {
+                    sh "ssh -o StrictHostKeyChecking=no ${EC2_SERVER} 'sudo rm -rf /var/www/html/*'"
+                    sh "scp -r build/* ${EC2_SERVER}:/var/www/html/"
+                    echo "FE 배포가 성공적으로 완료되었습니다."
+                }
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
