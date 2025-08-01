@@ -1,4 +1,4 @@
-package com.sonfind.chelsea.types;
+package com.sonfind.chelsea.dto.notification;
 
 import com.sonfind.chelsea.dto.student.StudentUnionForNotificationResponseDto;
 
