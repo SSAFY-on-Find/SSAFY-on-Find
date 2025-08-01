@@ -83,5 +83,13 @@ public class Team extends BaseEntity {
 	public void decrementMajorCount() {
 		this.majorCount = Math.max(0, this.majorCount - 1);
 	}
+
+	public void incrementNonMajorCount() {
+		this.nonMajorCount++;
+	}
+
+	public void decrementNonMajorCount() {
+		this.nonMajorCount = Math.max(0, this.nonMajorCount - 1);
+	}
 }
 
