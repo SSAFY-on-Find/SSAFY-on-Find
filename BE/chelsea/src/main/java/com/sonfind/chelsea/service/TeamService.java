@@ -1,6 +1,7 @@
 package com.sonfind.chelsea.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.domain.teams.Recruitment;
 import com.sonfind.chelsea.domain.teams.Team;
 import com.sonfind.chelsea.dto.teams.CreateTeamRequest;
+import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
 import com.sonfind.chelsea.dto.teams.UpdateTeamRequest;
 import com.sonfind.chelsea.global.domain.SubCode;
 import com.sonfind.chelsea.repository.StudentRepository;
@@ -146,6 +148,32 @@ public class TeamService {
 	// public MyTeamDetailResponse getMyTeamDetailResponse(Long teamId, Long studentId) {
 	//
 	// }
+
+	/**
+	 * 팀 ID로 팀의 간단한 정보를 조회합니다.(팀 초대, 및 합치기에 사용)
+	 * 존재하지 않는 팀이면 404 에러 발생
+	 * @param teamId
+	 * @return TeamSimpleResponseDto
+	 * @throws ResponseStatusException
+	 */
+	public TeamSimpleResponseDto findSimpleTeamInfoByTeamId(Long teamId) {
+		Optional<Team> optionalTeam = teamRepository.findById(teamId);
+
+		if (optionalTeam.isEmpty()) {
+			throw new ResponseStatusException(
+				HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다.");
+		}
+
+		Team taem = optionalTeam.get();
+
+		return TeamSimpleResponseDto.builder()
+			.teamId(taem.getTeamId())
+			.name(taem.getName())
+			.track(taem.getTrack().getSubCodeName())
+			.majorCount(taem.getMajorCount())
+			.nonMajorCount(taem.getNonMajorCount())
+			.build();
+	}
 
 	//String positioncodes를 recruitment 리스트로 변환
 	private List<Recruitment> toRecruitments(List<String> positionCodes, Team team) {
