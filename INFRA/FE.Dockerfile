@@ -6,7 +6,7 @@ COPY FE/package*.json ./
 
 RUN npm install
 
-COPY FE/ ./
+COPY . ./
 
 RUN npm run build
 
