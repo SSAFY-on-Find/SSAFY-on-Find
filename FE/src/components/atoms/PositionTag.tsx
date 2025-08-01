@@ -26,7 +26,7 @@ function PositionTag({ positionName }: IPositionTag) {
   return (
     <>
       <div
-        className={` ${textColor} border-subtext/30 inline-block rounded-full border-2 px-[11px] py-[3px] text-xs font-bold`}
+        className={` ${textColor} border-subtext/30 inline-block rounded-full border-2 px-[11px] py-[3px] text-xs font-bold whitespace-nowrap`}
       >
         {positionName}
       </div>

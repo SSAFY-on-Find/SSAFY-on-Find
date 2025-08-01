@@ -7,7 +7,7 @@ function WhiteTag({ tagContent, fillBg = false }: IWhiteTag) {
   return (
     <>
       <div
-        className={`${colorApply} inline-block rounded-full border-2 bg-transparent px-[11px] py-[3px] text-xs font-bold text-white`}
+        className={`${colorApply} inline-block rounded-full border-2 bg-transparent px-[11px] py-[3px] text-xs font-bold whitespace-nowrap text-white`}
       >
         {tagContent}
       </div>
