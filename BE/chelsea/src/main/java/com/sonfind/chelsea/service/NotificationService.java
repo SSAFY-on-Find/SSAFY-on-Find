@@ -1,7 +1,6 @@
 package com.sonfind.chelsea.service;
 
 import java.util.Date;
-import java.util.Map;
 
 import org.apache.coyote.BadRequestException;
 import org.bson.types.ObjectId;
@@ -14,6 +13,7 @@ import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
 import com.sonfind.chelsea.facade.StudentFacade;
 import com.sonfind.chelsea.repository.NotificationRepository;
 import com.sonfind.chelsea.repository.NotificationStatusRepository;
+import com.sonfind.chelsea.types.NotificationContext;
 import com.sonfind.chelsea.types.NotificationDomainType;
 import com.sonfind.chelsea.types.NotificationStatus;
 import com.sonfind.chelsea.types.NotificationType;
@@ -47,9 +47,8 @@ public class NotificationService {
 		NotificationDomainType subType =
 			NotificationDomainType.valueOf(dto.getSubType().toUpperCase());
 
-		Date now = new Date();
 		// 이벤트 발행 시점의 현재 날짜를 가져옴
-		Date currentDate = getCurrentDate();
+		Date now = getCurrentDate();
 
 		// 알림 발신자와 수신자의 정보를 NotificationParticipant 객체로 생성
 		NotificationDocument findNotificationLog = findLatestNotification(dto);
@@ -110,11 +109,14 @@ public class NotificationService {
 			? notif.getPublisherId()
 			: notif.getSubscriberId();
 
-		// 컨텍스트 맵 준비
-		Map<String, Object> ctx = Map.of(
-			"publisher", studentFacade.findByStudentIdForSse(notif.getPublisherId()),
-			"subscriber", studentFacade.findByStudentIdForSse(notif.getSubscriberId())
+		NotificationContext ctx = new NotificationContext(
+			studentFacade.findByStudentIdForSse(notif.getPublisherId()),
+			studentFacade.findByStudentIdForSse(notif.getSubscriberId())
 		);
+
+		// 제목/메시지 생성 로직을 분리: type + role 조합에 따라 다른 처리
+		String title = contentService.buildTitle(notif, role, ctx);
+		String message = contentService.buildMessage(notif, role, ctx);
 
 		return NotificationStatusDocument.builder()
 			.notificationId(notif.getId())
@@ -123,8 +125,8 @@ public class NotificationService {
 			.status(NotificationStatus.PENDING)
 			.isRead(role == RecipientRole.PUBLISHER)
 			.readAt(role == RecipientRole.PUBLISHER ? now : null)
-			.notificationTitle(contentService.buildTitle(notif.getType(), role, ctx))
-			.notificationMessage(contentService.buildMessage(notif.getType(), role, ctx))
+			.notificationTitle(title)
+			.notificationMessage(message)
 			.createdAt(now)
 			.updatedAt(now)
 			.build();
