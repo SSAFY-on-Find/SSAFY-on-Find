@@ -13,12 +13,15 @@ import com.sonfind.chelsea.domain.studentInfo.UploadedFile;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoCreateRequestDto;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoForNotificationResponseDto;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoResponseDto;
+import com.sonfind.chelsea.dto.studentInfo.StudentInfoUpdateRequestDto;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
 import com.sonfind.chelsea.global.domain.SubCode;
 import com.sonfind.chelsea.repository.SubCodeRepository;
 import com.sonfind.chelsea.repository.studentInfo.StudentInfoRepository;
 import com.sonfind.chelsea.util.StringListConverter;
 
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -30,6 +33,10 @@ public class StudentInfoService {
 	private final StudentService studentService;
 	private final FileService fileService;
 
+	/**
+	 * 자기소개 생성 함수
+	 * */
+	@Transactional
 	public void createStudentInfo(Long studentId, StudentInfoCreateRequestDto requestDto, MultipartFile profile,
 		MultipartFile portfolio) throws IOException {
 
@@ -41,6 +48,9 @@ public class StudentInfoService {
 
 	}
 
+	/**
+	 * 자기소개 조회 함수
+	 * */
 	public StudentInfoResponseDto getStudentInfo(Long studentId) {
 
 		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId)
@@ -72,6 +82,38 @@ public class StudentInfoService {
 	}
 
 	/**
+	 * 자기소개 수정 함수
+	 * */
+	@Transactional
+	public void updateStudentInfo(Long studentId, StudentInfoUpdateRequestDto requestDto, MultipartFile profile,
+		MultipartFile portfolio) throws IOException {
+
+		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId)
+			.orElseThrow(() -> new EntityNotFoundException("해당 학생의 자기소개를 찾을 수 없습니다."));
+
+		//새로운 프로필 이미지 입력 시 변경
+		if (profile != null && !profile.isEmpty()) {
+			fileService.deleteProfileImage(studentInfo.getProfileImageUrl());
+			String newProfileImage = fileService.saveProfileImage(profile);
+			studentInfo.updateProfileImage(newProfileImage);
+
+		}
+		//새로운 포트폴리오 입력 시 변경
+		if (portfolio != null && !portfolio.isEmpty()) {
+			fileService.deletePortfolioFile(studentInfo.getPortfolio());
+			UploadedFile newPortfolio = fileService.savePortfolio(portfolio);
+			studentInfo.updatePortfolio(newPortfolio);
+		}
+
+		List<String> requiredCodes = List.of(requestDto.track(), requestDto.position(), requestDto.goal(),
+			requestDto.mbti());
+		List<SubCode> subCodes = subCodeRepository.findAllBySubCodeIn(requiredCodes);
+		studentInfo.update(requestDto, subCodes);
+
+		studentInfoRepository.save(studentInfo);
+	}
+
+	/**
 	 * 학생 ID로 학생 정보를 조회하는 메소드(SSE용)
 	 * @param studentId
 	 * @return StudentInfoForNotificationResponseDto(학생 ID, 포지션, 트랙, 프로필 이미지 URL)
@@ -96,7 +138,7 @@ public class StudentInfoService {
 	private StudentInfo saveStudentInfo(Long studentId, StudentInfoCreateRequestDto requestDto, String profileImageUrl,
 		UploadedFile portfolio) {
 
-		Students student = studentService.findByStudentId(studentId);
+		Students students = studentService.findByStudentId(studentId);
 
 		String techStackString = StringListConverter.listToString(requestDto.techStack());
 		String strengthString = StringListConverter.listToString(requestDto.strength());
@@ -107,7 +149,7 @@ public class StudentInfoService {
 		SubCode mbtiCode = getSubCodeByValue(requestDto.mbti());
 
 		return StudentInfo.builder()
-			.student(student)
+			.student(students)
 			.techStack(techStackString)
 			.strength(strengthString)
 			.description(requestDto.description())
@@ -117,33 +159,6 @@ public class StudentInfoService {
 			.mbtiCode(mbtiCode)
 			.profileImageUrl(profileImageUrl)
 			.portfolio(portfolio)
-			.build();
-	}
-
-	private String saveProfileImage(MultipartFile profile) throws IOException {
-
-		String imageSaveUrl = "";
-
-		if (profile == null || profile.isEmpty()) {
-			//없으면 기본 이미지 처리
-		} else {
-			imageSaveUrl = fileService.uploadFile(profile, "profiles");
-		}
-		return imageSaveUrl;
-	}
-
-	private UploadedFile savePortfolio(MultipartFile portfolio) throws IOException {
-
-		if (portfolio == null || portfolio.isEmpty()) {
-			return null;
-		}
-
-		String portfolioOriImageName = portfolio.getOriginalFilename();
-		String savedFilename = fileService.uploadFile(portfolio, "portfolios");
-
-		return UploadedFile.builder()
-			.originalFileName(portfolioOriImageName)
-			.savedFileName(savedFilename)
 			.build();
 	}
 
