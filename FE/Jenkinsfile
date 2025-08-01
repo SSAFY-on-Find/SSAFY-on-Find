@@ -1,14 +1,16 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'nodejs-22.17.1'
+    }
+
     stages {
         stage('Build Frontend') {
             steps {
                 echo "FE 파이프라인: 빌드를 시작합니다."
-                nodejs(nodeJSInstallationName: 'node-21') {
-                    sh 'npm install'
-                    sh 'npm run build'
-                }
+                sh 'npm install'
+                sh 'npm run build'
                 echo "FE 빌드가 완료되었습니다."
             }
         }
