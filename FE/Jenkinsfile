@@ -1,36 +1,74 @@
 pipeline {
-    agent any
-
-    tools {
-        nodejs 'nodejs-22.17.1'
+    agent {
+        docker {
+            image 'node:22.17.1-alpine'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Verify Environment') {
+            steps {
+                echo "Node.js 환경을 확인합니다."
+                sh 'node --version'
+                sh 'npm --version'
+            }
+        }
+        
         stage('Build Frontend') {
             steps {
                 echo "FE 파이프라인: 빌드를 시작합니다."
-                sh 'npm install'
+                sh 'npm ci --only=production' 
                 sh 'npm run build'
                 echo "FE 빌드가 완료되었습니다."
             }
         }
+        
         stage('Deploy Frontend') {
             steps {
                 echo "EC2로 FE 빌드 결과물을 배포합니다."
-                withCredentials([
-                    sshUserPrivateKey(credentialsId: 'ssh-credentials'), 
-                    string(credentialsId: 'ec2-server-address', variable: 'EC2_SERVER')
-                ]) {
-                    sh "ssh -o StrictHostKeyChecking=no ${EC2_SERVER} 'sudo rm -rf /var/www/html/*'"
-                    sh "scp -r build/* ${EC2_SERVER}:/var/www/html/"
-                    echo "FE 배포가 성공적으로 완료되었습니다."
+                script {
+                    node {
+                        sh 'docker cp $(docker ps -q --filter ancestor=node:22.17.1-alpine):/workspace/build ./build'
+                        
+                        withCredentials([
+                            sshUserPrivateKey(credentialsId: 'ssh-credentials', keyFileVariable: 'SSH_KEY'), 
+                            string(credentialsId: 'ec2-server-address', variable: 'EC2_SERVER')
+                        ]) {
+                            sh """
+                                # SSH 연결 테스트
+                                ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${EC2_SERVER} 'echo "SSH 연결 성공"'
+                                
+                                # 기존 파일 삭제
+                                ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${EC2_SERVER} 'sudo rm -rf /var/www/html/*'
+                                
+                                # 새 빌드 파일 배포
+                                scp -i ${SSH_KEY} -o StrictHostKeyChecking=no -r build/* ${EC2_SERVER}:/tmp/
+                                ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${EC2_SERVER} 'sudo mv /tmp/* /var/www/html/ && sudo chown -R www-data:www-data /var/www/html'
+                            """
+                            echo "FE 배포가 성공적으로 완료되었습니다."
+                        }
+                    }
                 }
             }
         }
     }
+    
     post {
         always {
             cleanWs()
+        }
+        success {
+            echo 'Frontend 파이프라인이 성공적으로 완료되었습니다!'
+        }
+        failure {
+            echo 'Frontend 파이프라인이 실패했습니다. 로그를 확인해주세요.'
         }
     }
 }
