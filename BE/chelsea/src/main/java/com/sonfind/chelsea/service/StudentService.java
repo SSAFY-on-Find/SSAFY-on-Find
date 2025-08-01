@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.sonfind.chelsea.domain.student.Students;
-import com.sonfind.chelsea.dto.student.StudentForNotificationResponseDto;
+import com.sonfind.chelsea.dto.student.StudentResponseDto;
 import com.sonfind.chelsea.repository.StudentRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public class StudentService {
 		return student;
 	}
 
-	public StudentForNotificationResponseDto findByStudentIdForSse(long studentId) {
+	public StudentResponseDto findByStudentIdForSse(long studentId) {
 		Optional<Students> authOptional = studentRepository.findByStudentId(studentId);
 
 		if (!authOptional.isPresent()) {
@@ -37,10 +37,10 @@ public class StudentService {
 		}
 		Students student = authOptional.get();
 
-		return StudentForNotificationResponseDto.builder()
+		return StudentResponseDto.builder()
 			.studentId(student.getStudentId())
 			.name(student.getName())
-			.isMajor(getIsMajor(student))
+			.major(getIsMajor(student))
 			.build();
 	}
 
