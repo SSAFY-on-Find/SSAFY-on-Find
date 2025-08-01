@@ -1,9 +1,9 @@
-FROM eclipse-temurin:21-jre-jammy
+FROM openjdk:21
 
-WORKDIR /app
+RUN ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime && echo Asia/Seoul > /etc/timezone
 
-COPY build/libs/chelsea-0.0.1-SNAPSHOT.jar app.jar
+ARG JAR_FILE=build/libs/chelsea-0.0.1-SNAPSHOT.jar
 
-EXPOSE 8090
+COPY ${JAR_FILE} app.jar
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=dev", "-Duser.timezone=Asia/Seoul", "/app.jar"]
