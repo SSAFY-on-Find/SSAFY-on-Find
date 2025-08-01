@@ -77,7 +77,10 @@ public class StudentInfoController {
 
 		studentInfoService.updateStudentInfo(studentId, requestDto, profile, portfolio);
 
-		return null;
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+
+		return ResponseEntity.ok().body(body);
 	}
 
 }
