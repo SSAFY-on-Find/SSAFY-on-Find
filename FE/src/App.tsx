@@ -17,7 +17,7 @@ function App() {
       <Header />
       <div className="mt-[64px]">
         <SideBar />
-        <main className="border-main ml-[200px] border">
+        <main className="border-main ml-[230px] border">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/myteam" element={<MyTeam />} />

@@ -1,16 +1,16 @@
-import { MajorTag, PositionTag } from "@/components/atoms"
+import { MajorTag, PositionTag, UserImg } from "@/components/atoms"
 
 interface IChatUser {
-  img: string
   name: string
   major: string
   position: string
+  hasTeam: boolean
 }
 
-function Chat({ img, name, major, position }: IChatUser) {
+function ChatListItem({ name, major, position, hasTeam }: IChatUser) {
   return (
-    <div className="flex items-center justify-center gap-2">
-      <div className="bg-main rounded-full"></div>
+    <div className="hover:bg-main/10 flex w-full cursor-pointer items-center justify-start gap-2 rounded-md px-1 py-1">
+      <UserImg name={name} size={"s"} showTeamBadge={true} hasTeam={hasTeam} />
       <div className="text-sm font-medium">{name}</div>
       <div className="flex items-center justify-center gap-1">
         <MajorTag tagContent={major} />
@@ -22,8 +22,12 @@ function Chat({ img, name, major, position }: IChatUser) {
 
 function ChatList() {
   return (
-    <div className="flex flex-col gap-2 px-2 py-4">
-      <Chat img={"SL"} name={"김싸피"} major={"전공"} position={"풀스텍"} />
+    <div className="flex w-full flex-col items-start gap-2 px-2 py-3 whitespace-nowrap">
+      <ChatListItem name={"김이싸피"} major={"비전공"} position={"임베디드"} hasTeam={true} />
+      <ChatListItem name={"이싸"} major={"전공"} position={"풀스텍"} hasTeam={false} />
+      <ChatListItem name={"박싸피"} major={"비전공"} position={"백엔드"} hasTeam={true} />
+      <ChatListItem name={"조싸피"} major={"전공"} position={"모바일"} hasTeam={true} />
+      <ChatListItem name={"이싸피"} major={"비전공"} position={"임베디드"} hasTeam={false} />
     </div>
   )
 }

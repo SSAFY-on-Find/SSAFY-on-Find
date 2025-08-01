@@ -29,7 +29,7 @@ interface IHeaderProps {
 function Header({ classCode = "7" }: IHeaderProps) {
   return (
     <header className="fixed top-0 left-0 z-50 flex h-[64px] w-full items-center justify-center gap-3 bg-white px-5 py-4 shadow-xs">
-      <div className="text-main flex h-full w-[200px] items-center justify-start gap-2">
+      <div className="text-main flex h-full w-[230px] items-center justify-start gap-2">
         <Search />
         <h1 className="text-l font-bold">SSAFY On Find</h1>
       </div>
