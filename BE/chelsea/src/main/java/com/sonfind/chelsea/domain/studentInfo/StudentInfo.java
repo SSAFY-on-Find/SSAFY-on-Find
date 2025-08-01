@@ -2,11 +2,15 @@ package com.sonfind.chelsea.domain.studentInfo;
 
 import static lombok.AccessLevel.*;
 
+import java.util.List;
+
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.sonfind.chelsea.domain.student.Students;
+import com.sonfind.chelsea.dto.studentInfo.StudentInfoUpdateRequestDto;
 import com.sonfind.chelsea.global.domain.BaseEntity;
 import com.sonfind.chelsea.global.domain.SubCode;
+import com.sonfind.chelsea.util.StringListConverter;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -69,4 +73,55 @@ public class StudentInfo extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "mbti_code")
 	private SubCode mbtiCode;
+
+	public void update(StudentInfoUpdateRequestDto requestDto, List<SubCode> subCodes) {
+		if (requestDto.techStack() != null && !requestDto.techStack().isEmpty()) {
+			String techStackString = StringListConverter.listToString(requestDto.techStack());
+			this.techStack = techStackString;
+		}
+
+		if (requestDto.strength() != null && !requestDto.strength().isEmpty()) {
+			String strengthString = StringListConverter.listToString(requestDto.strength());
+			this.strength = strengthString;
+		}
+
+		if (requestDto.description() != null && !requestDto.description().isEmpty()) {
+			this.description = requestDto.description();
+		}
+
+		if (requestDto.track() != null && !requestDto.track().isEmpty()) {
+			SubCode trackCode = getSubCodeBySubCode(subCodes, requestDto.track());
+			this.trackCode = trackCode;
+		}
+		if (requestDto.position() != null && !requestDto.position().isEmpty()) {
+			SubCode positionCode = getSubCodeBySubCode(subCodes, requestDto.position());
+			this.positionCode = positionCode;
+		}
+		if (requestDto.goal() != null && !requestDto.goal().isEmpty()) {
+			SubCode goalCode = getSubCodeBySubCode(subCodes, requestDto.goal());
+			this.goalCode = goalCode;
+		}
+		if (requestDto.mbti() != null && !requestDto.mbti().isEmpty()) {
+			SubCode mbtiCode = getSubCodeBySubCode(subCodes, requestDto.mbti());
+			this.mbtiCode = mbtiCode;
+		}
+	}
+
+	private SubCode getSubCodeBySubCode(List<SubCode> subCodes, String code) {
+		if (code == null)
+			return null; // 업데이트하지 않을 필드는 null로 들어올 수 있음
+		return subCodes.stream()
+			.filter(sc -> sc.getSubCode().equals(code))
+			.findFirst()
+			.orElse(null);
+	}
+
+	public void updateProfileImage(String profileImageUrl) {
+		this.profileImageUrl = profileImageUrl;
+	}
+
+	public void updatePortfolio(UploadedFile portfolio) {
+		this.portfolio = portfolio;
+	}
+
 }
