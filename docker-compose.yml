@@ -1,6 +1,6 @@
 services:
   nginx-proxy:
-    build: ./FE
+    image: "pug9483/chelsea-fe:latest"
     container_name: "my-nginx-proxy"
     restart: always
     ports:
