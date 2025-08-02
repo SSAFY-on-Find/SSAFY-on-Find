@@ -2,11 +2,12 @@ package com.sonfind.chelsea.domain.notification;
 
 import java.util.Date;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
-import com.sonfind.chelsea.types.NotificationStatus;
+import com.sonfind.chelsea.types.NotificationDomainType;
+import com.sonfind.chelsea.types.NotificationType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,14 +15,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * Notification 관련 정보를 저장하는 컬렉션
- *
- * @field id: 알림 ID(PK - notification_id)
- * @field publisher: 알림 발신자 정보(NotificationParticipant)
- * @field subscriber: 알림 수신자 정보(NotificationParticipant)
- * @field status: 알림 상태(PENDING, ACCEPTED, REJECTED, CANCELLED)
+ * Notification 관련 불변 정보를 저장하는 Document
+ * @field id: NotificationDocument의 고유 ID
+ * @field groupId: 같은 이벤트 묶음 ID
+ * @field type: 알림 종류 (예: Application, Invitation 등)
+ * @field publisherId: 알림 발신자 ID
+ * @field publisherType: 알림 발신자 도메인 타입 (예: STUDENT, TEAM )
+ * @field subscriberId: 알림 수신자 ID
+ * @field subscriberType: 알림 수신자 도메인 타입 (예: STUDENT, TEAM )
  * @field createdAt: 알림 생성 시간
- * @field updatedAt: 알림 수정 시간
+ * @field updatedAt: 알림 정보 업데이트 시간
  */
 @Document(collection = "notifications")
 @Getter
@@ -30,15 +33,16 @@ import lombok.NoArgsConstructor;
 @Builder
 public class NotificationDocument {
 	@Id
-	private long id;
+	private ObjectId id;
 
-	@Field("notification_publisher")
-	private NotificationParticipant publisher;
-	@Field("notification_subscriber")
-	private NotificationParticipant subscriber;
+	private ObjectId groupId;
+	private NotificationType type;
 
-	@Field("notification_status")
-	private NotificationStatus status;
+	private long publisherId;
+	private NotificationDomainType publisherType;
+
+	private long subscriberId;
+	private NotificationDomainType subscriberType;
 
 	private Date createdAt;
 	private Date updatedAt;

@@ -1,22 +1,22 @@
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
 @import "tailwindcss";
 
-@theme {  
-  --color-main: #6C5CE7;
-  --color-background: #FAFAFA;
-  --color-text: #1A1A1A;
-  --color-subtext: #A3A3A3;
-  --color-line: #E6E6E6;
-  --color-error: #FF2B37;
-  --color-frontend: #EA580C;
-  --color-backend: #0891B2;
-  --color-fullstack: #F59E0B;
-  --color-embedded: #16A34A;
-  --color-infra: #64748B;
-  --color-ai: #D946EF;
-  --color-mobile: #EC4899;
+@theme {
+  --color-main: #6c5ce7;
+  --color-background: #fafafa;
+  --color-text: #1a1a1a;
+  --color-subtext: #a3a3a3;
+  --color-line: #e6e6e6;
+  --color-error: #ff2b37;
+  --color-frontend: #ea580c;
+  --color-backend: #0891b2;
+  --color-fullstack: #f59e0b;
+  --color-embedded: #16a34a;
+  --color-infra: #64748b;
+  --color-ai: #d946ef;
+  --color-mobile: #ec4899;
 }
 
 html {
-  font-family: 'Pretendard', sans-serif;
+  font-family: "Pretendard", sans-serif;
 }

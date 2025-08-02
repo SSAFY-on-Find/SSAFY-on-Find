@@ -4,7 +4,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -28,39 +27,34 @@ public class TeamController {
 
 	private final TeamService teamService;
 
-	//공통: mate 추가해야 함
-
 	//팀 생성
 	@PostMapping
 	public ResponseEntity<Map<String, Object>> createTeam(@RequestBody @Valid CreateTeamRequest request,
-		@CookieValue("sessionId") String sessionId) {
+		@CookieValue("sessionId") Long studentId) {
 
-		Long teamId = teamService.createTeam(request);
+		Long teamId = teamService.createTeam(studentId, request);
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
 		body.put("data", Map.of("teamId", teamId));
 
-		URI location = URI.create("/api/v1/teams/" + teamId);
+		URI location = URI.create("/teams/" + teamId);
 		return ResponseEntity.created(location).body(body);
 	}
 
-	//팀 생성
+	//팀 수정
 	@PatchMapping("/{teamId}")
 	public ResponseEntity<Map<String, Object>> updateTeam(
+		@CookieValue("sessionId") Long studentId,
 		@PathVariable Long teamId,
-		@CookieValue("sessionId") String sessionId,
 		@RequestBody @Valid UpdateTeamRequest request) {
 
-		teamService.updateTeamInfo(teamId, sessionId, request);
+		teamService.updateTeam(teamId, studentId, request);
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
 		body.put("data", Map.of("teamId", teamId));
 
-		URI location = URI.create("/api/v1/teams/" + teamId);
-		return ResponseEntity.created(location)
-			.contentType(MediaType.APPLICATION_JSON)
-			.body(body);
+		return ResponseEntity.ok().body(body);
 	}
 }

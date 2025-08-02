@@ -1,0 +1,1 @@
+cd FE && npx lint-staged

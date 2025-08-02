@@ -7,9 +7,11 @@ import com.sonfind.chelsea.global.domain.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @NoArgsConstructor(access = PROTECTED)
@@ -23,8 +25,9 @@ public class Students extends BaseEntity {
 	private String name;
 
 	@Column(name = "major_yn")
-	private boolean majorYn;
+	private Boolean majorYn;
 
-	@Column(name = "team_id")
+	@Setter
+	@JoinColumn(name = "team_id", referencedColumnName = "team_id")
 	private Long teamId;
 }

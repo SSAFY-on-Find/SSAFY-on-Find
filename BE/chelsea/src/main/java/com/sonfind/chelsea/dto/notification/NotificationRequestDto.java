@@ -10,4 +10,5 @@ public class NotificationRequestDto {
 	private String subType;
 	private Long pubId;
 	private String pubType;
+	private String type;
 }
