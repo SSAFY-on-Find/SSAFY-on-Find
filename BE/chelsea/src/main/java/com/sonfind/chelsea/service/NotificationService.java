@@ -1,7 +1,9 @@
 package com.sonfind.chelsea.service;
 
 import java.util.Date;
+import java.util.List;
 
+import com.sonfind.chelsea.domain.student.Students;
 import org.apache.coyote.BadRequestException;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
@@ -33,12 +35,22 @@ public class NotificationService {
 	private final NotificationContentService contentService;
 
 	/**
-	 * 알림을 저장
+	 * 알림 발송 메소드
 	 * 알림 발신자와 수신자의 정보를 NotificationParticipant 객체로 생성하고,
-	 * NotificationDocument 객체를 생성하여 MongoDB에 저장
+	 * NotificationDocument 객체를 생성하여 MongoDB에 저장 후 sse로 발송
 	 * @param dto: NotificationRequestDto
 	 */
-	public NotificationDocument saveNotification(NotificationRequestDto dto) throws BadRequestException {
+	public NotificationDocument sendNotification(Long studentId, NotificationRequestDto dto) throws BadRequestException {
+		if(dto.pubType().equals("team")) {
+			List<Students> findTeamMembers = studentFacade.findAllByTeamId(dto.pubId());
+			if(!findTeamMembers.contains(studentFacade.findByStudentId(studentId))) {
+				throw new BadRequestException("HttpStatus: " + HttpStatus.BAD_REQUEST + " | 잘못된 요청입니다.");
+			}
+		} else {
+			if(!dto.pubId().equals(studentId)) {
+				throw new BadRequestException("HttpStatus: " + HttpStatus.BAD_REQUEST + " | 잘못된 요청입니다.");
+			}
+		}
 		// String → Enum 변환 (대소문자 구분이 있다면 toUpperCase() 등으로 맞춰주세요)
 		NotificationType type =
 			NotificationType.valueOf(dto.type().toUpperCase());
