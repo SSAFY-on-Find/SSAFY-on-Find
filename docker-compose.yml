@@ -10,6 +10,9 @@ services:
       - spring-app
     networks:
       - my_network
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot
 
   spring-app:
     build: ./BE/chelsea
