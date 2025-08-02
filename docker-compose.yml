@@ -1,16 +1,11 @@
 services:
   nginx-proxy:
-    image: "nginx:stable-alpine"
+    build: ./FE
     container_name: "my-nginx-proxy"
     restart: always
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      - ./conf:/etc/nginx/conf.d
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-      - /var/www/certbot:/var/www/certbot
-      - /home/ubuntu/app/frontend/dist:/usr/share/nginx/html
     depends_on:
       - spring-app
     networks:
