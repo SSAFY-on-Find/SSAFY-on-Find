@@ -44,4 +44,18 @@ public class StudentFacade {
 			.profileImageUrl(findStudentInfo.profileImageUrl())
 			.build();
 	}
+
+	// 해당 학생이 팀의 멤버인지 확인하는 메소드
+	public Boolean isMemberOfTeam(Long StudentId, Long teamId) {
+	if (teamId == null) {
+			return false; // 팀 ID가 없으면 false 반환
+		}
+		List<Students> teamMembers = studentService.findAllByTeamId(teamId);
+		for (Students member : teamMembers) {
+			if (member.getStudentId() == StudentId) {
+				return true; // 학생이 팀의 멤버인 경우 true 반환
+			}
+		}
+		return false; // 학생이 팀의 멤버가 아닌 경우 false 반환
+	}
 }
