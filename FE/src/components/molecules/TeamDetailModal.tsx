@@ -34,18 +34,18 @@ function TeamDetailModal({ isOpen, onClose, teamData }: ITeamDetailModal) {
           <p className="text-subtext text-sm">{teamData.description}</p>
         </div>
         <div className="px-8">
-          <p className="text-text mb-[10px] text-sm font-bold">모집중인 포지션</p>
+          <p className="text-text mb-[10px] text-sm font-semibold">모집중인 포지션</p>
           <div className="flex gap-[10px]">
             {teamData.position.map((ele) => (
               <PositionTag positionName={ele} />
             ))}
           </div>
-          <p className="text-text mt-[30px] mb-[15px] text-sm font-bold">
+          <p className="text-text mt-[30px] mb-[15px] text-sm font-semibold">
             현재팀원 ({teamData.currentMembers} / {teamData.maxMembers})
           </p>
           <div className="flex">
             <div>
-              <p className="text-text mb-[10px] text-sm font-bold">전공</p>
+              <p className="text-text mb-[10px] text-sm font-semibold">전공</p>
               <div className="flex">
                 {majorMembers.map((ele) => (
                   <div className="flex flex-col items-center px-[10px]">
@@ -58,7 +58,7 @@ function TeamDetailModal({ isOpen, onClose, teamData }: ITeamDetailModal) {
             </div>
             <div className="mx-4 w-px bg-gray-300"></div>
             <div>
-              <p className="text-text mb-[10px] text-sm font-bold">비전공</p>
+              <p className="text-text mb-[10px] text-sm font-semibold">비전공</p>
               <div className="flex">
                 {nonMajorMembers.map((ele) => (
                   <div className="flex flex-col items-center px-[10px]">
