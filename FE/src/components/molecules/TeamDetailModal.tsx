@@ -35,9 +35,11 @@ function TeamDetailModal({ isOpen, onClose, teamData }: ITeamDetailModal) {
         </div>
         <div className="px-8">
           <p className="text-text mb-[10px] text-sm font-bold">모집중인 포지션</p>
-          {teamData.position.map((ele) => (
-            <PositionTag positionName={ele} />
-          ))}
+          <div className="flex gap-[10px]">
+            {teamData.position.map((ele) => (
+              <PositionTag positionName={ele} />
+            ))}
+          </div>
           <p className="text-text mt-[30px] mb-[15px] text-sm font-bold">
             현재팀원 ({teamData.currentMembers} / {teamData.maxMembers})
           </p>
