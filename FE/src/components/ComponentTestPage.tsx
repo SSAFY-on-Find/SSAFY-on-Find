@@ -1,6 +1,7 @@
 import { useState } from "react"
 
 import { CheckTag, MainTag, MajorTag, NormalTag, PositionTag, WhiteTag } from "./atoms"
+import { ConfirmModal } from "./molecules"
 // API로 기술스택 70여개를 받아온다고 가정하고 상수에 담아두었어요
 const TECH_STACKS = [
   { id: "tech001", name: "React" },
@@ -25,6 +26,15 @@ export default function ComponentTestPage() {
       }
       return prev.filter((id) => id !== teckStackId)
     })
+  }
+
+  const [ConfirmModal_teamout, setConfirmModal_teamout] = useState(false)
+  const [ConfirmModal_inviteAccept, setConfirmModal_inviteAccept] = useState(false)
+  const handleOut = () => {
+    setConfirmModal_teamout(false)
+  }
+  const handleAccept = () => {
+    setConfirmModal_inviteAccept(false)
   }
 
   return (
@@ -56,6 +66,37 @@ export default function ComponentTestPage() {
         <WhiteTag tagContent={"하양"}></WhiteTag>
         <WhiteTag tagContent={"유령"} fillBg={true}></WhiteTag>
       </div>
+      <div className="flex gap-4">
+        <button
+          className="rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-700"
+          onClick={() => setConfirmModal_teamout(true)}
+        >
+          확인 모달 - 팀 탈퇴
+        </button>
+        <button
+          className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
+          onClick={() => setConfirmModal_inviteAccept(true)}
+        >
+          확인 모달 - 초대 수락
+        </button>
+      </div>
+      <ConfirmModal
+        isOpen={ConfirmModal_teamout}
+        title="팀 탈퇴"
+        message={"정말 이 팀을 탈퇴하시겠습니까?"}
+        onConfirm={handleOut}
+        onCancel={() => setConfirmModal_teamout(false)}
+        confirmText="탈퇴"
+        isDestructive={true}
+      />
+      <ConfirmModal
+        isOpen={ConfirmModal_inviteAccept}
+        title="초대 수락"
+        message={"정말 초대를 받으시겠습니까?"}
+        onConfirm={handleAccept}
+        onCancel={() => setConfirmModal_inviteAccept(false)}
+        confirmText="수락"
+      />
     </div>
   )
 }

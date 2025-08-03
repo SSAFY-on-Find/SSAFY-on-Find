@@ -1,6 +1,7 @@
 export { default as CheckTag } from "./CheckTag"
 export { default as MainTag } from "./MainTag"
 export { default as MajorTag } from "./MajorTag"
+export { default as Modal } from "./Modal"
 export { default as NormalTag } from "./NormalTag"
 export { default as PositionTag } from "./PositionTag"
 export { default as UserImg } from "./UserImg"
