@@ -1,7 +1,5 @@
 package com.sonfind.chelsea.global.event;
 
-import java.util.Map;
-
 import com.sonfind.chelsea.dto.notification.*;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
