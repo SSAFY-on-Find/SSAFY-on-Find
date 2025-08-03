@@ -1,7 +1,7 @@
 import { useState } from "react"
 
 import { CheckTag, MainTag, MajorTag, NormalTag, PositionTag, WhiteTag } from "./atoms"
-import { ConfirmModal } from "./molecules"
+import { ConfirmModal, TeamDetailModal } from "./molecules"
 // API로 기술스택 70여개를 받아온다고 가정하고 상수에 담아두었어요
 const TECH_STACKS = [
   { id: "tech001", name: "React" },
@@ -13,6 +13,42 @@ const TECH_STACKS = [
   { id: "tech007", name: "MySQL" },
   { id: "tech008", name: "AWS" },
 ]
+// ComponentTestPage.tsx에 추가
+const sampleTeamData = {
+  id: "team001",
+  name: "팀 001",
+  description: "팀 한줄 설명.",
+  track: "웹 디자인",
+  position: ["백엔드", "인프라"],
+  maxMembers: 6,
+  currentMembers: 4,
+  members: [
+    {
+      id: "member001",
+      name: "김태호",
+      position: "프론트",
+      major: "전공",
+    },
+    {
+      id: "member002",
+      name: "이영희",
+      position: "백엔드",
+      major: "비전공",
+    },
+    {
+      id: "member003",
+      name: "박민수",
+      position: "풀스택",
+      major: "비전공",
+    },
+    {
+      id: "member004",
+      name: "최지은",
+      position: "프론트",
+      major: "전공",
+    },
+  ],
+}
 
 export default function ComponentTestPage() {
   // 기술스택이 선택되면 2개 이상일 경우 관리하기 위하여 배열로 선언.(기술스택 ID를 저장할 예정입니다.)
@@ -30,11 +66,18 @@ export default function ComponentTestPage() {
 
   const [ConfirmModal_teamout, setConfirmModal_teamout] = useState(false)
   const [ConfirmModal_inviteAccept, setConfirmModal_inviteAccept] = useState(false)
+  const [teamDetailModal, setTeamDetailModal] = useState(false)
+  const [selectedTeam, setSelectedTeam] = useState(sampleTeamData)
+
   const handleOut = () => {
     setConfirmModal_teamout(false)
   }
   const handleAccept = () => {
     setConfirmModal_inviteAccept(false)
+  }
+  const handleTeamSelect = (teamData: typeof sampleTeamData) => {
+    setSelectedTeam(teamData)
+    setTeamDetailModal(true)
   }
 
   return (
@@ -79,6 +122,12 @@ export default function ComponentTestPage() {
         >
           확인 모달 - 초대 수락
         </button>
+        <button
+          className="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-700"
+          onClick={() => handleTeamSelect(sampleTeamData)}
+        >
+          팀 상세 정보
+        </button>
       </div>
       <ConfirmModal
         isOpen={ConfirmModal_teamout}
@@ -97,6 +146,7 @@ export default function ComponentTestPage() {
         onCancel={() => setConfirmModal_inviteAccept(false)}
         confirmText="수락"
       />
+      <TeamDetailModal isOpen={teamDetailModal} onClose={() => setTeamDetailModal(false)} teamData={selectedTeam} />
     </div>
   )
 }

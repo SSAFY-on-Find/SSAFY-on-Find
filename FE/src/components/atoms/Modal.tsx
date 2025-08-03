@@ -8,8 +8,8 @@ interface IModal {
 }
 const sizeMap = {
   s: "max-w-sm",
-  m: "",
-  l: "",
+  m: "max-w-lg",
+  l: "max-w-xl",
 }
 
 function Modal({ isOpen, onClose, size, children }: IModal) {
