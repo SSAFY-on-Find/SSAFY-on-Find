@@ -8,7 +8,7 @@ function MainTag({ tagContent, fillBg = false }: tagProps) {
   return (
     <>
       <div
-        className={`${colorApply} border-main inline-flex h-6 items-center justify-center rounded-full border-2 px-[9px] text-xs font-bold whitespace-nowrap`}
+        className={`${colorApply} border-main inline-block rounded-full border-2 px-[9px] py-[3px] text-xs font-bold whitespace-nowrap`}
       >
         {tagContent}
       </div>
