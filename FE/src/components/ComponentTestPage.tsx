@@ -1,4 +1,4 @@
-import { MainTag, MajorTag, NormalTag, PositionTag, WhiteTag } from "./atoms"
+import { MainTag, MajorTag, NormalTag, PositionTag, SearchBar, WhiteTag } from "./atoms"
 
 export default function ComponentTestPage() {
   return (
@@ -18,6 +18,9 @@ export default function ComponentTestPage() {
       <div className="bg-black p-5">
         <WhiteTag tagContent={"하양"}></WhiteTag>
         <WhiteTag tagContent={"유령"} fillBg={true}></WhiteTag>
+      </div>
+      <div>
+        <SearchBar></SearchBar>
       </div>
     </div>
   )
