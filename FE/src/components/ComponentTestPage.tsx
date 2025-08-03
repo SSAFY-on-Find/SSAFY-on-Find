@@ -15,6 +15,7 @@ const TECH_STACKS = [
 ]
 
 export default function ComponentTestPage() {
+  // 1. CheckTag 사용법
   // 기술스택이 선택되면 2개 이상일 경우 관리하기 위하여 배열로 선언.(기술스택 ID를 저장할 예정입니다.)
   const [selectedTechStackIds, setSelectedTechStackIds] = useState<string[]>([])
 
@@ -26,6 +27,13 @@ export default function ComponentTestPage() {
       }
       return prev.filter((id) => id !== teckStackId)
     })
+  }
+
+  // 2. SearchBar 사용법
+  const [searchQuery, setSearchQuery] = useState("")
+  // searchBar에서 매개변수로 사용할 검색함수입니다.
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
   }
 
   return (
@@ -58,7 +66,8 @@ export default function ComponentTestPage() {
         <WhiteTag tagContent={"유령"} fillBg={true}></WhiteTag>
       </div>
       <div>
-        <SearchBar></SearchBar>
+        <p>현재 검색어: {searchQuery}</p>
+        <SearchBar onSearch={handleSearch} />
       </div>
     </div>
   )

@@ -1,14 +1,20 @@
 import { useState } from "react"
 import { Search } from "lucide-react"
 
-function SearchBar() {
+interface ISearchBar {
+  onSearch: (searchValue: string) => void
+}
+
+function SearchBar({ onSearch }: ISearchBar) {
   const [searchValue, setSearchValue] = useState("")
   const handleSearch = () => {
-    if (searchValue.trim() === "") {
+    const trimedSearchValue = searchValue.trim()
+    if (trimedSearchValue === "") {
       alert("내용을 입력하세요") // toast가 준비되면 바꾸면 좋을 것 같아요!!
       return
     }
-    console.log("검색버튼 클릭! 내용 : ", searchValue) // 검색 로직 개발 시 여기다 추가하기!!
+    onSearch(trimedSearchValue)
+    console.log("검색버튼 클릭! 내용 : ", trimedSearchValue) // 검색 로직 개발 시 여기다 추가하기!!
   }
   const handleEnderPress = (ele: { key: string }) => {
     if (ele.key === "Enter") {
