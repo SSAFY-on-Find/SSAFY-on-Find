@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-import { CheckTag, MainTag, MajorTag, NormalTag, PositionTag, WhiteTag } from "./atoms"
+import { CheckTag, InputBox, MainTag, MajorTag, NormalTag, PositionTag, WhiteTag } from "./atoms"
 // API로 기술스택 70여개를 받아온다고 가정하고 상수에 담아두었어요
 const TECH_STACKS = [
   { id: "tech001", name: "React" },
@@ -28,8 +28,8 @@ export default function ComponentTestPage() {
   }
 
   return (
-    <div>
-      <div className="bg-amber-100">
+    <div className="flex flex-col gap-5 p-5">
+      <div>
         <h5>선택된 기술 스택 ID: {selectedTechStackIds.join(", ")}</h5>
         {TECH_STACKS.map((ele) => (
           <CheckTag
@@ -40,7 +40,7 @@ export default function ComponentTestPage() {
           ></CheckTag>
         ))}
       </div>
-      <div className="bg-background p-5">
+      <div className="bg-background">
         <NormalTag tagContent={"기본태그"} />
         <MainTag tagContent={"메인태그"}></MainTag>
         <MainTag tagContent={"메인태그"} fillBg={true}></MainTag>
@@ -52,9 +52,17 @@ export default function ComponentTestPage() {
         <PositionTag positionName={"AI"}></PositionTag>
         <MajorTag tagContent={"전공태그"}></MajorTag>
       </div>
-      <div className="bg-black p-5">
+      <div className="bg-main p-5">
         <WhiteTag tagContent={"하양"}></WhiteTag>
         <WhiteTag tagContent={"유령"} fillBg={true}></WhiteTag>
+      </div>
+      <div className="">
+        <p>small - 채팅입력이나 기본 입력</p>
+        <InputBox text={""} size={"s"} placeholder={"메시지를 입력하세요..."}></InputBox>
+        <p>medium - 팀소개</p>
+        <InputBox text={""} size={"m"} placeholder={"팀을 소개하는 한줄 설명을 작성해주세요"}></InputBox>
+        <p>large - 자기소개 마크다운</p>
+        <InputBox text={""} size={"l"} placeholder={"마크다운 형식으로 자유롭게 자기소개를 작성해 보세요!"}></InputBox>
       </div>
     </div>
   )
