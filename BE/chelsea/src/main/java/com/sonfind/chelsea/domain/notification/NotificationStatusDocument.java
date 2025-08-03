@@ -2,17 +2,14 @@ package com.sonfind.chelsea.domain.notification;
 
 import java.util.Date;
 
+import com.sonfind.chelsea.types.NotificationDomainType;
+import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.sonfind.chelsea.types.NotificationStatus;
 import com.sonfind.chelsea.types.RecipientRole;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 /**
  * Notification 상태 정보를 저장하는 Document
@@ -40,17 +37,22 @@ public class NotificationStatusDocument {
 
 	private ObjectId notificationId;
 
-	private long targetId;
+	private Long targetId;
+	private NotificationDomainType targetType;
 
 	private RecipientRole role;
+	@Setter
 	private NotificationStatus status;
 
+	@Setter
 	private boolean isRead;
+	@Setter
 	private Date readAt;
 
 	private String notificationTitle;
 	private String notificationMessage;
 
 	private Date createdAt;
+	@Setter
 	private Date updatedAt;
 }
