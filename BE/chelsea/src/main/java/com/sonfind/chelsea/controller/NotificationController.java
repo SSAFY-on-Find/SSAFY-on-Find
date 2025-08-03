@@ -4,17 +4,13 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
 import com.sonfind.chelsea.global.manager.SseEmitterManager;
 import com.sonfind.chelsea.service.NotificationService;
 
@@ -40,7 +36,7 @@ public class NotificationController {
 	@GetMapping("/subscribe")
 	@Operation(summary = "SSE 구독", description = "SSE를 통해 알림을 구독합니다. " + "구독자는 자신의 ID를 통해 알림을 받을 수 있습니다.")
 	@ApiResponses({@ApiResponse(responseCode = "200", description = "SSE 구독 성공", content = @Content),
-		@ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content)})
+					@ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content)})
 	public ResponseEntity<SseEmitter> subscribe(Long subId) {
 		log.info("subscribe called with pubId: {}", subId);
 		SseEmitter emitter = sseEmitterManager.connect(subId);
@@ -52,26 +48,42 @@ public class NotificationController {
 		return ResponseEntity.ok(emitter);
 	}
 
-	@Operation(summary = "알림 로그 저장", description = "요청에 대한 알림 로그를 DB에 저장합니다. "
-		+ "알림 발신자와 수신자의 정보를 NotificationParticipant 객체로 생성하고, " + "NotificationDocument 객체를 생성하여 MongoDB에 저장합니다.")
-	@ApiResponses({@ApiResponse(responseCode = "201", description = "알림 로그 저장 성공", content = @Content),
-		@ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)})
-	@PostMapping()
-	public ResponseEntity<Map<String, Object>> createTeamMateEvent(
-		@RequestBody NotificationRequestDto notificationRequestDto) {
-		log.info("createTeamMateEvent called");
-
+	@GetMapping()
+	public ResponseEntity<? extends Map<String, ? extends Object>> getPersonalInvitationList(
+					@CookieValue("sessionId") Long studentId,
+					@RequestParam("type") String type
+	) {
 		try {
 			Map<String, Object> body = new HashMap<>();
 			body.put("status", "SUCCESS");
-			body.put("data", Map.of("notification", notificationService.saveNotification(notificationRequestDto)));
-			return ResponseEntity.status(HttpStatus.CREATED)
-				.header(HttpHeaders.LOCATION, LOCATION.toString())
-				.body(body);
+			body.put("data", Map.of("notification", notificationService.getMyNotifications(studentId, type)));
+			return ResponseEntity.status(HttpStatus.OK)
+							.header(HttpHeaders.LOCATION, LOCATION.toString())
+							.body(body);
 		} catch (Exception e) {
 			log.error("Error creating notification: {}", e.getMessage());
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(Map.of("error", "Failed to create notification"));
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+							.body(Map.of("error", "Failed to find notification"));
+		}
+	}
+
+	@GetMapping("/{teamId}")
+	public ResponseEntity<? extends Map<String, ? extends Object>> getTeamInvitationList(
+					@CookieValue("sessionId") Long studentId,
+					@PathVariable Long teamId,
+					@RequestParam("type") String type
+	) throws BadRequestException {
+		try {
+			Map<String, Object> body = new HashMap<>();
+			body.put("status", "SUCCESS");
+			body.put("data", Map.of("notification", notificationService.getTeamNotifications(studentId, teamId, type)));
+			return ResponseEntity.status(HttpStatus.OK)
+							.header(HttpHeaders.LOCATION, LOCATION.toString())
+							.body(body);
+		} catch (Exception e) {
+			log.error("Error creating notification: {}", e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+							.body(Map.of("error", "Failed to find notification"));
 		}
 	}
 }
