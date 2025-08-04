@@ -1,11 +1,17 @@
 package com.sonfind.chelsea.dto.teams;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
 
-@Getter
-@AllArgsConstructor
-public class RecruitmentDto {
-	private String positionCode;
-	private String positionName;
+@Builder
+public record RecruitmentDto(
+	String positionCode,
+	String positionName
+) {
+
+	public RecruitmentDto(String positionCode, String positionName) {
+		this.positionCode = positionCode;
+		this.positionName = positionName;
+	}
 }
+
+

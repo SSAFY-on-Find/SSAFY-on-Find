@@ -40,6 +40,7 @@ public class Team extends BaseEntity {
 	@Column(nullable = false)
 	private String name;
 
+	//varchar(80)
 	@Column(nullable = false)
 	private String description;
 

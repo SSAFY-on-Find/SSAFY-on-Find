@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sonfind.chelsea.dto.teams.CreateTeamRequest;
+import com.sonfind.chelsea.dto.teams.MyTeamResponse;
+import com.sonfind.chelsea.dto.teams.TeamResponse;
 import com.sonfind.chelsea.dto.teams.UpdateTeamRequest;
 import com.sonfind.chelsea.service.TeamService;
 
@@ -57,5 +60,30 @@ public class TeamController {
 
 		return ResponseEntity.ok().body(body);
 	}
+
+	//타 팀 상세조회
+	@GetMapping("/{teamId}")
+	public ResponseEntity<Map<String, Object>> getTeamDetail(@PathVariable Long teamId) {
+		TeamResponse teamResponse = teamService.getTeamDetail(teamId);
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", teamResponse);
+
+		return ResponseEntity.ok().body(body);
+	}
+
+	//내 팀 상세조회
+	@GetMapping("/me")
+	public ResponseEntity<Map<String, Object>> getMyTeamDetail(@CookieValue("sessionId") Long studentId) {
+		MyTeamResponse myTeamResponse = teamService.getMyTeamDetail(studentId);
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", myTeamResponse);
+		
+		return ResponseEntity.ok().body(body);
+	}
+
 }
 
