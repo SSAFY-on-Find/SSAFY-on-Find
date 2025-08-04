@@ -7,10 +7,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.sonfind.chelsea.domain.student.Students;
-import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
-import com.sonfind.chelsea.dto.notification.NotificationStatusResponseDto;
-import com.sonfind.chelsea.global.event.NotificationEvent;
 import org.apache.coyote.BadRequestException;
 import org.bson.types.ObjectId;
 import org.springframework.context.ApplicationEventPublisher;
@@ -19,9 +15,13 @@ import org.springframework.stereotype.Service;
 
 import com.sonfind.chelsea.domain.notification.NotificationDocument;
 import com.sonfind.chelsea.domain.notification.NotificationStatusDocument;
+import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.dto.notification.NotificationContext;
 import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
+import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
+import com.sonfind.chelsea.dto.notification.NotificationStatusResponseDto;
 import com.sonfind.chelsea.facade.StudentFacade;
+import com.sonfind.chelsea.global.event.NotificationEvent;
 import com.sonfind.chelsea.repository.NotificationRepository;
 import com.sonfind.chelsea.repository.NotificationStatusRepository;
 import com.sonfind.chelsea.types.NotificationDomainType;
@@ -50,13 +50,13 @@ public class NotificationService {
 	 * @param dto: NotificationRequestDto
 	 */
 	public void sendNotification(Long studentId, NotificationRequestDto dto) throws BadRequestException {
-		if(dto.pubType().equals("team")) {
+		if (dto.pubType().equals("team")) {
 			List<Students> findTeamMembers = studentFacade.findAllByTeamId(dto.pubId());
-			if(!findTeamMembers.contains(studentFacade.findByStudentId(studentId))) {
+			if (!findTeamMembers.contains(studentFacade.findByStudentId(studentId))) {
 				throw new BadRequestException("HttpStatus: " + HttpStatus.BAD_REQUEST + " | 잘못된 요청입니다.");
 			}
 		} else {
-			if(!dto.pubId().equals(studentId)) {
+			if (!dto.pubId().equals(studentId)) {
 				throw new BadRequestException("HttpStatus: " + HttpStatus.BAD_REQUEST + " | 잘못된 요청입니다.");
 			}
 		}
@@ -109,21 +109,21 @@ public class NotificationService {
 		log.info("알림 상태가 저장되었습니다: {}, {}", savedNotification.getId(), type);
 
 		// 알림 발송 이벤트를 발행
-		eventPublisher.publishEvent(
-						NotificationEvent.builder()
-										.notificationId(savedNotification.getId())
-										.pubId(savedNotification.getPublisherId())
-										.pubType(savedNotification.getPublisherType())
-										.subId(savedNotification.getSubscriberId())
-										.subType(savedNotification.getSubscriberType())
-										.type(type)
-										.updatedAt(savedNotification.getUpdatedAt())
-										.build()
+		NotificationEvent event = NotificationEvent.of(
+			this,
+			savedNotification.getId(),
+			savedNotification.getPublisherId(),
+			savedNotification.getPublisherType(),
+			savedNotification.getSubscriberId(),
+			savedNotification.getSubscriberType(),
+			savedNotification.getUpdatedAt(),
+			type
 		);
+		eventPublisher.publishEvent(event);
 	}
 
 	/**
-	 * 개인 또는 팀의 알림을 조회합니다.
+	 * 개인 또는 팀의 알림을 조회합니다.(알림 창)
 	 * 알림은 발신자 또는 수신자의 역할에 따라 조회됩니다.
 	 * @param studentId
 	 * @param role
@@ -132,63 +132,81 @@ public class NotificationService {
 	public List<NotificationResponseDto> getMyNotifications(Long studentId, String role) {
 		RecipientRole recipientRole = RecipientRole.valueOf(role.toUpperCase());
 		NotificationDomainType domain = NotificationDomainType.STUDENT;
-		List<NotificationStatusDocument> findNotifications = statusRepo.findAllByTargetIdAndTargetTypeAndRole(studentId, domain,  recipientRole);
+		List<NotificationStatusDocument> findNotifications = statusRepo.findAllByTargetIdAndTargetTypeAndRole(studentId,
+			domain, recipientRole);
 
 		if (findNotifications.isEmpty()) {
 			log.info("알림이 존재하지 않습니다. studentId: {}, role: {}", studentId, role);
 			return Collections.singletonList(NotificationResponseDto.builder()
-							.notificationStatusList(List.of())
-							.unReadCount(0)
-							.build());
+				.notificationStatusList(List.of())
+				.unReadCount(0)
+				.build());
 		}
 
+		// 미읽음 개수 조회
 		int unreadCount = statusRepo.countByTargetIdAndTargetTypeAndRoleAndIsReadFalse(
-						studentId, domain, recipientRole
+			studentId, domain, recipientRole
 		);
 
+		// 미읽음 상태를 읽음 처리하고 readAt 설정
+		Date now = getCurrentDate();
+		List<NotificationStatusDocument> toRead = findNotifications.stream()
+			.filter(s -> !s.isRead())
+			.peek(s -> {
+				s.setRead(true);
+				s.setReadAt(now);
+			})
+			.toList();
+		if (!toRead.isEmpty()) {
+			statusRepo.saveAll(toRead);
+		}
+
+		// 관련 NotificationDocument 일괄 조회
 		List<ObjectId> notiIds = findNotifications.stream()
-						.map(NotificationStatusDocument::getNotificationId)
-						.distinct()
-						.toList();
+			.map(NotificationStatusDocument::getNotificationId)
+			.distinct()
+			.toList();
 		List<NotificationDocument> docs = notificationRepo.findAllById(notiIds);
 		Map<ObjectId, NotificationDocument> docMap = docs.stream()
-						.collect(Collectors.toMap(NotificationDocument::getId, Function.identity()));
+			.collect(Collectors.toMap(NotificationDocument::getId, Function.identity()));
 
+		// DTO 매핑
 		List<NotificationStatusResponseDto> dtos = findNotifications.stream()
-						.map(status -> {
-							NotificationDocument doc = docMap.get(status.getNotificationId());
-							return NotificationStatusResponseDto.builder()
-											.statusId(status.getId())
-											.notificationId(doc.getId())
-											.targetId(status.getTargetId())
-											.targetType(status.getTargetType())
-											.role(status.getRole())
-											.status(status.getStatus())
-											.isRead(status.isRead())
-											.notificationTitle(status.getNotificationTitle())
-											.notificationMessage(status.getNotificationMessage())
-											.updatedAt(status.getUpdatedAt().toString())
-											.publisherId(doc.getPublisherId())
-											.publisherType(doc.getPublisherType())
-											.subscriberId(doc.getSubscriberId())
-											.subscriberType(doc.getSubscriberType())
-											.build();
-						})
-						.toList();
+			.map(status -> {
+				NotificationDocument doc = docMap.get(status.getNotificationId());
+				return NotificationStatusResponseDto.builder()
+					.statusId(status.getId())
+					.notificationId(doc.getId())
+					.targetId(status.getTargetId())
+					.targetType(status.getTargetType())
+					.role(status.getRole())
+					.status(status.getStatus())
+					.isRead(status.isRead())
+					.notificationTitle(status.getNotificationTitle())
+					.notificationMessage(status.getNotificationMessage())
+					.updatedAt(status.getUpdatedAt().toString())
+					.publisherId(doc.getPublisherId())
+					.publisherType(doc.getPublisherType())
+					.subscriberId(doc.getSubscriberId())
+					.subscriberType(doc.getSubscriberType())
+					.build();
+			})
+			.toList();
 
 		return Collections.singletonList(NotificationResponseDto.builder()
-						.notificationStatusList(dtos)
-						.unReadCount(unreadCount)
-						.build());
+			.notificationStatusList(dtos)
+			.unReadCount(unreadCount)
+			.build());
 	}
 
 	/**
-	 * 팀의 알림을 조회합니다.
+	 * 팀의 알림을 조회합니다.(팀 상세보기 페이지)
 	 * @param teamId
 	 * @param role
 	 * @return
 	 */
-	public List<NotificationResponseDto> getTeamNotifications(Long studentId, Long teamId, String role) throws BadRequestException {
+	public List<NotificationResponseDto> getTeamNotifications(Long studentId, Long teamId, String role) throws
+		BadRequestException {
 		if (!studentFacade.isMemberOfTeam(studentId, teamId)) {
 			log.info("학생이 팀의 멤버가 아닙니다. studentId: {}, teamId: {}", studentId, teamId);
 			throw new BadRequestException("HttpStatus: " + HttpStatus.BAD_REQUEST + " | 잘못된 요청입니다.");
@@ -197,54 +215,66 @@ public class NotificationService {
 		RecipientRole recipientRole = RecipientRole.valueOf(role.toUpperCase());
 		NotificationDomainType domain = NotificationDomainType.TEAM;
 
-		List<NotificationStatusDocument> findNotifications = statusRepo.findAllByTargetIdAndTargetTypeAndRole(teamId, domain, recipientRole);
+		List<NotificationStatusDocument> findNotifications = statusRepo.findAllByTargetIdAndTargetTypeAndRole(teamId,
+			domain, recipientRole);
 
 		if (findNotifications.isEmpty()) {
 			log.info("알림이 존재하지 않습니다. teamId: {}, role: {}", teamId, role);
 			return Collections.singletonList(NotificationResponseDto.builder()
-							.notificationStatusList(List.of())
-							.unReadCount(0)
-							.build());
+				.notificationStatusList(List.of())
+				.unReadCount(0)
+				.build());
 		}
 
 		int unreadCount = statusRepo.countByTargetIdAndTargetTypeAndRoleAndIsReadFalse(
-						studentId, domain, recipientRole
+			studentId, domain, recipientRole
 		);
 
 		List<ObjectId> notiIds = findNotifications.stream()
-						.map(NotificationStatusDocument::getNotificationId)
-						.distinct()
-						.toList();
+			.map(NotificationStatusDocument::getNotificationId)
+			.distinct()
+			.toList();
 		List<NotificationDocument> docs = notificationRepo.findAllById(notiIds);
 		Map<ObjectId, NotificationDocument> docMap = docs.stream()
-						.collect(Collectors.toMap(NotificationDocument::getId, Function.identity()));
+			.collect(Collectors.toMap(NotificationDocument::getId, Function.identity()));
 
 		List<NotificationStatusResponseDto> dtos = findNotifications.stream()
-						.map(status -> {
-							NotificationDocument doc = docMap.get(status.getNotificationId());
-							return NotificationStatusResponseDto.builder()
-											.statusId(status.getId())
-											.notificationId(doc.getId())
-											.targetId(status.getTargetId())
-											.targetType(status.getTargetType())
-											.role(status.getRole())
-											.status(status.getStatus())
-											.isRead(status.isRead())
-											.notificationTitle(status.getNotificationTitle())
-											.notificationMessage(status.getNotificationMessage())
-											.updatedAt(status.getUpdatedAt().toString())
-											.publisherId(doc.getPublisherId())
-											.publisherType(doc.getPublisherType())
-											.subscriberId(doc.getSubscriberId())
-											.subscriberType(doc.getSubscriberType())
-											.build();
-						})
-						.toList();
+			.map(status -> {
+				NotificationDocument doc = docMap.get(status.getNotificationId());
+				return NotificationStatusResponseDto.builder()
+					.statusId(status.getId())
+					.notificationId(doc.getId())
+					.targetId(status.getTargetId())
+					.targetType(status.getTargetType())
+					.role(status.getRole())
+					.status(status.getStatus())
+					.isRead(status.isRead())
+					.notificationTitle(status.getNotificationTitle())
+					.notificationMessage(status.getNotificationMessage())
+					.updatedAt(status.getUpdatedAt().toString())
+					.publisherId(doc.getPublisherId())
+					.publisherType(doc.getPublisherType())
+					.subscriberId(doc.getSubscriberId())
+					.subscriberType(doc.getSubscriberType())
+					.build();
+			})
+			.toList();
 
 		return Collections.singletonList(NotificationResponseDto.builder()
-						.notificationStatusList(dtos)
-						.unReadCount(unreadCount)
-						.build());
+			.notificationStatusList(dtos)
+			.unReadCount(unreadCount)
+			.build());
+	}
+
+	/**
+	 * 학생의 읽지 않은 알림 개수를 조회합니다.
+	 * @param studentId
+	 * @return 읽지 않은 알림 개수
+	 */
+	public int getCountOfNonReadNotifications(Long studentId) {
+		return statusRepo.countByTargetIdAndTargetTypeAndRoleAndIsReadFalse(
+			studentId, NotificationDomainType.STUDENT, RecipientRole.SUBSCRIBER
+		);
 	}
 
 	/**
@@ -269,51 +299,45 @@ public class NotificationService {
 
 		// 1) 내 상태 조회·검증
 		NotificationStatusDocument me = statusRepo.findById(statusObjId)
-						.orElseThrow(() -> new BadRequestException("잘못된 알림입니다."));
+			.orElseThrow(() -> new BadRequestException("잘못된 알림입니다."));
 		if (me.getRole() != RecipientRole.PUBLISHER ||
-						!me.getTargetId().equals(studentId)) {
+			!me.getTargetId().equals(studentId)) {
 			throw new BadRequestException("알림 거절 권한이 없습니다.");
 		}
 
 		// 2) 내 상태만 먼저 변경
 		me.setStatus(NotificationStatus.REJECTED);
-		/**
-		 * TODO: 읽음 처리 관련 정책 필요 임시로 취소 상태로 변환시 읽음 처리
-		 */
-		me.setRead(true);
-		me.setReadAt(now);
+		me.setUpdatedAt(now);
 		statusRepo.save(me);
 
 		// 3) 동일 notificationId를 가진 모든 상태 조회
 		ObjectId notificationId = me.getNotificationId();
 		List<NotificationStatusDocument> allStatuses =
-						statusRepo.findByNotificationId(notificationId);
+			statusRepo.findByNotificationId(notificationId);
 
 		// 4) 다른 상태들도 일괄 변경
 		allStatuses.stream()
-						.filter(s -> !s.getId().equals(statusObjId))
-						.forEach(s -> {
-							s.setStatus(NotificationStatus.REJECTED);
-							s.setRead(true);
-							s.setReadAt(now);
-						});
+			.filter(s -> !s.getId().equals(statusObjId))
+			.forEach(s -> {
+				s.setStatus(NotificationStatus.REJECTED);
+			});
 		statusRepo.saveAll(allStatuses);
 
 		// 5) SSE 이벤트 발행
 		NotificationDocument doc = notificationRepo.findById(notificationId)
-						.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
+			.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
 
 		/**
 		 * TODO: 브로드 캐스트로 변경
 		 */
 		// publisher → subscriber
 		eventPublisher.publishEvent(new NotificationEvent(
-						this,
-						notificationId,
-						doc.getPublisherId(), doc.getPublisherType(),
-						doc.getSubscriberId(), doc.getSubscriberType(),
-						now,
-						doc.getType()
+			this,
+			notificationId,
+			doc.getPublisherId(), doc.getPublisherType(),
+			doc.getSubscriberId(), doc.getSubscriberType(),
+			now,
+			doc.getType()
 		));
 
 		log.info("초대/지원이 거절되었습니다: notificationId={}, statusId={}", notificationId, statusId);
@@ -331,51 +355,44 @@ public class NotificationService {
 
 		// 1) 내 상태 조회·검증
 		NotificationStatusDocument me = statusRepo.findById(statusObjId)
-						.orElseThrow(() -> new BadRequestException("잘못된 알림입니다."));
+			.orElseThrow(() -> new BadRequestException("잘못된 알림입니다."));
 		if (me.getRole() != RecipientRole.PUBLISHER ||
-						!me.getTargetId().equals(studentId)) {
+			!me.getTargetId().equals(studentId)) {
 			throw new BadRequestException("알림 취소 권한이 없습니다.");
 		}
 
 		// 2) 내 상태만 먼저 변경
 		me.setStatus(NotificationStatus.CANCELED);
-		/**
-		 * TODO: 읽음 처리 관련 정책 필요 임시로 취소 상태로 변환시 읽음 처리
-		 */
-		me.setRead(true);
-		me.setReadAt(now);
 		statusRepo.save(me);
 
 		// 3) 동일 notificationId를 가진 모든 상태 조회
 		ObjectId notificationId = me.getNotificationId();
 		List<NotificationStatusDocument> allStatuses =
-						statusRepo.findByNotificationId(notificationId);
+			statusRepo.findByNotificationId(notificationId);
 
 		// 4) 다른 상태들도 일괄 변경
 		allStatuses.stream()
-						.filter(s -> !s.getId().equals(statusObjId))
-						.forEach(s -> {
-							s.setStatus(NotificationStatus.CANCELED);
-							s.setRead(true);
-							s.setReadAt(now);
-						});
+			.filter(s -> !s.getId().equals(statusObjId))
+			.forEach(s -> {
+				s.setStatus(NotificationStatus.CANCELED);
+			});
 		statusRepo.saveAll(allStatuses);
 
 		// 5) SSE 이벤트 발행
 		NotificationDocument doc = notificationRepo.findById(notificationId)
-						.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
+			.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
 
 		/**
 		 * TODO: 브로드 캐스트로 변경
 		 */
 		// publisher → subscriber
 		eventPublisher.publishEvent(new NotificationEvent(
-						this,
-						notificationId,
-						doc.getPublisherId(), doc.getPublisherType(),
-						doc.getSubscriberId(), doc.getSubscriberType(),
-						now,
-						doc.getType()
+			this,
+			notificationId,
+			doc.getPublisherId(), doc.getPublisherType(),
+			doc.getSubscriberId(), doc.getSubscriberType(),
+			now,
+			doc.getType()
 		));
 
 		log.info("알림이 취소되었습니다: notificationId={}, statusId={}", notificationId, statusId);
