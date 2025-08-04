@@ -148,7 +148,7 @@ public class NotificationService {
 		eventPublisher.publishEvent(event);
 	}
 
-	public NotificationResponseDto findNotificationById(ObjectId notificationId) throws
+	public NotificationResponseDto getNotificationInfo(ObjectId notificationId) throws
 		BadRequestException {
 		NotificationDocument findNotification = notificationRepo.findById(notificationId)
 			.orElseThrow(() -> new BadRequestException(
