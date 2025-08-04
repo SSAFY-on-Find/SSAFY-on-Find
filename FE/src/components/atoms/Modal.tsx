@@ -8,8 +8,8 @@ interface IModal {
 }
 const sizeMap = {
   s: "max-w-sm",
-  m: "max-w-lg",
-  l: "max-w-xl",
+  m: "max-w-2xl",
+  l: "max-w-4xl",
 }
 
 function Modal({ isOpen, onClose, size, children }: IModal) {
@@ -20,7 +20,7 @@ function Modal({ isOpen, onClose, size, children }: IModal) {
       <div className="absolute inset-0 bg-black/25" onClick={onClose} />
       <div className={`${sizeMap[size]} relative w-full rounded-lg bg-white`}>
         <button className="t-4 r-4 text-main absolute top-4 right-4 z-10" onClick={onClose}>
-          <CircleX className="hover:bg-main/10 h-5 w-5 rounded-full"></CircleX>
+          <CircleX className="hover:bg-main/10 h-5 w-5 rounded-full hover:cursor-pointer"></CircleX>
         </button>
         {children}
       </div>

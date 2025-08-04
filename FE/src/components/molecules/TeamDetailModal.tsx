@@ -31,7 +31,7 @@ function TeamDetailModal({ isOpen, onClose, teamData }: ITeamDetailModal) {
             <h3 className="text-text text-2xl font-bold">{teamData.name}</h3>
             <MainTag tagContent={teamData.track} />
           </div>
-          <p className="text-subtext text-sm">{teamData.description}</p>
+          <p className="text-subtext text-sm text-pretty">{teamData.description}</p>
         </div>
         <div className="px-8">
           <p className="text-text mb-[10px] text-sm font-semibold">모집중인 포지션</p>
@@ -50,7 +50,7 @@ function TeamDetailModal({ isOpen, onClose, teamData }: ITeamDetailModal) {
                 {majorMembers.map((ele) => (
                   <div className="flex flex-col items-center px-[10px]">
                     <UserImg name={ele.name} size={"m"} showTeamBadge={false} />
-                    <p className="text-sm">{ele.name}</p>
+                    <p className="mt-2 mb-[5px] text-sm">{ele.name}</p>
                     <PositionTag positionName={ele.position} />
                   </div>
                 ))}
@@ -63,7 +63,7 @@ function TeamDetailModal({ isOpen, onClose, teamData }: ITeamDetailModal) {
                 {nonMajorMembers.map((ele) => (
                   <div className="flex flex-col items-center px-[10px]">
                     <UserImg name={ele.name} size={"m"} showTeamBadge={false} />
-                    <p className="text-sm">{ele.name}</p>
+                    <p className="mt-2 mb-[5px] text-sm">{ele.name}</p>
                     <PositionTag positionName={ele.position} />
                   </div>
                 ))}

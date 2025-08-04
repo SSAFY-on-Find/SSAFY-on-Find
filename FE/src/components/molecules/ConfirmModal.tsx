@@ -23,8 +23,8 @@ function ConfirmModal({
   return (
     <Modal isOpen={isOpen} onClose={onCancel} size={"s"}>
       <div className="p-5">
-        <h3 className="text-text text-xl font-bold">{title}</h3>
-        <p className="text-subtext">{message}</p>
+        <h3 className="text-text mb-2 text-xl font-bold">{title}</h3>
+        <p className="text-subtext text-sm">{message}</p>
         <div className="flex justify-end gap-3">
           <button className="text-text rounded-md bg-gray-300 px-3 py-1 hover:bg-gray-400" onClick={onCancel}>
             {cancelText}

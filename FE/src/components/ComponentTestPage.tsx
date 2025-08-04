@@ -18,12 +18,25 @@ const TECH_STACKS = [
 const sampleTeamData = {
   id: "team001",
   name: "팀 001",
-  description: "팀 한줄 설명.",
+  description:
+    "팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명",
   track: "웹 디자인",
   position: ["백엔드", "인프라"],
   maxMembers: 6,
   currentMembers: 4,
   members: [
+    {
+      id: "member001",
+      name: "김태호",
+      position: "프론트",
+      major: "전공",
+    },
+    {
+      id: "member001",
+      name: "김태호",
+      position: "프론트",
+      major: "비전공",
+    },
     {
       id: "member001",
       name: "김태호",
