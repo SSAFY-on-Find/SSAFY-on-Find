@@ -42,9 +42,13 @@ public class NotificationDocument {
 
 	private long publisherId;
 	private NotificationDomainType publisherType;
+	private String pubNotificationTitle;
+	private String pubNotificationMessage;
 
 	private long subscriberId;
 	private NotificationDomainType subscriberType;
+	private String subNotificationTitle;
+	private String subNotificationMessage;
 
 	private Date createdAt;
 	private Date updatedAt;
