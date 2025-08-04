@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sonfind.chelsea.dto.teams.CreateTeamRequest;
-import com.sonfind.chelsea.dto.teams.MyTeamResponse;
-import com.sonfind.chelsea.dto.teams.TeamResponse;
-import com.sonfind.chelsea.dto.teams.UpdateTeamRequest;
+import com.sonfind.chelsea.dto.teams.CreateTeamRequestDto;
+import com.sonfind.chelsea.dto.teams.MyTeamResponseDto;
+import com.sonfind.chelsea.dto.teams.TeamResponseDto;
+import com.sonfind.chelsea.dto.teams.UpdateTeamRequestDto;
 import com.sonfind.chelsea.service.TeamService;
 
 import jakarta.validation.Valid;
@@ -32,7 +32,7 @@ public class TeamController {
 
 	//팀 생성
 	@PostMapping
-	public ResponseEntity<Map<String, Object>> createTeam(@RequestBody @Valid CreateTeamRequest request,
+	public ResponseEntity<Map<String, Object>> createTeam(@RequestBody @Valid CreateTeamRequestDto request,
 		@CookieValue("sessionId") Long studentId) {
 
 		Long teamId = teamService.createTeam(studentId, request);
@@ -50,7 +50,7 @@ public class TeamController {
 	public ResponseEntity<Map<String, Object>> updateTeam(
 		@CookieValue("sessionId") Long studentId,
 		@PathVariable Long teamId,
-		@RequestBody @Valid UpdateTeamRequest request) {
+		@RequestBody @Valid UpdateTeamRequestDto request) {
 
 		teamService.updateTeam(teamId, studentId, request);
 
@@ -64,7 +64,7 @@ public class TeamController {
 	//타 팀 상세조회
 	@GetMapping("/{teamId}")
 	public ResponseEntity<Map<String, Object>> getTeamDetail(@PathVariable Long teamId) {
-		TeamResponse teamResponse = teamService.getTeamDetail(teamId);
+		TeamResponseDto teamResponse = teamService.getTeamDetail(teamId);
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
@@ -76,12 +76,12 @@ public class TeamController {
 	//내 팀 상세조회
 	@GetMapping("/me")
 	public ResponseEntity<Map<String, Object>> getMyTeamDetail(@CookieValue("sessionId") Long studentId) {
-		MyTeamResponse myTeamResponse = teamService.getMyTeamDetail(studentId);
+		MyTeamResponseDto myTeamResponse = teamService.getMyTeamDetail(studentId);
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
 		body.put("data", myTeamResponse);
-		
+
 		return ResponseEntity.ok().body(body);
 	}
 

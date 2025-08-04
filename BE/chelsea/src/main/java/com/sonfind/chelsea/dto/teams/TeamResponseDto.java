@@ -7,12 +7,12 @@ import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
 import lombok.Builder;
 
 @Builder
-public record TeamResponse(
+public record TeamResponseDto(
 	String teamName,
 	String teamDescription,
 	SubCodeResponse teamTrack,
 	Long teamCount,
 	List<RecruitmentDto> positions,
-	List<TeamMemberResponse> members
+	List<TeamMemberResponseDto> members
 ) {
 }

@@ -5,14 +5,14 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
-public record MyTeamResponse(
-	TeamResponse teamInfo,
+public record MyTeamResponseDto(
+	TeamResponseDto teamInfo,
 	int majorCount,
 	int nonMajorCount,
-	List<TeamRuleResponse> ruleStatuses
+	List<TeamRuleResponseDto> ruleStatuses
 ) {
-	public MyTeamResponse(TeamResponse teamInfo, int majorCount, int nonMajorCount,
-		List<TeamRuleResponse> ruleStatuses) {
+	public MyTeamResponseDto(TeamResponseDto teamInfo, int majorCount, int nonMajorCount,
+		List<TeamRuleResponseDto> ruleStatuses) {
 		this.teamInfo = teamInfo;
 		this.majorCount = majorCount;
 		this.nonMajorCount = nonMajorCount;

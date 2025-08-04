@@ -5,12 +5,12 @@ import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
 import lombok.Builder;
 
 @Builder
-public record TeamMemberResponse(
+public record TeamMemberResponseDto(
 	Long studentId,
 	String name,
 	String major,
 	String profileImageUrl,
 	SubCodeResponse position
 ) {
-	
+
 }

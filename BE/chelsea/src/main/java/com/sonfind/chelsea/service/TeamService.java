@@ -13,13 +13,13 @@ import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 import com.sonfind.chelsea.domain.teams.Recruitment;
 import com.sonfind.chelsea.domain.teams.Team;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
-import com.sonfind.chelsea.dto.teams.CreateTeamRequest;
-import com.sonfind.chelsea.dto.teams.MyTeamResponse;
+import com.sonfind.chelsea.dto.teams.CreateTeamRequestDto;
+import com.sonfind.chelsea.dto.teams.MyTeamResponseDto;
 import com.sonfind.chelsea.dto.teams.RecruitmentDto;
-import com.sonfind.chelsea.dto.teams.TeamMemberResponse;
-import com.sonfind.chelsea.dto.teams.TeamResponse;
-import com.sonfind.chelsea.dto.teams.TeamRuleResponse;
-import com.sonfind.chelsea.dto.teams.UpdateTeamRequest;
+import com.sonfind.chelsea.dto.teams.TeamMemberResponseDto;
+import com.sonfind.chelsea.dto.teams.TeamResponseDto;
+import com.sonfind.chelsea.dto.teams.TeamRuleResponseDto;
+import com.sonfind.chelsea.dto.teams.UpdateTeamRequestDto;
 import com.sonfind.chelsea.global.domain.SubCode;
 import com.sonfind.chelsea.repository.StudentRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
@@ -40,7 +40,7 @@ public class TeamService {
 
 	//팀 생성
 	@Transactional
-	public Long createTeam(Long studentId, CreateTeamRequest request) {
+	public Long createTeam(Long studentId, CreateTeamRequestDto request) {
 
 		//팀에 속해 있는 교육생은 팀 생성 못함
 		Students students = studentService.findByStudentId(studentId);
@@ -83,7 +83,7 @@ public class TeamService {
 
 	//팀 수정
 	@Transactional
-	public void updateTeam(Long teamId, Long studentId, UpdateTeamRequest request) {
+	public void updateTeam(Long teamId, Long studentId, UpdateTeamRequestDto request) {
 
 		//팀에 속해 있지 않은 교육생은 수정 불가
 		Students students = studentService.findByStudentId(studentId);
@@ -119,8 +119,8 @@ public class TeamService {
 	}
 
 	//타 팀 상세조회
-	@Transactional
-	public TeamResponse getTeamDetail(Long teamId) {
+	@Transactional(readOnly = true)
+	public TeamResponseDto getTeamDetail(Long teamId) {
 		//존재하는 팀인지 확인
 		Team team = teamRepository.findTeamByTeamId(teamId)
 			.orElseThrow(() -> new ResponseStatusException(
@@ -129,7 +129,7 @@ public class TeamService {
 		List<Students> teamMembers = studentRepository.findAllByTeamId(teamId);
 
 		//팀원 정보 변환
-		List<TeamMemberResponse> members = teamMembers.stream()
+		List<TeamMemberResponseDto> members = teamMembers.stream()
 			.map(this::convertToTeamMemberResponse)
 			.collect(Collectors.toList());
 
@@ -141,7 +141,7 @@ public class TeamService {
 			))
 			.collect(Collectors.toList());
 
-		return TeamResponse.builder()
+		return TeamResponseDto.builder()
 			.teamName(team.getName())
 			.teamDescription(team.getDescription())
 			.teamTrack(new SubCodeResponse(
@@ -155,15 +155,15 @@ public class TeamService {
 	}
 
 	//내 팀 상세조회
-	@Transactional
-	public MyTeamResponse getMyTeamDetail(Long studentId) {
+	@Transactional(readOnly = true)
+	public MyTeamResponseDto getMyTeamDetail(Long studentId) {
 		Students students = studentService.findByStudentId(studentId);
 		if (students.getTeamId() == null) {
 			throw new ResponseStatusException(
 				HttpStatus.NOT_FOUND, "팀에 속해 있지 않습니다.");
 		}
 
-		TeamResponse teamInfo = getTeamDetail(students.getTeamId());
+		TeamResponseDto teamInfo = getTeamDetail(students.getTeamId());
 
 		List<Students> teamMembers = studentRepository.findAllByTeamId(students.getTeamId());
 
@@ -173,9 +173,9 @@ public class TeamService {
 		int nonMajorCount = teamMembers.size() - majorCount;
 		int teamCount = teamMembers.size();
 
-		List<TeamRuleResponse> ruleStatuses = isOkTeamRules(teamCount, majorCount, nonMajorCount);
+		List<TeamRuleResponseDto> ruleStatuses = isOkTeamRules(teamCount, majorCount, nonMajorCount);
 
-		return MyTeamResponse.builder()
+		return MyTeamResponseDto.builder()
 			.teamInfo(teamInfo)
 			.majorCount(majorCount)
 			.nonMajorCount(nonMajorCount)
@@ -185,10 +185,10 @@ public class TeamService {
 
 	//팀 빌딩 규칙
 	//6인 1팀
-	private TeamRuleResponse teamSizeRule(int teamSize) {
+	private TeamRuleResponseDto teamSizeRule(int teamSize) {
 		boolean isOk = (teamSize == 6);
 
-		return TeamRuleResponse.builder()
+		return TeamRuleResponseDto.builder()
 			.ruleCode("RULE001")
 			.ruleName("SIZE_LIMIT")
 			.ruleDescription("6인 1팀 원칙")
@@ -198,14 +198,14 @@ public class TeamService {
 	}
 
 	//전공 비전공 각각 2인 이상
-	private TeamRuleResponse teamMajorRule(int majorCount, int nonMajorCount) {
+	private TeamRuleResponseDto teamMajorRule(int majorCount, int nonMajorCount) {
 		boolean isMajorOk = (majorCount >= 2);
 		boolean isNonMajorOk = (nonMajorCount >= 2);
 		boolean isOk = (isMajorOk && isNonMajorOk);
 
 		String requiredStatus = "전공자 2명 이상, 비전공자 2명 이상";
 
-		return TeamRuleResponse.builder()
+		return TeamRuleResponseDto.builder()
 			.ruleCode("RULE002&003")
 			.ruleName("전공 비전공 최소 인원 수")
 			.ruleDescription("전공자 2인 이상, 비전공자 2인 이상")
@@ -215,8 +215,8 @@ public class TeamService {
 	}
 
 	//팀 빌딩 규칙 검증
-	private List<TeamRuleResponse> isOkTeamRules(int teamSize, int majorCount, int nonMajorCount) {
-		List<TeamRuleResponse> teamRules = List.of(
+	private List<TeamRuleResponseDto> isOkTeamRules(int teamSize, int majorCount, int nonMajorCount) {
+		List<TeamRuleResponseDto> teamRules = List.of(
 			teamSizeRule(teamSize),
 			teamMajorRule(majorCount, nonMajorCount)
 		);
@@ -231,7 +231,7 @@ public class TeamService {
 	}
 
 	//팀원 정보 변환
-	private TeamMemberResponse convertToTeamMemberResponse(Students students) {
+	private TeamMemberResponseDto convertToTeamMemberResponse(Students students) {
 		try {
 			StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(students.getStudentId())
 				.orElse(null);
@@ -247,7 +247,7 @@ public class TeamService {
 				);
 			}
 
-			return TeamMemberResponse.builder()
+			return TeamMemberResponseDto.builder()
 				.studentId(students.getStudentId())
 				.name(students.getName())
 				.major(major)
@@ -255,7 +255,7 @@ public class TeamService {
 				.position(position)
 				.build();
 		} catch (Exception e) {
-			return TeamMemberResponse.builder()
+			return TeamMemberResponseDto.builder()
 				.studentId(students.getStudentId())
 				.name(students.getName())
 				.major(Boolean.TRUE.equals(students.getMajorYn()) ? "전공" : "비전공")

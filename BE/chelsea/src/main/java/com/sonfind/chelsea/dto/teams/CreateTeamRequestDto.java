@@ -9,7 +9,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class CreateTeamRequest {
+public class CreateTeamRequestDto {
 
 	@NotBlank
 	private String description;
