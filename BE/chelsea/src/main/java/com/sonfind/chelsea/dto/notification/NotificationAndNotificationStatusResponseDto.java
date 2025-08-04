@@ -1,12 +1,12 @@
 package com.sonfind.chelsea.dto.notification;
 
-import lombok.Builder;
-
 import java.util.List;
 
+import lombok.Builder;
+
 @Builder
-public record NotificationResponseDto(
-        List<NotificationStatusResponseDto> notificationStatusList,
-        int unReadCount
+public record NotificationAndNotificationStatusResponseDto(
+	List<NotificationStatusResponseDto> notificationStatusList,
+	int unReadCount
 ) {
 }
