@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.sonfind.chelsea.domain.notification.NotificationDocument;
 import com.sonfind.chelsea.domain.notification.NotificationStatusDocument;
 import com.sonfind.chelsea.domain.student.Students;
+import com.sonfind.chelsea.dto.notification.NotificationAndNotificationStatusResponseDto;
 import com.sonfind.chelsea.dto.notification.NotificationContext;
 import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
 import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
@@ -76,8 +77,7 @@ public class NotificationService {
 		// 해당 알림 중 PENDING 상태의 알림이 있는지 확인
 		hasPendingStatus(findNotificationLog.getId());
 
-		// NotificationDocument 객체를 생성
-		NotificationDocument notificationLog = NotificationDocument.builder()
+		NotificationDocument temp = NotificationDocument.builder()
 			.type(type)
 			.publisherId(dto.pubId())
 			.publisherType(pubType)
@@ -87,7 +87,33 @@ public class NotificationService {
 			.updatedAt(now)
 			.build();
 
-		// 알림을 저장
+		// 2) 컨텍스트 생성
+		NotificationContext ctx = new NotificationContext(
+			studentFacade.findByStudentIdForSse(dto.pubId()),
+			studentFacade.findByStudentIdForSse(dto.subId())
+		);
+
+		// 3) 발·수신자용 제목·메시지 미리 생성
+		String pubTitle = contentService.buildTitle(temp, RecipientRole.PUBLISHER, ctx);
+		String pubMsg = contentService.buildMessage(temp, RecipientRole.PUBLISHER, ctx);
+		String subTitle = contentService.buildTitle(temp, RecipientRole.SUBSCRIBER, ctx);
+		String subMsg = contentService.buildMessage(temp, RecipientRole.SUBSCRIBER, ctx);
+
+		// 4) 실제 NotificationDocument에 제목·메시지 주입
+		NotificationDocument notificationLog = NotificationDocument.builder()
+			.type(type)
+			.publisherId(dto.pubId())
+			.publisherType(pubType)
+			.pubNotificationTitle(pubTitle)
+			.pubNotificationMessage(pubMsg)
+			.subscriberId(dto.subId())
+			.subscriberType(subType)
+			.subNotificationTitle(subTitle)
+			.subNotificationMessage(subMsg)
+			.createdAt(now)
+			.updatedAt(now)
+			.build();
+
 		NotificationDocument savedNotification = notificationRepo.save(notificationLog);
 		log.info("알림이 저장되었습니다: {}", savedNotification.getId());
 
@@ -122,6 +148,27 @@ public class NotificationService {
 		eventPublisher.publishEvent(event);
 	}
 
+	public NotificationResponseDto findNotificationById(ObjectId notificationId) throws
+		BadRequestException {
+		NotificationDocument findNotification = notificationRepo.findById(notificationId)
+			.orElseThrow(() -> new BadRequestException(
+				"HttpStatus: " + HttpStatus.BAD_REQUEST + " | 알림을 찾을 수 없습니다."
+			));
+		log.info("알림 조회 성공: {}", findNotification.getId());
+
+		return NotificationResponseDto.builder()
+			.type(findNotification.getType())
+			.publisherId(findNotification.getPublisherId())
+			.publisherType(findNotification.getPublisherType())
+			.pubNotificationTitle(findNotification.getPubNotificationTitle())
+			.pubNotificationMessage(findNotification.getPubNotificationMessage())
+			.subscriberId(findNotification.getSubscriberId())
+			.subscriberType(findNotification.getSubscriberType())
+			.subNotificationTitle(findNotification.getSubNotificationTitle())
+			.subNotificationMessage(findNotification.getSubNotificationMessage())
+			.build();
+	}
+
 	/**
 	 * 개인 또는 팀의 알림을 조회합니다.(알림 창)
 	 * 알림은 발신자 또는 수신자의 역할에 따라 조회됩니다.
@@ -129,7 +176,7 @@ public class NotificationService {
 	 * @param role
 	 * @return
 	 */
-	public List<NotificationResponseDto> getMyNotifications(Long studentId, String role) {
+	public List<NotificationAndNotificationStatusResponseDto> getMyNotifications(Long studentId, String role) {
 		RecipientRole recipientRole = RecipientRole.valueOf(role.toUpperCase());
 		NotificationDomainType domain = NotificationDomainType.STUDENT;
 		List<NotificationStatusDocument> findNotifications = statusRepo.findAllByTargetIdAndTargetTypeAndRole(studentId,
@@ -137,7 +184,7 @@ public class NotificationService {
 
 		if (findNotifications.isEmpty()) {
 			log.info("알림이 존재하지 않습니다. studentId: {}, role: {}", studentId, role);
-			return Collections.singletonList(NotificationResponseDto.builder()
+			return Collections.singletonList(NotificationAndNotificationStatusResponseDto.builder()
 				.notificationStatusList(List.of())
 				.unReadCount(0)
 				.build());
@@ -182,8 +229,6 @@ public class NotificationService {
 					.role(status.getRole())
 					.status(status.getStatus())
 					.isRead(status.isRead())
-					.notificationTitle(status.getNotificationTitle())
-					.notificationMessage(status.getNotificationMessage())
 					.updatedAt(status.getUpdatedAt().toString())
 					.publisherId(doc.getPublisherId())
 					.publisherType(doc.getPublisherType())
@@ -193,7 +238,7 @@ public class NotificationService {
 			})
 			.toList();
 
-		return Collections.singletonList(NotificationResponseDto.builder()
+		return Collections.singletonList(NotificationAndNotificationStatusResponseDto.builder()
 			.notificationStatusList(dtos)
 			.unReadCount(unreadCount)
 			.build());
@@ -205,7 +250,8 @@ public class NotificationService {
 	 * @param role
 	 * @return
 	 */
-	public List<NotificationResponseDto> getTeamNotifications(Long studentId, Long teamId, String role) throws
+	public List<NotificationAndNotificationStatusResponseDto> getTeamNotifications(Long studentId, Long teamId,
+		String role) throws
 		BadRequestException {
 		if (!studentFacade.isMemberOfTeam(studentId, teamId)) {
 			log.info("학생이 팀의 멤버가 아닙니다. studentId: {}, teamId: {}", studentId, teamId);
@@ -220,7 +266,7 @@ public class NotificationService {
 
 		if (findNotifications.isEmpty()) {
 			log.info("알림이 존재하지 않습니다. teamId: {}, role: {}", teamId, role);
-			return Collections.singletonList(NotificationResponseDto.builder()
+			return Collections.singletonList(NotificationAndNotificationStatusResponseDto.builder()
 				.notificationStatusList(List.of())
 				.unReadCount(0)
 				.build());
@@ -249,8 +295,6 @@ public class NotificationService {
 					.role(status.getRole())
 					.status(status.getStatus())
 					.isRead(status.isRead())
-					.notificationTitle(status.getNotificationTitle())
-					.notificationMessage(status.getNotificationMessage())
 					.updatedAt(status.getUpdatedAt().toString())
 					.publisherId(doc.getPublisherId())
 					.publisherType(doc.getPublisherType())
@@ -260,7 +304,7 @@ public class NotificationService {
 			})
 			.toList();
 
-		return Collections.singletonList(NotificationResponseDto.builder()
+		return Collections.singletonList(NotificationAndNotificationStatusResponseDto.builder()
 			.notificationStatusList(dtos)
 			.unReadCount(unreadCount)
 			.build());
@@ -281,10 +325,18 @@ public class NotificationService {
 	 * 알림을 수락합니다.
 	 * 알림 상태를 PENDING에서 ACCEPTED로 변경하고, 읽음 상태를 true로 설정합니다.
 	 * @param studentId
-	 * @param notificationId
+	 * @param statusId
 	 */
-	public void acceptInvitation(Long studentId, String notificationId) throws BadRequestException {
+	public void acceptInvitation(Long studentId, String statusId) throws BadRequestException {
+		ObjectId ststusObjId = new ObjectId(statusId);
+		Date now = getCurrentDate();
 
+		// 1) 내 상태 조회·검증
+		NotificationStatusDocument me = statusRepo.findById(ststusObjId)
+			.orElseThrow(() -> new BadRequestException("잘못된 알림입니다."));
+		/**
+		 * TODO: 후순위 개발
+		 */
 	}
 
 	/**
@@ -320,6 +372,7 @@ public class NotificationService {
 			.filter(s -> !s.getId().equals(statusObjId))
 			.forEach(s -> {
 				s.setStatus(NotificationStatus.REJECTED);
+				s.setUpdatedAt(now);
 			});
 		statusRepo.saveAll(allStatuses);
 
@@ -375,6 +428,7 @@ public class NotificationService {
 			.filter(s -> !s.getId().equals(statusObjId))
 			.forEach(s -> {
 				s.setStatus(NotificationStatus.CANCELED);
+				s.setUpdatedAt(now);
 			});
 		statusRepo.saveAll(allStatuses);
 
@@ -419,15 +473,6 @@ public class NotificationService {
 			? notif.getPublisherId()
 			: notif.getSubscriberId();
 
-		NotificationContext ctx = new NotificationContext(
-			studentFacade.findByStudentIdForSse(notif.getPublisherId()),
-			studentFacade.findByStudentIdForSse(notif.getSubscriberId())
-		);
-
-		// 제목/메시지 생성 로직을 분리: type + role 조합에 따라 다른 처리
-		String title = contentService.buildTitle(notif, role, ctx);
-		String message = contentService.buildMessage(notif, role, ctx);
-
 		return NotificationStatusDocument.builder()
 			.notificationId(notif.getId())
 			.targetId(targetId)
@@ -438,8 +483,6 @@ public class NotificationService {
 			.status(NotificationStatus.PENDING)
 			.isRead(role == RecipientRole.PUBLISHER)
 			.readAt(role == RecipientRole.PUBLISHER ? now : null)
-			.notificationTitle(title)
-			.notificationMessage(message)
 			.createdAt(now)
 			.updatedAt(now)
 			.build();
@@ -482,6 +525,22 @@ public class NotificationService {
 			log.info("완료 처리되지 않은 알림이 이미 존재하며, 상태가 PENDING입니다. 알림을 저장하지 않습니다.");
 			throw new BadRequestException("HttpStatus: " + HttpStatus.BAD_REQUEST + " | 알림이 이미 존재하며, 상태가 PENDING입니다.");
 		}
+	}
+
+	public NotificationStatusDocument getNotificationStatus(ObjectId notificationId, Long studentId, RecipientRole role,
+		NotificationStatus status
+	) throws BadRequestException {
+		NotificationStatusDocument findStatus = statusRepo.findByNotificationIdAndTargetIdAndRoleAndStatus(
+			notificationId, studentId, role, status
+		);
+
+		if (findStatus == null) {
+			log.info("알림 상태가 존재하지 않습니다: {}, {}, {}", notificationId, studentId, role);
+			throw new BadRequestException("HttpStatus: " + HttpStatus.BAD_REQUEST + " | 알림 상태가 존재하지 않습니다.");
+		}
+
+		log.info("알림 상태 조회 성공: {}, {}, {}", notificationId, studentId, role);
+		return findStatus;
 	}
 
 	/**
