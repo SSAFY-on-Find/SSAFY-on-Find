@@ -38,4 +38,3 @@ public class Recruitment extends BaseEntity {
 	@JoinColumn(name = "team_id")
 	private Team team;
 }
-
