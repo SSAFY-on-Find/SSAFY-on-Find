@@ -26,7 +26,7 @@ function SearchBar({ onSearch }: ISearchBar) {
     <div className="relative">
       <Search className="text-subtext absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform" />
       <input
-        className="border-subtext/30 placeholder:text-subtext h-[45px] w-full rounded-full border-1 py-2 pr-4 pl-9 text-sm"
+        className="border-subtext/30 placeholder:text-subtext focus:border-main h-[45px] w-full rounded-full border-1 py-2 pr-4 pl-9 text-sm focus:outline-none"
         placeholder="이름으로 검색..."
         value={searchValue}
         onChange={(e) => setSearchValue(e.target.value)}
