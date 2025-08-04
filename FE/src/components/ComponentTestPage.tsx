@@ -2,6 +2,7 @@ import { useState } from "react"
 import { AlarmClock } from "lucide-react"
 
 import { Button, CheckTag, InputBox, MainTag, MajorTag, NormalTag, PositionTag, SearchBar, WhiteTag } from "./atoms"
+import { ConfirmModal, TeamDetailModal } from "./templates"
 
 // API로 기술스택 70여개를 받아온다고 가정하고 상수에 담아두었어요
 const TECH_STACKS = [
@@ -14,6 +15,55 @@ const TECH_STACKS = [
   { id: "tech007", name: "MySQL" },
   { id: "tech008", name: "AWS" },
 ]
+// ComponentTestPage.tsx에 추가
+const sampleTeamData = {
+  id: "team001",
+  name: "팀 001",
+  description:
+    "팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명팀한줄설명",
+  track: "웹 디자인",
+  position: ["백엔드", "인프라"],
+  maxMembers: 6,
+  currentMembers: 4,
+  members: [
+    {
+      id: "member001",
+      name: "김태호",
+      position: "프론트",
+      major: "전공",
+    },
+    {
+      id: "member001",
+      name: "김태호",
+      position: "프론트",
+      major: "비전공",
+    },
+    {
+      id: "member001",
+      name: "김태호",
+      position: "프론트",
+      major: "전공",
+    },
+    {
+      id: "member002",
+      name: "이영희",
+      position: "백엔드",
+      major: "비전공",
+    },
+    {
+      id: "member003",
+      name: "박민수",
+      position: "풀스택",
+      major: "비전공",
+    },
+    {
+      id: "member004",
+      name: "최지은",
+      position: "프론트",
+      major: "전공",
+    },
+  ],
+}
 
 export default function ComponentTestPage() {
   // 1. CheckTag 사용법
@@ -41,6 +91,23 @@ export default function ComponentTestPage() {
   const [inputBoxValueSmall, setInputBoxValueSmall] = useState("")
   const [inputBoxValueMedium, setInputBoxValueMedium] = useState("")
   const [inputBoxValueLarge, setInputBoxValueLarge] = useState("")
+
+  // 4. 모달 사용법
+  const [ConfirmModal_teamout, setConfirmModal_teamout] = useState(false)
+  const [ConfirmModal_inviteAccept, setConfirmModal_inviteAccept] = useState(false)
+  const [teamDetailModal, setTeamDetailModal] = useState(false)
+  const [selectedTeam, setSelectedTeam] = useState(sampleTeamData)
+
+  const handleOut = () => {
+    setConfirmModal_teamout(false)
+  }
+  const handleAccept = () => {
+    setConfirmModal_inviteAccept(false)
+  }
+  const handleTeamSelect = (teamData: typeof sampleTeamData) => {
+    setSelectedTeam(teamData)
+    setTeamDetailModal(true)
+  }
 
   return (
     <div className="flex flex-col gap-5 p-5">
@@ -217,6 +284,44 @@ export default function ComponentTestPage() {
         <WhiteTag tagContent={"하양"}></WhiteTag>
         <WhiteTag tagContent={"유령"} fillBg={true}></WhiteTag>
       </div>
+      <div className="flex gap-4">
+        <button
+          className="rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-700"
+          onClick={() => setConfirmModal_teamout(true)}
+        >
+          확인 모달 - 팀 탈퇴
+        </button>
+        <button
+          className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
+          onClick={() => setConfirmModal_inviteAccept(true)}
+        >
+          확인 모달 - 초대 수락
+        </button>
+        <button
+          className="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-700"
+          onClick={() => handleTeamSelect(sampleTeamData)}
+        >
+          팀 상세 정보
+        </button>
+      </div>
+      <ConfirmModal
+        isOpen={ConfirmModal_teamout}
+        title="팀 탈퇴"
+        message={"정말 이 팀을 탈퇴하시겠습니까?"}
+        onConfirm={handleOut}
+        onCancel={() => setConfirmModal_teamout(false)}
+        confirmText="탈퇴"
+        isDestructive={true}
+      />
+      <ConfirmModal
+        isOpen={ConfirmModal_inviteAccept}
+        title="초대 수락"
+        message={"정말 초대를 받으시겠습니까?"}
+        onConfirm={handleAccept}
+        onCancel={() => setConfirmModal_inviteAccept(false)}
+        confirmText="수락"
+      />
+      <TeamDetailModal isOpen={teamDetailModal} onClose={() => setTeamDetailModal(false)} teamData={selectedTeam} />
       <div className="">
         <p>small - 채팅입력이나 기본 입력</p>
         <InputBox

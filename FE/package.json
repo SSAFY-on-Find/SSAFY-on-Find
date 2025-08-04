@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "format": "prettier --write",
     "lint:fix": "eslint --fix",
-    "prepare": "cd ../ && husky FE/.husky"
+    "prepare": "husky"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

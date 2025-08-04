@@ -58,4 +58,3 @@ public class TeamController {
 		return ResponseEntity.ok().body(body);
 	}
 }
-
