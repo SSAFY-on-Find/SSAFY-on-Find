@@ -125,6 +125,12 @@ export default function ComponentTestPage() {
     setSelectedTeam(teamData)
     setTeamDetailModal(true)
   }
+  const handleInviteUser = (userId: string) => {
+    console.log(userId, "로 초대요청 보내기") // 초대 로직 넣기
+  }
+  const handleChatWithUser = (userId: string) => {
+    console.log(userId, "과 채팅하기") // 1대1 채팅 로직 넣기
+  }
 
   return (
     <div className="flex flex-col gap-5 p-5">
@@ -204,6 +210,11 @@ export default function ComponentTestPage() {
         isOpen={studentSearchModal}
         onClose={() => setStudentSearchModal(false)}
         students={students}
+        onStudentClick={(userId) => {
+          handleInviteUser(userId)
+          handleChatWithUser(userId)
+          setStudentSearchModal(false)
+        }}
       />
       <div className="">
         <p>small - 채팅입력이나 기본 입력</p>

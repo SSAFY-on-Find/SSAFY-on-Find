@@ -20,7 +20,8 @@ interface IChatUser {
 interface IStudentListItem extends IChatUser {
   onClick: () => void
 }
-function StudentListItem({ id, name, major, position, hasTeam, onClick }: IStudentListItem) {
+function StudentListItem({ name, major, position, hasTeam, onClick }: IStudentListItem) {
+  // 1대1 채팅이나 초대 요청시 id기반으로 동작 예정
   return (
     <div
       className="hover:bg-main/10 flex w-full cursor-pointer items-center justify-between gap-2 rounded-md px-1 py-1"
