@@ -1,6 +1,5 @@
 import type { ITeamDetail } from "@/types"
 
-import { MainTag, PositionTag, UserImg } from "../atoms"
 import { TeamDetail } from "../molecules"
 
 import Modal from "./Modal"
