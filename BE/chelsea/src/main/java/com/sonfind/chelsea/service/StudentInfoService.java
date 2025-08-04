@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.sonfind.chelsea.domain.student.Students;
@@ -21,7 +22,6 @@ import com.sonfind.chelsea.repository.studentInfo.StudentInfoRepository;
 import com.sonfind.chelsea.util.StringListConverter;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -51,6 +51,7 @@ public class StudentInfoService {
 	/**
 	 * 자기소개 조회 함수
 	 * */
+	@Transactional(readOnly = true)
 	public StudentInfoResponseDto getStudentInfo(Long studentId) {
 
 		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId)
