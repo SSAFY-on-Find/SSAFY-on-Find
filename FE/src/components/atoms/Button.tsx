@@ -1,11 +1,11 @@
 type ButtonVariant = "primary" | "outline" | "danger" | "text" | "white"
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: "bg-main text-background",
-  outline: "border border-main text-main bg-white",
-  danger: "bg-white border border-error text-error",
-  text: "bg-transparent text-text border border-line",
-  white: "bg-transparent text-white border border-white",
+  primary: "bg-main text-background hover:bg-main/90",
+  outline: "border border-main text-main bg-white hover:bg-main/10",
+  danger: "bg-white border border-error text-error hover:bg-error/10",
+  text: "bg-transparent text-text border border-line hover:bg-subtext/10",
+  white: "bg-transparent text-white border border-white hover:bg-white/10",
 }
 
 interface IButton {

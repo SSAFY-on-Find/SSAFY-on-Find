@@ -344,7 +344,7 @@ export default function ComponentTestPage() {
           size={"l"}
         />
       </div>
-      <div className="bg-black p-2">
+      <div className="bg-main p-2">
         <Button
           text={"흰색"}
           isIcon={false}
