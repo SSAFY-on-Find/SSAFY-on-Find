@@ -1,6 +1,7 @@
 import { useState } from "react"
+import { AlarmClock } from "lucide-react"
 
-import { CheckTag, InputBox, MainTag, MajorTag, NormalTag, PositionTag, SearchBar, WhiteTag } from "./atoms"
+import { Button, CheckTag, InputBox, MainTag, MajorTag, NormalTag, PositionTag, SearchBar, WhiteTag } from "./atoms"
 import { ConfirmModal, StudentSearchModal, TeamDetailModal } from "./templates"
 
 // API로 기술스택 70여개를 받아온다고 가정하고 상수에 담아두었어요
@@ -250,6 +251,150 @@ export default function ComponentTestPage() {
           <p>현재 검색어: {searchQuery}</p>
           <SearchBar onSearch={handleSearch} />
         </div>
+      </div>
+      <div className="flex flex-row gap-2">
+        {/* 태그 small */}
+        <Button
+          text={"기본"}
+          isIcon={false}
+          onClick={function (): void {
+            throw new Error("Function not implemented.")
+          }}
+          size={"s"}
+        />
+        <Button
+          text={"아이콘"}
+          isIcon={true}
+          Icon={AlarmClock}
+          onClick={function (): void {
+            throw new Error("Function not implemented.")
+          }}
+          size={"s"}
+        />
+        <Button
+          text={"테두리"}
+          isIcon={false}
+          variant="outline"
+          onClick={function (): void {
+            throw new Error("Function not implemented.")
+          }}
+          size={"s"}
+        />
+        <Button
+          text={"경고"}
+          isIcon={false}
+          variant="danger"
+          onClick={function (): void {
+            throw new Error("Function not implemented.")
+          }}
+          size={"s"}
+        />
+        <Button
+          text={"텍스트"}
+          isIcon={false}
+          variant="text"
+          onClick={function (): void {
+            throw new Error("Function not implemented.")
+          }}
+          size={"s"}
+        />
+        <Button
+          isIcon={true}
+          Icon={AlarmClock}
+          onClick={function (): void {
+            throw new Error("Function not implemented.")
+          }}
+          size={"s"}
+        />
+      </div>
+      <div className="flex flex-row gap-2">
+        {/* 태그 medium */}
+        <Button
+          text={"기본"}
+          isIcon={false}
+          onClick={function (): void {
+            throw new Error("Function not implemented.")
+          }}
+          size={"m"}
+        />
+        <Button
+          text={"아이콘"}
+          isIcon={true}
+          Icon={AlarmClock}
+          onClick={function (): void {
+            throw new Error("Function not implemented.")
+          }}
+          size={"m"}
+        />
+        <Button
+          text={"테두리"}
+          isIcon={false}
+          variant="outline"
+          onClick={function (): void {
+            throw new Error("Function not implemented.")
+          }}
+          size={"m"}
+        />
+        <Button
+          text={"경고"}
+          isIcon={false}
+          variant="danger"
+          onClick={function (): void {
+            throw new Error("Function not implemented.")
+          }}
+          size={"m"}
+        />
+        <Button
+          text={"텍스트"}
+          isIcon={false}
+          variant="text"
+          onClick={function (): void {
+            throw new Error("Function not implemented.")
+          }}
+          size={"m"}
+        />
+        <Button
+          isIcon={true}
+          Icon={AlarmClock}
+          onClick={function (): void {
+            throw new Error("Function not implemented.")
+          }}
+          size={"m"}
+        />
+      </div>
+      <div className="flex flex-row gap-2">
+        {" "}
+        {/* 태그 large */}
+        <Button
+          text={"아이콘"}
+          isIcon={true}
+          Icon={AlarmClock}
+          onClick={function (): void {
+            throw new Error("Function not implemented.")
+          }}
+          size={"l"}
+        />
+        <Button
+          text={"테두리"}
+          isIcon={true}
+          Icon={AlarmClock}
+          variant="outline"
+          onClick={function (): void {
+            throw new Error("Function not implemented.")
+          }}
+          size={"l"}
+        />
+      </div>
+      <div className="bg-main p-2">
+        <Button
+          text={"흰색"}
+          isIcon={false}
+          variant="white"
+          onClick={function (): void {
+            throw new Error("Function not implemented.")
+          }}
+          size={"m"}
+        />
       </div>
     </div>
   )

@@ -1,3 +1,4 @@
+import { Button } from "@/components/atoms"
 import type { ITeamDetail } from "@/types"
 
 import { TeamDetail } from "../molecules"
@@ -24,6 +25,10 @@ function TeamDetailModal({ isOpen, onClose, teamData }: ITeamDetailModal) {
           currentMembers={teamData.currentMembers}
           members={teamData.members}
         ></TeamDetail>
+        <div className="mt-10 mb-4 flex gap-3 px-5">
+          <Button size={"m"} isIcon={false} text="지원하기" variant="primary" onClick={function (): void {}} />
+          <Button size={"m"} isIcon={false} text="팀 합치기 제안" variant="outline" onClick={function (): void {}} />
+        </div>
       </div>
     </Modal>
   )
