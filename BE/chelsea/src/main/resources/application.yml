@@ -1,4 +1,7 @@
 spring:
+  port:
+    8080
+
   application:
     name: chelsea
 
