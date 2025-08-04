@@ -1,3 +1,4 @@
+export { default as Button } from "./Button"
 export { default as CheckTag } from "./CheckTag"
 export { default as InputBox } from "./InputBox"
 export { default as MainTag } from "./MainTag"
