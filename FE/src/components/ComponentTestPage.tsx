@@ -2,6 +2,7 @@ import { useState } from "react"
 import { AlarmClock } from "lucide-react"
 
 import { Button, CheckTag, InputBox, MainTag, MajorTag, NormalTag, PositionTag, SearchBar, WhiteTag } from "./atoms"
+import { TeamCard } from "./molecules"
 import { ConfirmModal, TeamDetailModal } from "./templates"
 
 // API로 기술스택 70여개를 받아온다고 가정하고 상수에 담아두었어요
@@ -15,7 +16,7 @@ const TECH_STACKS = [
   { id: "tech007", name: "MySQL" },
   { id: "tech008", name: "AWS" },
 ]
-// ComponentTestPage.tsx에 추가
+// 단일 팀 테스트용 MockData에 추가
 const sampleTeamData = {
   id: "team001",
   name: "팀 001",
@@ -64,7 +65,11 @@ const sampleTeamData = {
     },
   ],
 }
-
+const initialTeams = [
+  { ...sampleTeamData, id: "team001", name: "팀 001", isFavorite: false },
+  { ...sampleTeamData, id: "team002", name: "팀 002", isFavorite: true },
+  { ...sampleTeamData, id: "team003", name: "팀 003", isFavorite: false },
+]
 export default function ComponentTestPage() {
   // 1. CheckTag 사용법
   // 기술스택이 선택되면 2개 이상일 경우 관리하기 위하여 배열로 선언.(기술스택 ID를 저장할 예정입니다.)
@@ -109,8 +114,33 @@ export default function ComponentTestPage() {
     setTeamDetailModal(true)
   }
 
+  // 5. 팀 카드 좋아요 사용법
+  const [teams, setTeams] = useState(initialTeams)
+  const handleFavoriteToggle = (id: string) => {
+    setTeams((teams) => {
+      return teams.map((team) => (team.id === id ? { ...team, isFavorite: !team.isFavorite } : team))
+    })
+  }
+
   return (
     <div className="flex flex-col gap-5 p-5">
+      <div className="flex gap-4">
+        {teams.map((team) => (
+          <TeamCard
+            id={team.id}
+            name={team.name}
+            description={team.description}
+            track={team.track}
+            position={team.position}
+            maxMembers={team.maxMembers}
+            currentMembers={team.currentMembers}
+            members={team.members}
+            isFavorite={team.isFavorite}
+            onClickFavorite={() => handleFavoriteToggle(team.id)}
+            onClickCard={() => handleTeamSelect(team)}
+          />
+        ))}
+      </div>
       <div>
         <h5>선택된 기술 스택 ID: {selectedTechStackIds.join(", ")}</h5>
         {TECH_STACKS.map((ele) => (
