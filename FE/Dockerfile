@@ -8,7 +8,7 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build
+RUN npx vite build
 
 FROM nginx:stable-alpine
 
