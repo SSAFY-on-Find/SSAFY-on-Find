@@ -2,12 +2,13 @@ import { Heart } from "lucide-react"
 
 import type { ITeamDetail } from "@/types"
 
-import { Button, MainTag, PositionTag, UserImg } from "../atoms"
+import { Button, MainTag, PositionTag, UserImg, WhiteTag } from "../atoms"
 
 interface ITeamCard extends ITeamDetail {
   isFavorite?: boolean
   onClickFavorite: () => void
   onClickCard: () => void
+  variant?: "default" | "main"
 }
 
 function TeamCard({
@@ -20,6 +21,7 @@ function TeamCard({
   isFavorite = false,
   onClickFavorite,
   onClickCard,
+  variant = "default",
 }: ITeamCard) {
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -29,24 +31,32 @@ function TeamCard({
     e.stopPropagation()
   }
 
+  // 카드 스타일
+  const bgColor = variant === "main" ? "bg-gradient-to-tl from-main to-main/80" : ""
+  const textColor = variant === "main" ? "text-white" : "text-text"
+  const titleColor = variant === "main" ? "text-white" : "text-main"
+  const heartColor = variant === "main" ? "text-white" : "text-subtext"
+  const heartFillColor = variant === "main" ? "fill-white text-white" : "fill-red-500 text-red-500"
+  const btnRecruit = variant === "main" ? "outline" : "primary"
+  const btnMerge = variant === "main" ? "white" : "outline"
   return (
     <div
       key={id}
       onClick={onClickCard}
-      className="border-main flex max-w-[260px] min-w-[260px] flex-col rounded-md border-2"
+      className={`${bgColor} border-main flex max-w-[260px] min-w-[260px] flex-col rounded-md border-2`}
     >
       <div className="flex flex-col gap-[11px] p-[25px] pb-[18px]">
         <div className="inline-flex items-center justify-between">
           <div className="inline-flex items-center gap-3">
-            <h3 className="text-main text-2xl font-bold">{name}</h3>
-            <MainTag tagContent={track} />
+            <h3 className={`${titleColor} text-2xl font-bold`}>{name}</h3>
+            {variant === "main" ? <WhiteTag tagContent={track} /> : <MainTag tagContent={track} />}
           </div>
           <Heart
-            className={`cursor-pointer transition-colors ${isFavorite ? "fill-red-500 text-red-500" : "text-subtext"}`}
+            className={`cursor-pointer transition-colors ${isFavorite ? heartFillColor : heartColor}`}
             onClick={handleFavoriteClick}
           />
         </div>
-        <p className="text-text line-clamp-2 text-sm">{description}</p>
+        <p className={`${textColor} line-clamp-2 text-sm`}>{description}</p>
       </div>
       <div className="p-[18px] pt-0">
         <div className="mb-5 flex px-[5px]">
@@ -56,16 +66,16 @@ function TeamCard({
             </div>
           ))}
         </div>
-        <p className="text-text mb-[10px] text-sm font-semibold">모집중인 포지션</p>
+        <p className={`${textColor} mb-[10px] text-sm font-semibold`}>모집중인 포지션</p>
         <div className="flex gap-[10px]">
           {position.map((ele) => (
-            <PositionTag positionName={ele} />
+            <>{variant === "main" ? <WhiteTag tagContent={ele} fillBg={true} /> : <PositionTag positionName={ele} />}</>
           ))}
         </div>
       </div>
       <div className="flex gap-4 p-[25px] pt-0" onClick={handleButtonClick}>
-        <Button size={"s"} isIcon={false} text="지원하기" variant="primary" onClick={function (): void {}} />
-        <Button size={"s"} isIcon={false} text="팀 합치기 제안" variant="outline" onClick={function (): void {}} />
+        <Button size={"s"} isIcon={false} text="지원하기" variant={btnRecruit} onClick={function (): void {}} />
+        <Button size={"s"} isIcon={false} text="팀 합치기 제안" variant={btnMerge} onClick={function (): void {}} />
       </div>
     </div>
   )

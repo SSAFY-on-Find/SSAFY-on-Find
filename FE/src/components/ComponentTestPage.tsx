@@ -67,7 +67,7 @@ const sampleTeamData = {
 }
 const initialTeams = [
   { ...sampleTeamData, id: "team001", name: "팀 001", isFavorite: false },
-  { ...sampleTeamData, id: "team002", name: "팀 002", isFavorite: true },
+  { ...sampleTeamData, id: "team002", name: "팀 002", isFavorite: true, variant: "main" },
   { ...sampleTeamData, id: "team003", name: "팀 003", isFavorite: false },
 ]
 export default function ComponentTestPage() {
@@ -138,6 +138,7 @@ export default function ComponentTestPage() {
             isFavorite={team.isFavorite}
             onClickFavorite={() => handleFavoriteToggle(team.id)}
             onClickCard={() => handleTeamSelect(team)}
+            variant={team.variant}
           />
         ))}
       </div>
