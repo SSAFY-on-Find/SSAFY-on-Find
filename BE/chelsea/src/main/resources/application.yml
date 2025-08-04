@@ -1,7 +1,4 @@
 spring:
-  port:
-    8080
-
   application:
     name: chelsea
 
@@ -11,3 +8,7 @@ spring:
   servlet:
     multipart:
       enabled: true
+
+server:
+  port:
+    8080
