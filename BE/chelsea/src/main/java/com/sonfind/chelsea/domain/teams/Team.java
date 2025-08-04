@@ -40,8 +40,7 @@ public class Team extends BaseEntity {
 	@Column(nullable = false)
 	private String name;
 
-	//varchar(80)
-	@Column(nullable = false)
+	@Column(nullable = false, length = 80)
 	private String description;
 
 	@ManyToOne
