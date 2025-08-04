@@ -51,14 +51,16 @@ public class TeamService {
 
 		//subCode로 track
 		//없는 트랙이면 badrequest
-		SubCode track = subCodeRepository.findById(request.getTrackCode())
-			.orElseThrow(() -> new ResponseStatusException(
-				HttpStatus.NOT_FOUND, "없는 트랙입니다."));
+		SubCode track = getSubCodeByValue(request.track());
+		if (track == null) {
+			throw new ResponseStatusException(
+				HttpStatus.NOT_FOUND, "없는 트랙입니다");
+		}
 
 		//팀 명 없이 일단 저장
 		Team noTeamName = Team.builder()
 			.name("")
-			.description(request.getDescription())
+			.description(request.description())
 			.track(track)
 			.build();
 
@@ -69,8 +71,8 @@ public class TeamService {
 		team.updateName(autoName);
 
 		// positions를 recruitments로 변환
-		if (request.getPositions() != null && !request.getPositions().isEmpty()) {
-			List<Recruitment> recruitments = toRecruitments(request.getPositions(), team);
+		if (request.positions() != null && !request.positions().isEmpty()) {
+			List<Recruitment> recruitments = toRecruitments(request.positions(), team);
 			team.updatePositions(recruitments);
 		}
 
@@ -105,9 +107,11 @@ public class TeamService {
 
 		//희망 트랙 수정
 		if (request.getTrackCode() != null) {
-			SubCode track = subCodeRepository.findById(request.getTrackCode())
-				.orElseThrow(() -> new ResponseStatusException(
-					HttpStatus.NOT_FOUND, "없는 트랙입니다"));
+			SubCode track = getSubCodeByValue(request.getTrackCode());
+			if (track == null) {
+				throw new ResponseStatusException(
+					HttpStatus.NOT_FOUND, "없는 트랙입니다.");
+			}
 			team.updateTrack(track);
 		}
 
@@ -223,11 +227,17 @@ public class TeamService {
 		return teamRules;
 	}
 
-	private SubCode getSubCodeByValue(String subCode) {
-		if (subCode == null || subCode.isBlank()) {
+	private SubCode getSubCodeByValue(String value) {
+		if (value == null || value.isBlank()) {
 			return null;
 		}
-		return subCodeRepository.findBySubCode(subCode);
+		// 1) 먼저 PK(subCode) 로 시도
+		SubCode byCode = subCodeRepository.findBySubCode(value);
+		if (byCode != null) {
+			return byCode;
+		}
+		// 2) 없으면 한글명(subCodeName) 으로 조회
+		return subCodeRepository.findBySubCodeName(value);
 	}
 
 	//팀원 정보 변환
@@ -267,15 +277,16 @@ public class TeamService {
 	}
 
 	//String positioncodes를 recruitment 리스트로 변환
-	private List<Recruitment> toRecruitments(List<String> positionCodes, Team team) {
-		return positionCodes.stream()
-			.map(code -> {
-				SubCode position = subCodeRepository.findById(code)
-					.orElseThrow(() -> new ResponseStatusException(
-						HttpStatus.NOT_FOUND,
-						"없는 포지션입니다"));
+	private List<Recruitment> toRecruitments(List<String> positionNames, Team team) {
+		return positionNames.stream()
+			.map(name -> {
+				SubCode pos = getSubCodeByValue(name);
+				if (pos == null) {
+					throw new ResponseStatusException(
+						HttpStatus.NOT_FOUND, "없는 포지션입니다: " + name);
+				}
 				return Recruitment.builder()
-					.position(position)
+					.position(pos)
 					.team(team)
 					.build();
 			})
