@@ -1,4 +1,4 @@
-import { Modal } from "../atoms"
+import Modal from "./Modal"
 
 interface IConfirmModal {
   isOpen: boolean

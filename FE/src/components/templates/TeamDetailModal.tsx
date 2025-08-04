@@ -1,4 +1,6 @@
-import { MainTag, Modal, PositionTag, UserImg } from "../atoms"
+import { MainTag, PositionTag, UserImg } from "../atoms"
+
+import Modal from "./Modal"
 
 interface ITeamDetailModal {
   isOpen: boolean

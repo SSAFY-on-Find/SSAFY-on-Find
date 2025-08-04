@@ -1,7 +1,7 @@
 import { useState } from "react"
 
 import { CheckTag, InputBox, MainTag, MajorTag, NormalTag, PositionTag, SearchBar, WhiteTag } from "./atoms"
-import { ConfirmModal, TeamDetailModal } from "./molecules"
+import { ConfirmModal, TeamDetailModal } from "./templates"
 
 // API로 기술스택 70여개를 받아온다고 가정하고 상수에 담아두었어요
 const TECH_STACKS = [
