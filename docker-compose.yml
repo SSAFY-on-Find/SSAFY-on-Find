@@ -6,24 +6,29 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    volumes:
+      - ./conf:/etc/nginx/conf.d
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot
+      - /home/ubuntu/app/frontend/dist:/usr/share/nginx/html
     depends_on:
       - spring-app
     networks:
       - my_network
-    volumes:
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-      - /var/www/certbot:/var/www/certbot
 
   spring-app:
     image: "pug9483/chelsea-be:latest"
     container_name: "my-spring-container"
+    restart: always
     ports:
       - "8080:8080"
-    restart: always
     depends_on:
-      - mysql
-      - redis
-      - mongo
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started 
+      mongo:
+        condition: service_healthy 
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true
@@ -49,6 +54,10 @@ services:
       - mysql_data:/var/lib/mysql
     networks:
       - my_network
+    healthcheck: 
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
 
   redis:
     image: "redis:alpine"
@@ -72,11 +81,18 @@ services:
       - mongodb_data:/data/db
     networks:
       - my_network
+    healthcheck: 
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   jenkins:
     build: . 
     container_name: "my-jenkins"
     restart: always
+    user: "1000:1000"
     ports:
       - "9090:8080"
       - "50000:50000"
