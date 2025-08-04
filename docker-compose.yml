@@ -15,8 +15,10 @@ services:
       - /var/www/certbot:/var/www/certbot
 
   spring-app:
-    build: "pug9483/chelsea-be:latest"
+    image: "pug9483/chelsea-be:latest"
     container_name: "my-spring-container"
+    ports:
+      - "8080:8080"
     restart: always
     depends_on:
       - mysql
