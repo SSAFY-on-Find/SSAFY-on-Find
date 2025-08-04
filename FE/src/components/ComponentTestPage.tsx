@@ -1,6 +1,7 @@
 import { useState } from "react"
 
-import { CheckTag, InputBox, MainTag, MajorTag, NormalTag, PositionTag, WhiteTag } from "./atoms"
+import { CheckTag, InputBox, MainTag, MajorTag, NormalTag, PositionTag, SearchBar, WhiteTag } from "./atoms"
+
 // API로 기술스택 70여개를 받아온다고 가정하고 상수에 담아두었어요
 const TECH_STACKS = [
   { id: "tech001", name: "React" },
@@ -14,6 +15,7 @@ const TECH_STACKS = [
 ]
 
 export default function ComponentTestPage() {
+  // 1. CheckTag 사용법
   // 기술스택이 선택되면 2개 이상일 경우 관리하기 위하여 배열로 선언.(기술스택 ID를 저장할 예정입니다.)
   const [selectedTechStackIds, setSelectedTechStackIds] = useState<string[]>([])
 
@@ -25,6 +27,13 @@ export default function ComponentTestPage() {
       }
       return prev.filter((id) => id !== teckStackId)
     })
+  }
+
+  // 2. SearchBar 사용법
+  const [searchQuery, setSearchQuery] = useState("")
+  // searchBar에서 매개변수로 사용할 검색함수입니다.
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
   }
 
   return (
@@ -63,6 +72,10 @@ export default function ComponentTestPage() {
         <InputBox text={""} size={"m"} placeholder={"팀을 소개하는 한줄 설명을 작성해주세요"}></InputBox>
         <p>large - 자기소개 마크다운</p>
         <InputBox text={""} size={"l"} placeholder={"마크다운 형식으로 자유롭게 자기소개를 작성해 보세요!"}></InputBox>
+        <div>
+          <p>현재 검색어: {searchQuery}</p>
+          <SearchBar onSearch={handleSearch} />
+        </div>
       </div>
     </div>
   )
