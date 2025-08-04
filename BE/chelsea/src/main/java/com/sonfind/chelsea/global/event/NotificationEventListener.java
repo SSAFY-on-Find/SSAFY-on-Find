@@ -1,8 +1,10 @@
 package com.sonfind.chelsea.global.event;
 
+import org.apache.coyote.BadRequestException;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.dto.notification.ApplicantDto;
 import com.sonfind.chelsea.dto.notification.ApplicationPubData;
 import com.sonfind.chelsea.dto.notification.ApplicationSubData;
@@ -13,8 +15,14 @@ import com.sonfind.chelsea.dto.notification.MergeSubData;
 import com.sonfind.chelsea.dto.notification.MergeTargetDto;
 import com.sonfind.chelsea.dto.notification.NotificationDto;
 import com.sonfind.chelsea.dto.notification.NotificationMsgDto;
+import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
 import com.sonfind.chelsea.dto.notification.ParticipantDto;
+import com.sonfind.chelsea.dto.student.StudentUnionForNotificationResponseDto;
+import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
+import com.sonfind.chelsea.facade.StudentFacade;
+import com.sonfind.chelsea.service.NotificationService;
 import com.sonfind.chelsea.service.SseService;
+import com.sonfind.chelsea.service.TeamService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,50 +36,59 @@ import lombok.RequiredArgsConstructor;
 public class NotificationEventListener {
 
 	private final SseService sseService;
+	private final StudentFacade studentFacade;
+	private final NotificationService notificationService;
+	private final TeamService teamService;
 
 	/**
 	 * 알림 이벤트 리스너
 	 * 이벤트 타입에 따라 발신자와 수신자에게 알림을 전송합니다.
 	 */
 	@EventListener
-	public void onNotification(NotificationEvent e) {
+	public void onNotification(NotificationEvent e) throws BadRequestException {
 		switch (e.getType()) {
 			case APPLICATION -> {
 				NotificationDto<ApplicationPubData> pubPayload = createApplicationPubPayload(e);
 				NotificationDto<ApplicationSubData> subPayload = createApplicationSubPayload(e);
 				sseService.sendNotification(e.getPubId(), pubPayload);
-				sseService.sendNotification(e.getSubId(), subPayload);
+				sseService.broadcastToTeam(subPayload.data().subscriber().id(), subPayload);
 			}
 			case INVITATION -> {
 				NotificationDto<InvitationPubData> pubPayload = createInvitationPubPayload(e);
 				NotificationDto<InvitationSubData> subPayload = createInvitationSubPayload(e);
-				sseService.sendNotification(e.getPubId(), pubPayload);
+				sseService.broadcastToTeam(pubPayload.data().subscriber().id(), pubPayload);
 				sseService.sendNotification(e.getSubId(), subPayload);
 			}
 			case MERGE -> {
 				NotificationDto<MergePubData> pubPayload = createMergePubPayload(e);
 				NotificationDto<MergeSubData> subPayload = createMergeSubPayload(e);
-				sseService.sendNotification(e.getPubId(), pubPayload);
-				sseService.sendNotification(e.getSubId(), subPayload);
+				sseService.broadcastToTeam(pubPayload.data().subscriber().id(), pubPayload);
+				sseService.broadcastToTeam(subPayload.data().subscriber().id(), subPayload);
 			}
 		}
 	}
 
 	// APPLICATION(개인 -> 팀 지원) - 발신자(개인)에게 알림 전송
-	private static NotificationDto<ApplicationPubData> createApplicationPubPayload(NotificationEvent e) {
-		String pubName = "김싸피";
+	private NotificationDto<ApplicationPubData> createApplicationPubPayload(NotificationEvent e) throws
+		BadRequestException {
 
-		String subName = "팀 A";
-		String subTrack = "웹기술";
+		// 발신자 정보 조회
+		Students findPub = studentFacade.findByStudentId(e.getPubId());
+
+		// 발신자 알림 관련 정보 조회
+		NotificationResponseDto findNotificationInfo = notificationService.getNotificationInfo(e.getNotificationId());
+
+		// 수신자 정보 조회
+		Students findSub = studentFacade.findByStudentId(e.getSubId());
 
 		// 발신자 정보
 		NotificationMsgDto pub = NotificationMsgDto.builder()
-			.id(e.getPubId())
-			.name(pubName)
+			.id(findPub.getStudentId())
+			.name(findPub.getName())
 			.type(e.getPubType())
-			.notificationTitle("e.getPublisher().getNotificationTitle()")
-			.notificationMessage("e.getPublisher().getNotificationMessage()")
-			.targetId(e.getSubId())
+			.notificationTitle(findNotificationInfo.pubNotificationTitle())
+			.notificationMessage(findNotificationInfo.pubNotificationMessage())
+			.targetId(findSub.getStudentId())
 			.build();
 
 		// 이벤트 페이로드
@@ -90,32 +107,38 @@ public class NotificationEventListener {
 	}
 
 	// APPLICATION(개인 -> 팀 지원) - 수신자(팀)에게 알림 전송
-	private static NotificationDto<ApplicationSubData> createApplicationSubPayload(NotificationEvent e) {
-		String pubName = "김싸피";
-		String pubTrack = "웹기술";
-		Boolean pubIsMajor = true;
-		String pubPosition = "BE";
+	private NotificationDto<ApplicationSubData> createApplicationSubPayload(NotificationEvent e) throws
+		BadRequestException {
+		// 발신자 정보 조회
+		Students findPub = studentFacade.findByStudentId(e.getPubId());
 
-		String subName = "팀 A";
-		String subTrack = "웹기술";
+		// 발신자 추가정보 조회
+		StudentUnionForNotificationResponseDto findPubInfo = studentFacade.findByStudentIdForSse(
+			findPub.getStudentId());
+
+		// 수신팀 정보 조회
+		TeamSimpleResponseDto findSubTeam = teamService.findSimpleTeamInfoByTeamId(e.getSubId());
+
+		// 수신정보 조회
+		NotificationResponseDto findNotificationInfo = notificationService.getNotificationInfo(e.getNotificationId());
 
 		// 발신자 정보
 		ApplicantDto pub = ApplicantDto.builder()
-			.id(e.getPubId())
-			.name(pubName)
+			.id(findPub.getStudentId())
+			.name(findPub.getName())
 			.type(e.getPubType())
-			.track(pubTrack)
-			.isMajor(pubIsMajor)
-			.position(pubPosition)
+			.track(findPubInfo.track())
+			.isMajor(getIsMajor(findPub))
+			.position(findPubInfo.position())
 			.build();
 
 		// 수신자 정보
 		NotificationMsgDto sub = NotificationMsgDto.builder()
-			.id(e.getSubId())
-			.name(subName)
+			.id(findNotificationInfo.subscriberId())
+			.name(findSubTeam.name())
 			.type(e.getSubType())
-			.notificationTitle("e.getSubscriber().getNotificationTitle()")
-			.notificationMessage("e.getSubscriber().getNotificationMessage()")
+			.notificationTitle(findNotificationInfo.subNotificationTitle())
+			.notificationMessage(findNotificationInfo.subNotificationMessage())
 			.build();
 
 		// 이벤트 페이로드
@@ -135,34 +158,40 @@ public class NotificationEventListener {
 	}
 
 	// INVITATION(팀 -> 개인 초대) - 발신자(팀)에게 알림 전송
-	private static NotificationDto<InvitationPubData> createInvitationPubPayload(NotificationEvent e) {
-		String pubName = "김싸피";
-		String pubTrack = "웹기술";
-		Boolean pubIsMajor = true;
-		String pubPosition = "BE";
+	private NotificationDto<InvitationPubData> createInvitationPubPayload(NotificationEvent e) throws
+		BadRequestException {
+		// 발신자 정보
+		TeamSimpleResponseDto findPubTeam = teamService.findSimpleTeamInfoByTeamId(e.getPubId());
 
-		String subName = "김싸피";
-		String subTrack = "웹기술";
+		// 발신자 추가정보 조회
+		NotificationResponseDto findPubTeamInfo = notificationService.getNotificationInfo(e.getNotificationId());
+
+		// 수신자 정보 조회
+		Students findSub = studentFacade.findByStudentId(e.getSubId());
+
+		// 수신자 추가정보 조회
+		StudentUnionForNotificationResponseDto findSubInfo = studentFacade.findByStudentIdForSse(
+			findSub.getStudentId());
 
 		// 발신자 정보
 		NotificationMsgDto pub = NotificationMsgDto.builder()
-			.id(e.getPubId())
-			.name(pubName)
+			.id(findPubTeam.teamId())
+			.name(findPubTeam.name())
 			.type(e.getPubType())
-			.track(pubTrack)
-			.notificationTitle("e.getPublisher().getNotificationTitle()")
-			.notificationMessage("e.getPublisher().getNotificationMessage()")
-			.targetId(e.getSubId())
+			.track(findPubTeam.track())
+			.notificationTitle(findPubTeamInfo.pubNotificationTitle())
+			.notificationMessage(findPubTeamInfo.pubNotificationMessage())
+			.targetId(findSub.getStudentId())
 			.build();
 
 		// 수신자 정보
 		ApplicantDto sub = ApplicantDto.builder()
-			.id(e.getSubId())
-			.name(subName)
+			.id(findSub.getStudentId())
+			.name(findSub.getName())
 			.type(e.getSubType())
-			.track(subTrack)
-			.isMajor(pubIsMajor)
-			.position(pubPosition)
+			.track(findSubInfo.track())
+			.isMajor(getIsMajor(findSub))
+			.position(findSubInfo.position())
 			.build();
 
 		// 이벤트 페이로드
@@ -182,30 +211,32 @@ public class NotificationEventListener {
 	}
 
 	// INVITATION(팀 -> 개인 초대) - 수신자(개인)에게 알림 전송
-	private static NotificationDto<InvitationSubData> createInvitationSubPayload(NotificationEvent e) {
-		String pubName = "김싸피";
-		String pubTrack = "웹기술";
-		Boolean pubIsMajor = true;
-		String pubPosition = "BE";
+	private NotificationDto<InvitationSubData> createInvitationSubPayload(NotificationEvent e) throws
+		BadRequestException {
+		// 발신자 정보
+		TeamSimpleResponseDto findPubTeam = teamService.findSimpleTeamInfoByTeamId(e.getPubId());
 
-		String subName = "김싸피";
-		String subTrack = "웹기술";
+		// 수신자 정보 조회
+		Students findSub = studentFacade.findByStudentId(e.getSubId());
+
+		// 수신자 추가정보 조회
+		NotificationResponseDto findNotificationInfo = notificationService.getNotificationInfo(e.getNotificationId());
 
 		// 발신자 정보
 		ParticipantDto pub = ParticipantDto.builder()
-			.id(e.getPubId())
-			.name(pubName)
+			.id(findPubTeam.teamId())
+			.name(findPubTeam.name())
 			.type(e.getPubType())
-			.track(pubTrack)
+			.track(findPubTeam.track())
 			.build();
 
 		// 수신자 정보
 		NotificationMsgDto sub = NotificationMsgDto.builder()
-			.id(e.getSubId())
-			.name(subName)
+			.id(findSub.getStudentId())
+			.name(findSub.getName())
 			.type(e.getSubType())
-			.notificationTitle("e.getSubscriber().getNotificationTitle()")
-			.notificationMessage("e.getSubscriber().getNotificationMessage()")
+			.notificationTitle(findNotificationInfo.subNotificationTitle())
+			.notificationMessage(findNotificationInfo.subNotificationMessage())
 			.build();
 
 		// 이벤트 페이로드
@@ -225,35 +256,36 @@ public class NotificationEventListener {
 	}
 
 	// MERGE(팀 합치기) - 발신자(팀)에게 알림 전송
-	private static NotificationDto<MergePubData> createMergePubPayload(NotificationEvent e) {
-		String pubName = "김싸피";
-		String pubTrack = "웹기술";
-		Boolean pubIsMajor = true;
-		String pubPosition = "BE";
+	private NotificationDto<MergePubData> createMergePubPayload(NotificationEvent e) throws BadRequestException {
+		// 발신자 정보 조회
+		TeamSimpleResponseDto findPubTeam = teamService.findSimpleTeamInfoByTeamId(e.getPubId());
 
-		String subName = "김싸피";
-		String subTrack = "웹기술";
+		// 발신자 추가정보 조회
+		NotificationResponseDto findNotification = notificationService.getNotificationInfo(e.getNotificationId());
+
+		// 수신자 정보 조회
+		TeamSimpleResponseDto findSubTeam = teamService.findSimpleTeamInfoByTeamId(e.getSubId());
 
 		// 발신자 정보
 		NotificationMsgDto pub = NotificationMsgDto.builder()
-			.id(e.getPubId())
-			.name(pubName)
+			.id(findPubTeam.teamId())
+			.name(findPubTeam.name())
 			.type(e.getPubType())
-			.track(pubTrack)
-			.notificationTitle("e.getPublisher().getNotificationTitle()")
-			.notificationMessage("e.getPublisher().getNotificationMessage()")
+			.track(findPubTeam.track())
+			.notificationTitle(findNotification.pubNotificationTitle())
+			.notificationMessage(findNotification.pubNotificationMessage())
 			.targetId(e.getSubId())
 			.build();
 
 		// 수신자 정보
 		MergeTargetDto sub = MergeTargetDto.builder()
-			.id(e.getSubId())
-			.name(subName)
+			.id(findSubTeam.teamId())
+			.name(findSubTeam.name())
 			.type(e.getSubType())
-			.track(subTrack)
-			.memberCount(4)
-			.majorCount(2)
-			.nonMajorCount(2)
+			.track(findSubTeam.track())
+			.memberCount(calcTeamMemberCount(findSubTeam))
+			.majorCount(findSubTeam.majorCount())
+			.nonMajorCount(findSubTeam.nonMajorCount())
 			.build();
 
 		// 이벤트 페이로드
@@ -273,33 +305,34 @@ public class NotificationEventListener {
 	}
 
 	// MERGE(팀 합치기) - 수신자(팀)에게 알림 전송
-	private static NotificationDto<MergeSubData> createMergeSubPayload(NotificationEvent e) {
-		String pubName = "김싸피";
-		String pubTrack = "웹기술";
-		Boolean pubIsMajor = true;
-		String pubPosition = "BE";
+	private NotificationDto<MergeSubData> createMergeSubPayload(NotificationEvent e) throws BadRequestException {
+		// 발신자 정보 조회
+		TeamSimpleResponseDto findPubTeam = teamService.findSimpleTeamInfoByTeamId(e.getPubId());
 
-		String subName = "김싸피";
-		String subTrack = "웹기술";
+		// 수신자 정보 조회
+		TeamSimpleResponseDto findSubTeam = teamService.findSimpleTeamInfoByTeamId(e.getSubId());
+
+		// 수신자 추가정보 조회
+		NotificationResponseDto findNotification = notificationService.getNotificationInfo(e.getNotificationId());
 
 		// 발신자 정보
 		MergeTargetDto pub = MergeTargetDto.builder()
-			.id(e.getPubId())
-			.name(pubName)
+			.id(findPubTeam.teamId())
+			.name(findPubTeam.name())
 			.type(e.getPubType())
-			.track(pubTrack)
-			.memberCount(4)
-			.majorCount(2)
-			.nonMajorCount(2)
+			.track(findPubTeam.track())
+			.memberCount(calcTeamMemberCount(findPubTeam))
+			.majorCount(findPubTeam.majorCount())
+			.nonMajorCount(findPubTeam.nonMajorCount())
 			.build();
 
 		// 수신자 정보
 		NotificationMsgDto sub = NotificationMsgDto.builder()
-			.id(e.getSubId())
-			.name(subName)
+			.id(findSubTeam.teamId())
+			.name(findSubTeam.name())
 			.type(e.getSubType())
-			.notificationTitle("e.getSubscriber().getNotificationTitle()")
-			.notificationMessage("e.getSubscriber().getNotificationMessage()")
+			.notificationTitle(findNotification.subNotificationTitle())
+			.notificationMessage(findNotification.subNotificationMessage())
 			.build();
 
 		// 이벤트 페이로드
@@ -316,5 +349,13 @@ public class NotificationEventListener {
 			.time(e.getUpdatedAt().toString())
 			.data(payload)
 			.build();
+	}
+
+	private String getIsMajor(Students findSub) {
+		return findSub.getMajorYn() ? "전공" : "비전공";
+	}
+
+	private static int calcTeamMemberCount(TeamSimpleResponseDto findSubTeamInfo) {
+		return findSubTeamInfo.majorCount() + findSubTeamInfo.nonMajorCount();
 	}
 }
