@@ -187,6 +187,16 @@ public class TeamService {
 			.build();
 	}
 
+	//팀 전체 목록 조회
+	// @Transactional(readOnly = true)
+	// public List<TeamListResponseDto> getAllTeams() {
+	// 	List<Team> teams = teamRepository.findByDeletedIsFalseOrderByTeamIdAsc();
+	//
+	// 	return teams.stream()
+	// 		.map(this::convertToTeamListResponse)
+	// 		.collect(Collectors.toList());
+	// }
+
 	//팀 빌딩 규칙
 	//6인 1팀
 	private TeamRuleResponseDto teamSizeRule(int teamSize) {
