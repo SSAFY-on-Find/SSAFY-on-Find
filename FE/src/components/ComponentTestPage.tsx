@@ -1,7 +1,8 @@
 import { useState } from "react"
 
-import { CheckTag, MainTag, MajorTag, NormalTag, PositionTag, WhiteTag } from "./atoms"
+import { CheckTag, InputBox, MainTag, MajorTag, NormalTag, PositionTag, SearchBar, WhiteTag } from "./atoms"
 import { ConfirmModal, TeamDetailModal } from "./molecules"
+
 // API로 기술스택 70여개를 받아온다고 가정하고 상수에 담아두었어요
 const TECH_STACKS = [
   { id: "tech001", name: "React" },
@@ -51,6 +52,7 @@ const sampleTeamData = {
 }
 
 export default function ComponentTestPage() {
+  // 1. CheckTag 사용법
   // 기술스택이 선택되면 2개 이상일 경우 관리하기 위하여 배열로 선언.(기술스택 ID를 저장할 예정입니다.)
   const [selectedTechStackIds, setSelectedTechStackIds] = useState<string[]>([])
 
@@ -64,6 +66,19 @@ export default function ComponentTestPage() {
     })
   }
 
+  // 2. SearchBar 사용법
+  const [searchQuery, setSearchQuery] = useState("")
+  // searchBar에서 매개변수로 사용할 검색함수입니다.
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
+  }
+
+  // 3. InputBox 사용법
+  const [inputBoxValueSmall, setInputBoxValueSmall] = useState("")
+  const [inputBoxValueMedium, setInputBoxValueMedium] = useState("")
+  const [inputBoxValueLarge, setInputBoxValueLarge] = useState("")
+
+  // 4. 모달 사용법
   const [ConfirmModal_teamout, setConfirmModal_teamout] = useState(false)
   const [ConfirmModal_inviteAccept, setConfirmModal_inviteAccept] = useState(false)
   const [teamDetailModal, setTeamDetailModal] = useState(false)
@@ -81,8 +96,8 @@ export default function ComponentTestPage() {
   }
 
   return (
-    <div>
-      <div className="bg-amber-100">
+    <div className="flex flex-col gap-5 p-5">
+      <div>
         <h5>선택된 기술 스택 ID: {selectedTechStackIds.join(", ")}</h5>
         {TECH_STACKS.map((ele) => (
           <CheckTag
@@ -93,7 +108,7 @@ export default function ComponentTestPage() {
           ></CheckTag>
         ))}
       </div>
-      <div className="bg-background p-5">
+      <div className="bg-background">
         <NormalTag tagContent={"기본태그"} />
         <MainTag tagContent={"메인태그"}></MainTag>
         <MainTag tagContent={"메인태그"} fillBg={true}></MainTag>
@@ -105,7 +120,7 @@ export default function ComponentTestPage() {
         <PositionTag positionName={"AI"}></PositionTag>
         <MajorTag tagContent={"전공태그"}></MajorTag>
       </div>
-      <div className="bg-black p-5">
+      <div className="bg-main p-5">
         <WhiteTag tagContent={"하양"}></WhiteTag>
         <WhiteTag tagContent={"유령"} fillBg={true}></WhiteTag>
       </div>
@@ -147,6 +162,41 @@ export default function ComponentTestPage() {
         confirmText="수락"
       />
       <TeamDetailModal isOpen={teamDetailModal} onClose={() => setTeamDetailModal(false)} teamData={selectedTeam} />
+      <div className="">
+        <p>small - 채팅입력이나 기본 입력</p>
+        <InputBox
+          text={inputBoxValueSmall}
+          size={"s"}
+          placeholder={"메시지를 입력하세요..."}
+          onChange={setInputBoxValueSmall}
+        ></InputBox>
+        <p>small - isDisabled=true</p>
+        <InputBox
+          text={"사전에 설정된 이름입니다."}
+          size={"s"}
+          placeholder={"메시지를 입력하세요..."}
+          onChange={setInputBoxValueSmall}
+          isDisabled={true}
+        ></InputBox>
+        <p>medium - 팀소개</p>
+        <InputBox
+          text={inputBoxValueMedium}
+          size={"m"}
+          placeholder={"팀을 소개하는 한줄 설명을 작성해주세요"}
+          onChange={setInputBoxValueMedium}
+        ></InputBox>
+        <p>large - 자기소개 마크다운</p>
+        <InputBox
+          text={inputBoxValueLarge}
+          size={"l"}
+          placeholder={"마크다운 형식으로 자유롭게 자기소개를 작성해 보세요!"}
+          onChange={setInputBoxValueLarge}
+        ></InputBox>
+        <div>
+          <p>현재 검색어: {searchQuery}</p>
+          <SearchBar onSearch={handleSearch} />
+        </div>
+      </div>
     </div>
   )
 }
