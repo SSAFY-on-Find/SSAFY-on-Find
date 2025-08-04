@@ -36,6 +36,11 @@ export default function ComponentTestPage() {
     setSearchQuery(query)
   }
 
+  // 3. InputBox 사용법
+  const [inputBoxValueSmall, setInputBoxValueSmall] = useState("")
+  const [inputBoxValueMedium, setInputBoxValueMedium] = useState("")
+  const [inputBoxValueLarge, setInputBoxValueLarge] = useState("")
+
   return (
     <div className="flex flex-col gap-5 p-5">
       <div>
@@ -67,11 +72,34 @@ export default function ComponentTestPage() {
       </div>
       <div className="">
         <p>small - 채팅입력이나 기본 입력</p>
-        <InputBox text={""} size={"s"} placeholder={"메시지를 입력하세요..."}></InputBox>
+        <InputBox
+          text={inputBoxValueSmall}
+          size={"s"}
+          placeholder={"메시지를 입력하세요..."}
+          onChange={setInputBoxValueSmall}
+        ></InputBox>
+        <p>small - isDisabled=true</p>
+        <InputBox
+          text={"사전에 설정된 이름입니다."}
+          size={"s"}
+          placeholder={"메시지를 입력하세요..."}
+          onChange={setInputBoxValueSmall}
+          isDisabled={true}
+        ></InputBox>
         <p>medium - 팀소개</p>
-        <InputBox text={""} size={"m"} placeholder={"팀을 소개하는 한줄 설명을 작성해주세요"}></InputBox>
+        <InputBox
+          text={inputBoxValueMedium}
+          size={"m"}
+          placeholder={"팀을 소개하는 한줄 설명을 작성해주세요"}
+          onChange={setInputBoxValueMedium}
+        ></InputBox>
         <p>large - 자기소개 마크다운</p>
-        <InputBox text={""} size={"l"} placeholder={"마크다운 형식으로 자유롭게 자기소개를 작성해 보세요!"}></InputBox>
+        <InputBox
+          text={inputBoxValueLarge}
+          size={"l"}
+          placeholder={"마크다운 형식으로 자유롭게 자기소개를 작성해 보세요!"}
+          onChange={setInputBoxValueLarge}
+        ></InputBox>
         <div>
           <p>현재 검색어: {searchQuery}</p>
           <SearchBar onSearch={handleSearch} />
