@@ -1,7 +1,18 @@
 import { useState } from "react"
 import { AlarmClock } from "lucide-react"
 
-import { Button, CheckTag, InputBox, MainTag, MajorTag, NormalTag, PositionTag, SearchBar, WhiteTag } from "./atoms"
+import {
+  Button,
+  CheckTag,
+  Dropdown,
+  InputBox,
+  MainTag,
+  MajorTag,
+  NormalTag,
+  PositionTag,
+  SearchBar,
+  WhiteTag,
+} from "./atoms"
 import { ConfirmModal, TeamDetailModal } from "./templates"
 
 // API로 기술스택 70여개를 받아온다고 가정하고 상수에 담아두었어요
@@ -109,8 +120,20 @@ export default function ComponentTestPage() {
     setTeamDetailModal(true)
   }
 
+  // 5. 드롭다운 사용법
+  const POSITION_OPTIONS = ["프론트", "백엔드", "풀스택", "모바일", "임베디드", "AI", "인프라"]
+  const [position, setPosition] = useState("")
+
   return (
     <div className="flex flex-col gap-5 p-5">
+      <div>
+        <Dropdown
+          placeholder={"희망 포지션을 선택하세요"}
+          options={POSITION_OPTIONS}
+          value={position}
+          onChange={setPosition}
+        />
+      </div>
       <div>
         <h5>선택된 기술 스택 ID: {selectedTechStackIds.join(", ")}</h5>
         {TECH_STACKS.map((ele) => (
