@@ -15,7 +15,7 @@ services:
       - /var/www/certbot:/var/www/certbot
 
   spring-app:
-    build: ./BE/chelsea
+    build: pug9483/chelsea-be:latest
     container_name: "my-spring-container"
     restart: always
     depends_on:
