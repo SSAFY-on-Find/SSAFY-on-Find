@@ -1,3 +1,5 @@
+import { Button } from "@/components/atoms"
+
 import Modal from "./Modal"
 
 interface IConfirmModal {
@@ -23,18 +25,17 @@ function ConfirmModal({
   return (
     <Modal isOpen={isOpen} onClose={onCancel} size={"s"}>
       <div className="p-5">
-        <h3 className="text-text mb-2 text-xl font-bold">{title}</h3>
+        <h3 className="text-text mb-3 text-xl font-bold">{title}</h3>
         <p className="text-subtext text-sm">{message}</p>
-        <div className="flex justify-end gap-3">
-          <button className="text-text rounded-md bg-gray-300 px-3 py-1 hover:bg-gray-400" onClick={onCancel}>
-            {cancelText}
-          </button>
-          <button
-            className={`${isDestructive ? "bg-red-600 hover:bg-red-800" : "bg-blue-600 hover:bg-blue-800"} rounded-md px-3 py-1 text-white`}
+        <div className="mt-4 flex justify-end gap-3">
+          <Button size={"m"} isIcon={false} text={cancelText} onClick={onCancel} variant="text" />
+          <Button
+            size={"m"}
+            isIcon={false}
+            text={confirmText}
             onClick={onConfirm}
-          >
-            {confirmText}
-          </button>
+            variant={`${isDestructive ? "danger" : "primary"}`}
+          />
         </div>
       </div>
     </Modal>
