@@ -28,20 +28,20 @@ SSAFY On Find는 삼성 청년 SW 아카데미(SSAFY) 교육생들의 효율적�
 <br/>
 <b>김정연</b>
 <br/>
-<i>Backend</i>
+<i>Frontend</i>
 <br/>
 <a href="https://github.com/blueconecell">
 <img src="https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white"/>
 </a>
 </td>
 <td align="center" width="33%">
-<img src="https://github.com/박의균-github-주소.png" width="120" height="120" style="border-radius: 50%;">
+<img src="https://avatars.githubusercontent.com/u/67894738?v=4" width="120" height="120" style="border-radius: 50%;">
 <br/>
 <b>박의균</b>
 <br/>
-<i>Backend</i>
+<i>infra</i>
 <br/>
-<a href="https://github.com/박의균-github-주소">
+<a href="https://github.com/pug9483">
 <img src="https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white"/>
 </a>
 </td>
@@ -52,7 +52,7 @@ SSAFY On Find는 삼성 청년 SW 아카데미(SSAFY) 교육생들의 효율적�
 <br/>
 <b>서재곤</b>
 <br/>
-<i>Frontend</i>
+<i>Backend</i>
 <br/>
 <a href="https://github.com/Jgone2">
 <img src="https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white"/>
@@ -63,7 +63,7 @@ SSAFY On Find는 삼성 청년 SW 아카데미(SSAFY) 교육생들의 효율적�
 <br/>
 <b>석예은</b>
 <br/>
-<i>AI/Data</i>
+<i>Backend</i>
 <br/>
 <a href="https://github.com/yenseok">
 <img src="https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white"/>
@@ -74,7 +74,7 @@ SSAFY On Find는 삼성 청년 SW 아카데미(SSAFY) 교육생들의 효율적�
 <br/>
 <b>조현지</b>
 <br/>
-<i>Frontend</i>
+<i>Backend</i>
 <br/>
 <a href="https://github.com/hyunji321">
 <img src="https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white"/>
