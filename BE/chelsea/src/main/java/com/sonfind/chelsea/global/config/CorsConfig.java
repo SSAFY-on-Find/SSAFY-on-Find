@@ -18,8 +18,7 @@ public class CorsConfig {
 
 		corsConfiguration.setAllowCredentials(true);
 
-		corsConfiguration.setAllowedOriginPatterns(Arrays.asList("http://localhost:*",
-			"https://claude.ai/public/artifacts/1791ab62-f357-483d-959b-d2a8719a6a17"));
+		corsConfiguration.setAllowedOriginPatterns(Arrays.asList("http://localhost:*"));
 
 		corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 		corsConfiguration.addExposedHeader("Authorization");

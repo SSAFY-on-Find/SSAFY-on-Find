@@ -54,15 +54,15 @@ public class Team extends BaseEntity {
 	private boolean isDeleted;
 
 	@Column(name = "major_count", nullable = false)
-	@Builder.Default
-	private Integer majorCount = 0;
+	// @Builder.Default
+	private Integer majorCount;
 
 	@Column(name = "non_major_count", nullable = false)
-	@Builder.Default
-	private Integer nonMajorCount = 0;
+	// @Builder.Default
+	private Integer nonMajorCount;
 
 	@OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
-	@Builder.Default
+	// @Builder.Default
 	private List<Recruitment> recruitments = new ArrayList<>();
 
 	public void updateDescription(String description) {
