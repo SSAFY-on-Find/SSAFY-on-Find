@@ -5,6 +5,6 @@ public record NotificationRequestDto(
 	String subType,
 	Long pubId,
 	String pubType,
-	String type
+	String type    // APPLICATION, INVITATION, MERGE
 ) {
 }
