@@ -6,6 +6,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 
 import App from "./App.tsx"
 
+import "react-toastify/ReactToastify.css"
 import "./index.css"
 const queryClient = new QueryClient({
   defaultOptions: {

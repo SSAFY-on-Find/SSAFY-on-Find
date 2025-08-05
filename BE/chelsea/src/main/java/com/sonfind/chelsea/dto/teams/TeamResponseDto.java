@@ -2,7 +2,7 @@ package com.sonfind.chelsea.dto.teams;
 
 import java.util.List;
 
-import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
+import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 
 import lombok.Builder;
 
@@ -10,9 +10,12 @@ import lombok.Builder;
 public record TeamResponseDto(
 	String teamName,
 	String teamDescription,
-	SubCodeResponse teamTrack,
+	SubCodeResponseDto teamTrack,
+	int majorCount,
+	int nonMajorCount,
 	Long teamCount,
 	List<RecruitmentDto> positions,
-	List<TeamMemberResponseDto> members
+	List<TeamMemberResponseDto> members,
+	boolean isFavorite
 ) {
 }

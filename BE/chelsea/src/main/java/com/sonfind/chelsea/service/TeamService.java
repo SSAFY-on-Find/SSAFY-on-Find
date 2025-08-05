@@ -14,7 +14,7 @@ import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 import com.sonfind.chelsea.domain.teams.Recruitment;
 import com.sonfind.chelsea.domain.teams.Team;
-import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
+import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 import com.sonfind.chelsea.dto.teams.CreateTeamRequestDto;
 import com.sonfind.chelsea.dto.teams.MyTeamResponseDto;
 import com.sonfind.chelsea.dto.teams.RecruitmentDto;
@@ -25,10 +25,10 @@ import com.sonfind.chelsea.dto.teams.TeamRuleResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
 import com.sonfind.chelsea.dto.teams.UpdateTeamRequestDto;
 import com.sonfind.chelsea.global.domain.SubCode;
+import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
 import com.sonfind.chelsea.repository.TeamRepository;
-import com.sonfind.chelsea.repository.studentInfo.StudentInfoRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -40,7 +40,10 @@ public class TeamService {
 	private final SubCodeRepository subCodeRepository;
 	private final StudentRepository studentRepository;
 	private final StudentInfoRepository studentInfoRepository;
+
+	private final SubCodeService subCodeService;
 	private final StudentService studentService;
+	private final FavoriteService favoriteService;
 
 	//팀 생성
 	@Transactional
@@ -128,7 +131,7 @@ public class TeamService {
 
 	//타 팀 상세조회
 	@Transactional(readOnly = true)
-	public TeamResponseDto getTeamDetail(Long teamId) {
+	public TeamResponseDto getTeamDetail(Long teamId, Long studentId) {
 		//존재하는 팀인지 확인
 		Team team = teamRepository.findTeamByTeamId(teamId)
 			.orElseThrow(() -> new ResponseStatusException(
@@ -141,6 +144,12 @@ public class TeamService {
 			.map(this::convertToTeamMemberResponse)
 			.collect(Collectors.toList());
 
+		int majorCount = (int)teamMembers.stream()
+			.mapToLong(member -> Boolean.TRUE.equals(member.getMajorYn()) ? 1L : 0L)
+			.sum();
+		int nonMajorCount = teamMembers.size() - majorCount;
+		int teamCount = teamMembers.size();
+
 		//모집 포지션
 		List<RecruitmentDto> positions = team.getRecruitments().stream()
 			.map(recruitment -> new RecruitmentDto(
@@ -149,16 +158,21 @@ public class TeamService {
 			))
 			.collect(Collectors.toList());
 
+		boolean isFavorite = favoriteService.checkFavoriteStatus(studentId, teamId);
+
 		return TeamResponseDto.builder()
 			.teamName(team.getName())
 			.teamDescription(team.getDescription())
-			.teamTrack(new SubCodeResponse(
+			.teamTrack(new SubCodeResponseDto(
 				team.getTrack().getSubCode(),
 				team.getTrack().getSubCodeName()
 			))
 			.teamCount((long)teamMembers.size())
+			.majorCount(majorCount)
+			.nonMajorCount(nonMajorCount)
 			.positions(positions)
 			.members(members)
+			.isFavorite(isFavorite)
 			.build();
 	}
 
@@ -171,7 +185,7 @@ public class TeamService {
 				HttpStatus.NOT_FOUND, "팀에 속해 있지 않습니다.");
 		}
 
-		TeamResponseDto teamInfo = getTeamDetail(students.getTeamId());
+		TeamResponseDto teamInfo = getTeamDetail(students.getTeamId(), studentId);
 
 		List<Students> teamMembers = studentRepository.findAllByTeamId(students.getTeamId());
 
@@ -193,11 +207,11 @@ public class TeamService {
 
 	//팀 전체 목록 조회
 	@Transactional(readOnly = true)
-	public List<TeamListResponseDto> getAllTeams() {
+	public List<TeamListResponseDto> getAllTeams(Long studentId) {
 		List<Team> teams = teamRepository.findByIsDeletedIsFalseOrderByTeamIdAsc();
 
 		return teams.stream()
-			.map(this::convertToTeamListResponse)
+			.map(team -> convertToTeamListResponse(team, studentId))
 			.sorted(
 				Comparator.comparing(TeamListResponseDto::isRecruitingComplete)
 					.thenComparing(dto -> parseTeamNumber(dto.teamName()))
@@ -206,12 +220,11 @@ public class TeamService {
 	}
 
 	//team2teamlistresponseDto
-	private TeamListResponseDto convertToTeamListResponse(Team team) {
+	private TeamListResponseDto convertToTeamListResponse(Team team, Long studentId) {
 		List<Students> teamMembers = studentRepository.findAllByTeamId(team.getTeamId());
-
-		List<String> memberProfileImages = teamMembers.stream()
-			.map(this::getStudentProfileImage)
-			.filter(url -> url != null && !url.trim().isEmpty())
+		
+		List<TeamMemberResponseDto> members = teamMembers.stream()
+			.map(this::convertToTeamMemberResponse)
 			.collect(Collectors.toList());
 
 		List<RecruitmentDto> recruitments = team.getRecruitments().stream()
@@ -221,19 +234,22 @@ public class TeamService {
 			))
 			.collect(Collectors.toList());
 
-		SubCodeResponse track = new SubCodeResponse(
+		SubCodeResponseDto track = new SubCodeResponseDto(
 			team.getTrack().getSubCode(),
 			team.getTrack().getSubCodeName()
 		);
+
+		boolean isFavorite = favoriteService.checkFavoriteStatus(studentId, team.getTeamId());
 
 		return TeamListResponseDto.builder()
 			.teamId(team.getTeamId())
 			.teamName(team.getName())
 			.description(team.getDescription())
 			.track(track)
-			.memberProfileImages(memberProfileImages)
 			.recruitments(recruitments)
+			.members(members)
 			.isRecruitingComplete(teamMembers.size() >= 6)
+			.isFavorite(isFavorite)
 			.build();
 	}
 
@@ -320,9 +336,9 @@ public class TeamService {
 			String major = Boolean.TRUE.equals(students.getMajorYn()) ? "전공" : "비전공";
 			String profileImageUrl = (studentInfo != null) ? studentInfo.getProfileImageUrl() : "";
 
-			SubCodeResponse position = null;
+			SubCodeResponseDto position = null;
 			if (studentInfo != null && studentInfo.getPositionCode() != null) {
-				position = new SubCodeResponse(
+				position = new SubCodeResponseDto(
 					studentInfo.getPositionCode().getSubCode(),
 					studentInfo.getPositionCode().getSubCodeName()
 				);
@@ -388,6 +404,11 @@ public class TeamService {
 			.majorCount(taem.getMajorCount())
 			.nonMajorCount(taem.getNonMajorCount())
 			.build();
+	}
+
+	public TeamSimpleResponseDto createTeamSimpleResponseDto(Long teamId, String teamName, String trackCodeName,
+		int majorCount, int nonMajorCout) {
+		return new TeamSimpleResponseDto(teamId, teamName, trackCodeName, majorCount, nonMajorCout);
 	}
 
 }
