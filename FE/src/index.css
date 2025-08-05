@@ -20,3 +20,9 @@
 html {
   font-family: "Pretendard", sans-serif;
 }
+
+.Toastify__toast {
+  font-family: 'Pretendard', sans-serif;
+  font-size: 14px;
+  color: var(--color-subtext);
+}
