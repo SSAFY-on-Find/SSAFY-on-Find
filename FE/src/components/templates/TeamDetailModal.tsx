@@ -1,6 +1,7 @@
 import { Button } from "@/components/atoms"
-import { TeamDetail } from "@/components/molecules"
 import type { ITeamDetail } from "@/types"
+
+import { TeamDetail } from "../molecules"
 
 import Modal from "./Modal"
 
