@@ -1,7 +1,7 @@
 import { useRef, useState } from "react"
 
 interface ITooltip {
-  content: string
+  content: React.ReactNode
   children: React.ReactNode
   side?: "top" | "bottom" | "left" | "right"
 }
@@ -30,7 +30,7 @@ function Tooltip({ content, children, side = "top" }: ITooltip) {
     >
       {children}
       <div
-        className={`text-subtext border-line pointer-events-none absolute z-20 w-full rounded-md border bg-white p-2 text-left text-xs font-normal shadow transition-opacity ${positionClass} ${open ? "visible opacity-100" : "invisible opacity-0"} `}
+        className={`text-subtext border-line pointer-events-none absolute z-20 w-auto max-w-[200px] min-w-[70px] rounded-md border bg-white p-2 text-left text-xs font-normal break-words shadow transition-opacity ${positionClass} ${open ? "visible opacity-100" : "invisible opacity-0"} `}
         role="tooltip"
       >
         {content}
