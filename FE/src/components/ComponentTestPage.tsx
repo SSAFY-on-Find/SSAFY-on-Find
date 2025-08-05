@@ -1,7 +1,18 @@
 import { useState } from "react"
-import { AlarmClock } from "lucide-react"
+import { AlarmClock, Eye, Search } from "lucide-react"
 
-import { Button, CheckTag, InputBox, MainTag, MajorTag, NormalTag, PositionTag, SearchBar, WhiteTag } from "./atoms"
+import {
+  Button,
+  CheckTag,
+  InputBox,
+  MainTag,
+  MajorTag,
+  NormalTag,
+  PositionTag,
+  SearchBar,
+  Segmented,
+  WhiteTag,
+} from "./atoms"
 import { ConfirmModal, TeamDetailModal } from "./templates"
 
 // API로 기술스택 70여개를 받아온다고 가정하고 상수에 담아두었어요
@@ -109,8 +120,38 @@ export default function ComponentTestPage() {
     setTeamDetailModal(true)
   }
 
+  // segmented 사용방법
+  const [activeRequestTab, setActiveRequestTab] = useState<"left" | "right">("left")
+  const [activeMarkdownTab, setActiveMarkdownTab] = useState<"left" | "right">("left")
+
   return (
     <div className="flex flex-col gap-5 p-5">
+      <div className="w-80">
+        <Segmented
+          leftText="받은 요청"
+          rightText="보낸 요청"
+          activeSegment={activeRequestTab}
+          onSegmentChange={setActiveRequestTab}
+        />
+
+        <div className="mt-4">
+          {activeRequestTab === "left" ? <div>받은 요청 컨텐츠</div> : <div>보낸 요청 컨텐츠</div>}
+        </div>
+      </div>
+      <div className="w-200">
+        <Segmented
+          leftText="편집"
+          leftIcon={Search}
+          rightText="미리보기"
+          rightIcon={Eye}
+          activeSegment={activeMarkdownTab}
+          onSegmentChange={setActiveMarkdownTab}
+        />
+
+        <div className="mt-4">
+          {activeMarkdownTab === "left" ? <div>마크다운으로 작성하세요!</div> : <div>마크다운으로 작성된 컨텐츠</div>}
+        </div>
+      </div>
       <div>
         <h5>선택된 기술 스택 ID: {selectedTechStackIds.join(", ")}</h5>
         {TECH_STACKS.map((ele) => (
