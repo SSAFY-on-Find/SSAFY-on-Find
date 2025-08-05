@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,9 +45,9 @@ public class StudentController {
 	}
 
 	@GetMapping
-	public ResponseEntity<Map<String, Object>> getStudentList(@CookieValue("sessionId") Long studentId) {
+	public ResponseEntity<Map<String, Object>> getStudentList() {
 
-		List<StudentListResponseDto> data = studentService.getStudentList(studentId);
+		List<StudentListResponseDto> data = studentService.getStudentList();
 
 		Map<String, Object> body = new HashMap<String, Object>();
 
