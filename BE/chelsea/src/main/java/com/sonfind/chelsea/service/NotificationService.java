@@ -22,7 +22,7 @@ import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
 import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
 import com.sonfind.chelsea.dto.notification.NotificationStatusResponseDto;
 import com.sonfind.chelsea.facade.StudentFacade;
-import com.sonfind.chelsea.global.event.NotificationEvent;
+import com.sonfind.chelsea.global.event.InvitationRequestEvent;
 import com.sonfind.chelsea.repository.NotificationRepository;
 import com.sonfind.chelsea.repository.NotificationStatusRepository;
 import com.sonfind.chelsea.types.NotificationDomainType;
@@ -135,7 +135,7 @@ public class NotificationService {
 		log.info("알림 상태가 저장되었습니다: {}, {}", savedNotification.getId(), type);
 
 		// 알림 발송 이벤트를 발행
-		NotificationEvent event = NotificationEvent.of(
+		InvitationRequestEvent event = InvitationRequestEvent.of(
 			this,
 			savedNotification.getId(),
 			savedNotification.getPublisherId(),
@@ -143,7 +143,7 @@ public class NotificationService {
 			savedNotification.getSubscriberId(),
 			savedNotification.getSubscriberType(),
 			savedNotification.getUpdatedAt(),
-			type
+			savedNotification.getType()
 		);
 		eventPublisher.publishEvent(event);
 	}
@@ -384,11 +384,8 @@ public class NotificationService {
 		NotificationDocument doc = notificationRepo.findById(notificationId)
 			.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
 
-		/**
-		 * TODO: 브로드 캐스트로 변경
-		 */
 		// publisher → subscriber
-		eventPublisher.publishEvent(new NotificationEvent(
+		eventPublisher.publishEvent(new InvitationRequestEvent(
 			this,
 			notificationId,
 			doc.getPublisherId(), doc.getPublisherType(),
@@ -440,11 +437,8 @@ public class NotificationService {
 		NotificationDocument doc = notificationRepo.findById(notificationId)
 			.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
 
-		/**
-		 * TODO: 브로드 캐스트로 변경
-		 */
 		// publisher → subscriber
-		eventPublisher.publishEvent(new NotificationEvent(
+		eventPublisher.publishEvent(new InvitationRequestEvent(
 			this,
 			notificationId,
 			doc.getPublisherId(), doc.getPublisherType(),
