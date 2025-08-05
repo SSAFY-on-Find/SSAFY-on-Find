@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,12 +43,12 @@ public class NotificationController {
 	@Operation(summary = "SSE 구독", description = "SSE를 통해 알림을 구독합니다. " + "구독자는 자신의 ID를 통해 알림을 받을 수 있습니다.")
 	@ApiResponses({@ApiResponse(responseCode = "200", description = "SSE 구독 성공", content = @Content),
 		@ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content)})
-	public ResponseEntity<SseEmitter> subscribe(Long subId) {
-		log.info("subscribe called with pubId: {}", subId);
-		SseEmitter emitter = sseEmitterManager.connect(subId);
+	public ResponseEntity<SseEmitter> subscribe(@CookieValue("sessionId") Long studentId) {
+		log.info("subscribe called with pubId: {}", studentId);
+		SseEmitter emitter = sseEmitterManager.connect(studentId);
 		if (emitter == null) {
-			log.error("Failed to create SSE emitter for user ID: {}", subId);
-			return ResponseEntity.badRequest().body(null);
+			log.error("Failed to create SSE emitter for user ID: {}", studentId);
+			return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(null);
 		}
 
 		return ResponseEntity.ok(emitter);
@@ -68,11 +69,13 @@ public class NotificationController {
 			body.put("status", "SUCCESS");
 			body.put("data", Map.of("notification", notificationService.getMyNotifications(studentId, type)));
 			return ResponseEntity.status(HttpStatus.OK)
+				.contentType(MediaType.APPLICATION_JSON)
 				.header(HttpHeaders.LOCATION, LOCATION.toString())
 				.body(body);
 		} catch (Exception e) {
 			log.error("Error creating notification: {}", e.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+				.contentType(MediaType.APPLICATION_JSON)
 				.body(Map.of("error", "Failed to find notification"));
 		}
 	}
@@ -88,18 +91,14 @@ public class NotificationController {
 		@PathVariable Long teamId,
 		@RequestParam("type") String type
 	) throws BadRequestException {
-		try {
-			Map<String, Object> body = new HashMap<>();
-			body.put("status", "SUCCESS");
-			body.put("data", Map.of("notification", notificationService.getTeamNotifications(studentId, teamId, type)));
-			return ResponseEntity.status(HttpStatus.OK)
-				.header(HttpHeaders.LOCATION, LOCATION.toString())
-				.body(body);
-		} catch (Exception e) {
-			log.error("Error creating notification: {}", e.getMessage());
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-				.body(Map.of("error", "Failed to find notification"));
-		}
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", Map.of("notification", notificationService.getTeamNotifications(studentId, teamId, type)));
+		return ResponseEntity.status(HttpStatus.OK)
+			.contentType(MediaType.APPLICATION_JSON)
+			.header(HttpHeaders.LOCATION, LOCATION.toString())
+			.body(body);
+
 	}
 
 	@GetMapping("/count")
@@ -111,17 +110,13 @@ public class NotificationController {
 	public ResponseEntity<? extends Map<String, ? extends Object>> getCountOfNonReadNotifications(
 		@CookieValue("sessionId") Long studentId
 	) {
-		try {
-			Map<String, Object> body = new HashMap<>();
-			body.put("status", "SUCCESS");
-			body.put("data", Map.of("nonReadCount", notificationService.getCountOfNonReadNotifications(studentId)));
-			return ResponseEntity.status(HttpStatus.OK)
-				.header(HttpHeaders.LOCATION, LOCATION.toString())
-				.body(body);
-		} catch (Exception e) {
-			log.error("Error getting count of non-read notifications: {}", e.getMessage());
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-				.body(Map.of("error", "Failed to get count of non-read notifications"));
-		}
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", Map.of("nonReadCount", notificationService.getCountOfNonReadNotifications(studentId)));
+		return ResponseEntity.status(HttpStatus.OK)
+			.contentType(MediaType.APPLICATION_JSON)
+			.header(HttpHeaders.LOCATION, LOCATION.toString())
+			.body(body);
+
 	}
 }
