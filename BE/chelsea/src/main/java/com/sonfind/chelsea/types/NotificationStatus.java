@@ -9,7 +9,7 @@ public enum NotificationStatus {
 	PENDING("pending"),
 	ACCEPTED("accepted"),
 	REJECTED("rejected"),
-	CANCELLED("cancelled");
+	CANCELED("canceled");
 
 	private final String status;
 }

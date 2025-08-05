@@ -3,7 +3,7 @@ package com.sonfind.chelsea.dto.student;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
 
 public record StudentListResponseDto(
-	StudentResponse student,
+	StudentResponseDto student,
 	SubCodeResponse position,
 	SubCodeResponse track,
 	SubCodeResponse goal,

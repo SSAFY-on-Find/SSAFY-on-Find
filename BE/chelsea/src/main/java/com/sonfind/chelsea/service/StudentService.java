@@ -8,13 +8,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sonfind.chelsea.domain.student.Students;
-import com.sonfind.chelsea.dto.student.StudentForNotificationResponseDto;
 import com.sonfind.chelsea.dto.student.StudentListQueryDto;
 import com.sonfind.chelsea.dto.student.StudentListResponseDto;
-import com.sonfind.chelsea.dto.student.StudentResponse;
+import com.sonfind.chelsea.dto.student.StudentResponseDto;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
 import com.sonfind.chelsea.repository.StudentRepository;
-import com.sonfind.chelsea.repository.studentInfo.StudentInfoRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 public class StudentService {
 
 	private final StudentRepository studentRepository;
-	private final StudentInfoRepository studentInfoRepository;
 
 	public Students findByStudentId(long studentId) {
 
@@ -37,7 +34,7 @@ public class StudentService {
 		return student;
 	}
 
-	public StudentForNotificationResponseDto findByStudentIdForSse(long studentId) {
+	public StudentResponseDto findByStudentIdForSse(long studentId) {
 		Optional<Students> authOptional = studentRepository.findByStudentId(studentId);
 
 		if (!authOptional.isPresent()) {
@@ -45,10 +42,10 @@ public class StudentService {
 		}
 		Students student = authOptional.get();
 
-		return StudentForNotificationResponseDto.builder()
+		return StudentResponseDto.builder()
 			.studentId(student.getStudentId())
 			.name(student.getName())
-			.isMajor(getIsMajor(student))
+			.major(getIsMajor(student))
 			.build();
 	}
 
@@ -59,7 +56,7 @@ public class StudentService {
 		List<StudentListQueryDto> queryResult = studentRepository.findStudentList();
 
 		return queryResult.stream().map(dto -> new StudentListResponseDto(
-			new StudentResponse(dto.studentId(), dto.name(), dto.major() ? "전공" : "비전공"),
+			new StudentResponseDto(dto.studentId(), dto.name(), dto.major() ? "전공" : "비전공"),
 			new SubCodeResponse(dto.positionCode(), dto.positionCodeName()),
 			new SubCodeResponse(dto.trackCode(), dto.trackCodeName()),
 			new SubCodeResponse(dto.goalCode(), dto.goalCodeName()),
