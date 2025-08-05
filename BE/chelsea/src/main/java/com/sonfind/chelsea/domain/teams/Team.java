@@ -47,8 +47,14 @@ public class Team extends BaseEntity {
 	@JoinColumn(name = "track_code", nullable = false)
 	private SubCode track;
 
+	@Column(name = "major_count", nullable = false)
+	private int majorCount = 0;
+
+	@Column(name = "non_major_count", nullable = false)
+	private int nonMajorCount = 0;
+
 	@Column(name = "is_deleted")
-	private boolean isDeleted = false;
+	private boolean isDeleted;
 
 	@OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
 	@Builder.Default
@@ -69,5 +75,21 @@ public class Team extends BaseEntity {
 
 	public void updateName(String name) {
 		this.name = name;
+	}
+
+	public void incrementMajorCount() {
+		this.majorCount++;
+	}
+
+	public void decrementMajorCount() {
+		this.majorCount = Math.max(0, this.majorCount - 1);
+	}
+
+	public void incrementNonMajorCount() {
+		this.nonMajorCount++;
+	}
+
+	public void decrementNonMajorCount() {
+		this.nonMajorCount = Math.max(0, this.nonMajorCount - 1);
 	}
 }

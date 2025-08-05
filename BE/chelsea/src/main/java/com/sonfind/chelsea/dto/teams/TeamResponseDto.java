@@ -11,6 +11,8 @@ public record TeamResponseDto(
 	String teamName,
 	String teamDescription,
 	SubCodeResponse teamTrack,
+	int majorCount,
+	int nonMajorCount,
 	Long teamCount,
 	List<RecruitmentDto> positions,
 	List<TeamMemberResponseDto> members
