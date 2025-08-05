@@ -65,7 +65,7 @@ const sampleTeamData = {
     },
   ],
 }
-const initialTeams = [
+const initialTeams: (typeof sampleTeamData & { isFavorite: boolean; variant?: "default" | "main" })[] = [
   { ...sampleTeamData, id: "team001", name: "팀 001", isFavorite: false },
   { ...sampleTeamData, id: "team002", name: "팀 002", isFavorite: true, variant: "main" },
   { ...sampleTeamData, id: "team003", name: "팀 003", isFavorite: false },
