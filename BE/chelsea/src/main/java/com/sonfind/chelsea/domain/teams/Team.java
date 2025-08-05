@@ -47,8 +47,14 @@ public class Team extends BaseEntity {
 	@JoinColumn(name = "track_code", nullable = false)
 	private SubCode track;
 
+	@Column(name = "major_count", nullable = false)
+	private int majorCount;
+
+	@Column(name = "non_major_count", nullable = false)
+	private int nonMajorCount;
+
 	@Column(name = "is_deleted")
-	private boolean isDeleted = false;
+	private boolean isDeleted;
 
 	@Column(name = "major_count", nullable = false)
 	private int majorCount = 0;

@@ -141,6 +141,12 @@ public class TeamService {
 			.map(this::convertToTeamMemberResponse)
 			.collect(Collectors.toList());
 
+		int majorCount = (int)teamMembers.stream()
+			.mapToLong(member -> Boolean.TRUE.equals(member.getMajorYn()) ? 1L : 0L)
+			.sum();
+		int nonMajorCount = teamMembers.size() - majorCount;
+		int teamCount = teamMembers.size();
+
 		//모집 포지션
 		List<RecruitmentDto> positions = team.getRecruitments().stream()
 			.map(recruitment -> new RecruitmentDto(
@@ -157,6 +163,8 @@ public class TeamService {
 				team.getTrack().getSubCodeName()
 			))
 			.teamCount((long)teamMembers.size())
+			.majorCount(majorCount)
+			.nonMajorCount(nonMajorCount)
 			.positions(positions)
 			.members(members)
 			.build();
