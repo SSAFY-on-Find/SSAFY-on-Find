@@ -92,4 +92,3 @@ public class Team extends BaseEntity {
 		this.nonMajorCount = Math.max(0, this.nonMajorCount - 1);
 	}
 }
-

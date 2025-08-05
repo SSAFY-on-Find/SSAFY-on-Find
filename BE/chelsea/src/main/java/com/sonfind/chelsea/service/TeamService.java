@@ -38,8 +38,8 @@ public class TeamService {
 	public Long createTeam(Long studentId, CreateTeamRequest request) {
 
 		//팀에 속해 있는 교육생은 팀 생성 못함
-		Students student = studentService.findByStudentId(studentId);
-		if (student.getTeam().getTeamId() != null) {
+		Students students = studentService.findByStudentId(studentId);
+		if (students.getTeamId() != null) {
 			throw new ResponseStatusException(
 				HttpStatus.FORBIDDEN, "이미 팀에 속해있습니다");
 		}
@@ -70,8 +70,8 @@ public class TeamService {
 		}
 
 		//학생 teamId 저장
-		student.setTeam(team);
-		studentRepository.save(student);
+		students.setTeamId(team.getTeamId());
+		studentRepository.save(students);
 
 		return team.getTeamId();
 	}
@@ -81,8 +81,8 @@ public class TeamService {
 	public void updateTeam(Long teamId, Long studentId, UpdateTeamRequest request) {
 
 		//팀에 속해 있지 않은 교육생은 수정 불가
-		Students student = studentService.findByStudentId(studentId);
-		if (!teamId.equals(student.getTeam().getTeamId())) {
+		Students students = studentService.findByStudentId(studentId);
+		if (!teamId.equals(students.getTeamId())) {
 			throw new ResponseStatusException(
 				HttpStatus.FORBIDDEN, "팀에 속해 있지 않은 교육생은 수정할 수 없습니다."
 			);

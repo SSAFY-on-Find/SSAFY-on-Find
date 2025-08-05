@@ -76,4 +76,34 @@ public class FileService {
 			.build();
 	}
 
+	private boolean deleteFile(Path filePath) {
+		if (Files.exists(filePath)) {
+			try {
+				Files.delete(filePath);
+				return true;
+			} catch (IOException e) {
+				log.error("파일 삭제 실패");
+			}
+		} else {
+			log.warn("삭제할 파일이 존재하지 않습니다.");
+		}
+		return false;
+	}
+
+	public void deleteProfileImage(String profileImageUrl) {
+		if (profileImageUrl == null || profileImageUrl.isEmpty()) {
+			return;
+		}
+		Path filePath = Paths.get(uploadDirPath + "/profiles/" + profileImageUrl);
+		deleteFile(filePath);
+	}
+
+	public void deletePortfolioFile(UploadedFile portfolio) {
+		if (portfolio == null) {
+			return;
+		}
+		Path filePath = Paths.get(uploadDirPath + "/portfolios/" + portfolio.getSavedFileName());
+		deleteFile(filePath);
+	}
+
 }

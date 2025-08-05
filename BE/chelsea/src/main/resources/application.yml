@@ -1,13 +1,15 @@
 spring:
   application:
     name: chelsea
-    config:
 
   profiles:
     active: ${SPRING_PROFILES_ACTIVE}
-
   servlet:
     multipart:
       enabled: true
 
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
 
