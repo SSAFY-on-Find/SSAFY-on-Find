@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom"
+import { ToastContainer } from "react-toastify"
 
 import { Header, SideBar } from "@/layout"
 import Dashboard from "@/pages/DashboardPage"
@@ -28,6 +29,7 @@ function App() {
           </Routes>
         </main>
       </div>
+      <ToastContainer position="bottom-right" autoClose={3000} theme="light" />
     </div>
   )
 }
