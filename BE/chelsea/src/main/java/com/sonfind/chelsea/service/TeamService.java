@@ -41,6 +41,7 @@ public class TeamService {
 	private final StudentRepository studentRepository;
 	private final StudentInfoRepository studentInfoRepository;
 	private final StudentService studentService;
+	private final FavoriteService favoriteService;
 
 	//팀 생성
 	@Transactional
@@ -128,7 +129,7 @@ public class TeamService {
 
 	//타 팀 상세조회
 	@Transactional(readOnly = true)
-	public TeamResponseDto getTeamDetail(Long teamId) {
+	public TeamResponseDto getTeamDetail(Long teamId, Long studentId) {
 		//존재하는 팀인지 확인
 		Team team = teamRepository.findTeamByTeamId(teamId)
 			.orElseThrow(() -> new ResponseStatusException(
@@ -155,6 +156,8 @@ public class TeamService {
 			))
 			.collect(Collectors.toList());
 
+		boolean isFavorite = favoriteService.checkFavoriteStatus(studentId, teamId);
+
 		return TeamResponseDto.builder()
 			.teamName(team.getName())
 			.teamDescription(team.getDescription())
@@ -167,6 +170,7 @@ public class TeamService {
 			.nonMajorCount(nonMajorCount)
 			.positions(positions)
 			.members(members)
+			.isFavorite(isFavorite)
 			.build();
 	}
 
@@ -179,7 +183,7 @@ public class TeamService {
 				HttpStatus.NOT_FOUND, "팀에 속해 있지 않습니다.");
 		}
 
-		TeamResponseDto teamInfo = getTeamDetail(students.getTeamId());
+		TeamResponseDto teamInfo = getTeamDetail(students.getTeamId(), studentId);
 
 		List<Students> teamMembers = studentRepository.findAllByTeamId(students.getTeamId());
 
@@ -201,11 +205,11 @@ public class TeamService {
 
 	//팀 전체 목록 조회
 	@Transactional(readOnly = true)
-	public List<TeamListResponseDto> getAllTeams() {
+	public List<TeamListResponseDto> getAllTeams(Long studentId) {
 		List<Team> teams = teamRepository.findByIsDeletedIsFalseOrderByTeamIdAsc();
 
 		return teams.stream()
-			.map(this::convertToTeamListResponse)
+			.map(team -> convertToTeamListResponse(team, studentId))
 			.sorted(
 				Comparator.comparing(TeamListResponseDto::isRecruitingComplete)
 					.thenComparing(dto -> parseTeamNumber(dto.teamName()))
@@ -214,7 +218,7 @@ public class TeamService {
 	}
 
 	//team2teamlistresponseDto
-	private TeamListResponseDto convertToTeamListResponse(Team team) {
+	private TeamListResponseDto convertToTeamListResponse(Team team, Long studentId) {
 		List<Students> teamMembers = studentRepository.findAllByTeamId(team.getTeamId());
 
 		List<String> memberProfileImages = teamMembers.stream()
@@ -234,6 +238,8 @@ public class TeamService {
 			team.getTrack().getSubCodeName()
 		);
 
+		boolean isFavorite = favoriteService.checkFavoriteStatus(studentId, team.getTeamId());
+
 		return TeamListResponseDto.builder()
 			.teamId(team.getTeamId())
 			.teamName(team.getName())
@@ -242,6 +248,7 @@ public class TeamService {
 			.memberProfileImages(memberProfileImages)
 			.recruitments(recruitments)
 			.isRecruitingComplete(teamMembers.size() >= 6)
+			.isFavorite(isFavorite)
 			.build();
 	}
 

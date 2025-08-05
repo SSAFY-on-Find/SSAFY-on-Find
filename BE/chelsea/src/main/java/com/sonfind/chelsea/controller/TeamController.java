@@ -65,8 +65,10 @@ public class TeamController {
 
 	//타 팀 상세조회
 	@GetMapping("/{teamId}")
-	public ResponseEntity<Map<String, Object>> getTeamDetail(@PathVariable Long teamId) {
-		TeamResponseDto teamResponse = teamService.getTeamDetail(teamId);
+	public ResponseEntity<Map<String, Object>> getTeamDetail(
+		@CookieValue("sessionId") Long studentId,
+		@PathVariable Long teamId) {
+		TeamResponseDto teamResponse = teamService.getTeamDetail(teamId, studentId);
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
@@ -90,7 +92,7 @@ public class TeamController {
 	//팀 전체 목록 조회
 	@GetMapping
 	public ResponseEntity<Map<String, Object>> getAllTeams(@CookieValue("sessionId") Long studentId) {
-		List<TeamListResponseDto> teamListResponse = teamService.getAllTeams();
+		List<TeamListResponseDto> teamListResponse = teamService.getAllTeams(studentId);
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
