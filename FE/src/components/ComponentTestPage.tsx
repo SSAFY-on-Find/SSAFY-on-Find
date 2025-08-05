@@ -1,7 +1,18 @@
 import { useState } from "react"
-import { AlarmClock } from "lucide-react"
+import { AlarmClock, Eye, Search } from "lucide-react"
 
-import { Button, CheckTag, InputBox, MainTag, MajorTag, NormalTag, PositionTag, SearchBar, WhiteTag } from "./atoms"
+import {
+  Button,
+  CheckTag,
+  InputBox,
+  MainTag,
+  MajorTag,
+  NormalTag,
+  PositionTag,
+  SearchBar,
+  Segmented,
+  WhiteTag,
+} from "./atoms"
 import { TeamCard } from "./molecules"
 import { ConfirmModal, StudentSearchModal, TeamDetailModal } from "./templates"
 
@@ -147,25 +158,55 @@ export default function ComponentTestPage() {
     })
   }
 
+  // segmented 사용방법
+  const [activeRequestTab, setActiveRequestTab] = useState<"left" | "right">("left")
+  const [activeMarkdownTab, setActiveMarkdownTab] = useState<"left" | "right">("left")
+
   return (
     <div className="flex flex-col gap-5 p-5">
-      <div className="flex gap-4">
-        {teams.map((team) => (
-          <TeamCard
-            id={team.id}
-            name={team.name}
-            description={team.description}
-            track={team.track}
-            position={team.position}
-            maxMembers={team.maxMembers}
-            currentMembers={team.currentMembers}
-            members={team.members}
-            isFavorite={team.isFavorite}
-            onClickFavorite={() => handleFavoriteToggle(team.id)}
-            onClickCard={() => handleTeamSelect(team)}
-            variant={team.variant}
-          />
-        ))}
+      <div className="w-80">
+        <Segmented
+          leftText="받은 요청"
+          rightText="보낸 요청"
+          activeSegment={activeRequestTab}
+          onSegmentChange={setActiveRequestTab}
+        />
+
+        <div className="mt-4">
+          {activeRequestTab === "left" ? <div>받은 요청 컨텐츠</div> : <div>보낸 요청 컨텐츠</div>}
+        </div>
+      </div>
+      <div className="w-200">
+        <Segmented
+          leftText="편집"
+          leftIcon={Search}
+          rightText="미리보기"
+          rightIcon={Eye}
+          activeSegment={activeMarkdownTab}
+          onSegmentChange={setActiveMarkdownTab}
+        />
+
+        <div className="mt-4">
+          {activeMarkdownTab === "left" ? <div>마크다운으로 작성하세요!</div> : <div>마크다운으로 작성된 컨텐츠</div>}
+        </div>
+        <div className="flex gap-4">
+          {teams.map((team) => (
+            <TeamCard
+              id={team.id}
+              name={team.name}
+              description={team.description}
+              track={team.track}
+              position={team.position}
+              maxMembers={team.maxMembers}
+              currentMembers={team.currentMembers}
+              members={team.members}
+              isFavorite={team.isFavorite}
+              onClickFavorite={() => handleFavoriteToggle(team.id)}
+              onClickCard={() => handleTeamSelect(team)}
+              variant={team.variant}
+            />
+          ))}
+        </div>
       </div>
       <div>
         <h5>선택된 기술 스택 ID: {selectedTechStackIds.join(", ")}</h5>
