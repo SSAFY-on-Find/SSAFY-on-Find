@@ -14,7 +14,7 @@ import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 import com.sonfind.chelsea.domain.teams.Recruitment;
 import com.sonfind.chelsea.domain.teams.Team;
-import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
+import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 import com.sonfind.chelsea.dto.teams.CreateTeamRequestDto;
 import com.sonfind.chelsea.dto.teams.MyTeamResponseDto;
 import com.sonfind.chelsea.dto.teams.RecruitmentDto;
@@ -25,10 +25,10 @@ import com.sonfind.chelsea.dto.teams.TeamRuleResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
 import com.sonfind.chelsea.dto.teams.UpdateTeamRequestDto;
 import com.sonfind.chelsea.global.domain.SubCode;
+import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
 import com.sonfind.chelsea.repository.TeamRepository;
-import com.sonfind.chelsea.repository.studentInfo.StudentInfoRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -40,6 +40,8 @@ public class TeamService {
 	private final SubCodeRepository subCodeRepository;
 	private final StudentRepository studentRepository;
 	private final StudentInfoRepository studentInfoRepository;
+
+	private final SubCodeService subCodeService;
 	private final StudentService studentService;
 
 	//팀 생성
@@ -158,7 +160,7 @@ public class TeamService {
 		return TeamResponseDto.builder()
 			.teamName(team.getName())
 			.teamDescription(team.getDescription())
-			.teamTrack(new SubCodeResponse(
+			.teamTrack(new SubCodeResponseDto(
 				team.getTrack().getSubCode(),
 				team.getTrack().getSubCodeName()
 			))
@@ -229,7 +231,7 @@ public class TeamService {
 			))
 			.collect(Collectors.toList());
 
-		SubCodeResponse track = new SubCodeResponse(
+		SubCodeResponseDto track = new SubCodeResponseDto(
 			team.getTrack().getSubCode(),
 			team.getTrack().getSubCodeName()
 		);
@@ -328,9 +330,9 @@ public class TeamService {
 			String major = Boolean.TRUE.equals(students.getMajorYn()) ? "전공" : "비전공";
 			String profileImageUrl = (studentInfo != null) ? studentInfo.getProfileImageUrl() : "";
 
-			SubCodeResponse position = null;
+			SubCodeResponseDto position = null;
 			if (studentInfo != null && studentInfo.getPositionCode() != null) {
-				position = new SubCodeResponse(
+				position = new SubCodeResponseDto(
 					studentInfo.getPositionCode().getSubCode(),
 					studentInfo.getPositionCode().getSubCodeName()
 				);
@@ -396,6 +398,11 @@ public class TeamService {
 			.majorCount(taem.getMajorCount())
 			.nonMajorCount(taem.getNonMajorCount())
 			.build();
+	}
+
+	public TeamSimpleResponseDto createTeamSimpleResponseDto(Long teamId, String teamName, String trackCodeName,
+		int majorCount, int nonMajorCout) {
+		return new TeamSimpleResponseDto(teamId, teamName, trackCodeName, majorCount, nonMajorCout);
 	}
 
 }

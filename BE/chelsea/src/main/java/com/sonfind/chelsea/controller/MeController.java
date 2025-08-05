@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoCreateRequestDto;
-import com.sonfind.chelsea.dto.studentInfo.StudentInfoResponseDto;
+import com.sonfind.chelsea.dto.studentInfo.StudentInfoGetResponseDto;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoUpdateRequestDto;
 import com.sonfind.chelsea.service.StudentInfoService;
 
@@ -56,7 +56,7 @@ public class MeController {
 		@CookieValue("sessionId") Long studentId
 	) {
 
-		StudentInfoResponseDto studentInfo = studentInfoService.getStudentInfo(studentId);
+		StudentInfoGetResponseDto studentInfo = studentInfoService.getStudentInfo(studentId);
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
