@@ -15,6 +15,7 @@ public record TeamResponseDto(
 	int nonMajorCount,
 	Long teamCount,
 	List<RecruitmentDto> positions,
-	List<TeamMemberResponseDto> members
+	List<TeamMemberResponseDto> members,
+	boolean isFavorite
 ) {
 }

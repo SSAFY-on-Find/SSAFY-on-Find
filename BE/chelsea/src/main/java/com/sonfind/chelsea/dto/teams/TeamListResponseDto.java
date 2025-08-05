@@ -14,10 +14,11 @@ public record TeamListResponseDto(
 	SubCodeResponseDto track,
 	List<String> memberProfileImages,
 	List<RecruitmentDto> recruitments,
-	boolean isRecruitingComplete
+	boolean isRecruitingComplete,
+	boolean isFavorite
 ) {
 	public TeamListResponseDto(Long teamId, String teamName, String description, SubCodeResponseDto track,
-		List<String> memberProfileImages, List<RecruitmentDto> recruitments, boolean isRecruitingComplete) {
+		List<String> memberProfileImages, List<RecruitmentDto> recruitments, boolean isRecruitingComplete, boolean isFavorite) {
 		this.teamId = teamId;
 		this.teamName = teamName;
 		this.description = description;
@@ -25,5 +26,6 @@ public record TeamListResponseDto(
 		this.memberProfileImages = memberProfileImages;
 		this.recruitments = recruitments;
 		this.isRecruitingComplete = isRecruitingComplete;
+		this.isFavorite = isFavorite;
 	}
 }
