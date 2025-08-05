@@ -2,7 +2,7 @@ import { useState } from "react"
 import { AlarmClock } from "lucide-react"
 
 import { Button, CheckTag, InputBox, MainTag, MajorTag, NormalTag, PositionTag, SearchBar, WhiteTag } from "./atoms"
-import { ConfirmModal, TeamDetailModal } from "./templates"
+import { ConfirmModal, StudentSearchModal, TeamDetailModal } from "./templates"
 
 // API로 기술스택 70여개를 받아온다고 가정하고 상수에 담아두었어요
 const TECH_STACKS = [
@@ -15,7 +15,7 @@ const TECH_STACKS = [
   { id: "tech007", name: "MySQL" },
   { id: "tech008", name: "AWS" },
 ]
-// ComponentTestPage.tsx에 추가
+// 팀 세부 정보 모달 테스트용 MockData 입니다
 const sampleTeamData = {
   id: "team001",
   name: "팀 001",
@@ -64,7 +64,24 @@ const sampleTeamData = {
     },
   ],
 }
-
+// 교육생 검색 모달 테스트용 MockData 입니다
+const students = [
+  { id: "std001", name: "김싸피", major: "비전공", position: "임베디드", hasTeam: true },
+  { id: "std002", name: "이싸", major: "전공", position: "풀스텍", hasTeam: false },
+  { id: "std003", name: "박싸피", major: "비전공", position: "백엔드", hasTeam: true },
+  { id: "std004", name: "조싸피", major: "전공", position: "모바일", hasTeam: true },
+  { id: "std005", name: "이싸피", major: "비전공", position: "임베디드", hasTeam: false },
+  { id: "std006", name: "김박싸피", major: "비전공", position: "임베디드", hasTeam: true },
+  { id: "std007", name: "이싸", major: "전공", position: "풀스텍", hasTeam: false },
+  { id: "std008", name: "박싸피", major: "비전공", position: "백엔드", hasTeam: true },
+  { id: "std009", name: "조싸피", major: "전공", position: "모바일", hasTeam: true },
+  { id: "std010", name: "이싸피", major: "비전공", position: "임베디드", hasTeam: false },
+  { id: "std011", name: "김싸피", major: "비전공", position: "임베디드", hasTeam: true },
+  { id: "std012", name: "이싸", major: "전공", position: "풀스텍", hasTeam: false },
+  { id: "std013", name: "박싸피", major: "비전공", position: "백엔드", hasTeam: true },
+  { id: "std014", name: "조싸피", major: "전공", position: "모바일", hasTeam: true },
+  { id: "std015", name: "이싸피", major: "비전공", position: "임베디드", hasTeam: false },
+]
 export default function ComponentTestPage() {
   // 1. CheckTag 사용법
   // 기술스택이 선택되면 2개 이상일 경우 관리하기 위하여 배열로 선언.(기술스택 ID를 저장할 예정입니다.)
@@ -97,6 +114,7 @@ export default function ComponentTestPage() {
   const [ConfirmModal_inviteAccept, setConfirmModal_inviteAccept] = useState(false)
   const [teamDetailModal, setTeamDetailModal] = useState(false)
   const [selectedTeam, setSelectedTeam] = useState(sampleTeamData)
+  const [studentSearchModal, setStudentSearchModal] = useState(false)
 
   const handleOut = () => {
     setConfirmModal_teamout(false)
@@ -107,6 +125,12 @@ export default function ComponentTestPage() {
   const handleTeamSelect = (teamData: typeof sampleTeamData) => {
     setSelectedTeam(teamData)
     setTeamDetailModal(true)
+  }
+  const handleInviteUser = (userId: string) => {
+    console.log(userId, "로 초대요청 보내기") // 초대 로직 넣기
+  }
+  const handleChatWithUser = (userId: string) => {
+    console.log(userId, "과 채팅하기") // 1대1 채팅 로직 넣기
   }
 
   return (
@@ -157,6 +181,13 @@ export default function ComponentTestPage() {
         >
           팀 상세 정보
         </button>
+
+        <button
+          className="rounded-md bg-amber-600 px-4 py-2 text-white hover:bg-amber-800"
+          onClick={() => setStudentSearchModal(true)}
+        >
+          교육생 찾기 모달
+        </button>
       </div>
       <ConfirmModal
         isOpen={ConfirmModal_teamout}
@@ -176,6 +207,16 @@ export default function ComponentTestPage() {
         confirmText="수락"
       />
       <TeamDetailModal isOpen={teamDetailModal} onClose={() => setTeamDetailModal(false)} teamData={selectedTeam} />
+      <StudentSearchModal
+        isOpen={studentSearchModal}
+        onClose={() => setStudentSearchModal(false)}
+        students={students}
+        onStudentClick={(userId) => {
+          handleInviteUser(userId)
+          handleChatWithUser(userId)
+          setStudentSearchModal(false)
+        }}
+      />
       <div className="">
         <p>small - 채팅입력이나 기본 입력</p>
         <InputBox

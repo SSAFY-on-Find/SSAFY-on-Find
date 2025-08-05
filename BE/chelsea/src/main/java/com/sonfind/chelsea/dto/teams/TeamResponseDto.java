@@ -1,13 +1,18 @@
 package com.sonfind.chelsea.dto.teams;
 
+import java.util.List;
+
 import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
 
 import lombok.Builder;
 
 @Builder
-public record TeamResponse(
+public record TeamResponseDto(
 	String teamName,
+	String teamDescription,
 	SubCodeResponse teamTrack,
-	Long teamCount
+	Long teamCount,
+	List<RecruitmentDto> positions,
+	List<TeamMemberResponseDto> members
 ) {
 }

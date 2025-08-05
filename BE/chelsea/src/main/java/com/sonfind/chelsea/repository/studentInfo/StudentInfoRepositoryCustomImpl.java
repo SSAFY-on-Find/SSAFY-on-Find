@@ -19,7 +19,7 @@ import com.sonfind.chelsea.domain.studentInfo.UploadedFile;
 import com.sonfind.chelsea.dto.student.StudentResponseDto;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoResponseDto;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
-import com.sonfind.chelsea.dto.teams.TeamResponse;
+import com.sonfind.chelsea.dto.teams.TeamResponseDto;
 import com.sonfind.chelsea.global.domain.QSubCode;
 
 import lombok.RequiredArgsConstructor;
@@ -72,7 +72,7 @@ public class StudentInfoRepositoryCustomImpl implements StudentInfoRepositoryCus
 					studentInfo.portfolio.savedFileName
 				),
 				//Team
-				Projections.constructor(TeamResponse.class,
+				Projections.constructor(TeamResponseDto.class,
 					team.name,
 					Projections.constructor(SubCodeResponse.class, team.track.subCode, team.track.subCodeName),
 					JPAExpressions

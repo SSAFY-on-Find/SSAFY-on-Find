@@ -1,7 +1,7 @@
 package com.sonfind.chelsea.service;
 
+import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -10,11 +10,18 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.sonfind.chelsea.domain.student.Students;
+import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 import com.sonfind.chelsea.domain.teams.Recruitment;
 import com.sonfind.chelsea.domain.teams.Team;
-import com.sonfind.chelsea.dto.teams.CreateTeamRequest;
-import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
-import com.sonfind.chelsea.dto.teams.UpdateTeamRequest;
+import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
+import com.sonfind.chelsea.dto.teams.CreateTeamRequestDto;
+import com.sonfind.chelsea.dto.teams.MyTeamResponseDto;
+import com.sonfind.chelsea.dto.teams.RecruitmentDto;
+import com.sonfind.chelsea.dto.teams.TeamListResponseDto;
+import com.sonfind.chelsea.dto.teams.TeamMemberResponseDto;
+import com.sonfind.chelsea.dto.teams.TeamResponseDto;
+import com.sonfind.chelsea.dto.teams.TeamRuleResponseDto;
+import com.sonfind.chelsea.dto.teams.UpdateTeamRequestDto;
 import com.sonfind.chelsea.global.domain.SubCode;
 import com.sonfind.chelsea.repository.StudentRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
@@ -35,7 +42,7 @@ public class TeamService {
 
 	//팀 생성
 	@Transactional
-	public Long createTeam(Long studentId, CreateTeamRequest request) {
+	public Long createTeam(Long studentId, CreateTeamRequestDto request) {
 
 		//팀에 속해 있는 교육생은 팀 생성 못함
 		Students students = studentService.findByStudentId(studentId);
@@ -46,14 +53,16 @@ public class TeamService {
 
 		//subCode로 track
 		//없는 트랙이면 badrequest
-		SubCode track = subCodeRepository.findById(request.getTrackCode())
-			.orElseThrow(() -> new ResponseStatusException(
-				HttpStatus.NOT_FOUND, "없는 트랙입니다."));
+		SubCode track = getSubCodeByValue(request.track());
+		if (track == null) {
+			throw new ResponseStatusException(
+				HttpStatus.NOT_FOUND, "없는 트랙입니다");
+		}
 
 		//팀 명 없이 일단 저장
 		Team noTeamName = Team.builder()
 			.name("")
-			.description(request.getDescription())
+			.description(request.description())
 			.track(track)
 			.build();
 
@@ -64,8 +73,8 @@ public class TeamService {
 		team.updateName(autoName);
 
 		// positions를 recruitments로 변환
-		if (request.getPositions() != null && !request.getPositions().isEmpty()) {
-			List<Recruitment> recruitments = toRecruitments(request.getPositions(), team);
+		if (request.positions() != null && !request.positions().isEmpty()) {
+			List<Recruitment> recruitments = toRecruitments(request.positions(), team);
 			team.updatePositions(recruitments);
 		}
 
@@ -78,7 +87,7 @@ public class TeamService {
 
 	//팀 수정
 	@Transactional
-	public void updateTeam(Long teamId, Long studentId, UpdateTeamRequest request) {
+	public void updateTeam(Long teamId, Long studentId, UpdateTeamRequestDto request) {
 
 		//팀에 속해 있지 않은 교육생은 수정 불가
 		Students students = studentService.findByStudentId(studentId);
@@ -89,7 +98,7 @@ public class TeamService {
 		}
 
 		//존재하는 팀인지 확인
-		Team team = teamRepository.findById(teamId)
+		Team team = teamRepository.findTeamByTeamId(teamId)
 			.orElseThrow(() -> new ResponseStatusException(
 				HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다."));
 
@@ -100,9 +109,11 @@ public class TeamService {
 
 		//희망 트랙 수정
 		if (request.getTrackCode() != null) {
-			SubCode track = subCodeRepository.findById(request.getTrackCode())
-				.orElseThrow(() -> new ResponseStatusException(
-					HttpStatus.NOT_FOUND, "없는 트랙입니다"));
+			SubCode track = getSubCodeByValue(request.getTrackCode());
+			if (track == null) {
+				throw new ResponseStatusException(
+					HttpStatus.NOT_FOUND, "없는 트랙입니다.");
+			}
 			team.updateTrack(track);
 		}
 
@@ -114,90 +125,241 @@ public class TeamService {
 	}
 
 	//타 팀 상세조회
-	//@Transactional
-	// public TeamDetailResponse getTeamDetail(Long teamId) {
-	// 	//존재하는 팀인지 확인
-	// 	Team team = teamRepository.findById(teamId)
-	// 		.orElseThrow(() -> new ResponseStatusException(
-	// 			HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다."));
-	//
-	// 	//Recruitments 정보
-	// 	List<RecruitmentDto> recruitments = team.getRecruitments().stream()
-	// 		.map(r -> new Recruitment(r.getPosition().getSubCodeName()))
-	// 		.collect(Collectors.toList());
-	//
-	// 	//팀원(member) 정보
-	// 	List<MemberDto> members = studentInfoRepository.findAllByStudent_TeamId(teamId).stream()
-	// 		.map(this::mapToMemberDto)
-	// 		.collect(Collectors.toList());
-	//
-	// 	return new TeamDetailResponse(
-	// 		team.getTeamId(),
-	// 		team.getName(),
-	// 		team.getDescription(),
-	// 		team.getTrack().getSubCode(),
-	// 		team.getTrack().getSubCodeName(),
-	// 		recruitments,
-	// 		members.size(),
-	// 		members
-	// 	);
-	// }
+	@Transactional(readOnly = true)
+	public TeamResponseDto getTeamDetail(Long teamId) {
+		//존재하는 팀인지 확인
+		Team team = teamRepository.findTeamByTeamId(teamId)
+			.orElseThrow(() -> new ResponseStatusException(
+				HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다."));
 
-	//내 팀 상세조회
-	// @Transactional
-	// public MyTeamDetailResponse getMyTeamDetailResponse(Long teamId, Long studentId) {
-	//
-	// }
+		List<Students> teamMembers = studentRepository.findAllByTeamId(teamId);
 
-	/**
-	 * 팀 ID로 팀의 간단한 정보를 조회합니다.(팀 초대, 및 합치기에 사용)
-	 * 존재하지 않는 팀이면 404 에러 발생
-	 * @param teamId
-	 * @return TeamSimpleResponseDto
-	 * @throws ResponseStatusException
-	 */
-	public TeamSimpleResponseDto findSimpleTeamInfoByTeamId(Long teamId) {
-		Optional<Team> optionalTeam = teamRepository.findById(teamId);
+		//팀원 정보 변환
+		List<TeamMemberResponseDto> members = teamMembers.stream()
+			.map(this::convertToTeamMemberResponse)
+			.collect(Collectors.toList());
 
-		if (optionalTeam.isEmpty()) {
-			throw new ResponseStatusException(
-				HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다.");
-		}
+		//모집 포지션
+		List<RecruitmentDto> positions = team.getRecruitments().stream()
+			.map(recruitment -> new RecruitmentDto(
+				recruitment.getPosition().getSubCode(),
+				recruitment.getPosition().getSubCodeName()
+			))
+			.collect(Collectors.toList());
 
-		Team taem = optionalTeam.get();
-
-		return TeamSimpleResponseDto.builder()
-			.teamId(taem.getTeamId())
-			.name(taem.getName())
-			.track(taem.getTrack().getSubCodeName())
-			.majorCount(taem.getMajorCount())
-			.nonMajorCount(taem.getNonMajorCount())
+		return TeamResponseDto.builder()
+			.teamName(team.getName())
+			.teamDescription(team.getDescription())
+			.teamTrack(new SubCodeResponse(
+				team.getTrack().getSubCode(),
+				team.getTrack().getSubCodeName()
+			))
+			.teamCount((long)teamMembers.size())
+			.positions(positions)
+			.members(members)
 			.build();
 	}
 
+	//내 팀 상세조회
+	@Transactional(readOnly = true)
+	public MyTeamResponseDto getMyTeamDetail(Long studentId) {
+		Students students = studentService.findByStudentId(studentId);
+		if (students.getTeamId() == null) {
+			throw new ResponseStatusException(
+				HttpStatus.NOT_FOUND, "팀에 속해 있지 않습니다.");
+		}
+
+		TeamResponseDto teamInfo = getTeamDetail(students.getTeamId());
+
+		List<Students> teamMembers = studentRepository.findAllByTeamId(students.getTeamId());
+
+		int majorCount = (int)teamMembers.stream()
+			.mapToLong(member -> Boolean.TRUE.equals(member.getMajorYn()) ? 1L : 0L)
+			.sum();
+		int nonMajorCount = teamMembers.size() - majorCount;
+		int teamCount = teamMembers.size();
+
+		List<TeamRuleResponseDto> ruleStatuses = isOkTeamRules(teamCount, majorCount, nonMajorCount);
+
+		return MyTeamResponseDto.builder()
+			.teamInfo(teamInfo)
+			.majorCount(majorCount)
+			.nonMajorCount(nonMajorCount)
+			.ruleStatuses(ruleStatuses)
+			.build();
+	}
+
+	//팀 전체 목록 조회
+	@Transactional(readOnly = true)
+	public List<TeamListResponseDto> getAllTeams() {
+		List<Team> teams = teamRepository.findByIsDeletedIsFalseOrderByTeamIdAsc();
+
+		return teams.stream()
+			.map(this::convertToTeamListResponse)
+			.sorted(
+				Comparator.comparing(TeamListResponseDto::isRecruitingComplete)
+					.thenComparing(dto -> parseTeamNumber(dto.teamName()))
+			)
+			.collect(Collectors.toList());
+	}
+
+	//team2teamlistresponseDto
+	private TeamListResponseDto convertToTeamListResponse(Team team) {
+		List<Students> teamMembers = studentRepository.findAllByTeamId(team.getTeamId());
+
+		List<String> memberProfileImages = teamMembers.stream()
+			.map(this::getStudentProfileImage)
+			.filter(url -> url != null && !url.trim().isEmpty())
+			.collect(Collectors.toList());
+
+		List<RecruitmentDto> recruitments = team.getRecruitments().stream()
+			.map(recruitment -> new RecruitmentDto(
+				recruitment.getPosition().getSubCode(),
+				recruitment.getPosition().getSubCodeName()
+			))
+			.collect(Collectors.toList());
+
+		SubCodeResponse track = new SubCodeResponse(
+			team.getTrack().getSubCode(),
+			team.getTrack().getSubCodeName()
+		);
+
+		return TeamListResponseDto.builder()
+			.teamId(team.getTeamId())
+			.teamName(team.getName())
+			.description(team.getDescription())
+			.track(track)
+			.memberProfileImages(memberProfileImages)
+			.recruitments(recruitments)
+			.isRecruitingComplete(teamMembers.size() >= 6)
+			.build();
+	}
+
+	//교육생 프사 조회
+	private String getStudentProfileImage(Students student) {
+		try {
+			return studentInfoRepository.findByStudent_StudentId(student.getStudentId())
+				.map(StudentInfo::getProfileImageUrl)
+				.orElse("");
+		} catch (Exception e) {
+			return "";
+		}
+	}
+
+	//팀 이름 숫자만 파싱
+	private int parseTeamNumber(String teamName) {
+		try {
+			String digits = teamName.replaceAll("\\D+", "");
+			return Integer.parseInt(digits);
+		} catch (Exception e) {
+			return Integer.MAX_VALUE;
+		}
+	}
+
+	//팀 빌딩 규칙
+	//6인 1팀
+	private TeamRuleResponseDto teamSizeRule(int teamSize) {
+		boolean isOk = (teamSize == 6);
+
+		return TeamRuleResponseDto.builder()
+			.ruleCode("RULE001")
+			.ruleName("SIZE_LIMIT")
+			.ruleDescription("6인 1팀 원칙")
+			.isOk(isOk)
+			.requiredStatus("6명")
+			.build();
+	}
+
+	//전공 비전공 각각 2인 이상
+	private TeamRuleResponseDto teamMajorRule(int majorCount, int nonMajorCount) {
+		boolean isMajorOk = (majorCount >= 2);
+		boolean isNonMajorOk = (nonMajorCount >= 2);
+		boolean isOk = (isMajorOk && isNonMajorOk);
+
+		String requiredStatus = "전공자 2명 이상, 비전공자 2명 이상";
+
+		return TeamRuleResponseDto.builder()
+			.ruleCode("RULE002&003")
+			.ruleName("전공 비전공 최소 인원 수")
+			.ruleDescription("전공자 2인 이상, 비전공자 2인 이상")
+			.isOk(isOk)
+			.requiredStatus(requiredStatus)
+			.build();
+	}
+
+	//팀 빌딩 규칙 검증
+	private List<TeamRuleResponseDto> isOkTeamRules(int teamSize, int majorCount, int nonMajorCount) {
+		List<TeamRuleResponseDto> teamRules = List.of(
+			teamSizeRule(teamSize),
+			teamMajorRule(majorCount, nonMajorCount)
+		);
+		return teamRules;
+	}
+
+	private SubCode getSubCodeByValue(String value) {
+		if (value == null || value.isBlank()) {
+			return null;
+		}
+		// 1) 먼저 PK(subCode) 로 시도
+		SubCode byCode = subCodeRepository.findBySubCode(value);
+		if (byCode != null) {
+			return byCode;
+		}
+		// 2) 없으면 한글명(subCodeName) 으로 조회
+		return subCodeRepository.findBySubCodeName(value);
+	}
+
+	//팀원 정보 변환
+	private TeamMemberResponseDto convertToTeamMemberResponse(Students students) {
+		try {
+			StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(students.getStudentId())
+				.orElse(null);
+
+			String major = Boolean.TRUE.equals(students.getMajorYn()) ? "전공" : "비전공";
+			String profileImageUrl = (studentInfo != null) ? studentInfo.getProfileImageUrl() : "";
+
+			SubCodeResponse position = null;
+			if (studentInfo != null && studentInfo.getPositionCode() != null) {
+				position = new SubCodeResponse(
+					studentInfo.getPositionCode().getSubCode(),
+					studentInfo.getPositionCode().getSubCodeName()
+				);
+			}
+
+			return TeamMemberResponseDto.builder()
+				.studentId(students.getStudentId())
+				.name(students.getName())
+				.major(major)
+				.profileImageUrl(profileImageUrl)
+				.position(position)
+				.build();
+		} catch (Exception e) {
+			return TeamMemberResponseDto.builder()
+				.studentId(students.getStudentId())
+				.name(students.getName())
+				.major(Boolean.TRUE.equals(students.getMajorYn()) ? "전공" : "비전공")
+				.profileImageUrl("")
+				.position(null)
+				.build();
+		}
+
+	}
+
 	//String positioncodes를 recruitment 리스트로 변환
-	private List<Recruitment> toRecruitments(List<String> positionCodes, Team team) {
-		return positionCodes.stream()
-			.map(code -> {
-				SubCode position = subCodeRepository.findById(code)
-					.orElseThrow(() -> new ResponseStatusException(
-						HttpStatus.NOT_FOUND,
-						"없는 포지션입니다"));
+	private List<Recruitment> toRecruitments(List<String> positionNames, Team team) {
+		return positionNames.stream()
+			.map(name -> {
+				SubCode pos = getSubCodeByValue(name);
+				if (pos == null) {
+					throw new ResponseStatusException(
+						HttpStatus.NOT_FOUND, "없는 포지션입니다: " + name);
+				}
 				return Recruitment.builder()
-					.position(position)
+					.position(pos)
 					.team(team)
 					.build();
 			})
 			.collect(Collectors.toList());
 	}
-	//
-	// private MemberDto mapToMemberDto(StudentInfo info) {
-	// 	return new MemberDto(
-	// 		info.getStudent().getStudentId(),
-	// 		info.getStudent().getName(),
-	// 		info.getStudent().isMajorYn(),
-	// 		info.getProfileImageUrl(), //프로필 이미지는 왜 getStudent 안하고 바로 가져오는지?
-	// 		info.getPosition().getSubCodeName()
-	// 	);
-	// }
+
 }
