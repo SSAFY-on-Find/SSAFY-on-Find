@@ -7,12 +7,14 @@ import com.sonfind.chelsea.domain.teams.Team;
 import com.sonfind.chelsea.global.domain.BaseEntity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,22 +26,24 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = PRIVATE)
 @Builder
-@Table(name = "TeamFavorites")
+@Table(name = "TeamFavorites", uniqueConstraints = @UniqueConstraint(
+	name = "UK_team_favorite_student_team",
+	columnNames = {"student_id", "team_id"}
+))
 public class TeamFavorite extends BaseEntity {
 
-	@EmbeddedId
-	private TeamFavoriteId id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
 	@Column(name = "is_favorite")
 	private Boolean isFavorite;
 
 	@ManyToOne
-	@MapsId("studentId")
 	@JoinColumn(name = "student_id")
 	private Students student;
 
 	@ManyToOne
-	@MapsId("teamId")
 	@JoinColumn(name = "team_id")
 	private Team team;
 

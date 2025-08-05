@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.sonfind.chelsea.domain.Favorite.TeamFavorite;
-import com.sonfind.chelsea.domain.Favorite.TeamFavoriteId;
 import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.domain.teams.Team;
 import com.sonfind.chelsea.dto.Favorite.TeamFavoriteResponseDto;
@@ -41,7 +40,7 @@ public class FavoriteService {
 		}
 
 		//기존 좋아요 상태 확인
-		Optional<TeamFavorite> existingFavorite = teamFavoriteRepository.findByIdStudentIdAndIdTeamId(studentId,
+		Optional<TeamFavorite> existingFavorite = teamFavoriteRepository.findByStudentStudentIdAndTeamTeamId(studentId,
 			teamId);
 		//좋취
 		if (existingFavorite.isPresent()) {
@@ -53,9 +52,7 @@ public class FavoriteService {
 		}
 		//좋아요
 		else {
-			TeamFavoriteId teamFavoriteId = new TeamFavoriteId(studentId, teamId);
 			TeamFavorite newFavorite = TeamFavorite.builder()
-				.id(teamFavoriteId)
 				.isFavorite(true)
 				.student(student)
 				.team(team)
@@ -72,7 +69,7 @@ public class FavoriteService {
 	//좋아요 상태 확인
 	@Transactional(readOnly = true)
 	public Boolean checkFavoriteStatus(Long studentId, Long teamId) {
-		return teamFavoriteRepository.findByIdStudentIdAndIdTeamId(studentId, teamId)
+		return teamFavoriteRepository.findByStudentStudentIdAndTeamTeamId(studentId, teamId)
 			.map(TeamFavorite::getIsFavorite)
 			.orElse(false);
 	}
