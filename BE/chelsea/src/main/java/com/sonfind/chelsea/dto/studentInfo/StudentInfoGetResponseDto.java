@@ -5,12 +5,12 @@ import java.util.List;
 import com.sonfind.chelsea.domain.studentInfo.UploadedFile;
 import com.sonfind.chelsea.dto.student.StudentResponseDto;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
-import com.sonfind.chelsea.dto.teams.TeamResponseDto;
+import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
 
 import lombok.Builder;
 
 @Builder
-public record StudentInfoResponseDto(
+public record StudentInfoGetResponseDto(
 
 	StudentResponseDto student,
 
@@ -24,6 +24,6 @@ public record StudentInfoResponseDto(
 	String profileImageUrl,
 	UploadedFile portfolio,
 
-	TeamResponseDto teamInfo
+	TeamSimpleResponseDto teamInfo
 ) {
 }
