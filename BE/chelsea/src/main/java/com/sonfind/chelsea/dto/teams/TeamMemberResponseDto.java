@@ -1,6 +1,6 @@
 package com.sonfind.chelsea.dto.teams;
 
-import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
+import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 
 import lombok.Builder;
 
@@ -10,7 +10,7 @@ public record TeamMemberResponseDto(
 	String name,
 	String major,
 	String profileImageUrl,
-	SubCodeResponse position
+	SubCodeResponseDto position
 ) {
 
 }

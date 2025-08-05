@@ -2,7 +2,7 @@ package com.sonfind.chelsea.dto.teams;
 
 import java.util.List;
 
-import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
+import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 
 import lombok.Builder;
 
@@ -11,12 +11,12 @@ public record TeamListResponseDto(
 	Long teamId,
 	String teamName,
 	String description,
-	SubCodeResponse track,
+	SubCodeResponseDto track,
 	List<String> memberProfileImages,
 	List<RecruitmentDto> recruitments,
 	boolean isRecruitingComplete
 ) {
-	public TeamListResponseDto(Long teamId, String teamName, String description, SubCodeResponse track,
+	public TeamListResponseDto(Long teamId, String teamName, String description, SubCodeResponseDto track,
 		List<String> memberProfileImages, List<RecruitmentDto> recruitments, boolean isRecruitingComplete) {
 		this.teamId = teamId;
 		this.teamName = teamName;
