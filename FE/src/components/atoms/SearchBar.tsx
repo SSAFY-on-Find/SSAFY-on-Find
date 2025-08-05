@@ -21,6 +21,11 @@ function SearchBar({ onSearch }: ISearchBar) {
       handleSearch()
     }
   }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setSearchValue(value)
+    onSearch(value)
+  }
 
   return (
     <div className="relative">
@@ -29,7 +34,7 @@ function SearchBar({ onSearch }: ISearchBar) {
         className="border-subtext/30 placeholder:text-subtext text-text focus:border-main h-[45px] w-full rounded-full border-1 py-2 pr-4 pl-9 text-sm focus:outline-none"
         placeholder="이름으로 검색..."
         value={searchValue}
-        onChange={(e) => setSearchValue(e.target.value)}
+        onChange={handleInputChange}
         onKeyDown={handleEnderPress}
       ></input>
     </div>

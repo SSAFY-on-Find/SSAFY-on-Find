@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { AlarmClock } from "lucide-react"
+import { AlarmClock, Eye, Search } from "lucide-react"
 
 import {
   Button,
@@ -11,9 +11,11 @@ import {
   NormalTag,
   PositionTag,
   SearchBar,
+  Segmented,
   WhiteTag,
 } from "./atoms"
-import { ConfirmModal, TeamDetailModal } from "./templates"
+import { TeamCard } from "./molecules"
+import { ConfirmModal, StudentSearchModal, TeamDetailModal } from "./templates"
 
 // API로 기술스택 70여개를 받아온다고 가정하고 상수에 담아두었어요
 const TECH_STACKS = [
@@ -26,7 +28,7 @@ const TECH_STACKS = [
   { id: "tech007", name: "MySQL" },
   { id: "tech008", name: "AWS" },
 ]
-// ComponentTestPage.tsx에 추가
+// 팀 세부 정보 모달 테스트용 MockData 입니다
 const sampleTeamData = {
   id: "team001",
   name: "팀 001",
@@ -75,7 +77,29 @@ const sampleTeamData = {
     },
   ],
 }
-
+const initialTeams: (typeof sampleTeamData & { isFavorite: boolean; variant?: "default" | "main" })[] = [
+  { ...sampleTeamData, id: "team001", name: "팀 001", isFavorite: false },
+  { ...sampleTeamData, id: "team002", name: "팀 002", isFavorite: true, variant: "main" },
+  { ...sampleTeamData, id: "team003", name: "팀 003", isFavorite: false },
+]
+// 교육생 검색 모달 테스트용 MockData 입니다
+const students = [
+  { id: "std001", name: "김싸피", major: "비전공", position: "임베디드", hasTeam: true },
+  { id: "std002", name: "이싸", major: "전공", position: "풀스텍", hasTeam: false },
+  { id: "std003", name: "박싸피", major: "비전공", position: "백엔드", hasTeam: true },
+  { id: "std004", name: "조싸피", major: "전공", position: "모바일", hasTeam: true },
+  { id: "std005", name: "이싸피", major: "비전공", position: "임베디드", hasTeam: false },
+  { id: "std006", name: "김박싸피", major: "비전공", position: "임베디드", hasTeam: true },
+  { id: "std007", name: "이싸", major: "전공", position: "풀스텍", hasTeam: false },
+  { id: "std008", name: "박싸피", major: "비전공", position: "백엔드", hasTeam: true },
+  { id: "std009", name: "조싸피", major: "전공", position: "모바일", hasTeam: true },
+  { id: "std010", name: "이싸피", major: "비전공", position: "임베디드", hasTeam: false },
+  { id: "std011", name: "김싸피", major: "비전공", position: "임베디드", hasTeam: true },
+  { id: "std012", name: "이싸", major: "전공", position: "풀스텍", hasTeam: false },
+  { id: "std013", name: "박싸피", major: "비전공", position: "백엔드", hasTeam: true },
+  { id: "std014", name: "조싸피", major: "전공", position: "모바일", hasTeam: true },
+  { id: "std015", name: "이싸피", major: "비전공", position: "임베디드", hasTeam: false },
+]
 export default function ComponentTestPage() {
   // 1. CheckTag 사용법
   // 기술스택이 선택되면 2개 이상일 경우 관리하기 위하여 배열로 선언.(기술스택 ID를 저장할 예정입니다.)
@@ -108,6 +132,7 @@ export default function ComponentTestPage() {
   const [ConfirmModal_inviteAccept, setConfirmModal_inviteAccept] = useState(false)
   const [teamDetailModal, setTeamDetailModal] = useState(false)
   const [selectedTeam, setSelectedTeam] = useState(sampleTeamData)
+  const [studentSearchModal, setStudentSearchModal] = useState(false)
 
   const handleOut = () => {
     setConfirmModal_teamout(false)
@@ -119,6 +144,24 @@ export default function ComponentTestPage() {
     setSelectedTeam(teamData)
     setTeamDetailModal(true)
   }
+  const handleInviteUser = (userId: string) => {
+    console.log(userId, "로 초대요청 보내기") // 초대 로직 넣기
+  }
+  const handleChatWithUser = (userId: string) => {
+    console.log(userId, "과 채팅하기") // 1대1 채팅 로직 넣기
+  }
+
+  // 5. 팀 카드 좋아요 사용법
+  const [teams, setTeams] = useState(initialTeams)
+  const handleFavoriteToggle = (id: string) => {
+    setTeams((teams) => {
+      return teams.map((team) => (team.id === id ? { ...team, isFavorite: !team.isFavorite } : team))
+    })
+  }
+
+  // segmented 사용방법
+  const [activeRequestTab, setActiveRequestTab] = useState<"left" | "right">("left")
+  const [activeMarkdownTab, setActiveMarkdownTab] = useState<"left" | "right">("left")
 
   // 5. 드롭다운 사용법
   const POSITION_OPTIONS = ["프론트", "백엔드", "풀스택", "모바일", "임베디드", "AI", "인프라"]
@@ -136,250 +179,310 @@ export default function ComponentTestPage() {
           onChange={setPosition}
         />
         <Dropdown placeholder={"희망 트랙을 선택하세요"} options={TRACK_OPTIONS} value={track} onChange={setTrack} />
-      </div>
-      <div>
-        <h5>선택된 기술 스택 ID: {selectedTechStackIds.join(", ")}</h5>
-        {TECH_STACKS.map((ele) => (
-          <CheckTag
-            key={ele.id}
-            tagContent={ele.name}
-            isChecked={selectedTechStackIds?.includes(ele.id)}
-            onToggle={handleTechStackToggle(ele.id)}
-          ></CheckTag>
-        ))}
-      </div>
-      <div className="bg-background">
-        <NormalTag tagContent={"기본태그"} />
-        <MainTag tagContent={"메인태그"}></MainTag>
-        <MainTag tagContent={"메인태그"} fillBg={true}></MainTag>
-        <PositionTag positionName={"프론트"}></PositionTag>
-        <PositionTag positionName={"백엔드"}></PositionTag>
-        <PositionTag positionName={"풀스택"}></PositionTag>
-        <PositionTag positionName={"모바일"}></PositionTag>
-        <PositionTag positionName={"임베디드"}></PositionTag>
-        <PositionTag positionName={"AI"}></PositionTag>
-        <MajorTag tagContent={"전공태그"}></MajorTag>
-      </div>
-      <div className="bg-main p-5">
-        <WhiteTag tagContent={"하양"}></WhiteTag>
-        <WhiteTag tagContent={"유령"} fillBg={true}></WhiteTag>
-      </div>
-      <div className="flex gap-4">
-        <button
-          className="rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-700"
-          onClick={() => setConfirmModal_teamout(true)}
-        >
-          확인 모달 - 팀 탈퇴
-        </button>
-        <button
-          className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
-          onClick={() => setConfirmModal_inviteAccept(true)}
-        >
-          확인 모달 - 초대 수락
-        </button>
-        <button
-          className="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-700"
-          onClick={() => handleTeamSelect(sampleTeamData)}
-        >
-          팀 상세 정보
-        </button>
-      </div>
-      <ConfirmModal
-        isOpen={ConfirmModal_teamout}
-        title="팀 탈퇴"
-        message={"정말 이 팀을 탈퇴하시겠습니까?"}
-        onConfirm={handleOut}
-        onCancel={() => setConfirmModal_teamout(false)}
-        confirmText="탈퇴"
-        isDestructive={true}
-      />
-      <ConfirmModal
-        isOpen={ConfirmModal_inviteAccept}
-        title="초대 수락"
-        message={"정말 초대를 받으시겠습니까?"}
-        onConfirm={handleAccept}
-        onCancel={() => setConfirmModal_inviteAccept(false)}
-        confirmText="수락"
-      />
-      <TeamDetailModal isOpen={teamDetailModal} onClose={() => setTeamDetailModal(false)} teamData={selectedTeam} />
-      <div className="">
-        <p>small - 채팅입력이나 기본 입력</p>
-        <InputBox
-          text={inputBoxValueSmall}
-          size={"s"}
-          placeholder={"메시지를 입력하세요..."}
-          onChange={setInputBoxValueSmall}
-        ></InputBox>
-        <p>small - isDisabled=true</p>
-        <InputBox
-          text={"사전에 설정된 이름입니다."}
-          size={"s"}
-          placeholder={"메시지를 입력하세요..."}
-          onChange={setInputBoxValueSmall}
-          isDisabled={true}
-        ></InputBox>
-        <p>medium - 팀소개</p>
-        <InputBox
-          text={inputBoxValueMedium}
-          size={"m"}
-          placeholder={"팀을 소개하는 한줄 설명을 작성해주세요"}
-          onChange={setInputBoxValueMedium}
-        ></InputBox>
-        <p>large - 자기소개 마크다운</p>
-        <InputBox
-          text={inputBoxValueLarge}
-          size={"l"}
-          placeholder={"마크다운 형식으로 자유롭게 자기소개를 작성해 보세요!"}
-          onChange={setInputBoxValueLarge}
-        ></InputBox>
-        <div>
-          <p>현재 검색어: {searchQuery}</p>
-          <SearchBar onSearch={handleSearch} />
+        <div className="w-80">
+          <Segmented
+            leftText="받은 요청"
+            rightText="보낸 요청"
+            activeSegment={activeRequestTab}
+            onSegmentChange={setActiveRequestTab}
+          />
+
+          <div className="mt-4">
+            {activeRequestTab === "left" ? <div>받은 요청 컨텐츠</div> : <div>보낸 요청 컨텐츠</div>}
+          </div>
         </div>
-      </div>
-      <div className="flex flex-row gap-2">
-        {/* 태그 small */}
-        <Button
-          text={"기본"}
-          isIcon={false}
-          onClick={function (): void {
-            throw new Error("Function not implemented.")
-          }}
-          size={"s"}
+        <div className="w-200">
+          <Segmented
+            leftText="편집"
+            leftIcon={Search}
+            rightText="미리보기"
+            rightIcon={Eye}
+            activeSegment={activeMarkdownTab}
+            onSegmentChange={setActiveMarkdownTab}
+          />
+          <div className="mt-4">
+            {activeMarkdownTab === "left" ? <div>마크다운으로 작성하세요!</div> : <div>마크다운으로 작성된 컨텐츠</div>}
+          </div>
+          <div className="flex gap-4">
+            {teams.map((team) => (
+              <TeamCard
+                id={team.id}
+                name={team.name}
+                description={team.description}
+                track={team.track}
+                position={team.position}
+                maxMembers={team.maxMembers}
+                currentMembers={team.currentMembers}
+                members={team.members}
+                isFavorite={team.isFavorite}
+                onClickFavorite={() => handleFavoriteToggle(team.id)}
+                onClickCard={() => handleTeamSelect(team)}
+                variant={team.variant}
+              />
+            ))}
+          </div>
+        </div>
+        <div>
+          <h5>선택된 기술 스택 ID: {selectedTechStackIds.join(", ")}</h5>
+          {TECH_STACKS.map((ele) => (
+            <CheckTag
+              key={ele.id}
+              tagContent={ele.name}
+              isChecked={selectedTechStackIds?.includes(ele.id)}
+              onToggle={handleTechStackToggle(ele.id)}
+            ></CheckTag>
+          ))}
+        </div>
+        <div className="bg-background">
+          <NormalTag tagContent={"기본태그"} />
+          <MainTag tagContent={"메인태그"}></MainTag>
+          <MainTag tagContent={"메인태그"} fillBg={true}></MainTag>
+          <PositionTag positionName={"프론트"}></PositionTag>
+          <PositionTag positionName={"백엔드"}></PositionTag>
+          <PositionTag positionName={"풀스택"}></PositionTag>
+          <PositionTag positionName={"모바일"}></PositionTag>
+          <PositionTag positionName={"임베디드"}></PositionTag>
+          <PositionTag positionName={"AI"}></PositionTag>
+          <MajorTag tagContent={"전공태그"}></MajorTag>
+        </div>
+        <div className="bg-main p-5">
+          <WhiteTag tagContent={"하양"}></WhiteTag>
+          <WhiteTag tagContent={"유령"} fillBg={true}></WhiteTag>
+        </div>
+        <div className="flex gap-4">
+          <button
+            className="rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-700"
+            onClick={() => setConfirmModal_teamout(true)}
+          >
+            확인 모달 - 팀 탈퇴
+          </button>
+          <button
+            className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
+            onClick={() => setConfirmModal_inviteAccept(true)}
+          >
+            확인 모달 - 초대 수락
+          </button>
+          <button
+            className="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-700"
+            onClick={() => handleTeamSelect(sampleTeamData)}
+          >
+            팀 상세 정보
+          </button>
+
+          <button
+            className="rounded-md bg-amber-600 px-4 py-2 text-white hover:bg-amber-800"
+            onClick={() => setStudentSearchModal(true)}
+          >
+            교육생 찾기 모달
+          </button>
+        </div>
+        <ConfirmModal
+          isOpen={ConfirmModal_teamout}
+          title="팀 탈퇴"
+          message={"정말 이 팀을 탈퇴하시겠습니까?"}
+          onConfirm={handleOut}
+          onCancel={() => setConfirmModal_teamout(false)}
+          confirmText="탈퇴"
+          isDestructive={true}
         />
-        <Button
-          text={"아이콘"}
-          isIcon={true}
-          Icon={AlarmClock}
-          onClick={function (): void {
-            throw new Error("Function not implemented.")
-          }}
-          size={"s"}
+        <ConfirmModal
+          isOpen={ConfirmModal_inviteAccept}
+          title="초대 수락"
+          message={"정말 초대를 받으시겠습니까?"}
+          onConfirm={handleAccept}
+          onCancel={() => setConfirmModal_inviteAccept(false)}
+          confirmText="수락"
         />
-        <Button
-          text={"테두리"}
-          isIcon={false}
-          variant="outline"
-          onClick={function (): void {
-            throw new Error("Function not implemented.")
+        <TeamDetailModal isOpen={teamDetailModal} onClose={() => setTeamDetailModal(false)} teamData={selectedTeam} />
+        <StudentSearchModal
+          isOpen={studentSearchModal}
+          onClose={() => setStudentSearchModal(false)}
+          students={students}
+          onStudentClick={(userId) => {
+            handleInviteUser(userId)
+            handleChatWithUser(userId)
+            setStudentSearchModal(false)
           }}
-          size={"s"}
         />
-        <Button
-          text={"경고"}
-          isIcon={false}
-          variant="danger"
-          onClick={function (): void {
-            throw new Error("Function not implemented.")
-          }}
-          size={"s"}
-        />
-        <Button
-          text={"텍스트"}
-          isIcon={false}
-          variant="text"
-          onClick={function (): void {
-            throw new Error("Function not implemented.")
-          }}
-          size={"s"}
-        />
-        <Button
-          isIcon={true}
-          Icon={AlarmClock}
-          onClick={function (): void {
-            throw new Error("Function not implemented.")
-          }}
-          size={"s"}
-        />
-      </div>
-      <div className="flex flex-row gap-2">
-        {/* 태그 medium */}
-        <Button
-          text={"기본"}
-          isIcon={false}
-          onClick={function (): void {
-            throw new Error("Function not implemented.")
-          }}
-          size={"m"}
-        />
-        <Button
-          text={"아이콘"}
-          isIcon={true}
-          Icon={AlarmClock}
-          onClick={function (): void {
-            throw new Error("Function not implemented.")
-          }}
-          size={"m"}
-        />
-        <Button
-          text={"테두리"}
-          isIcon={false}
-          variant="outline"
-          onClick={function (): void {
-            throw new Error("Function not implemented.")
-          }}
-          size={"m"}
-        />
-        <Button
-          text={"경고"}
-          isIcon={false}
-          variant="danger"
-          onClick={function (): void {
-            throw new Error("Function not implemented.")
-          }}
-          size={"m"}
-        />
-        <Button
-          text={"텍스트"}
-          isIcon={false}
-          variant="text"
-          onClick={function (): void {
-            throw new Error("Function not implemented.")
-          }}
-          size={"m"}
-        />
-        <Button
-          isIcon={true}
-          Icon={AlarmClock}
-          onClick={function (): void {
-            throw new Error("Function not implemented.")
-          }}
-          size={"m"}
-        />
-      </div>
-      <div className="flex flex-row gap-2">
-        {" "}
-        {/* 태그 large */}
-        <Button
-          text={"아이콘"}
-          isIcon={true}
-          Icon={AlarmClock}
-          onClick={function (): void {
-            throw new Error("Function not implemented.")
-          }}
-          size={"l"}
-        />
-        <Button
-          text={"테두리"}
-          isIcon={true}
-          Icon={AlarmClock}
-          variant="outline"
-          onClick={function (): void {
-            throw new Error("Function not implemented.")
-          }}
-          size={"l"}
-        />
-      </div>
-      <div className="bg-main p-2">
-        <Button
-          text={"흰색"}
-          isIcon={false}
-          variant="white"
-          onClick={function (): void {
-            throw new Error("Function not implemented.")
-          }}
-          size={"m"}
-        />
+        <div className="">
+          <p>small - 채팅입력이나 기본 입력</p>
+          <InputBox
+            text={inputBoxValueSmall}
+            size={"s"}
+            placeholder={"메시지를 입력하세요..."}
+            onChange={setInputBoxValueSmall}
+          ></InputBox>
+          <p>small - isDisabled=true</p>
+          <InputBox
+            text={"사전에 설정된 이름입니다."}
+            size={"s"}
+            placeholder={"메시지를 입력하세요..."}
+            onChange={setInputBoxValueSmall}
+            isDisabled={true}
+          ></InputBox>
+          <p>medium - 팀소개</p>
+          <InputBox
+            text={inputBoxValueMedium}
+            size={"m"}
+            placeholder={"팀을 소개하는 한줄 설명을 작성해주세요"}
+            onChange={setInputBoxValueMedium}
+          ></InputBox>
+          <p>large - 자기소개 마크다운</p>
+          <InputBox
+            text={inputBoxValueLarge}
+            size={"l"}
+            placeholder={"마크다운 형식으로 자유롭게 자기소개를 작성해 보세요!"}
+            onChange={setInputBoxValueLarge}
+          ></InputBox>
+          <div>
+            <p>현재 검색어: {searchQuery}</p>
+            <SearchBar onSearch={handleSearch} />
+          </div>
+        </div>
+        <div className="flex flex-row gap-2">
+          {/* 태그 small */}
+          <Button
+            text={"기본"}
+            isIcon={false}
+            onClick={function (): void {
+              throw new Error("Function not implemented.")
+            }}
+            size={"s"}
+          />
+          <Button
+            text={"아이콘"}
+            isIcon={true}
+            Icon={AlarmClock}
+            onClick={function (): void {
+              throw new Error("Function not implemented.")
+            }}
+            size={"s"}
+          />
+          <Button
+            text={"테두리"}
+            isIcon={false}
+            variant="outline"
+            onClick={function (): void {
+              throw new Error("Function not implemented.")
+            }}
+            size={"s"}
+          />
+          <Button
+            text={"경고"}
+            isIcon={false}
+            variant="danger"
+            onClick={function (): void {
+              throw new Error("Function not implemented.")
+            }}
+            size={"s"}
+          />
+          <Button
+            text={"텍스트"}
+            isIcon={false}
+            variant="text"
+            onClick={function (): void {
+              throw new Error("Function not implemented.")
+            }}
+            size={"s"}
+          />
+          <Button
+            isIcon={true}
+            Icon={AlarmClock}
+            onClick={function (): void {
+              throw new Error("Function not implemented.")
+            }}
+            size={"s"}
+          />
+        </div>
+        <div className="flex flex-row gap-2">
+          {/* 태그 medium */}
+          <Button
+            text={"기본"}
+            isIcon={false}
+            onClick={function (): void {
+              throw new Error("Function not implemented.")
+            }}
+            size={"m"}
+          />
+          <Button
+            text={"아이콘"}
+            isIcon={true}
+            Icon={AlarmClock}
+            onClick={function (): void {
+              throw new Error("Function not implemented.")
+            }}
+            size={"m"}
+          />
+          <Button
+            text={"테두리"}
+            isIcon={false}
+            variant="outline"
+            onClick={function (): void {
+              throw new Error("Function not implemented.")
+            }}
+            size={"m"}
+          />
+          <Button
+            text={"경고"}
+            isIcon={false}
+            variant="danger"
+            onClick={function (): void {
+              throw new Error("Function not implemented.")
+            }}
+            size={"m"}
+          />
+          <Button
+            text={"텍스트"}
+            isIcon={false}
+            variant="text"
+            onClick={function (): void {
+              throw new Error("Function not implemented.")
+            }}
+            size={"m"}
+          />
+          <Button
+            isIcon={true}
+            Icon={AlarmClock}
+            onClick={function (): void {
+              throw new Error("Function not implemented.")
+            }}
+            size={"m"}
+          />
+        </div>
+        <div className="flex flex-row gap-2">
+          {" "}
+          {/* 태그 large */}
+          <Button
+            text={"아이콘"}
+            isIcon={true}
+            Icon={AlarmClock}
+            onClick={function (): void {
+              throw new Error("Function not implemented.")
+            }}
+            size={"l"}
+          />
+          <Button
+            text={"테두리"}
+            isIcon={true}
+            Icon={AlarmClock}
+            variant="outline"
+            onClick={function (): void {
+              throw new Error("Function not implemented.")
+            }}
+            size={"l"}
+          />
+        </div>
+        <div className="bg-main p-2">
+          <Button
+            text={"흰색"}
+            isIcon={false}
+            variant="white"
+            onClick={function (): void {
+              throw new Error("Function not implemented.")
+            }}
+            size={"m"}
+          />
+        </div>
       </div>
     </div>
   )

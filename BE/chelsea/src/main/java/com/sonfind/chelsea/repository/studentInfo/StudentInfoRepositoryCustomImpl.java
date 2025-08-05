@@ -16,10 +16,10 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sonfind.chelsea.domain.student.QStudents;
 import com.sonfind.chelsea.domain.studentInfo.UploadedFile;
-import com.sonfind.chelsea.dto.student.StudentResponse;
+import com.sonfind.chelsea.dto.student.StudentResponseDto;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoResponseDto;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
-import com.sonfind.chelsea.dto.teams.TeamResponse;
+import com.sonfind.chelsea.dto.teams.TeamResponseDto;
 import com.sonfind.chelsea.global.domain.QSubCode;
 
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ public class StudentInfoRepositoryCustomImpl implements StudentInfoRepositoryCus
 		StudentInfoResponseDto result = queryFactory
 			.select(Projections.constructor(StudentInfoResponseDto.class,
 				// 학생 정보 get
-				Projections.constructor(StudentResponse.class,
+				Projections.constructor(StudentResponseDto.class,
 					students.studentId,
 					students.name,
 					new CaseBuilder()
@@ -72,7 +72,7 @@ public class StudentInfoRepositoryCustomImpl implements StudentInfoRepositoryCus
 					studentInfo.portfolio.savedFileName
 				),
 				//Team
-				Projections.constructor(TeamResponse.class,
+				Projections.constructor(TeamResponseDto.class,
 					team.name,
 					Projections.constructor(SubCodeResponse.class, team.track.subCode, team.track.subCodeName),
 					JPAExpressions
