@@ -4,6 +4,7 @@ import { AlarmClock, Eye, Search } from "lucide-react"
 import {
   Button,
   CheckTag,
+  Dropdown,
   InputBox,
   MainTag,
   MajorTag,
@@ -162,8 +163,23 @@ export default function ComponentTestPage() {
   const [activeRequestTab, setActiveRequestTab] = useState<"left" | "right">("left")
   const [activeMarkdownTab, setActiveMarkdownTab] = useState<"left" | "right">("left")
 
+  // 5. 드롭다운 사용법
+  const POSITION_OPTIONS = ["프론트", "백엔드", "풀스택", "모바일", "임베디드", "AI", "인프라"]
+  const TRACK_OPTIONS = ["웹기술", "웹디자인", "모바일", "임베디드"]
+  const [position, setPosition] = useState("")
+  const [track, setTrack] = useState("")
+
   return (
     <div className="flex flex-col gap-5 p-5">
+      <div className="flex flex-row gap-5">
+        <Dropdown
+          placeholder={"희망 포지션을 선택하세요"}
+          options={POSITION_OPTIONS}
+          value={position}
+          onChange={setPosition}
+        />
+        <Dropdown placeholder={"희망 트랙을 선택하세요"} options={TRACK_OPTIONS} value={track} onChange={setTrack} />
+      </div>
       <div className="w-80">
         <Segmented
           leftText="받은 요청"
@@ -185,7 +201,6 @@ export default function ComponentTestPage() {
           activeSegment={activeMarkdownTab}
           onSegmentChange={setActiveMarkdownTab}
         />
-
         <div className="mt-4">
           {activeMarkdownTab === "left" ? <div>마크다운으로 작성하세요!</div> : <div>마크다운으로 작성된 컨텐츠</div>}
         </div>
