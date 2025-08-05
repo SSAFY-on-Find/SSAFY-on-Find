@@ -122,17 +122,20 @@ export default function ComponentTestPage() {
 
   // 5. 드롭다운 사용법
   const POSITION_OPTIONS = ["프론트", "백엔드", "풀스택", "모바일", "임베디드", "AI", "인프라"]
+  const TRACK_OPTIONS = ["웹기술", "웹디자인", "모바일", "임베디드"]
   const [position, setPosition] = useState("")
+  const [track, setTrack] = useState("")
 
   return (
     <div className="flex flex-col gap-5 p-5">
-      <div>
+      <div className="flex flex-row gap-5">
         <Dropdown
           placeholder={"희망 포지션을 선택하세요"}
           options={POSITION_OPTIONS}
           value={position}
           onChange={setPosition}
         />
+        <Dropdown placeholder={"희망 트랙을 선택하세요"} options={TRACK_OPTIONS} value={track} onChange={setTrack} />
       </div>
       <div>
         <h5>선택된 기술 스택 ID: {selectedTechStackIds.join(", ")}</h5>
