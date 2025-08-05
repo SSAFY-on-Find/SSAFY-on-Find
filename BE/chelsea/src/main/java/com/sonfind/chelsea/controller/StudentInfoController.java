@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sonfind.chelsea.dto.studentInfo.StudentInfoResponseDto;
+import com.sonfind.chelsea.dto.studentInfo.StudentInfoGetResponseDto;
 import com.sonfind.chelsea.service.StudentInfoService;
 
 import lombok.RequiredArgsConstructor;
@@ -25,8 +25,8 @@ public class StudentInfoController {
 	public ResponseEntity<Map<String, Object>> getStudentInfo(
 		@PathVariable Long studentId) {
 
-		StudentInfoResponseDto studentInfo = studentInfoService.getStudentInfo(studentId);
-
+		StudentInfoGetResponseDto studentInfo = studentInfoService.getStudentInfo(studentId);
+		
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
 		body.put("data", studentInfo);
