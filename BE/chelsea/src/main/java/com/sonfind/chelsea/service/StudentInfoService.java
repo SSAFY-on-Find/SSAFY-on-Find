@@ -11,14 +11,17 @@ import org.springframework.web.multipart.MultipartFile;
 import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 import com.sonfind.chelsea.domain.studentInfo.UploadedFile;
+import com.sonfind.chelsea.dto.student.StudentResponseDto;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoCreateRequestDto;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoForNotificationResponseDto;
-import com.sonfind.chelsea.dto.studentInfo.StudentInfoResponseDto;
+import com.sonfind.chelsea.dto.studentInfo.StudentInfoGetQueryDto;
+import com.sonfind.chelsea.dto.studentInfo.StudentInfoGetResponseDto;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoUpdateRequestDto;
-import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
+import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
+import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
 import com.sonfind.chelsea.global.domain.SubCode;
+import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
-import com.sonfind.chelsea.repository.studentInfo.StudentInfoRepository;
 import com.sonfind.chelsea.util.StringListConverter;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -30,7 +33,10 @@ public class StudentInfoService {
 
 	private final SubCodeRepository subCodeRepository;
 	private final StudentInfoRepository studentInfoRepository;
+
 	private final StudentService studentService;
+	private final SubCodeService subCodeService;
+	private final TeamService teamService;
 	private final FileService fileService;
 
 	/**
@@ -52,33 +58,53 @@ public class StudentInfoService {
 	 * 자기소개 조회 함수
 	 * */
 	@Transactional(readOnly = true)
-	public StudentInfoResponseDto getStudentInfo(Long studentId) {
+	public StudentInfoGetResponseDto getStudentInfo(Long studentId) {
 
-		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId)
-			.orElse(null);
-		StudentInfoResponseDto responseDto = studentInfoRepository.findStudentInfoResponseDtoById(studentId)
-			.orElse(null);
+		boolean check = studentInfoRepository.existsByStudent_StudentId(studentId);
 
-		List<String> techStackCodes = StringListConverter.stringToList(studentInfo.getTechStack());
+		//이후에 error 처리
+		if (!check) {
+			return null;
+		}
 
-		List<SubCodeResponse> techStackResponse = subCodeRepository.findAllBySubCodeIn(techStackCodes).stream()
-			.map(sc -> new SubCodeResponse(sc.getSubCode(), sc.getSubCodeName()))
+		StudentInfoGetQueryDto studentInfo = studentInfoRepository.findStudentInfoByStudentId(studentId);
+
+		List<String> techStackCodes = StringListConverter.stringToList(studentInfo.techStackString());
+		List<SubCodeResponseDto> techStackResponse = subCodeRepository.findAllBySubCodeIn(techStackCodes).stream()
+			.map(sc -> new SubCodeResponseDto(sc.getSubCode(), sc.getSubCodeName()))
 			.collect(Collectors.toList());
 
-		List<String> strength = StringListConverter.stringToList(studentInfo.getStrength());
+		List<String> strength = StringListConverter.stringToList(studentInfo.strengthString());
 
-		return StudentInfoResponseDto.builder()
-			.student(responseDto.student())
-			.position(responseDto.position())
-			.track(responseDto.track())
-			.goal(responseDto.goal())
-			.mbti(responseDto.mbti())
+		StudentResponseDto studentResponse = studentService.createStudentResponse(studentInfo.studentId(),
+			studentInfo.name(),
+			studentInfo.isMajor());
+
+		SubCodeResponseDto positionCode = subCodeService.createSubCodeResponse(studentInfo.positionCode(),
+			studentInfo.positionCodeName());
+		SubCodeResponseDto trackCode = subCodeService.createSubCodeResponse(studentInfo.trackCode(),
+			studentInfo.trackCodeName());
+		SubCodeResponseDto goalCode = subCodeService.createSubCodeResponse(studentInfo.goalCode(),
+			studentInfo.goalCodeName());
+		SubCodeResponseDto mbtiCode = subCodeService.createSubCodeResponse(studentInfo.mbtiCode(),
+			studentInfo.mbtiCodeName());
+
+		TeamSimpleResponseDto teamResponse = teamService.createTeamSimpleResponseDto(studentInfo.teamId(),
+			studentInfo.teamName(), studentInfo.teamTrackCodeName(), studentInfo.majorCount(),
+			studentInfo.nonMajorCount());
+
+		return StudentInfoGetResponseDto.builder()
+			.student(studentResponse)
+			.position(positionCode)
+			.track(trackCode)
+			.goal(goalCode)
+			.mbti(mbtiCode)
 			.techStack(techStackResponse)
 			.strength(strength)
-			.description(studentInfo.getDescription())
-			.profileImageUrl(studentInfo.getProfileImageUrl())
-			.portfolio(studentInfo.getPortfolio())
-			.teamInfo(responseDto.teamInfo())
+			.description(studentInfo.description())
+			.profileImageUrl(studentInfo.profileImageUrl())
+			.portfolio(studentInfo.portfolio())
+			.teamInfo(teamResponse)
 			.build();
 	}
 
@@ -120,6 +146,7 @@ public class StudentInfoService {
 	 * @return StudentInfoForNotificationResponseDto(학생 ID, 포지션, 트랙, 프로필 이미지 URL)
 	 * @throws IllegalArgumentException 해당 학생의 정보가 없을 경우
 	 */
+	@Transactional(readOnly = true)
 	public StudentInfoForNotificationResponseDto findByStudentId(Long studentId) {
 		StudentInfo findStuInfo = studentInfoRepository.findByStudent_StudentId(studentId)
 			.orElse(null);
