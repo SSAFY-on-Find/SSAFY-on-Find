@@ -13,6 +13,7 @@ import {
   PositionTag,
   SearchBar,
   Segmented,
+  Tooltip,
   WhiteTag,
 } from "./atoms"
 import { TeamCard } from "./molecules"
@@ -211,6 +212,13 @@ export default function ComponentTestPage() {
             }}
           />
         </div>
+      </div>
+      <div className="flex">
+        <Tooltip content="툴팁 내용입니다." side="right">
+          <button type="button" className="bg-main rounded-lg px-5 py-2.5 text-center text-sm font-medium text-white">
+            Tooltip
+          </button>
+        </Tooltip>
       </div>
       <div className="flex flex-row gap-5">
         <Dropdown
