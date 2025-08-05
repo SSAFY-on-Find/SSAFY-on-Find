@@ -5,18 +5,11 @@ import java.util.List;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
-import lombok.Getter;
 
-@Getter
 @Builder
-public class CreateTeamRequest {
-
-	@NotBlank
-	private String description;
-
-	@NotBlank
-	private String trackCode;
-
-	@NotEmpty
-	private List<String> positions;
+public record CreateTeamRequestDto(
+	@NotBlank String description,
+	@NotBlank String track,
+	@NotEmpty List<String> positions
+) {
 }
