@@ -2,6 +2,7 @@ import { useState } from "react"
 import { AlarmClock } from "lucide-react"
 
 import { Button, CheckTag, InputBox, MainTag, MajorTag, NormalTag, PositionTag, SearchBar, WhiteTag } from "./atoms"
+import { TeamCard } from "./molecules"
 import { ConfirmModal, StudentSearchModal, TeamDetailModal } from "./templates"
 
 // API로 기술스택 70여개를 받아온다고 가정하고 상수에 담아두었어요
@@ -64,6 +65,11 @@ const sampleTeamData = {
     },
   ],
 }
+const initialTeams: (typeof sampleTeamData & { isFavorite: boolean; variant?: "default" | "main" })[] = [
+  { ...sampleTeamData, id: "team001", name: "팀 001", isFavorite: false },
+  { ...sampleTeamData, id: "team002", name: "팀 002", isFavorite: true, variant: "main" },
+  { ...sampleTeamData, id: "team003", name: "팀 003", isFavorite: false },
+]
 // 교육생 검색 모달 테스트용 MockData 입니다
 const students = [
   { id: "std001", name: "김싸피", major: "비전공", position: "임베디드", hasTeam: true },
@@ -133,8 +139,34 @@ export default function ComponentTestPage() {
     console.log(userId, "과 채팅하기") // 1대1 채팅 로직 넣기
   }
 
+  // 5. 팀 카드 좋아요 사용법
+  const [teams, setTeams] = useState(initialTeams)
+  const handleFavoriteToggle = (id: string) => {
+    setTeams((teams) => {
+      return teams.map((team) => (team.id === id ? { ...team, isFavorite: !team.isFavorite } : team))
+    })
+  }
+
   return (
     <div className="flex flex-col gap-5 p-5">
+      <div className="flex gap-4">
+        {teams.map((team) => (
+          <TeamCard
+            id={team.id}
+            name={team.name}
+            description={team.description}
+            track={team.track}
+            position={team.position}
+            maxMembers={team.maxMembers}
+            currentMembers={team.currentMembers}
+            members={team.members}
+            isFavorite={team.isFavorite}
+            onClickFavorite={() => handleFavoriteToggle(team.id)}
+            onClickCard={() => handleTeamSelect(team)}
+            variant={team.variant}
+          />
+        ))}
+      </div>
       <div>
         <h5>선택된 기술 스택 ID: {selectedTechStackIds.join(", ")}</h5>
         {TECH_STACKS.map((ele) => (
