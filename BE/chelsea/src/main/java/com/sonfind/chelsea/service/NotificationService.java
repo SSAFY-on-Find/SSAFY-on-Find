@@ -173,10 +173,12 @@ public class NotificationService {
 	 * 개인 또는 팀의 알림을 조회합니다.(알림 창)
 	 * 알림은 발신자 또는 수신자의 역할에 따라 조회됩니다.
 	 * @param studentId
-	 * @param role
+	 * @param type
 	 * @return
 	 */
-	public List<NotificationAndNotificationStatusResponseDto> getMyNotifications(Long studentId, String role) {
+	public List<NotificationAndNotificationStatusResponseDto> getMyNotifications(Long studentId, String type) throws
+		BadRequestException {
+		String role = getRole(type);
 		RecipientRole recipientRole = RecipientRole.valueOf(role.toUpperCase());
 		NotificationDomainType domain = NotificationDomainType.STUDENT;
 		List<NotificationStatusDocument> findNotifications = statusRepo.findAllByTargetIdAndTargetTypeAndRole(studentId,
@@ -247,16 +249,18 @@ public class NotificationService {
 	/**
 	 * 팀의 알림을 조회합니다.(팀 상세보기 페이지)
 	 * @param teamId
-	 * @param role
+	 * @param type
 	 * @return
 	 */
 	public List<NotificationAndNotificationStatusResponseDto> getTeamNotifications(Long studentId, Long teamId,
-		String role) throws
+		String type) throws
 		BadRequestException {
 		if (!studentFacade.isMemberOfTeam(studentId, teamId)) {
 			log.info("학생이 팀의 멤버가 아닙니다. studentId: {}, teamId: {}", studentId, teamId);
 			throw new BadRequestException("HttpStatus: " + HttpStatus.BAD_REQUEST + " | 잘못된 요청입니다.");
 		}
+
+		String role = getRole(type);
 
 		RecipientRole recipientRole = RecipientRole.valueOf(role.toUpperCase());
 		NotificationDomainType domain = NotificationDomainType.TEAM;
@@ -541,6 +545,24 @@ public class NotificationService {
 
 		log.info("알림 상태 조회 성공: {}, {}, {}", notificationId, studentId, role);
 		return findStatus;
+	}
+
+	/**
+	 * 알림의 역할을 반환합니다.
+	 * @param type
+	 * @return
+	 * @throws BadRequestException
+	 */
+	private String getRole(String type) throws BadRequestException {
+		String NotifiRole = null;
+		if (type.equals("receive")) {
+			NotifiRole = "subscriber";
+		} else if (type.equals("send")) {
+			NotifiRole = "publisher";
+		} else {
+			throw new BadRequestException("HttpStatus: " + HttpStatus.BAD_REQUEST + " | 잘못된 요청입니다.");
+		}
+		return NotifiRole;
 	}
 
 	/**
