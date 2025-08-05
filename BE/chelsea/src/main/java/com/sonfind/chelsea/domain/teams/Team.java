@@ -48,10 +48,10 @@ public class Team extends BaseEntity {
 	private SubCode track;
 
 	@Column(name = "major_count", nullable = false)
-	private int majorCount = 0;
+	private int majorCount;
 
 	@Column(name = "non_major_count", nullable = false)
-	private int nonMajorCount = 0;
+	private int nonMajorCount;
 
 	@Column(name = "is_deleted")
 	private boolean isDeleted;
