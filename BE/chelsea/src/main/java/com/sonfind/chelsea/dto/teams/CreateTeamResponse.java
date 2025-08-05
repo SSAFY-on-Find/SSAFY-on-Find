@@ -1,10 +1,8 @@
 package com.sonfind.chelsea.dto.teams;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
 
-@Getter
-@AllArgsConstructor
+@Builder
 public class CreateTeamResponse {
 	private Long teamId;
 }
