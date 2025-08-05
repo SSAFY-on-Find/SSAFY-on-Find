@@ -32,3 +32,5 @@ logging:
     org.hibernate.SQL: WARN
     org.hibernate.type.descriptor.sql: WARN
 
+upload:
+  dir: /app/uploads/
