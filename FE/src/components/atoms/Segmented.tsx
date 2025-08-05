@@ -1,3 +1,4 @@
+import React, { useState } from "react"
 import { Inbox, Send } from "lucide-react"
 
 interface ISegmented {
@@ -20,10 +21,16 @@ function Segmented({
     onSegmentChange(segment)
   }
   return (
-    <div className="bg-background flex h-8 w-full rounded-md p-1">
+    <div className="bg-background relative flex h-10 w-full rounded-lg p-1">
+      <div
+        className={`absolute top-1 bottom-1 w-1/2 rounded-md bg-white shadow-sm transition-transform duration-300 ease-out ${
+          activeSegment === "right" ? "translate-x-full" : "translate-x-0"
+        }`}
+      />
+
       <button
-        className={`flex flex-1 items-center justify-center gap-2 rounded-xs px-4 transition-colors ${
-          activeSegment === "left" ? "text-text bg-white" : "text-subtext"
+        className={`relative z-10 flex flex-1 items-center justify-center gap-2 rounded-md px-4 transition-all duration-300 ${
+          activeSegment === "left" ? "text-text scale-105" : "text-subtext hover:scale-102"
         }`}
         onClick={() => handleSegmentClick("left")}
       >
@@ -32,8 +39,8 @@ function Segmented({
       </button>
 
       <button
-        className={`flex flex-1 items-center justify-center gap-2 rounded-xs px-4 transition-colors ${
-          activeSegment === "right" ? "text-text bg-white" : "text-subtext"
+        className={`relative z-10 flex flex-1 items-center justify-center gap-2 rounded-md px-4 transition-all duration-300 ${
+          activeSegment === "right" ? "text-text scale-105" : "text-subtext hover:scale-102"
         }`}
         onClick={() => handleSegmentClick("right")}
       >
