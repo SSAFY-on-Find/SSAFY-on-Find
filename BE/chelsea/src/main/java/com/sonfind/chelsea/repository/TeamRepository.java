@@ -13,5 +13,5 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
 	@Query("SELECT t from Team t WHERE t.teamId =:teamId AND t.isDeleted=false")
 	Optional<Team> findTeamByTeamId(@Param("teamId") Long teamId);
 
-	List<Team> findByDeletedIsFalseOrderByTeamIdAsc();
+	List<Team> findByIsDeletedIsFalseOrderByTeamIdAsc();
 }

@@ -1,5 +1,6 @@
 package com.sonfind.chelsea.service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,7 @@ import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
 import com.sonfind.chelsea.dto.teams.CreateTeamRequestDto;
 import com.sonfind.chelsea.dto.teams.MyTeamResponseDto;
 import com.sonfind.chelsea.dto.teams.RecruitmentDto;
+import com.sonfind.chelsea.dto.teams.TeamListResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamMemberResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamRuleResponseDto;
@@ -188,14 +190,71 @@ public class TeamService {
 	}
 
 	//팀 전체 목록 조회
-	// @Transactional(readOnly = true)
-	// public List<TeamListResponseDto> getAllTeams() {
-	// 	List<Team> teams = teamRepository.findByDeletedIsFalseOrderByTeamIdAsc();
-	//
-	// 	return teams.stream()
-	// 		.map(this::convertToTeamListResponse)
-	// 		.collect(Collectors.toList());
-	// }
+	@Transactional(readOnly = true)
+	public List<TeamListResponseDto> getAllTeams() {
+		List<Team> teams = teamRepository.findByIsDeletedIsFalseOrderByTeamIdAsc();
+
+		return teams.stream()
+			.map(this::convertToTeamListResponse)
+			.sorted(
+				Comparator.comparing(TeamListResponseDto::isRecruitingComplete)
+					.thenComparing(dto -> parseTeamNumber(dto.teamName()))
+			)
+			.collect(Collectors.toList());
+	}
+
+	//team2teamlistresponseDto
+	private TeamListResponseDto convertToTeamListResponse(Team team) {
+		List<Students> teamMembers = studentRepository.findAllByTeamId(team.getTeamId());
+
+		List<String> memberProfileImages = teamMembers.stream()
+			.map(this::getStudentProfileImage)
+			.filter(url -> url != null && !url.trim().isEmpty())
+			.collect(Collectors.toList());
+
+		List<RecruitmentDto> recruitments = team.getRecruitments().stream()
+			.map(recruitment -> new RecruitmentDto(
+				recruitment.getPosition().getSubCode(),
+				recruitment.getPosition().getSubCodeName()
+			))
+			.collect(Collectors.toList());
+
+		SubCodeResponse track = new SubCodeResponse(
+			team.getTrack().getSubCode(),
+			team.getTrack().getSubCodeName()
+		);
+
+		return TeamListResponseDto.builder()
+			.teamId(team.getTeamId())
+			.teamName(team.getName())
+			.description(team.getDescription())
+			.track(track)
+			.memberProfileImages(memberProfileImages)
+			.recruitments(recruitments)
+			.isRecruitingComplete(teamMembers.size() >= 6)
+			.build();
+	}
+
+	//교육생 프사 조회
+	private String getStudentProfileImage(Students student) {
+		try {
+			return studentInfoRepository.findByStudent_StudentId(student.getStudentId())
+				.map(StudentInfo::getProfileImageUrl)
+				.orElse("");
+		} catch (Exception e) {
+			return "";
+		}
+	}
+
+	//팀 이름 숫자만 파싱
+	private int parseTeamNumber(String teamName) {
+		try {
+			String digits = teamName.replaceAll("\\D+", "");
+			return Integer.parseInt(digits);
+		} catch (Exception e) {
+			return Integer.MAX_VALUE;
+		}
+	}
 
 	//팀 빌딩 규칙
 	//6인 1팀

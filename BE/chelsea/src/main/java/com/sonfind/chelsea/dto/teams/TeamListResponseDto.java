@@ -14,16 +14,16 @@ public record TeamListResponseDto(
 	SubCodeResponse track,
 	List<String> memberProfileImages,
 	List<RecruitmentDto> recruitments,
-	boolean maxMemberCount
+	boolean isRecruitingComplete
 ) {
 	public TeamListResponseDto(Long teamId, String teamName, String description, SubCodeResponse track,
-		List<String> memberProfileImages, List<RecruitmentDto> recruitments, boolean maxMemberCount) {
+		List<String> memberProfileImages, List<RecruitmentDto> recruitments, boolean isRecruitingComplete) {
 		this.teamId = teamId;
 		this.teamName = teamName;
 		this.description = description;
 		this.track = track;
 		this.memberProfileImages = memberProfileImages;
 		this.recruitments = recruitments;
-		this.maxMemberCount = maxMemberCount;
+		this.isRecruitingComplete = isRecruitingComplete;
 	}
 }

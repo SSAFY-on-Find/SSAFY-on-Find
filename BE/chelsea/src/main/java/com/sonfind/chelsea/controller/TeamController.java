@@ -2,6 +2,7 @@ package com.sonfind.chelsea.controller;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sonfind.chelsea.dto.teams.CreateTeamRequestDto;
 import com.sonfind.chelsea.dto.teams.MyTeamResponseDto;
+import com.sonfind.chelsea.dto.teams.TeamListResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamResponseDto;
 import com.sonfind.chelsea.dto.teams.UpdateTeamRequestDto;
 import com.sonfind.chelsea.service.TeamService;
@@ -81,6 +83,18 @@ public class TeamController {
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
 		body.put("data", myTeamResponse);
+
+		return ResponseEntity.ok().body(body);
+	}
+
+	//팀 전체 목록 조회
+	@GetMapping
+	public ResponseEntity<Map<String, Object>> getAllTeams(@CookieValue("sessionId") Long studentId) {
+		List<TeamListResponseDto> teamListResponse = teamService.getAllTeams();
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", teamListResponse);
 
 		return ResponseEntity.ok().body(body);
 	}
