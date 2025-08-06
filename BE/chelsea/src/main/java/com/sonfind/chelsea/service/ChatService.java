@@ -17,14 +17,19 @@ public class ChatService {
 	private final ChatMessageRepository chatMessageRepository;
 
 	@Transactional
-	public void saveChatMessage(Long studentId, ChatMessageRequestDto chat) {
+	public void saveTeamChatMessage(Long studentId, ChatMessageRequestDto request) {
 		ChatMessage chatMessage = ChatMessage.builder()
 			.writerId(studentId)
-			.roomId(chat.roomId())
-			.content(chat.content())
+			.roomId(request.roomId())
+			.content(request.content())
 			.publishedAt(LocalDateTime.now())
 			.build();
 
 		chatMessageRepository.save(chatMessage);
+	}
+
+	@Transactional
+	public void saveDirectChatMessage(Long studentId, ChatMessageRequestDto chat) {
+
 	}
 }

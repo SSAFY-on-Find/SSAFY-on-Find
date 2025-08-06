@@ -9,9 +9,19 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketStompBrokerConfig implements WebSocketMessageBrokerConfigurer {
+	/**
+	 * 구독 prefix
+	 * /topic : 팀 내 채팅을 받을 접두어
+	 * /queue : 1:1 채팅을 받은 접두어
+	 *
+	 * 메시지 발행 prefix
+	 * /pub
+	 */
+
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
-		registry.enableSimpleBroker("/sub");
+		registry.enableSimpleBroker("/topic", "/queue");
+
 		registry.setApplicationDestinationPrefixes("/pub");
 	}
 

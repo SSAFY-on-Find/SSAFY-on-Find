@@ -8,18 +8,30 @@ import com.sonfind.chelsea.dto.chat.ChatMessageRequestDto;
 import com.sonfind.chelsea.service.ChatService;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @RequiredArgsConstructor
-@Slf4j
 public class ChatController {
 	private final SimpMessageSendingOperations simpMessageSendingOperations;
 	private final ChatService chatService;
 
-	@MessageMapping("/message")
+	/**
+	 * 팀 채팅 메시지 처리
+	 * 클라이언트가 /pub/team/message로 메시지를 보내면 이 메서드가 처리합니다.
+	 */
+	@MessageMapping("/team/message")
 	public void send(ChatMessageRequestDto request) {
-		chatService.saveChatMessage(request.studentId(), request);
-		simpMessageSendingOperations.convertAndSend("/sub/chatroom/" + request.roomId(), request.content());
+		chatService.saveTeamChatMessage(request.studentId(), request);
+		simpMessageSendingOperations.convertAndSend("/topic/chatroom/" + request.roomId(), request.content());
+	}
+
+	/**
+	 * 1:1 채팅 메시지 처리
+	 * 클라이언트가 /pub/direct/message로 메시지를 보내면 이 메서드가 처리합니다.
+	 */
+	@MessageMapping("/direct/message")
+	public void sendDirectMessage(ChatMessageRequestDto request) {
+		chatService.saveDirectChatMessage(request.studentId(), request);
+		simpMessageSendingOperations.convertAndSend("/queue/chatroom/" + request.roomId(), request);
 	}
 }
