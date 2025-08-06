@@ -31,8 +31,8 @@ function TeamCard({
   const titleColor = variant === "main" ? "text-white" : "text-main"
   const heartColor = variant === "main" ? "text-white" : "text-subtext"
   const heartFillColor = variant === "main" ? "fill-white text-white" : "fill-red-500 text-red-500"
-  const btnRecruit = variant === "main" ? "outline" : "primary"
-  const btnMerge = variant === "main" ? "white" : "outline"
+  const btnRecruit = variant === "main" ? "white-full" : "primary"
+  const btnMerge = variant === "main" ? "white-line" : "outline"
   return (
     <div
       key={teamId}
