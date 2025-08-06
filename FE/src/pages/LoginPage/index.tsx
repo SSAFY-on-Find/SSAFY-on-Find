@@ -63,7 +63,15 @@ export default function LoginPage() {
 
         {/* Input + 로그인 버튼 */}
         <div className="flex w-full flex-col gap-3">
-          <InputBox text={inputBoxValue} size={"s"} placeholder={"학번을 입력해주세요"} onChange={setInputBoxValue} />
+          <InputBox
+            text={inputBoxValue}
+            size={"s"}
+            placeholder={"학번을 입력해주세요"}
+            onChange={setInputBoxValue}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleLogin()
+            }}
+          />
           <Button size={"l"} isIcon={false} text="로그인" onClick={handleLogin} />
         </div>
 
