@@ -25,7 +25,6 @@ export default function LoginPage() {
     login(studentId, {
       onSuccess: (user) => {
         setUser(user)
-        console.log(user)
         navigate("/")
         toast.success("로그인에 성공했습니다.")
       },
