@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.sonfind.chelsea.domain.student.Students;
+import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoUpdateRequestDto;
 import com.sonfind.chelsea.global.domain.BaseEntity;
 import com.sonfind.chelsea.global.domain.SubCode;
@@ -42,7 +42,7 @@ public class StudentInfo extends BaseEntity {
 
 	@OneToOne
 	@JoinColumn(name = "student_id", referencedColumnName = "student_id")
-	Students student;
+	Student student;
 
 	private String techStack;
 

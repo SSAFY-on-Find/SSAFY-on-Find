@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sonfind.chelsea.domain.student.Students;
+import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.dto.student.request.StudentSignInRequestDto;
 import com.sonfind.chelsea.dto.student.response.StudentListResponseDto;
 import com.sonfind.chelsea.dto.student.response.StudentSignInResponseDto;
@@ -37,16 +37,16 @@ public class StudentController {
 	private final StudentService studentService;
 
 	@Operation(summary = "교육생 로그인", description = "교육생 학번 입력 시 로그인 성공")
-	// @ApiResponses(value = {
-	// 	@ApiResponse(responseCode = "200", description = "로그인 성공",
-	// 		content = @Content(schema = @Schema(implementation = Students.class))),
-	// 	@ApiResponse(responseCode = "404", description = "학번 조회 실패",
-	// 		content = @Content(
-	// 			schema = @Schema(
-	// 				type = "object",
-	// 				example = "{\"status\": \"FAIL\", \"message\": \"학번 조회 실패\"}"
-	// 			)))
-	// })
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "로그인 성공",
+			content = @Content(schema = @Schema(implementation = Student.class))),
+		@ApiResponse(responseCode = "404", description = "학번 조회 실패",
+			content = @Content(
+				schema = @Schema(
+					type = "object",
+					example = "{\"status\": \"FAIL\", \"message\": \"학번 조회 실패\"}"
+				)))
+	})
 	@PostMapping("/sign-in")
 	public ResponseEntity<Map<String, Object>> signup(@RequestBody @Valid StudentSignInRequestDto request,
 		HttpServletRequest httpServletRequest) {

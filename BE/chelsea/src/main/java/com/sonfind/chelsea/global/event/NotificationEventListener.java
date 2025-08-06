@@ -4,7 +4,7 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import com.sonfind.chelsea.domain.student.Students;
+import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.dto.notification.ApplicantDto;
 import com.sonfind.chelsea.dto.notification.ApplicationPubData;
 import com.sonfind.chelsea.dto.notification.ApplicationSubData;
@@ -82,7 +82,7 @@ public class NotificationEventListener {
 			case MERGE -> {
 				NotificationDto<MergePubData> pubPayload = createMergePubPayload(e);
 				NotificationDto<MergeSubData> subPayload = createMergeSubPayload(e);
-				
+
 				sseService.dispatch(
 					pubPayload.data().publisher().id(),
 					pubPayload.data().publisher().type(),
@@ -155,13 +155,13 @@ public class NotificationEventListener {
 		BadRequestException {
 
 		// 발신자 정보 조회
-		Students findPub = studentFacade.findByStudentId(e.getPubId());
+		Student findPub = studentFacade.findByStudentId(e.getPubId());
 
 		// 발신자 알림 관련 정보 조회
 		NotificationResponseDto findNotificationInfo = notificationService.getNotificationInfo(e.getNotificationId());
 
 		// 수신자 정보 조회
-		Students findSub = studentFacade.findByStudentId(e.getSubId());
+		Student findSub = studentFacade.findByStudentId(e.getSubId());
 
 		// 발신자 정보
 		NotificationMsgDto pub = NotificationMsgDto.builder()
@@ -192,7 +192,7 @@ public class NotificationEventListener {
 	private NotificationDto<ApplicationSubData> createApplicationSubPayload(InvitationRequestEvent e) throws
 		BadRequestException {
 		// 발신자 정보 조회
-		Students findPub = studentFacade.findByStudentId(e.getPubId());
+		Student findPub = studentFacade.findByStudentId(e.getPubId());
 
 		// 발신자 추가정보 조회
 		StudentUnionForNotificationResponseDto findPubInfo = studentFacade.findByStudentIdForSse(
@@ -249,7 +249,7 @@ public class NotificationEventListener {
 		NotificationResponseDto findPubTeamInfo = notificationService.getNotificationInfo(e.getNotificationId());
 
 		// 수신자 정보 조회
-		Students findSub = studentFacade.findByStudentId(e.getSubId());
+		Student findSub = studentFacade.findByStudentId(e.getSubId());
 
 		// 수신자 추가정보 조회
 		StudentUnionForNotificationResponseDto findSubInfo = studentFacade.findByStudentIdForSse(
@@ -299,7 +299,7 @@ public class NotificationEventListener {
 		TeamSimpleResponseDto findPubTeam = teamService.findSimpleTeamInfoByTeamId(e.getPubId());
 
 		// 수신자 정보 조회
-		Students findSub = studentFacade.findByStudentId(e.getSubId());
+		Student findSub = studentFacade.findByStudentId(e.getSubId());
 
 		// 수신자 추가정보 조회
 		NotificationResponseDto findNotificationInfo = notificationService.getNotificationInfo(e.getNotificationId());
@@ -433,7 +433,7 @@ public class NotificationEventListener {
 			.build();
 	}
 
-	private String getIsMajor(Students findSub) {
+	private String getIsMajor(Student findSub) {
 		return findSub.getMajorYn() ? "전공" : "비전공";
 	}
 

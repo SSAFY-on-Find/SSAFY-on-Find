@@ -6,7 +6,7 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import com.sonfind.chelsea.domain.student.Students;
+import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
 import com.sonfind.chelsea.dto.notification.NotificationTypeInfo;
 import com.sonfind.chelsea.facade.StudentFacade;
@@ -46,8 +46,8 @@ public class NotificationValidator {
 	// - student 타입이면 자기 자신인지
 	// - 그 외는 예외 발생
 	private void validateTeamPublisher(Long studentId, NotificationRequestDto dto) throws BadRequestException {
-		List<Students> members = studentFacade.findAllByTeamId(dto.pubId());
-		Students me = studentFacade.findByStudentId(studentId);
+		List<Student> members = studentFacade.findAllByTeamId(dto.pubId());
+		Student me = studentFacade.findByStudentId(studentId);
 		if (!members.contains(me)) {
 			log.info("HttpStatus: {} | 팀에 속해 있지 않은 사용자입니다.", HttpStatus.BAD_REQUEST);
 			throw new BadRequestException(
