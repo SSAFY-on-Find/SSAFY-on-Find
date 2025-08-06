@@ -1,5 +1,5 @@
 import type { IApiResponse } from "@/types/common"
-import type { IMyTeam, ITeamCard } from "@/types/team"
+import type { IMyTeam, ITeamCard, ITeamDetails } from "@/types/team"
 
 import api from "./index"
 
@@ -11,6 +11,10 @@ export const teamApi = {
   },
   getMyTeam: async (): Promise<IApiResponse<IMyTeam>> => {
     const response = await api.get<IApiResponse<IMyTeam>>(TEAM_BASE_URL + "/me")
+    return response.data
+  },
+  getTeamDetails: async (teamId: number): Promise<IApiResponse<ITeamDetails>> => {
+    const response = await api.get<IApiResponse<ITeamDetails>>(TEAM_BASE_URL + "/" + teamId)
     return response.data
   },
 }

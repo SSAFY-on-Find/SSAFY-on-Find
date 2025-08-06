@@ -7,10 +7,10 @@ import { Button, MainTag, PositionTag, UserImg, WhiteTag } from "../atoms"
 function TeamCard({
   teamId,
   teamName,
-  description,
+  teamDescription,
   track,
-  members,
   recruitments,
+  members,
   isRecruitingComplete,
   isFavorite,
   onClickFavorite,
@@ -54,7 +54,7 @@ function TeamCard({
             onClick={handleFavoriteClick}
           />
         </div>
-        <p className={`${textColor} line-clamp-2 text-sm`}>{description}</p>
+        <p className={`${textColor} line-clamp-2 text-sm`}>{teamDescription}</p>
       </div>
       <div className="p-[18px] pt-0">
         <div className="mb-5 flex px-[5px]">

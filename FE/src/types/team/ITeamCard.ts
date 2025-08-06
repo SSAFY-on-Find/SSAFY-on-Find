@@ -6,10 +6,10 @@ import type { ITeamMember } from "./ITeamMember"
 export interface ITeamCard {
   teamId: number
   teamName: string
-  description: string
+  teamDescription: string
   track: ISubcode
-  members: ITeamMember[]
   recruitments: IRecruitment[]
+  members: ITeamMember[]
   isRecruitingComplete: boolean
   isFavorite?: boolean
   onClickFavorite: () => void

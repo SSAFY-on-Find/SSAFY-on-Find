@@ -1,0 +1,1 @@
+export { sortTeamsByFavorite } from "./sortTeam"

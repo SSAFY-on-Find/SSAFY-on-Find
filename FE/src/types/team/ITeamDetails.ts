@@ -7,7 +7,10 @@ export interface ITeamDetails {
   teamName: string
   teamDescription: string
   teamTrack: ISubcode
+  majorCount: number
+  nonMajorCount: number
   teamCount: number
-  position: IRecruitment[]
+  positions: IRecruitment[]
   members: ITeamMember[]
+  isFavorite: boolean
 }
