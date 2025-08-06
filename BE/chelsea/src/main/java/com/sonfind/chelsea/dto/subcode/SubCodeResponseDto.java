@@ -3,7 +3,7 @@ package com.sonfind.chelsea.dto.subcode;
 import lombok.Builder;
 
 @Builder
-public record SubCodeResponse(
+public record SubCodeResponseDto(
 	String subcode,
 	String subcodeName
 ) {

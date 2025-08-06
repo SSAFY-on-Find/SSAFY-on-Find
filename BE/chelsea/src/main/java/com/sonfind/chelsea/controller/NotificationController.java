@@ -4,17 +4,19 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
 import com.sonfind.chelsea.global.manager.SseEmitterManager;
 import com.sonfind.chelsea.service.NotificationService;
 
@@ -41,37 +43,80 @@ public class NotificationController {
 	@Operation(summary = "SSE 구독", description = "SSE를 통해 알림을 구독합니다. " + "구독자는 자신의 ID를 통해 알림을 받을 수 있습니다.")
 	@ApiResponses({@ApiResponse(responseCode = "200", description = "SSE 구독 성공", content = @Content),
 		@ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content)})
-	public ResponseEntity<SseEmitter> subscribe(Long subId) {
-		log.info("subscribe called with pubId: {}", subId);
-		SseEmitter emitter = sseEmitterManager.connect(subId);
+	public ResponseEntity<SseEmitter> subscribe(@CookieValue("sessionId") Long studentId) {
+		log.info("subscribe called with pubId: {}", studentId);
+		SseEmitter emitter = sseEmitterManager.connect(studentId);
 		if (emitter == null) {
-			log.error("Failed to create SSE emitter for user ID: {}", subId);
-			return ResponseEntity.badRequest().body(null);
+			log.error("Failed to create SSE emitter for user ID: {}", studentId);
+			return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(null);
 		}
 
 		return ResponseEntity.ok(emitter);
 	}
 
-	@Operation(summary = "알림 로그 저장", description = "요청에 대한 알림 로그를 DB에 저장합니다. "
-		+ "알림 발신자와 수신자의 정보를 NotificationParticipant 객체로 생성하고, " + "NotificationDocument 객체를 생성하여 MongoDB에 저장합니다.")
-	@ApiResponses({@ApiResponse(responseCode = "201", description = "알림 로그 저장 성공", content = @Content),
-		@ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)})
-	@PostMapping()
-	public ResponseEntity<Map<String, Object>> createTeamMateEvent(
-		@RequestBody NotificationRequestDto notificationRequestDto) {
-		log.info("createTeamMateEvent called");
-
+	@GetMapping()
+	@Operation(summary = "개인 초대/지원 알림 조회", description = "사용자의 개인 초대 및 지원 알림을 조회합니다. " + "알림 타입을 통해 필터링할 수 있습니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "알림 조회 성공", content = @Content),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content)
+	})
+	public ResponseEntity<? extends Map<String, ? extends Object>> getPersonalInvitationList(
+		@CookieValue("sessionId") Long studentId,
+		@RequestParam("type") String type
+	) {
 		try {
 			Map<String, Object> body = new HashMap<>();
 			body.put("status", "SUCCESS");
-			body.put("data", Map.of("notification", notificationService.saveNotification(notificationRequestDto)));
-			return ResponseEntity.status(HttpStatus.CREATED)
+			body.put("data", Map.of("notification", notificationService.getMyNotifications(studentId, type)));
+			return ResponseEntity.status(HttpStatus.OK)
+				.contentType(MediaType.APPLICATION_JSON)
 				.header(HttpHeaders.LOCATION, LOCATION.toString())
 				.body(body);
 		} catch (Exception e) {
 			log.error("Error creating notification: {}", e.getMessage());
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(Map.of("error", "Failed to create notification"));
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(Map.of("error", "Failed to find notification"));
 		}
+	}
+
+	@GetMapping("/{teamId}")
+	@Operation(summary = "팀 초대/지원 알림 조회", description = "특정 팀에 대한 알림을 조회합니다. " + "팀 ID와 알림 타입을 통해 필터링할 수 있습니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "알림 조회 성공", content = @Content),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content)
+	})
+	public ResponseEntity<? extends Map<String, ? extends Object>> getTeamInvitationList(
+		@CookieValue("sessionId") Long studentId,
+		@PathVariable Long teamId,
+		@RequestParam("type") String type
+	) throws BadRequestException {
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", Map.of("notification", notificationService.getTeamNotifications(studentId, teamId, type)));
+		return ResponseEntity.status(HttpStatus.OK)
+			.contentType(MediaType.APPLICATION_JSON)
+			.header(HttpHeaders.LOCATION, LOCATION.toString())
+			.body(body);
+
+	}
+
+	@GetMapping("/count")
+	@Operation(summary = "알림 개수 조회", description = "사용자의 읽지 않은 알림 개수를 조회합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "알림 개수 조회 성공", content = @Content),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content)
+	})
+	public ResponseEntity<? extends Map<String, ? extends Object>> getCountOfNonReadNotifications(
+		@CookieValue("sessionId") Long studentId
+	) {
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", Map.of("nonReadCount", notificationService.getCountOfNonReadNotifications(studentId)));
+		return ResponseEntity.status(HttpStatus.OK)
+			.contentType(MediaType.APPLICATION_JSON)
+			.header(HttpHeaders.LOCATION, LOCATION.toString())
+			.body(body);
+
 	}
 }

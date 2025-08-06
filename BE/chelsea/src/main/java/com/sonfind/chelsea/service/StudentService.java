@@ -8,13 +8,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sonfind.chelsea.domain.student.Students;
-import com.sonfind.chelsea.dto.student.StudentForNotificationResponseDto;
 import com.sonfind.chelsea.dto.student.StudentListQueryDto;
 import com.sonfind.chelsea.dto.student.StudentListResponseDto;
-import com.sonfind.chelsea.dto.student.StudentResponse;
-import com.sonfind.chelsea.dto.subcode.SubCodeResponse;
+import com.sonfind.chelsea.dto.student.StudentResponseDto;
+import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
+import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
-import com.sonfind.chelsea.repository.studentInfo.StudentInfoRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,7 +36,7 @@ public class StudentService {
 		return student;
 	}
 
-	public StudentForNotificationResponseDto findByStudentIdForSse(long studentId) {
+	public StudentResponseDto findByStudentIdForSse(long studentId) {
 		Optional<Students> authOptional = studentRepository.findByStudentId(studentId);
 
 		if (!authOptional.isPresent()) {
@@ -45,32 +44,38 @@ public class StudentService {
 		}
 		Students student = authOptional.get();
 
-		return StudentForNotificationResponseDto.builder()
+		return StudentResponseDto.builder()
 			.studentId(student.getStudentId())
 			.name(student.getName())
-			.isMajor(getIsMajor(student))
+			.major(getIsMajor(student.getMajorYn()))
 			.build();
 	}
 
 	//교육생 목록 조회
 	@Transactional(readOnly = true)
-	public List<StudentListResponseDto> getStudentList(Long studentId) {
+	public List<StudentListResponseDto> getStudentList() {
 
 		List<StudentListQueryDto> queryResult = studentRepository.findStudentList();
 
 		return queryResult.stream().map(dto -> new StudentListResponseDto(
-			new StudentResponse(dto.studentId(), dto.name(), dto.major() ? "전공" : "비전공"),
-			new SubCodeResponse(dto.positionCode(), dto.positionCodeName()),
-			new SubCodeResponse(dto.trackCode(), dto.trackCodeName()),
-			new SubCodeResponse(dto.goalCode(), dto.goalCodeName()),
+			new StudentResponseDto(dto.studentId(), dto.name(), dto.major() ? "전공" : "비전공"),
+			new SubCodeResponseDto(dto.positionCode(), dto.positionCodeName()),
+			new SubCodeResponseDto(dto.trackCode(), dto.trackCodeName()),
+			new SubCodeResponseDto(dto.goalCode(), dto.goalCodeName()),
 			dto.profileImageUrl(),
 			false,
 			dto.teamName()
 		)).collect(Collectors.toList());
 	}
 
-	private static String getIsMajor(Students student) {
-		return student.getMajorYn() ? "전공" : "비전공";
+	public StudentResponseDto createStudentResponse(Long studentId, String name, Boolean isMajor) {
+		return new StudentResponseDto(
+			studentId, name, getIsMajor(isMajor)
+		);
+	}
+
+	private static String getIsMajor(Boolean major) {
+		return major ? "전공" : "비전공";
 	}
 
 	public List<Students> findAllByTeamId(Long teamId) {

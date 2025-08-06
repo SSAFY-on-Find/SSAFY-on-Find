@@ -2,6 +2,7 @@ package com.sonfind.chelsea.global.event;
 
 import java.util.Date;
 
+import org.bson.types.ObjectId;
 import org.springframework.context.ApplicationEvent;
 
 import com.sonfind.chelsea.types.NotificationDomainType;
@@ -11,7 +12,7 @@ import lombok.Getter;
 
 @Getter
 public class NotificationEvent extends ApplicationEvent {
-	private final long notificationId;
+	private final ObjectId notificationId;
 	private final long pubId;
 	private final NotificationDomainType pubType;
 	private final long subId;
@@ -19,7 +20,11 @@ public class NotificationEvent extends ApplicationEvent {
 	private final NotificationType type;   // APPLICATION, INVITATION, MERGE
 	private final Date updatedAt;
 
-	public NotificationEvent(Object source, long notificationId, long pubId, NotificationDomainType pubType, long subId,
+	public NotificationEvent(Object source,
+		ObjectId notificationId,
+		long pubId,
+		NotificationDomainType pubType,
+		long subId,
 		NotificationDomainType subType,
 		Date updatedAt,
 		NotificationType type) {
@@ -31,5 +36,16 @@ public class NotificationEvent extends ApplicationEvent {
 		this.subType = subType;
 		this.type = type;
 		this.updatedAt = updatedAt;
+	}
+
+	public static NotificationEvent of(Object source,
+		ObjectId notificationId,
+		long pubId,
+		NotificationDomainType pubType,
+		long subId,
+		NotificationDomainType subType,
+		Date updatedAt,
+		NotificationType type) {
+		return new NotificationEvent(source, notificationId, pubId, pubType, subId, subType, updatedAt, type);
 	}
 }

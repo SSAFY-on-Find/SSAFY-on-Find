@@ -5,6 +5,8 @@ import static lombok.AccessLevel.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import com.sonfind.chelsea.global.domain.BaseEntity;
 import com.sonfind.chelsea.global.domain.SubCode;
 
@@ -48,7 +50,16 @@ public class Team extends BaseEntity {
 	private SubCode track;
 
 	@Column(name = "is_deleted")
-	private boolean isDeleted = false;
+	@ColumnDefault("false")
+	private boolean isDeleted;
+
+	@Column(name = "major_count", nullable = false)
+	@Builder.Default
+	private Integer majorCount = 0;
+
+	@Column(name = "non_major_count", nullable = false)
+	@Builder.Default
+	private Integer nonMajorCount = 0;
 
 	@OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
 	@Builder.Default
@@ -69,5 +80,21 @@ public class Team extends BaseEntity {
 
 	public void updateName(String name) {
 		this.name = name;
+	}
+
+	public void incrementMajorCount() {
+		this.majorCount++;
+	}
+
+	public void decrementMajorCount() {
+		this.majorCount = Math.max(0, this.majorCount - 1);
+	}
+
+	public void incrementNonMajorCount() {
+		this.nonMajorCount++;
+	}
+
+	public void decrementNonMajorCount() {
+		this.nonMajorCount = Math.max(0, this.nonMajorCount - 1);
 	}
 }

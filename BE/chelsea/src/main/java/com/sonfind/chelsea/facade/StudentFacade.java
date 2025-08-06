@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.sonfind.chelsea.domain.student.Students;
-import com.sonfind.chelsea.dto.student.StudentForNotificationResponseDto;
+import com.sonfind.chelsea.dto.student.StudentResponseDto;
 import com.sonfind.chelsea.dto.student.StudentUnionForNotificationResponseDto;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoForNotificationResponseDto;
 import com.sonfind.chelsea.service.StudentInfoService;
@@ -31,17 +31,31 @@ public class StudentFacade {
 
 	// 학생 ID로 학생 정보를 조회하는 메소드(SSE용)
 	public StudentUnionForNotificationResponseDto findByStudentIdForSse(Long studentId) {
-		StudentForNotificationResponseDto findStudent = studentService.findByStudentIdForSse(studentId);
+		StudentResponseDto findStudent = studentService.findByStudentIdForSse(studentId);
 		StudentInfoForNotificationResponseDto findStudentInfo = studentInfoService.findByStudentId(
 			findStudent.studentId());
 
 		return StudentUnionForNotificationResponseDto.builder()
 			.studentId(findStudent.studentId())
 			.name(findStudent.name())
-			.isMajor(findStudent.isMajor())
+			.isMajor(findStudent.major())
 			.position(findStudentInfo.position())
 			.track(findStudentInfo.track())
 			.profileImageUrl(findStudentInfo.profileImageUrl())
 			.build();
+	}
+
+	// 해당 학생이 팀의 멤버인지 확인하는 메소드
+	public Boolean isMemberOfTeam(Long StudentId, Long teamId) {
+	if (teamId == null) {
+			return false; // 팀 ID가 없으면 false 반환
+		}
+		List<Students> teamMembers = studentService.findAllByTeamId(teamId);
+		for (Students member : teamMembers) {
+			if (member.getStudentId() == StudentId) {
+				return true; // 학생이 팀의 멤버인 경우 true 반환
+			}
+		}
+		return false; // 학생이 팀의 멤버가 아닌 경우 false 반환
 	}
 }
