@@ -6,46 +6,50 @@ import org.bson.types.ObjectId;
 import org.springframework.context.ApplicationEvent;
 
 import com.sonfind.chelsea.types.NotificationDomainType;
-import com.sonfind.chelsea.types.NotificationType;
+import com.sonfind.chelsea.types.NotificationStatus;
 
 import lombok.Getter;
 
 @Getter
-public class NotificationEvent extends ApplicationEvent {
+public class InvitationResponseEvent extends ApplicationEvent {
 	private final ObjectId notificationId;
 	private final long pubId;
 	private final NotificationDomainType pubType;
 	private final long subId;
 	private final NotificationDomainType subType;
-	private final NotificationType type;   // APPLICATION, INVITATION, MERGE
+	private final NotificationStatus status;
 	private final Date updatedAt;
 
-	public NotificationEvent(Object source,
+	public InvitationResponseEvent(
+		Object source,
 		ObjectId notificationId,
 		long pubId,
 		NotificationDomainType pubType,
 		long subId,
 		NotificationDomainType subType,
-		Date updatedAt,
-		NotificationType type) {
+		NotificationStatus status,
+		Date updatedAt
+	) {
 		super(source);
 		this.notificationId = notificationId;
 		this.pubId = pubId;
 		this.pubType = pubType;
 		this.subId = subId;
 		this.subType = subType;
-		this.type = type;
+		this.status = status;
 		this.updatedAt = updatedAt;
 	}
 
-	public static NotificationEvent of(Object source,
+	public static InvitationResponseEvent of(
+		Object source,
 		ObjectId notificationId,
 		long pubId,
 		NotificationDomainType pubType,
 		long subId,
 		NotificationDomainType subType,
-		Date updatedAt,
-		NotificationType type) {
-		return new NotificationEvent(source, notificationId, pubId, pubType, subId, subType, updatedAt, type);
+		NotificationStatus status,
+		Date updatedAt
+	) {
+		return new InvitationResponseEvent(source, notificationId, pubId, pubType, subId, subType, status, updatedAt);
 	}
 }

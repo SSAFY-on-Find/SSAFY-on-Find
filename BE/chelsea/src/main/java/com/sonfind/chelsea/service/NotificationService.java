@@ -21,14 +21,15 @@ import com.sonfind.chelsea.dto.notification.NotificationContext;
 import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
 import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
 import com.sonfind.chelsea.dto.notification.NotificationStatusResponseDto;
+import com.sonfind.chelsea.dto.notification.NotificationTypeInfo;
 import com.sonfind.chelsea.facade.StudentFacade;
-import com.sonfind.chelsea.global.event.NotificationEvent;
+import com.sonfind.chelsea.global.event.InvitationRequestEvent;
 import com.sonfind.chelsea.repository.NotificationRepository;
 import com.sonfind.chelsea.repository.NotificationStatusRepository;
 import com.sonfind.chelsea.types.NotificationDomainType;
 import com.sonfind.chelsea.types.NotificationStatus;
-import com.sonfind.chelsea.types.NotificationType;
 import com.sonfind.chelsea.types.RecipientRole;
+import com.sonfind.chelsea.util.NotificationTypeConverter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,7 @@ public class NotificationService {
 	private final StudentFacade studentFacade;
 	private final NotificationContentService contentService;
 	private final ApplicationEventPublisher eventPublisher;
+	private final NotificationTypeConverter typeConverter;
 
 	/**
 	 * 알림 발송 메소드
@@ -62,12 +64,7 @@ public class NotificationService {
 			}
 		}
 		// String → Enum 변환
-		NotificationType type =
-			NotificationType.valueOf(dto.type().toUpperCase());
-		NotificationDomainType pubType =
-			NotificationDomainType.valueOf(dto.pubType().toUpperCase());
-		NotificationDomainType subType =
-			NotificationDomainType.valueOf(dto.subType().toUpperCase());
+		NotificationTypeInfo info = typeConverter.convert(dto);
 
 		// 이벤트 발행 시점의 현재 날짜를 가져옴
 		Date now = getCurrentDate();
@@ -78,11 +75,11 @@ public class NotificationService {
 		hasPendingStatus(findNotificationLog.getId());
 
 		NotificationDocument temp = NotificationDocument.builder()
-			.type(type)
+			.type(info.type())
 			.publisherId(dto.pubId())
-			.publisherType(pubType)
+			.publisherType(info.pubType())
 			.subscriberId(dto.subId())
-			.subscriberType(subType)
+			.subscriberType(info.subType())
 			.createdAt(now)
 			.updatedAt(now)
 			.build();
@@ -101,13 +98,13 @@ public class NotificationService {
 
 		// 4) 실제 NotificationDocument에 제목·메시지 주입
 		NotificationDocument notificationLog = NotificationDocument.builder()
-			.type(type)
+			.type(info.type())
 			.publisherId(dto.pubId())
-			.publisherType(pubType)
+			.publisherType(info.pubType())
 			.pubNotificationTitle(pubTitle)
 			.pubNotificationMessage(pubMsg)
 			.subscriberId(dto.subId())
-			.subscriberType(subType)
+			.subscriberType(info.subType())
 			.subNotificationTitle(subTitle)
 			.subNotificationMessage(subMsg)
 			.createdAt(now)
@@ -117,7 +114,7 @@ public class NotificationService {
 		NotificationDocument savedNotification = notificationRepo.save(notificationLog);
 		log.info("알림이 저장되었습니다: {}", savedNotification.getId());
 
-		switch (type) {
+		switch (info.type()) {
 			case APPLICATION, INVITATION, MERGE -> {
 				// 발신자(팀 or 개인) → createStatus 내부에서 deriveTargetIds로 팀원 브로드캐스트도 처리
 				NotificationStatusDocument pub = createStatus(savedNotification, now, RecipientRole.PUBLISHER);
@@ -129,13 +126,13 @@ public class NotificationService {
 				savedNotification = notificationRepo.save(savedNotification);
 				statusRepo.save(sub);
 			}
-			default -> throw new IllegalArgumentException("지원하지 않는 NotificationType: " + type);
+			default -> throw new IllegalArgumentException("지원하지 않는 NotificationType: " + info.type());
 		}
 
-		log.info("알림 상태가 저장되었습니다: {}, {}", savedNotification.getId(), type);
+		log.info("알림 상태가 저장되었습니다: {}, {}", savedNotification.getId(), info.type());
 
 		// 알림 발송 이벤트를 발행
-		NotificationEvent event = NotificationEvent.of(
+		InvitationRequestEvent event = InvitationRequestEvent.of(
 			this,
 			savedNotification.getId(),
 			savedNotification.getPublisherId(),
@@ -143,7 +140,7 @@ public class NotificationService {
 			savedNotification.getSubscriberId(),
 			savedNotification.getSubscriberType(),
 			savedNotification.getUpdatedAt(),
-			type
+			savedNotification.getType()
 		);
 		eventPublisher.publishEvent(event);
 	}
@@ -384,11 +381,8 @@ public class NotificationService {
 		NotificationDocument doc = notificationRepo.findById(notificationId)
 			.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
 
-		/**
-		 * TODO: 브로드 캐스트로 변경
-		 */
 		// publisher → subscriber
-		eventPublisher.publishEvent(new NotificationEvent(
+		eventPublisher.publishEvent(new InvitationRequestEvent(
 			this,
 			notificationId,
 			doc.getPublisherId(), doc.getPublisherType(),
@@ -440,11 +434,8 @@ public class NotificationService {
 		NotificationDocument doc = notificationRepo.findById(notificationId)
 			.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
 
-		/**
-		 * TODO: 브로드 캐스트로 변경
-		 */
 		// publisher → subscriber
-		eventPublisher.publishEvent(new NotificationEvent(
+		eventPublisher.publishEvent(new InvitationRequestEvent(
 			this,
 			notificationId,
 			doc.getPublisherId(), doc.getPublisherType(),

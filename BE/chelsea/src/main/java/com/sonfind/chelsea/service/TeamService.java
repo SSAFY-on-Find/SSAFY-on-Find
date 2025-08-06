@@ -395,14 +395,14 @@ public class TeamService {
 				HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다.");
 		}
 
-		Team taem = optionalTeam.get();
+		Team team = optionalTeam.get();
 
 		return TeamSimpleResponseDto.builder()
-			.teamId(taem.getTeamId())
-			.name(taem.getName())
-			.track(taem.getTrack().getSubCodeName())
-			.majorCount(taem.getMajorCount())
-			.nonMajorCount(taem.getNonMajorCount())
+			.teamId(team.getTeamId())
+			.name(team.getName())
+			.track(team.getTrack().getSubCodeName())
+			.majorCount(team.getMajorCount())
+			.nonMajorCount(team.getNonMajorCount())
 			.build();
 	}
 

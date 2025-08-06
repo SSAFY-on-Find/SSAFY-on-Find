@@ -31,7 +31,11 @@ public class StudentInfoController {
 		@ApiResponse(responseCode = "200", description = "조회 성공",
 			content = @Content(schema = @Schema(implementation = StudentInfoGetResponseDto.class))),
 		@ApiResponse(responseCode = "404", description = "작성한 자기소개서가 없음",
-			content = @Content)
+			content = @Content(
+				schema = @Schema(
+					type = "object",
+					example = "{\"status\": \"FAIL\", \"message\": \"작성한 자기소개서가 없습니다.\"}"
+				)))
 	})
 	@GetMapping("/{studentId}")
 	public ResponseEntity<Map<String, Object>> getStudentInfo(
