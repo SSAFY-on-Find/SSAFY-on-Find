@@ -41,6 +41,8 @@ public class InvitationController {
 		}
 	}
 
+	@Operation(summary = "초대 수락", description = "초대를 수락합니다.")
+
 	@PostMapping("/{notificationId}/accept")
 	public void acceptInvitation(
 		@CookieValue("sessionId") Long studentId,

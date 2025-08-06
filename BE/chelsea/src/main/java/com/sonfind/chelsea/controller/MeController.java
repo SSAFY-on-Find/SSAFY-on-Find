@@ -42,6 +42,12 @@ public class MeController {
 	private final StudentInfoService studentInfoService;
 
 	@ApiCreateOperation(summary = "본인 자기소개 등록")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "201", description = "자기소개 등록 성공",
+			content = @Content(schema = @Schema(implementation = Map.class))),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청",
+			content = @Content)
+	})
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<Map<String, Object>> createStudentInfo(
 		@Parameter(content = @Content(mediaType = "application/json"))
@@ -82,6 +88,12 @@ public class MeController {
 	}
 
 	@ApiGetOperation(summary = "본인 자기소개 수정")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "자기소개 수정 성공",
+			content = @Content(schema = @Schema(implementation = Map.class))),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청",
+			content = @Content)
+	})
 	@PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<Map<String, Object>> updateStudentInfo(
 		@Parameter(content = @Content(mediaType = "application/json"), description = "자기소개 등록 정보 (JSON 형식)")

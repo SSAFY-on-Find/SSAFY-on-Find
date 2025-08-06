@@ -36,6 +36,16 @@ public class StudentController {
 	private final StudentService studentService;
 
 	@ApiGetOperation(summary = "교육생 로그인 ", description = "교육생 학번 입력 시 로그인 성공/반환 값을 학생 정보를 주는 걸로 이후에 바꿀 예정")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "로그인 성공",
+			content = @Content(schema = @Schema(implementation = Students.class))),
+		@ApiResponse(responseCode = "404", description = "학번 조회 실패",
+			content = @Content(
+				schema = @Schema(
+					type = "object",
+					example = "{\"status\": \"FAIL\", \"message\": \"학번 조회 실패\"}"
+				)))
+	})
 	@PostMapping("/sign-in")
 	public ResponseEntity<Object> signup(@RequestBody Long studentId, HttpSession session) {
 
@@ -58,7 +68,11 @@ public class StudentController {
 		@ApiResponse(responseCode = "200", description = "조회 성공",
 			content = @Content(schema = @Schema(implementation = StudentListResponseDto.class))),
 		@ApiResponse(responseCode = "404", description = "작성한 자기소개서가 없음",
-			content = @Content)
+			content = @Content(
+				schema = @Schema(
+					type = "object",
+					example = "{\"status\": \"FAIL\", \"message\": \"작성한 자기소개서가 없습니다.\"}"
+				)))
 	})
 	@GetMapping
 	public ResponseEntity<Map<String, Object>> getStudentList() {
