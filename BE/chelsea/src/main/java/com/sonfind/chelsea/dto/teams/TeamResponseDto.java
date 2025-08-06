@@ -10,7 +10,7 @@ import lombok.Builder;
 public record TeamResponseDto(
 	String teamName,
 	String teamDescription,
-	SubCodeResponse teamTrack,
+	SubCodeResponse track,
 	Long teamCount,
 	List<RecruitmentDto> positions,
 	List<TeamMemberResponseDto> members
