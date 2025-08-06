@@ -1,4 +1,4 @@
-package com.sonfind.chelsea.dto.student;
+package com.sonfind.chelsea.dto.student.response;
 
 public record StudentListQueryDto(
 	Long studentId,

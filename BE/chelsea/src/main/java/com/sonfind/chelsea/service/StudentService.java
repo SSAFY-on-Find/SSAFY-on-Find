@@ -8,13 +8,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sonfind.chelsea.domain.student.Students;
-import com.sonfind.chelsea.dto.student.StudentListQueryDto;
-import com.sonfind.chelsea.dto.student.StudentListResponseDto;
-import com.sonfind.chelsea.dto.student.StudentResponseDto;
+import com.sonfind.chelsea.dto.student.request.StudentSignInRequestDto;
+import com.sonfind.chelsea.dto.student.response.StudentListQueryDto;
+import com.sonfind.chelsea.dto.student.response.StudentListResponseDto;
+import com.sonfind.chelsea.dto.student.response.StudentResponseDto;
+import com.sonfind.chelsea.dto.student.response.StudentSignInResponseDto;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -23,6 +26,29 @@ public class StudentService {
 
 	private final StudentRepository studentRepository;
 	private final StudentInfoRepository studentInfoRepository;
+
+	/**
+	 * 로그인 처리 service
+	 * */
+	public StudentSignInResponseDto signIn(StudentSignInRequestDto request) {
+
+		Long studentId = Long.parseLong(request.studentId());
+
+		Students student = studentRepository.findByStudentId(studentId)
+			.orElseThrow(EntityNotFoundException::new);
+
+		String className = student.getClassCode().getSubCodeName();
+
+		boolean isCreatedStudentInfo = studentInfoRepository.existsByStudent_StudentId(studentId);
+
+		return StudentSignInResponseDto.builder()
+			.studentId(student.getStudentId())
+			.name(student.getName())
+			.major(getIsMajor(student.getMajorYn()))
+			.className(className)
+			.isCreatedStudentInfo(isCreatedStudentInfo)
+			.build();
+	}
 
 	public Students findByStudentId(long studentId) {
 

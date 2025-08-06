@@ -7,13 +7,13 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoCreateRequestDto;
@@ -42,6 +42,12 @@ public class MeController {
 	private final StudentInfoService studentInfoService;
 
 	@ApiCreateOperation(summary = "본인 자기소개 등록")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "201", description = "자기소개 등록 성공",
+			content = @Content(schema = @Schema(implementation = Map.class))),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청",
+			content = @Content)
+	})
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<Map<String, Object>> createStudentInfo(
 		@Parameter(content = @Content(mediaType = "application/json"))
@@ -49,7 +55,8 @@ public class MeController {
 
 		@RequestPart(value = "profile", required = false) MultipartFile profile,
 		@RequestPart(value = "portfolio", required = false) MultipartFile portfolio,
-		@CookieValue("sessionId") Long studentId
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId
 	) throws IOException {
 
 		studentInfoService.createStudentInfo(studentId, requestDto, profile, portfolio);
@@ -69,7 +76,8 @@ public class MeController {
 	})
 	@GetMapping
 	public ResponseEntity<Map<String, Object>> getStudentInfo(
-		@CookieValue("sessionId") Long studentId
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId
 	) {
 
 		StudentInfoGetResponseDto studentInfo = studentInfoService.getStudentInfo(studentId);
@@ -82,6 +90,12 @@ public class MeController {
 	}
 
 	@ApiGetOperation(summary = "본인 자기소개 수정")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "자기소개 수정 성공",
+			content = @Content(schema = @Schema(implementation = Map.class))),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청",
+			content = @Content)
+	})
 	@PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<Map<String, Object>> updateStudentInfo(
 		@Parameter(content = @Content(mediaType = "application/json"), description = "자기소개 등록 정보 (JSON 형식)")
@@ -89,7 +103,8 @@ public class MeController {
 
 		@RequestPart(value = "profile", required = false) MultipartFile profile,
 		@RequestPart(value = "portfolio", required = false) MultipartFile portfolio,
-		@CookieValue("sessionId") Long studentId
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId
 	) throws IOException {
 
 		studentInfoService.updateStudentInfo(studentId, requestDto, profile, portfolio);

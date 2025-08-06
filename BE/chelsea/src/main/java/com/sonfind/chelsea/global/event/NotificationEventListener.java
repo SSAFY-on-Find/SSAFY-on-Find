@@ -8,6 +8,7 @@ import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.dto.notification.ApplicantDto;
 import com.sonfind.chelsea.dto.notification.ApplicationPubData;
 import com.sonfind.chelsea.dto.notification.ApplicationSubData;
+import com.sonfind.chelsea.dto.notification.InvitationNotificationResponseDto;
 import com.sonfind.chelsea.dto.notification.InvitationPubData;
 import com.sonfind.chelsea.dto.notification.InvitationSubData;
 import com.sonfind.chelsea.dto.notification.MergePubData;
@@ -17,12 +18,13 @@ import com.sonfind.chelsea.dto.notification.NotificationDto;
 import com.sonfind.chelsea.dto.notification.NotificationMsgDto;
 import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
 import com.sonfind.chelsea.dto.notification.ParticipantDto;
-import com.sonfind.chelsea.dto.student.StudentUnionForNotificationResponseDto;
+import com.sonfind.chelsea.dto.student.response.StudentUnionForNotificationResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
 import com.sonfind.chelsea.facade.StudentFacade;
 import com.sonfind.chelsea.service.NotificationService;
 import com.sonfind.chelsea.service.SseService;
 import com.sonfind.chelsea.service.TeamService;
+import com.sonfind.chelsea.types.NotificationDomainType;
 
 import lombok.RequiredArgsConstructor;
 
@@ -45,31 +47,111 @@ public class NotificationEventListener {
 	 * 이벤트 타입에 따라 발신자와 수신자에게 알림을 전송합니다.
 	 */
 	@EventListener
-	public void onNotification(NotificationEvent e) throws BadRequestException {
+	public void onRequest(InvitationRequestEvent e) throws BadRequestException {
 		switch (e.getType()) {
 			case APPLICATION -> {
 				NotificationDto<ApplicationPubData> pubPayload = createApplicationPubPayload(e);
 				NotificationDto<ApplicationSubData> subPayload = createApplicationSubPayload(e);
-				sseService.sendNotification(e.getPubId(), pubPayload);
-				sseService.broadcastToTeam(subPayload.data().subscriber().id(), subPayload);
+
+				sseService.dispatch(
+					pubPayload.data().publisher().id(),
+					pubPayload.data().publisher().type(),
+					pubPayload
+				);
+				sseService.dispatch(
+					subPayload.data().subscriber().id(),
+					subPayload.data().subscriber().type(),
+					subPayload
+				);
 			}
 			case INVITATION -> {
 				NotificationDto<InvitationPubData> pubPayload = createInvitationPubPayload(e);
 				NotificationDto<InvitationSubData> subPayload = createInvitationSubPayload(e);
-				sseService.broadcastToTeam(pubPayload.data().subscriber().id(), pubPayload);
-				sseService.sendNotification(e.getSubId(), subPayload);
+
+				sseService.dispatch(
+					pubPayload.data().publisher().id(),
+					pubPayload.data().publisher().type(),
+					pubPayload
+				);
+				sseService.dispatch(
+					subPayload.data().subscriber().id(),
+					subPayload.data().subscriber().type(),
+					subPayload
+				);
 			}
 			case MERGE -> {
 				NotificationDto<MergePubData> pubPayload = createMergePubPayload(e);
 				NotificationDto<MergeSubData> subPayload = createMergeSubPayload(e);
-				sseService.broadcastToTeam(pubPayload.data().subscriber().id(), pubPayload);
-				sseService.broadcastToTeam(subPayload.data().subscriber().id(), subPayload);
+				
+				sseService.dispatch(
+					pubPayload.data().publisher().id(),
+					pubPayload.data().publisher().type(),
+					pubPayload
+				);
+				sseService.dispatch(
+					subPayload.data().subscriber().id(),
+					subPayload.data().subscriber().type(),
+					subPayload
+				);
+			}
+			default -> {
+				// 지원, 초대, 병합 외의 타입은 처리하지 않음
+				throw new BadRequestException("Unsupported invitation request type: " + e.getType());
 			}
 		}
 	}
 
+	@EventListener
+	public void onResponse(InvitationResponseEvent e) throws BadRequestException {
+		switch (e.getStatus()) {
+			case ACCEPTED, REJECTED, CANCELED -> {
+				NotificationDto<InvitationNotificationResponseDto> payload = createInvitationResponsePayload(e);
+
+				sendBoth(
+					payload.data().pubId(),
+					payload.data().pubType(),
+					payload.data().subId(),
+					payload.data().subType(),
+					payload
+				);
+			}
+			default -> {
+				// 수락/거절/취소 외의 상태는 처리하지 않음
+				throw new BadRequestException("Unsupported invitation response status: " + e.getStatus());
+			}
+		}
+	}
+
+	private <T> void sendBoth(Long pubId, NotificationDomainType pubType,
+		Long subId, NotificationDomainType subType,
+		NotificationDto<T> payload) {
+		sseService.dispatch(pubId, pubType, payload);
+		sseService.dispatch(subId, subType, payload);
+	}
+
+	// 수락/거절/취소 응답 이벤트에 대한 알림 페이로드 생성
+	private NotificationDto<InvitationNotificationResponseDto> createInvitationResponsePayload(
+		InvitationResponseEvent e) throws BadRequestException {
+
+		InvitationNotificationResponseDto createResponse = InvitationNotificationResponseDto.builder()
+			.pubId(e.getPubId())
+			.pubType(e.getPubType())
+			.subId(e.getSubId())
+			.subType(e.getSubType())
+			.updatedAt(e.getUpdatedAt().toString())
+			.build();
+
+		return NotificationDto.<InvitationNotificationResponseDto>builder()
+			.id(e.getNotificationId())
+			.event(e.getClass().toString())
+			.status(e.getStatus())
+			.time(e.getUpdatedAt().toString())
+			.data(createResponse)
+			.build();
+	}
+
 	// APPLICATION(개인 -> 팀 지원) - 발신자(개인)에게 알림 전송
-	private NotificationDto<ApplicationPubData> createApplicationPubPayload(NotificationEvent e) throws
+	private NotificationDto<ApplicationPubData> createApplicationPubPayload(InvitationRequestEvent e) throws
 		BadRequestException {
 
 		// 발신자 정보 조회
@@ -107,7 +189,7 @@ public class NotificationEventListener {
 	}
 
 	// APPLICATION(개인 -> 팀 지원) - 수신자(팀)에게 알림 전송
-	private NotificationDto<ApplicationSubData> createApplicationSubPayload(NotificationEvent e) throws
+	private NotificationDto<ApplicationSubData> createApplicationSubPayload(InvitationRequestEvent e) throws
 		BadRequestException {
 		// 발신자 정보 조회
 		Students findPub = studentFacade.findByStudentId(e.getPubId());
@@ -158,7 +240,7 @@ public class NotificationEventListener {
 	}
 
 	// INVITATION(팀 -> 개인 초대) - 발신자(팀)에게 알림 전송
-	private NotificationDto<InvitationPubData> createInvitationPubPayload(NotificationEvent e) throws
+	private NotificationDto<InvitationPubData> createInvitationPubPayload(InvitationRequestEvent e) throws
 		BadRequestException {
 		// 발신자 정보
 		TeamSimpleResponseDto findPubTeam = teamService.findSimpleTeamInfoByTeamId(e.getPubId());
@@ -211,7 +293,7 @@ public class NotificationEventListener {
 	}
 
 	// INVITATION(팀 -> 개인 초대) - 수신자(개인)에게 알림 전송
-	private NotificationDto<InvitationSubData> createInvitationSubPayload(NotificationEvent e) throws
+	private NotificationDto<InvitationSubData> createInvitationSubPayload(InvitationRequestEvent e) throws
 		BadRequestException {
 		// 발신자 정보
 		TeamSimpleResponseDto findPubTeam = teamService.findSimpleTeamInfoByTeamId(e.getPubId());
@@ -256,7 +338,7 @@ public class NotificationEventListener {
 	}
 
 	// MERGE(팀 합치기) - 발신자(팀)에게 알림 전송
-	private NotificationDto<MergePubData> createMergePubPayload(NotificationEvent e) throws BadRequestException {
+	private NotificationDto<MergePubData> createMergePubPayload(InvitationRequestEvent e) throws BadRequestException {
 		// 발신자 정보 조회
 		TeamSimpleResponseDto findPubTeam = teamService.findSimpleTeamInfoByTeamId(e.getPubId());
 
@@ -305,7 +387,7 @@ public class NotificationEventListener {
 	}
 
 	// MERGE(팀 합치기) - 수신자(팀)에게 알림 전송
-	private NotificationDto<MergeSubData> createMergeSubPayload(NotificationEvent e) throws BadRequestException {
+	private NotificationDto<MergeSubData> createMergeSubPayload(InvitationRequestEvent e) throws BadRequestException {
 		// 발신자 정보 조회
 		TeamSimpleResponseDto findPubTeam = teamService.findSimpleTeamInfoByTeamId(e.getPubId());
 
