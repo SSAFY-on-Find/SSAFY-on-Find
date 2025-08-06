@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { toast } from "react-toastify"
 import { AlarmClock, Eye, Search } from "lucide-react"
 
 import {
@@ -12,6 +13,7 @@ import {
   PositionTag,
   SearchBar,
   Segmented,
+  Tooltip,
   WhiteTag,
 } from "./atoms"
 import { TeamCard } from "./molecules"
@@ -171,6 +173,53 @@ export default function ComponentTestPage() {
 
   return (
     <div className="flex flex-col gap-5 p-5">
+      <div className="flex flex-col">
+        <div>토스트 팝업 예시</div>
+        <div className="flex flex-row gap-5">
+          <Button
+            size={"s"}
+            text="성공"
+            isIcon={false}
+            onClick={() => {
+              toast.success("버튼을 클릭하는 데 성공했습니다!")
+            }}
+          />
+          <Button
+            size={"s"}
+            text="에러"
+            variant="danger"
+            isIcon={false}
+            onClick={() => {
+              toast.error("에러메시지! 실패!!!")
+            }}
+          />
+          <Button
+            size={"s"}
+            text="인포"
+            variant="outline"
+            isIcon={false}
+            onClick={() => {
+              toast.info("기본 정보 제공~~")
+            }}
+          />
+          <Button
+            size={"s"}
+            text="경고"
+            variant="text"
+            isIcon={false}
+            onClick={() => {
+              toast.warn("warning")
+            }}
+          />
+        </div>
+      </div>
+      <div className="flex">
+        <Tooltip content="툴팁 내용입니다." side="right">
+          <button type="button" className="bg-main rounded-lg px-5 py-2.5 text-center text-sm font-medium text-white">
+            Tooltip
+          </button>
+        </Tooltip>
+      </div>
       <div className="flex flex-row gap-5">
         <Dropdown
           placeholder={"희망 포지션을 선택하세요"}

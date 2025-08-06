@@ -222,10 +222,9 @@ public class TeamService {
 	//team2teamlistresponseDto
 	private TeamListResponseDto convertToTeamListResponse(Team team, Long studentId) {
 		List<Students> teamMembers = studentRepository.findAllByTeamId(team.getTeamId());
-
-		List<String> memberProfileImages = teamMembers.stream()
-			.map(this::getStudentProfileImage)
-			.filter(url -> url != null && !url.trim().isEmpty())
+		
+		List<TeamMemberResponseDto> members = teamMembers.stream()
+			.map(this::convertToTeamMemberResponse)
 			.collect(Collectors.toList());
 
 		List<RecruitmentDto> recruitments = team.getRecruitments().stream()
@@ -247,8 +246,8 @@ public class TeamService {
 			.teamName(team.getName())
 			.description(team.getDescription())
 			.track(track)
-			.memberProfileImages(memberProfileImages)
 			.recruitments(recruitments)
+			.members(members)
 			.isRecruitingComplete(teamMembers.size() >= 6)
 			.isFavorite(isFavorite)
 			.build();

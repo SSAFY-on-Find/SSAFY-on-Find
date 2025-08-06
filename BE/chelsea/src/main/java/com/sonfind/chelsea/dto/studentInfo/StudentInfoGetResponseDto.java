@@ -3,7 +3,7 @@ package com.sonfind.chelsea.dto.studentInfo;
 import java.util.List;
 
 import com.sonfind.chelsea.domain.studentInfo.UploadedFile;
-import com.sonfind.chelsea.dto.student.StudentResponseDto;
+import com.sonfind.chelsea.dto.student.response.StudentResponseDto;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
 
@@ -23,7 +23,7 @@ public record StudentInfoGetResponseDto(
 	String description,
 	String profileImageUrl,
 	UploadedFile portfolio,
-	
+
 	TeamSimpleResponseDto teamInfo
 ) {
 }

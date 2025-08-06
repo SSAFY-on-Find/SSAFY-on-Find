@@ -18,7 +18,7 @@ import com.sonfind.chelsea.dto.notification.NotificationDto;
 import com.sonfind.chelsea.dto.notification.NotificationMsgDto;
 import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
 import com.sonfind.chelsea.dto.notification.ParticipantDto;
-import com.sonfind.chelsea.dto.student.StudentUnionForNotificationResponseDto;
+import com.sonfind.chelsea.dto.student.response.StudentUnionForNotificationResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
 import com.sonfind.chelsea.facade.StudentFacade;
 import com.sonfind.chelsea.service.NotificationService;

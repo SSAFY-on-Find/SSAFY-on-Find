@@ -4,17 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 import com.sonfind.chelsea.dto.Favorite.TeamFavoriteRequestDto;
 import com.sonfind.chelsea.dto.Favorite.TeamFavoriteResponseDto;
 import com.sonfind.chelsea.service.FavoriteService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -67,7 +68,8 @@ public class FavoriteController {
 		)
 	})
 	public ResponseEntity<Map<String, Object>> toggleFavorite(
-		@CookieValue("sessionId") Long studentId,
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId,
 		@RequestBody @Valid TeamFavoriteRequestDto request) {
 
 		TeamFavoriteResponseDto response = favoriteService.toggleFavoriteTeam(studentId, request.teamId());
