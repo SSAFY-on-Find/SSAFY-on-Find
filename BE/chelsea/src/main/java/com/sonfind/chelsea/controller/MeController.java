@@ -19,9 +19,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoCreateRequestDto;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoGetResponseDto;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoUpdateRequestDto;
+import com.sonfind.chelsea.dto.subcode.SubCodeMeResponseDto;
 import com.sonfind.chelsea.global.commonSwagger.ApiCreateOperation;
 import com.sonfind.chelsea.global.commonSwagger.ApiGetOperation;
 import com.sonfind.chelsea.service.StudentInfoService;
+import com.sonfind.chelsea.service.SubCodeService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,6 +42,7 @@ import lombok.RequiredArgsConstructor;
 public class MeController {
 
 	private final StudentInfoService studentInfoService;
+	private final SubCodeService subCodeService;
 
 	@ApiCreateOperation(summary = "본인 자기소개 등록")
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -99,6 +102,24 @@ public class MeController {
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
+
+		return ResponseEntity.ok().body(body);
+	}
+
+	@ApiGetOperation(summary = "자기소개 작성 subcode 목록 조회")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "조회 성공",
+			content = @Content(schema = @Schema(implementation = SubCodeMeResponseDto.class))),
+	})
+	@GetMapping("/warm-up")
+	public ResponseEntity<Map<String, Object>> getAllSubCode() {
+
+		SubCodeMeResponseDto data = subCodeService.getAllSubCode();
+
+		Map<String, Object> body = new HashMap<>();
+
+		body.put("status", "SUCCESS");
+		body.put("data", data);
 
 		return ResponseEntity.ok().body(body);
 	}
