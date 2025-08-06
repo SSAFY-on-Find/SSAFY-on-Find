@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.dto.student.request.StudentSignInRequestDto;
 import com.sonfind.chelsea.dto.student.response.StudentListResponseDto;
 import com.sonfind.chelsea.dto.student.response.StudentSignInResponseDto;
