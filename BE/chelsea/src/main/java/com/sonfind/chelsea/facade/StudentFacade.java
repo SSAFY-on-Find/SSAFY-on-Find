@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.sonfind.chelsea.domain.student.Students;
-import com.sonfind.chelsea.dto.student.StudentResponseDto;
-import com.sonfind.chelsea.dto.student.StudentUnionForNotificationResponseDto;
+import com.sonfind.chelsea.dto.student.response.StudentResponseDto;
+import com.sonfind.chelsea.dto.student.response.StudentUnionForNotificationResponseDto;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoForNotificationResponseDto;
 import com.sonfind.chelsea.service.StudentInfoService;
 import com.sonfind.chelsea.service.StudentService;
@@ -47,7 +47,7 @@ public class StudentFacade {
 
 	// 해당 학생이 팀의 멤버인지 확인하는 메소드
 	public Boolean isMemberOfTeam(Long StudentId, Long teamId) {
-	if (teamId == null) {
+		if (teamId == null) {
 			return false; // 팀 ID가 없으면 false 반환
 		}
 		List<Students> teamMembers = studentService.findAllByTeamId(teamId);

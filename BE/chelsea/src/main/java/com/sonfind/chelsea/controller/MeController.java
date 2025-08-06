@@ -7,13 +7,13 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoCreateRequestDto;
@@ -49,7 +49,8 @@ public class MeController {
 
 		@RequestPart(value = "profile", required = false) MultipartFile profile,
 		@RequestPart(value = "portfolio", required = false) MultipartFile portfolio,
-		@CookieValue("sessionId") Long studentId
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId
 	) throws IOException {
 
 		studentInfoService.createStudentInfo(studentId, requestDto, profile, portfolio);
@@ -69,7 +70,8 @@ public class MeController {
 	})
 	@GetMapping
 	public ResponseEntity<Map<String, Object>> getStudentInfo(
-		@CookieValue("sessionId") Long studentId
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId
 	) {
 
 		StudentInfoGetResponseDto studentInfo = studentInfoService.getStudentInfo(studentId);
@@ -89,7 +91,8 @@ public class MeController {
 
 		@RequestPart(value = "profile", required = false) MultipartFile profile,
 		@RequestPart(value = "portfolio", required = false) MultipartFile portfolio,
-		@CookieValue("sessionId") Long studentId
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId
 	) throws IOException {
 
 		studentInfoService.updateStudentInfo(studentId, requestDto, profile, portfolio);

@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 import com.sonfind.chelsea.domain.studentInfo.UploadedFile;
-import com.sonfind.chelsea.dto.student.StudentResponseDto;
+import com.sonfind.chelsea.dto.student.response.StudentResponseDto;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoCreateRequestDto;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoForNotificationResponseDto;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoGetQueryDto;

@@ -1,6 +1,6 @@
 package com.sonfind.chelsea.dto.notification;
 
-import com.sonfind.chelsea.dto.student.StudentUnionForNotificationResponseDto;
+import com.sonfind.chelsea.dto.student.response.StudentUnionForNotificationResponseDto;
 
 import lombok.Builder;
 
