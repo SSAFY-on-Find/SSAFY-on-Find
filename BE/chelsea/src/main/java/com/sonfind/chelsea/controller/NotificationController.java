@@ -9,18 +9,19 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.sonfind.chelsea.global.manager.SseEmitterManager;
 import com.sonfind.chelsea.service.NotificationService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -43,7 +44,8 @@ public class NotificationController {
 	@Operation(summary = "SSE 구독", description = "SSE를 통해 알림을 구독합니다. " + "구독자는 자신의 ID를 통해 알림을 받을 수 있습니다.")
 	@ApiResponses({@ApiResponse(responseCode = "200", description = "SSE 구독 성공", content = @Content),
 		@ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content)})
-	public ResponseEntity<SseEmitter> subscribe(@CookieValue("sessionId") Long studentId) {
+	public ResponseEntity<SseEmitter> subscribe(
+		@Parameter(hidden = true) @SessionAttribute("loginUser") Long studentId) {
 		log.info("subscribe called with pubId: {}", studentId);
 		SseEmitter emitter = sseEmitterManager.connect(studentId);
 		if (emitter == null) {
@@ -61,7 +63,8 @@ public class NotificationController {
 		@ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content)
 	})
 	public ResponseEntity<? extends Map<String, ? extends Object>> getPersonalInvitationList(
-		@CookieValue("sessionId") Long studentId,
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId,
 		@RequestParam("type") String type
 	) {
 		try {
@@ -87,7 +90,8 @@ public class NotificationController {
 		@ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content)
 	})
 	public ResponseEntity<? extends Map<String, ? extends Object>> getTeamInvitationList(
-		@CookieValue("sessionId") Long studentId,
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId,
 		@PathVariable Long teamId,
 		@RequestParam("type") String type
 	) throws BadRequestException {
@@ -108,7 +112,8 @@ public class NotificationController {
 		@ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content)
 	})
 	public ResponseEntity<? extends Map<String, ? extends Object>> getCountOfNonReadNotifications(
-		@CookieValue("sessionId") Long studentId
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId
 	) {
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");

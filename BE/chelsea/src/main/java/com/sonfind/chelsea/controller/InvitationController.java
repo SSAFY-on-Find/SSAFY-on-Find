@@ -1,17 +1,18 @@
 package com.sonfind.chelsea.controller;
 
 import org.apache.coyote.BadRequestException;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
 import com.sonfind.chelsea.service.NotificationService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -29,7 +30,8 @@ public class InvitationController {
 		@ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)})
 	@PostMapping()
 	public void sendInvitationRequest(
-		@CookieValue("sessionId") Long studentId,
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId,
 		@RequestBody NotificationRequestDto dto
 	) {
 		// 초대 요청을 보냅니다.
@@ -43,7 +45,8 @@ public class InvitationController {
 
 	@PostMapping("/{notificationId}/accept")
 	public void acceptInvitation(
-		@CookieValue("sessionId") Long studentId,
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId,
 		@PathVariable String notificationId
 	) throws BadRequestException {
 		// 초대를 수락합니다.
@@ -57,7 +60,8 @@ public class InvitationController {
 	})
 	@PostMapping("/{notificationId}/reject")
 	public void rejectInvitation(
-		@CookieValue("sessionId") Long studentId,
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId,
 		@PathVariable String notificationId
 	) throws BadRequestException {
 		// 초대를 거절합니다.
@@ -71,7 +75,8 @@ public class InvitationController {
 	})
 	@PostMapping("/{notificationId}/cancel")
 	public void cancelInvitation(
-		@CookieValue("sessionId") Long studentId,
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId,
 		@PathVariable String notificationId
 	) throws BadRequestException {
 		// 초대를 취소합니다.
