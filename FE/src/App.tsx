@@ -1,8 +1,9 @@
-import { Route, Routes } from "react-router-dom"
+import { Route, Routes, useLocation } from "react-router-dom"
 import { ToastContainer } from "react-toastify"
 
 import { Header, SideBar } from "@/layout"
 import Dashboard from "@/pages/DashboardPage"
+import Login from "@/pages/LoginPage"
 import MyProfile from "@/pages/MyProfilePage"
 import MyTeam from "@/pages/MyTeamPage"
 import StudentList from "@/pages/StudentListPage"
@@ -13,14 +14,18 @@ import ComponentTestPage from "./components/ComponentTestPage"
 import "@/index.css"
 
 function App() {
+  const location = useLocation()
+  const hideLayout = location.pathname === "/login" // /login에서는 숨김
+
   return (
     <div className="App">
-      <Header />
-      <div className="mt-[64px]">
-        <SideBar />
-        <main className="border-main ml-[230px] border">
+      {!hideLayout && <Header />}
+      <div className={!hideLayout ? "mt-[64px]" : ""}>
+        {!hideLayout && <SideBar />}
+        <main className={!hideLayout ? "border-main ml-[230px] border" : ""}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/myteam" element={<MyTeam />} />
             <Route path="/teamlist" element={<TeamList />} />
             <Route path="/studentlist" element={<StudentList />} />

@@ -20,7 +20,7 @@ interface IButton {
 const sizeMap = {
   s: "text-xs",
   m: "text-sm",
-  l: "text-xl font-semibold",
+  l: "text-lg font-semibold",
 }
 
 const iconSizeMap = {

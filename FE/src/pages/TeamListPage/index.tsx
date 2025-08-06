@@ -42,6 +42,7 @@ export default function TeamListPage() {
               isFavorite={favoriteTeams.includes(team.teamId)}
               onClickFavorite={() => toggleFavorite(team.teamId)}
               onClickCard={() => openDetailModal(team.teamId)}
+              variant="main"
             />
           ))}
         </div>
