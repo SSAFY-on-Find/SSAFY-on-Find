@@ -21,6 +21,7 @@ import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 import com.sonfind.chelsea.dto.teams.CreateTeamRequestDto;
 import com.sonfind.chelsea.dto.teams.MyTeamResponseDto;
 import com.sonfind.chelsea.dto.teams.RecruitmentDto;
+import com.sonfind.chelsea.dto.teams.TeamCreatePageDto;
 import com.sonfind.chelsea.dto.teams.TeamListResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamMemberResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamResponseDto;
@@ -91,6 +92,24 @@ public class TeamService {
 		studentRepository.save(students);
 
 		return team.getTeamId();
+	}
+
+	//팀 생성 페이지
+	@Transactional(readOnly = true)
+	public TeamCreatePageDto getTeamCreatePage() {
+		List<SubCodeResponseDto> tracks = subCodeRepository
+			.findByMainCodeAndUseYnTrue("TRACK")
+			.stream()
+			.map(sc -> new SubCodeResponseDto(sc.getSubCode(), sc.getSubCodeName()))
+			.collect(Collectors.toList());
+
+		List<SubCodeResponseDto> positions = subCodeRepository
+			.findByMainCodeAndUseYnTrue("POSITION")
+			.stream()
+			.map(sc -> new SubCodeResponseDto(sc.getSubCode(), sc.getSubCodeName()))
+			.collect(Collectors.toList());
+
+		return new TeamCreatePageDto(tracks, positions);
 	}
 
 	//팀 수정

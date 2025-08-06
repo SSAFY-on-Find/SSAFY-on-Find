@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 
 import com.sonfind.chelsea.dto.teams.CreateTeamRequestDto;
 import com.sonfind.chelsea.dto.teams.MyTeamResponseDto;
+import com.sonfind.chelsea.dto.teams.TeamCreatePageDto;
 import com.sonfind.chelsea.dto.teams.TeamListResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamResponseDto;
 import com.sonfind.chelsea.dto.teams.UpdateTeamRequestDto;
@@ -64,6 +65,18 @@ public class TeamController {
 		body.put("data", Map.of("teamId", teamId));
 
 		URI location = URI.create("/teams/" + teamId);
+		return ResponseEntity.created(location).body(body);
+	}
+
+	@GetMapping("warmup")
+	public ResponseEntity<Map<String, Object>> getTeamCreatePage() {
+		TeamCreatePageDto teamCreatePageDto = teamService.getTeamCreatePage();
+		
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", teamCreatePageDto);
+
+		URI location = URI.create("/teams/warmup");
 		return ResponseEntity.created(location).body(body);
 	}
 
