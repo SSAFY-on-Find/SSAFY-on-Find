@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 
 import { teamApi } from "@/apis/teamApi"
+import { sortTeamsByFavorite } from "@/utils"
 
 export const useTeams = () => {
   return useQuery({
@@ -19,6 +20,7 @@ export const useTeams = () => {
         throw new Error("팀 목록을 불러오는 중 오류가 발생했습니다.")
       }
     },
+    select: (data) => sortTeamsByFavorite(data),
     gcTime: 10 * 60 * 1000,
   })
 }
