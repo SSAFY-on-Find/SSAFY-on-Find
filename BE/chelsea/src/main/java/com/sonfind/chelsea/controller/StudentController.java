@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sonfind.chelsea.domain.student.Students;
-import com.sonfind.chelsea.dto.student.StudentListResponseDto;
-import com.sonfind.chelsea.global.commonSwagger.ApiGetOperation;
+import com.sonfind.chelsea.dto.student.request.StudentSignInRequestDto;
+import com.sonfind.chelsea.dto.student.response.StudentListResponseDto;
+import com.sonfind.chelsea.dto.student.response.StudentSignInResponseDto;
 import com.sonfind.chelsea.service.StudentService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,7 +22,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -35,22 +35,31 @@ public class StudentController {
 
 	private final StudentService studentService;
 
-	@ApiGetOperation(summary = "교육생 로그인 ", description = "교육생 학번 입력 시 로그인 성공/반환 값을 학생 정보를 주는 걸로 이후에 바꿀 예정")
+	@Operation(summary = "교육생 로그인", description = "교육생 학번 입력 시 로그인 성공")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "로그인 성공",
+			content = @Content(schema = @Schema(implementation = StudentSignInResponseDto.class))),
+		@ApiResponse(responseCode = "404", description = "학번 정보 없음",
+			content = @Content)
+	})
 	@PostMapping("/sign-in")
-	public ResponseEntity<Object> signup(@RequestBody Long studentId, HttpSession session) {
+	public ResponseEntity<Map<String, Object>> signup(@RequestBody @Valid StudentSignInRequestDto request,
+		HttpServletRequest httpServletRequest) {
 
-		Students student = studentService.findByStudentId(studentId);
-		if (student != null) {
-			session.setAttribute("loginUser", studentId);
+		StudentSignInResponseDto student = studentService.signIn(request);
 
-			return ResponseEntity.ok()
-				.header(HttpHeaders.SET_COOKIE,
-					"sessionId=" + studentId + "; Path=/; HttpOnly")
-				.build();
+		HttpSession oldSession = httpServletRequest.getSession(false);
+		if (oldSession != null) {
+			oldSession.invalidate();
 		}
+		HttpSession newSession = httpServletRequest.getSession(true);
+		newSession.setAttribute("loginUser", student.studentId());
+		Map<String, Object> body = new HashMap<>();
 
-		//학번 조회가 안되는 경우 예외 처리
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		body.put("status", "SUCCESS");
+		body.put("data", student);
+
+		return ResponseEntity.ok().body(body);
 	}
 
 	@Operation(summary = "교육생 목록 조회", description = "전체 교육생 목록 조회")
