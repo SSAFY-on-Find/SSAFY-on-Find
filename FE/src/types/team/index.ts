@@ -1,5 +1,4 @@
 export type { IMyTeam } from "./IMyTeam"
-export type { ITeamBase } from "./ITeamBase"
 export type { ITeamCard } from "./ITeamCard"
 export type { ITeamDetails } from "./ITeamDetails"
 export type { ITeamMember } from "./ITeamMember"
