@@ -5,11 +5,13 @@ import { User } from "lucide-react"
 
 import { Button, InputBox } from "@/components/atoms"
 import { useStudentLogin } from "@/hooks/useStudent"
+import { useUserStore } from "@/stores/userStore"
 
 export default function LoginPage() {
   const [inputBoxValue, setInputBoxValue] = useState("")
   const navigate = useNavigate()
   const { mutate: login, isPending, isError, error } = useStudentLogin()
+  const { setUser } = useUserStore()
 
   const handleLogin = () => {
     const studentId = inputBoxValue.trim()
@@ -21,7 +23,9 @@ export default function LoginPage() {
     }
 
     login(studentId, {
-      onSuccess: () => {
+      onSuccess: (user) => {
+        setUser(user)
+        console.log(user)
         navigate("/")
         toast.success("로그인에 성공했습니다.")
       },
@@ -79,7 +83,7 @@ export default function LoginPage() {
           text="SSAFY 계정으로 로그인"
           variant="outline"
           onClick={() => {
-            toast.info("준비중입니다.")
+            toast.info("SSAFY 로그인은 준비중입니다.")
           }}
         />
       </div>
