@@ -1,5 +1,6 @@
 package com.sonfind.chelsea.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -41,4 +42,18 @@ public interface StudentInfoRepository extends JpaRepository<StudentInfo, Long> 
 		+ "WHERE si.student.studentId = :studentId")
 	StudentInfoGetQueryDto findStudentInfoByStudentId(@Param("studentId") Long studentId);
 
+	@Query("""
+		SELECT si FROM StudentInfo si 
+		LEFT JOIN FETCH si.positionCode 
+		WHERE si.student.studentId IN :studentIds
+		""")
+	List<StudentInfo> findByStudent_StudentIdIn(@Param("studentIds") List<Long> studentIds);
+
+	@Query("""
+		SELECT si 
+		FROM StudentInfo si 
+		LEFT JOIN FETCH si.positionCode 
+		WHERE si.student.studentId IN :studentIds
+		""")
+	List<StudentInfo> findBasicInfoByStudentIds(@Param("studentIds") List<Long> studentIds);
 }

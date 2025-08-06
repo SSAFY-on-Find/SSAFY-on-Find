@@ -30,4 +30,7 @@ public interface StudentRepository extends JpaRepository<Students, Long> {
 		"LEFT JOIN si.trackCode track " +
 		"LEFT JOIN si.goalCode goal")
 	List<StudentListQueryDto> findStudentList();
+
+	List<Students> findAllByTeamIdIn(List<Long> teamIds);
+
 }
