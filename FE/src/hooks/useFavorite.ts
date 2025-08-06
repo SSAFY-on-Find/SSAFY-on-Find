@@ -20,7 +20,7 @@ export const useTeamFavoriteToggle = () => {
 
       if (response.status === "SUCCESS") {
         queryClient.setQueryData(["teams"], (oldData: ITeamCard[]) => {
-          toast.success("팀 좋아요 성공!")
+          // toast.success("팀 좋아요 성공!")
           const updatedData = oldData?.map((team: ITeamCard) =>
             team.teamId === teamId ? { ...team, isFavorite: !team.isFavorite } : team
           )
