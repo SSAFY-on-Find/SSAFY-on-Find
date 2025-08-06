@@ -1,5 +1,6 @@
 package com.sonfind.chelsea.service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -163,7 +164,7 @@ public class TeamService {
 		return TeamResponseDto.builder()
 			.teamName(team.getName())
 			.teamDescription(team.getDescription())
-			.teamTrack(new SubCodeResponseDto(
+			.track(new SubCodeResponseDto(
 				team.getTrack().getSubCode(),
 				team.getTrack().getSubCodeName()
 			))
@@ -195,7 +196,7 @@ public class TeamService {
 		int nonMajorCount = teamMembers.size() - majorCount;
 		int teamCount = teamMembers.size();
 
-		List<TeamRuleResponseDto> ruleStatuses = isOkTeamRules(teamCount, majorCount, nonMajorCount);
+		List<TeamRuleResponseDto> ruleStatuses = activeTeamRulesSelectively(teamCount, majorCount, nonMajorCount);
 
 		return MyTeamResponseDto.builder()
 			.teamInfo(teamInfo)
@@ -222,7 +223,7 @@ public class TeamService {
 	//team2teamlistresponseDto
 	private TeamListResponseDto convertToTeamListResponse(Team team, Long studentId) {
 		List<Students> teamMembers = studentRepository.findAllByTeamId(team.getTeamId());
-		
+
 		List<TeamMemberResponseDto> members = teamMembers.stream()
 			.map(this::convertToTeamMemberResponse)
 			.collect(Collectors.toList());
@@ -275,6 +276,30 @@ public class TeamService {
 	}
 
 	//팀 빌딩 규칙
+	//팀 규칙은 팀 테이블에 저장하지 않기로 함. 팀 규칙은 모든 팀에게 동일하게 적용이 되는데 중복 데이터를 저장해야하는 이유를 모르겠음.
+	//팀 테이블에 규칙 저장하는거 만드니까 팀 생성, 수정할 매마다 계속 저장해야 함.
+	//그래서 subcode의 useYn으로 팀 규칙의 사용여부를 조정할 수 있는 메소드를 만들었음.
+	private List<TeamRuleResponseDto> activeTeamRulesSelectively(int teamSize, int majorCount, int nonMajorCount) {
+		List<TeamRuleResponseDto> results = new ArrayList<>();
+
+		//사용하고 있는 규칙 조회
+		List<SubCode> activeRules = subCodeRepository.findByMainCodeAndUseYnTrue("RULE");
+		List<String> activeRuleCodes = activeRules.stream()
+			.map(SubCode::getSubCode)
+			.collect(Collectors.toList());
+
+		//RULE001 6인 1팀
+		if (activeRuleCodes.contains("RULE001")) {
+			results.add(teamSizeRule(teamSize));
+		}
+
+		if (activeRuleCodes.contains("RULE002") || activeRuleCodes.contains("RULE003")) {
+			results.add(teamMajorRule(majorCount, nonMajorCount));
+		}
+
+		return results;
+	}
+
 	//6인 1팀
 	private TeamRuleResponseDto teamSizeRule(int teamSize) {
 		boolean isOk = (teamSize == 6);
@@ -303,15 +328,6 @@ public class TeamService {
 			.isOk(isOk)
 			.requiredStatus(requiredStatus)
 			.build();
-	}
-
-	//팀 빌딩 규칙 검증
-	private List<TeamRuleResponseDto> isOkTeamRules(int teamSize, int majorCount, int nonMajorCount) {
-		List<TeamRuleResponseDto> teamRules = List.of(
-			teamSizeRule(teamSize),
-			teamMajorRule(majorCount, nonMajorCount)
-		);
-		return teamRules;
 	}
 
 	private SubCode getSubCodeByValue(String value) {
