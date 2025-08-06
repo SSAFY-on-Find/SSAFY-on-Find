@@ -2,6 +2,7 @@ import Skeleton, { SkeletonTheme } from "react-loading-skeleton"
 
 import { TeamCard } from "@/components/molecules"
 import { TeamDetailModal } from "@/components/templates"
+import { useTeamFavoriteToggle } from "@/hooks/useFavorite"
 import { useTeamDetails, useTeams } from "@/hooks/useTeam"
 import { useTeamStore } from "@/stores/teamStore"
 
@@ -15,13 +16,13 @@ const TeamCardSkeleton = () => (
 
 export default function TeamListPage() {
   const { data: teams = [], isLoading: isTeamsLoading, error, isError } = useTeams()
-  const { favoriteTeams, isDetailModalOpen, selectedTeamId, toggleFavorite, openDetailModal, closeDetailModal } =
-    useTeamStore()
+  const { isDetailModalOpen, selectedTeamId, openDetailModal, closeDetailModal } = useTeamStore()
   const {
     data: selectedTeamData,
     isLoading: isTeamDetailLoading,
     error: detailError,
   } = useTeamDetails(selectedTeamId || 0)
+  const { toggleFavorite, isLoading: teamFavoriteToggleLoading } = useTeamFavoriteToggle()
 
   if (isError) {
     return <div>다시 시도</div>
