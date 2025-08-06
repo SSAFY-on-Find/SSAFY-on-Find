@@ -1,18 +1,12 @@
-import Skeleton, { SkeletonTheme } from "react-loading-skeleton"
-
 import { TeamCard } from "@/components/molecules"
 import { TeamDetailModal } from "@/components/templates"
 import { useTeamFavoriteToggle } from "@/hooks/useFavorite"
 import { useTeamDetails, useTeams } from "@/hooks/useTeam"
 import { useTeamStore } from "@/stores/teamStore"
 
-import "react-loading-skeleton/dist/skeleton.css"
+import { TeamCardSkeleton } from "./organisms/TeamCardSkeleton"
 
-const TeamCardSkeleton = () => (
-  <div className="flex max-w-[260px] min-w-[260px] flex-col overflow-hidden rounded-md">
-    <Skeleton height={280} containerClassName="flex-1" style={{ borderRadius: "6px" }} />
-  </div>
-)
+import "react-loading-skeleton/dist/skeleton.css"
 
 export default function TeamListPage() {
   const { data: teams = [], isLoading: isTeamsLoading, error, isError } = useTeams()
@@ -34,11 +28,7 @@ export default function TeamListPage() {
         <h1 className="text-text mb-6 text-2xl font-bold">팀 목록</h1>
         <div className="flex flex-wrap gap-[10px]">
           {isTeamsLoading ? (
-            <SkeletonTheme baseColor="#f3f4f6" highlightColor="#e5e7eb">
-              {[...Array(6)].map((_, idx) => (
-                <TeamCardSkeleton key={idx} />
-              ))}
-            </SkeletonTheme>
+            <TeamCardSkeleton />
           ) : (
             teams.map((team) => (
               <TeamCard
