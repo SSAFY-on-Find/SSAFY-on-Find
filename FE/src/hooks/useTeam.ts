@@ -43,3 +43,25 @@ export const useMyTeam = () => {
     gcTime: 10 * 60 * 1000,
   })
 }
+
+export const useTeamDetails = (teamId: number) => {
+  return useQuery({
+    queryKey: ["TeamDetails", teamId],
+    queryFn: async () => {
+      try {
+        const response = await teamApi.getTeamDetails(teamId)
+        if (response.status !== "SUCCESS") {
+          throw new Error("팀 정보 조회에 실패했습니다.")
+        }
+        return response.data
+      } catch (error) {
+        if (error instanceof Error) {
+          throw new Error(error.message)
+        }
+        throw new Error("팀 정보를 불러오는데 오류가 발생했습니다.")
+      }
+    },
+    gcTime: 10 * 60 * 1000,
+    enabled: !!teamId,
+  })
+}
