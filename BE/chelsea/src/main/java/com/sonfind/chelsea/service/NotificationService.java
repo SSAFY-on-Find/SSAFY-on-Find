@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import com.sonfind.chelsea.domain.notification.NotificationDocument;
 import com.sonfind.chelsea.domain.notification.NotificationStatusDocument;
-import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.dto.notification.NotificationAndNotificationStatusResponseDto;
 import com.sonfind.chelsea.dto.notification.NotificationContext;
 import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
@@ -26,6 +25,7 @@ import com.sonfind.chelsea.facade.StudentFacade;
 import com.sonfind.chelsea.global.event.InvitationRequestEvent;
 import com.sonfind.chelsea.repository.NotificationRepository;
 import com.sonfind.chelsea.repository.NotificationStatusRepository;
+import com.sonfind.chelsea.service.validator.NotificationValidator;
 import com.sonfind.chelsea.types.NotificationDomainType;
 import com.sonfind.chelsea.types.NotificationStatus;
 import com.sonfind.chelsea.types.RecipientRole;
@@ -45,6 +45,7 @@ public class NotificationService {
 	private final NotificationContentService contentService;
 	private final ApplicationEventPublisher eventPublisher;
 	private final NotificationTypeConverter typeConverter;
+	private final NotificationValidator notificationValidator;
 
 	/**
 	 * 알림 발송 메소드
@@ -53,16 +54,9 @@ public class NotificationService {
 	 * @param dto: NotificationRequestDto
 	 */
 	public void sendNotification(Long studentId, NotificationRequestDto dto) throws BadRequestException {
-		if (dto.pubType().equals("team")) {
-			List<Students> findTeamMembers = studentFacade.findAllByTeamId(dto.pubId());
-			if (!findTeamMembers.contains(studentFacade.findByStudentId(studentId))) {
-				throw new BadRequestException("HttpStatus: " + HttpStatus.BAD_REQUEST + " | 잘못된 요청입니다.");
-			}
-		} else {
-			if (!dto.pubId().equals(studentId)) {
-				throw new BadRequestException("HttpStatus: " + HttpStatus.BAD_REQUEST + " | 잘못된 요청입니다.");
-			}
-		}
+		// 발신자 권한 검증
+		notificationValidator.validatePublisher(studentId, dto);
+
 		// String → Enum 변환
 		NotificationTypeInfo info = typeConverter.convert(dto);
 

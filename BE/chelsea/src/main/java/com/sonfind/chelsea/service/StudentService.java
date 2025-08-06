@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sonfind.chelsea.domain.student.Students;
+import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.dto.student.request.StudentSignInRequestDto;
 import com.sonfind.chelsea.dto.student.response.StudentListQueryDto;
 import com.sonfind.chelsea.dto.student.response.StudentListResponseDto;
@@ -34,7 +34,7 @@ public class StudentService {
 
 		Long studentId = Long.parseLong(request.studentId());
 
-		Students student = studentRepository.findByStudentId(studentId)
+		Student student = studentRepository.findByStudentId(studentId)
 			.orElseThrow(EntityNotFoundException::new);
 
 		String className = student.getClassCode().getSubCodeName();
@@ -51,10 +51,10 @@ public class StudentService {
 			.build();
 	}
 
-	public Students findByStudentId(long studentId) {
+	public Student findByStudentId(long studentId) {
 
-		Optional<Students> authOptional = studentRepository.findByStudentId(studentId);
-		Students student = null;
+		Optional<Student> authOptional = studentRepository.findByStudentId(studentId);
+		Student student = null;
 
 		if (authOptional.isPresent()) {
 			student = authOptional.get();
@@ -64,12 +64,12 @@ public class StudentService {
 	}
 
 	public StudentResponseDto findByStudentIdForSse(long studentId) {
-		Optional<Students> authOptional = studentRepository.findByStudentId(studentId);
+		Optional<Student> authOptional = studentRepository.findByStudentId(studentId);
 
 		if (!authOptional.isPresent()) {
 			throw new IllegalArgumentException("존재하지 않는 학생입니다.");
 		}
-		Students student = authOptional.get();
+		Student student = authOptional.get();
 
 		return StudentResponseDto.builder()
 			.studentId(student.getStudentId())
@@ -105,7 +105,7 @@ public class StudentService {
 		return major ? "전공" : "비전공";
 	}
 
-	public List<Students> findAllByTeamId(Long teamId) {
+	public List<Student> findAllByTeamId(Long teamId) {
 		return studentRepository.findAllByTeamId(teamId);
 	}
 }
