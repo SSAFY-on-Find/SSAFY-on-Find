@@ -48,7 +48,7 @@ public class Team extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "track_code", nullable = false)
 	private SubCode track;
-
+	
 	@Column(name = "is_deleted")
 	@ColumnDefault("false")
 	private boolean isDeleted;

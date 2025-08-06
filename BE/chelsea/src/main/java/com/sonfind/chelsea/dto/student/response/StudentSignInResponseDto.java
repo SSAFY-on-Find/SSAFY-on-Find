@@ -8,6 +8,7 @@ public record StudentSignInResponseDto(
 	String name,
 	String major,
 	String className,
+	Long teamId,
 	Boolean isCreatedStudentInfo
 ) {
 }

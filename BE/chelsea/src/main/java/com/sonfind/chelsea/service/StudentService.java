@@ -46,6 +46,7 @@ public class StudentService {
 			.name(student.getName())
 			.major(getIsMajor(student.getMajorYn()))
 			.className(className)
+			.teamId(student.getTeamId())
 			.isCreatedStudentInfo(isCreatedStudentInfo)
 			.build();
 	}

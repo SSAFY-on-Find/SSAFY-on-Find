@@ -1,6 +1,10 @@
 package com.sonfind.chelsea.service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -72,6 +76,23 @@ public class FavoriteService {
 		return teamFavoriteRepository.findByStudentStudentIdAndTeamTeamId(studentId, teamId)
 			.map(TeamFavorite::getIsFavorite)
 			.orElse(false);
+	}
+
+	public Map<Long, Boolean> checkFavoriteStatusBatch(Long studentId, List<Long> teamIds) {
+		if (teamIds.isEmpty()) {
+			return new HashMap<>();
+		}
+
+		// 한 번의 쿼리로 즐겨찾기된 팀들 조회 (isFavorite = true인 것만)
+		List<Long> favoriteTeamIds = teamFavoriteRepository.findFavoriteTeamIdsByStudentIdAndTeamIds(studentId,
+			teamIds);
+
+		// 결과 Map 생성
+		return teamIds.stream()
+			.collect(Collectors.toMap(
+				teamId -> teamId,
+				teamId -> favoriteTeamIds.contains(teamId)
+			));
 	}
 
 }
