@@ -1,3 +1,4 @@
+import { Button } from "@/components/atoms"
 import { TeamCard } from "@/components/molecules"
 import { TeamDetailModal } from "@/components/templates"
 import { useTeamFavoriteToggle } from "@/hooks/useFavorite"
@@ -25,7 +26,12 @@ export default function TeamListPage() {
   return (
     <div className="bg-background min-h-screen">
       <div className="p-6">
-        <h1 className="text-text mb-6 text-2xl font-bold">팀 목록</h1>
+        <div className="mb-6 flex items-center gap-5">
+          <h1 className="text-text text-2xl font-bold">팀 목록</h1>
+          <div className="">
+            <Button size={"m"} isIcon={false} text="팀생성" onClick={() => ""} />
+          </div>
+        </div>
         <div className="flex flex-wrap gap-[10px]">
           {isTeamsLoading ? (
             <TeamCardSkeleton />
