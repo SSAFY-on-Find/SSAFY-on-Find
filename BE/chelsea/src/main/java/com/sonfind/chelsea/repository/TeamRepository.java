@@ -16,4 +16,15 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
 	Optional<Team> findTeamByTeamId(@Param("teamId") Long teamId);
 
 	List<Team> findByIsDeletedIsFalseOrderByTeamIdAsc();
+
+	@Query("""
+		SELECT DISTINCT t FROM Team t 
+		LEFT JOIN FETCH t.track 
+		LEFT JOIN FETCH t.recruitments r 
+		LEFT JOIN FETCH r.position 
+		WHERE t.isDeleted = false 
+		ORDER BY t.teamId
+		""")
+	List<Team> findAllTeamsWithTrackAndRecruitments();
+	
 }

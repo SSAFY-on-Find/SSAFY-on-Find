@@ -1,7 +1,10 @@
 package com.sonfind.chelsea.service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -108,13 +111,13 @@ public class TeamService {
 				HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다."));
 
 		//팀 설명 수정
-		if (request.getDescription() != null) {
-			team.updateDescription(request.getDescription());
+		if (request.description() != null) {
+			team.updateDescription(request.description());
 		}
 
 		//희망 트랙 수정
-		if (request.getTrackCode() != null) {
-			SubCode track = getSubCodeByValue(request.getTrackCode());
+		if (request.track() != null) {
+			SubCode track = getSubCodeByValue(request.track());
 			if (track == null) {
 				throw new ResponseStatusException(
 					HttpStatus.NOT_FOUND, "없는 트랙입니다.");
@@ -123,8 +126,8 @@ public class TeamService {
 		}
 
 		//모집 포지션 수정
-		if (request.getPositions() != null) {
-			List<Recruitment> recruitments = toRecruitments(request.getPositions(), team);
+		if (request.positions() != null) {
+			List<Recruitment> recruitments = toRecruitments(request.positions(), team);
 			team.updatePositions(recruitments);
 		}
 	}
@@ -163,7 +166,7 @@ public class TeamService {
 		return TeamResponseDto.builder()
 			.teamName(team.getName())
 			.teamDescription(team.getDescription())
-			.teamTrack(new SubCodeResponseDto(
+			.track(new SubCodeResponseDto(
 				team.getTrack().getSubCode(),
 				team.getTrack().getSubCodeName()
 			))
@@ -195,7 +198,7 @@ public class TeamService {
 		int nonMajorCount = teamMembers.size() - majorCount;
 		int teamCount = teamMembers.size();
 
-		List<TeamRuleResponseDto> ruleStatuses = isOkTeamRules(teamCount, majorCount, nonMajorCount);
+		List<TeamRuleResponseDto> ruleStatuses = activeTeamRulesSelectively(teamCount, majorCount, nonMajorCount);
 
 		return MyTeamResponseDto.builder()
 			.teamInfo(teamInfo)
@@ -206,12 +209,61 @@ public class TeamService {
 	}
 
 	//팀 전체 목록 조회
+	// TeamService의 최적화된 getAllTeams 메서드 (최종 버전)
+	// TeamService의 최적화된 getAllTeams 메서드 (최종 버전 - 수정됨)
+	// TeamService - 기존 TeamMemberResponseDto 사용하는 방식
+
 	@Transactional(readOnly = true)
 	public List<TeamListResponseDto> getAllTeams(Long studentId) {
-		List<Team> teams = teamRepository.findByIsDeletedIsFalseOrderByTeamIdAsc();
+		// 1. 팀 데이터와 연관 데이터를 한 번에 조회
+		List<Team> teams = teamRepository.findAllTeamsWithTrackAndRecruitments();
 
+		if (teams.isEmpty()) {
+			return new ArrayList<>();
+		}
+
+		// 2. 팀 ID 리스트 추출
+		List<Long> teamIds = teams.stream()
+			.map(Team::getTeamId)
+			.collect(Collectors.toList());
+
+		// 3. 모든 팀의 멤버 기본 정보 조회
+		List<Students> allStudents = studentRepository.findAllByTeamIdIn(teamIds);
+
+		// 4. 멤버들의 필수 정보만 조회 (프로필 이미지, 포지션)
+		List<Long> studentIds = allStudents.stream()
+			.map(Students::getStudentId)
+			.collect(Collectors.toList());
+
+		// 필요한 정보만 조회
+		final Map<Long, StudentInfo> studentInfoMap;
+		if (!studentIds.isEmpty()) {
+			studentInfoMap = studentInfoRepository
+				.findBasicInfoByStudentIds(studentIds)
+				.stream()
+				.collect(Collectors.toMap(
+					info -> info.getStudent().getStudentId(),
+					info -> info
+				));
+		} else {
+			studentInfoMap = new HashMap<>();
+		}
+
+		// 5. 팀별로 멤버 그룹핑
+		Map<Long, List<Students>> membersByTeam = allStudents.stream()
+			.collect(Collectors.groupingBy(Students::getTeamId));
+
+		// 6. 즐겨찾기 정보를 배치로 조회
+		Map<Long, Boolean> favoriteStatus = favoriteService.checkFavoriteStatusBatch(studentId, teamIds);
+
+		// 7. DTO 변환
 		return teams.stream()
-			.map(team -> convertToTeamListResponse(team, studentId))
+			.map(team -> convertToTeamListResponseOptimized(
+				team,
+				membersByTeam.getOrDefault(team.getTeamId(), new ArrayList<>()),
+				studentInfoMap,
+				favoriteStatus.getOrDefault(team.getTeamId(), false)
+			))
 			.sorted(
 				Comparator.comparing(TeamListResponseDto::isRecruitingComplete)
 					.thenComparing(dto -> parseTeamNumber(dto.teamName()))
@@ -219,10 +271,76 @@ public class TeamService {
 			.collect(Collectors.toList());
 	}
 
+	// 기존 TeamMemberResponseDto 사용하는 변환 메서드
+	private TeamListResponseDto convertToTeamListResponseOptimized(
+		Team team,
+		List<Students> teamMembers,
+		Map<Long, StudentInfo> studentInfoMap,
+		boolean isFavorite
+	) {
+		// 기존 TeamMemberResponseDto로 변환
+		List<TeamMemberResponseDto> members = teamMembers.stream()
+			.map(student -> convertToTeamMemberResponseOptimized(student, studentInfoMap))
+			.collect(Collectors.toList());
+
+		// 모집 포지션 (이미 fetch join으로 조회된 데이터 사용)
+		List<RecruitmentDto> recruitments = team.getRecruitments().stream()
+			.map(recruitment -> new RecruitmentDto(
+				recruitment.getPosition().getSubCode(),
+				recruitment.getPosition().getSubCodeName()
+			))
+			.collect(Collectors.toList());
+
+		// 트랙 정보 (이미 fetch join으로 조회된 데이터 사용)
+		SubCodeResponseDto track = new SubCodeResponseDto(
+			team.getTrack().getSubCode(),
+			team.getTrack().getSubCodeName()
+		);
+
+		return TeamListResponseDto.builder()
+			.teamId(team.getTeamId())
+			.teamName(team.getName())
+			.description(team.getDescription())
+			.track(track)
+			.recruitments(recruitments)
+			.members(members)
+			.isRecruitingComplete(teamMembers.size() >= 6)
+			.isFavorite(isFavorite)
+			.build();
+	}
+
+	// 기존 TeamMemberResponseDto로 변환
+	private TeamMemberResponseDto convertToTeamMemberResponseOptimized(
+		Students student,
+		Map<Long, StudentInfo> studentInfoMap
+	) {
+		String major = Boolean.TRUE.equals(student.getMajorYn()) ? "전공" : "비전공";
+
+		// StudentInfo에서 필요한 정보만 추출
+		StudentInfo studentInfo = studentInfoMap.get(student.getStudentId());
+		String profileImageUrl = (studentInfo != null) ? studentInfo.getProfileImageUrl() : "";
+
+		SubCodeResponseDto position = null;
+		if (studentInfo != null && studentInfo.getPositionCode() != null) {
+			position = new SubCodeResponseDto(
+				studentInfo.getPositionCode().getSubCode(),
+				studentInfo.getPositionCode().getSubCodeName()
+			);
+		}
+
+		return TeamMemberResponseDto.builder()
+			.studentId(student.getStudentId())
+			.name(student.getName())
+			.major(major)
+			.profileImageUrl(profileImageUrl)
+			.position(position)
+			.build();
+	}
+
 	//team2teamlistresponseDto
 	private TeamListResponseDto convertToTeamListResponse(Team team, Long studentId) {
 		List<Students> teamMembers = studentRepository.findAllByTeamId(team.getTeamId());
-		
+
 		List<TeamMemberResponseDto> members = teamMembers.stream()
 			.map(this::convertToTeamMemberResponse)
 			.collect(Collectors.toList());
@@ -275,6 +393,30 @@ public class TeamService {
 	}
 
 	//팀 빌딩 규칙
+	//팀 규칙은 팀 테이블에 저장하지 않기로 함. 팀 규칙은 모든 팀에게 동일하게 적용이 되는데 중복 데이터를 저장해야하는 이유를 모르겠음.
+	//팀 테이블에 규칙 저장하는거 만드니까 팀 생성, 수정할 매마다 계속 저장해야 함.
+	//그래서 subcode의 useYn으로 팀 규칙의 사용여부를 조정할 수 있는 메소드를 만들었음.
+	private List<TeamRuleResponseDto> activeTeamRulesSelectively(int teamSize, int majorCount, int nonMajorCount) {
+		List<TeamRuleResponseDto> results = new ArrayList<>();
+
+		//사용하고 있는 규칙 조회
+		List<SubCode> activeRules = subCodeRepository.findByMainCodeAndUseYnTrue("RULE");
+		List<String> activeRuleCodes = activeRules.stream()
+			.map(SubCode::getSubCode)
+			.collect(Collectors.toList());
+
+		//RULE001 6인 1팀
+		if (activeRuleCodes.contains("RULE001")) {
+			results.add(teamSizeRule(teamSize));
+		}
+
+		if (activeRuleCodes.contains("RULE002") || activeRuleCodes.contains("RULE003")) {
+			results.add(teamMajorRule(majorCount, nonMajorCount));
+		}
+
+		return results;
+	}
+
 	//6인 1팀
 	private TeamRuleResponseDto teamSizeRule(int teamSize) {
 		boolean isOk = (teamSize == 6);
@@ -303,15 +445,6 @@ public class TeamService {
 			.isOk(isOk)
 			.requiredStatus(requiredStatus)
 			.build();
-	}
-
-	//팀 빌딩 규칙 검증
-	private List<TeamRuleResponseDto> isOkTeamRules(int teamSize, int majorCount, int nonMajorCount) {
-		List<TeamRuleResponseDto> teamRules = List.of(
-			teamSizeRule(teamSize),
-			teamMajorRule(majorCount, nonMajorCount)
-		);
-		return teamRules;
 	}
 
 	private SubCode getSubCodeByValue(String value) {
