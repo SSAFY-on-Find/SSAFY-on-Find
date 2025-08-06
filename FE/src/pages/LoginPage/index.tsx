@@ -12,7 +12,7 @@ export default function LoginPage() {
   const { mutate: login, isPending, isError, error } = useStudentLogin()
 
   const handleLogin = () => {
-    const studentId = Number(inputBoxValue.trim())
+    const studentId = inputBoxValue.trim()
     const regex = /^\d{7}$/
 
     if (!regex.test(inputBoxValue.trim())) {
@@ -78,7 +78,9 @@ export default function LoginPage() {
           Icon={User}
           text="SSAFY 계정으로 로그인"
           variant="outline"
-          onClick={() => {}}
+          onClick={() => {
+            toast.info("준비중입니다.")
+          }}
         />
       </div>
     </div>

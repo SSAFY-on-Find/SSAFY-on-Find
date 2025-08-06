@@ -4,7 +4,7 @@ import { studentApi } from "@/apis/studentApi"
 
 export const useStudentLogin = () => {
   return useMutation({
-    mutationFn: async (studentId: number) => {
+    mutationFn: async (studentId: string) => {
       try {
         const response = await studentApi.login(studentId)
         if (response.status !== "SUCCESS") {
