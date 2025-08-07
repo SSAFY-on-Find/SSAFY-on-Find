@@ -16,6 +16,7 @@ import com.sonfind.chelsea.domain.teams.Recruitment;
 import com.sonfind.chelsea.domain.teams.Team;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 import com.sonfind.chelsea.dto.teams.CreateTeamRequestDto;
+import com.sonfind.chelsea.dto.teams.LeaveTeamResponseDto;
 import com.sonfind.chelsea.dto.teams.MyTeamResponseDto;
 import com.sonfind.chelsea.dto.teams.RecruitmentDto;
 import com.sonfind.chelsea.dto.teams.TeamCreatePageDto;
@@ -51,8 +52,8 @@ public class TeamService {
 	public Long createTeam(Long studentId, CreateTeamRequestDto request) {
 
 		//팀에 속해 있는 교육생은 팀 생성 못함
-		Student Student = studentService.findByStudentId(studentId);
-		if (Student.getTeamId() != null) {
+		Student student = studentService.findByStudentId(studentId);
+		if (student.getTeamId() != null) {
 			throw new ResponseStatusException(
 				HttpStatus.FORBIDDEN, "이미 팀에 속해있습니다");
 		}
@@ -65,11 +66,17 @@ public class TeamService {
 				HttpStatus.NOT_FOUND, "없는 트랙입니다");
 		}
 
+		//최초 생성자 전공?비전공?
+		int initialMajorCount = Boolean.TRUE.equals(student.getMajorYn()) ? 1 : 0;
+		int initialNonMajorCount = Boolean.FALSE.equals(student.getMajorYn()) ? 1 : 0;
+
 		//팀 명 없이 일단 저장
 		Team noTeamName = Team.builder()
 			.name("")
 			.description(request.description())
 			.track(track)
+			.majorCount(initialMajorCount)
+			.nonMajorCount(initialNonMajorCount)
 			.build();
 
 		Team team = teamRepository.save(noTeamName);
@@ -85,8 +92,8 @@ public class TeamService {
 		}
 
 		//학생 teamId 저장
-		Student.setTeamId(team.getTeamId());
-		studentRepository.save(Student);
+		student.setTeamId(team.getTeamId());
+		studentRepository.save(student);
 
 		return team.getTeamId();
 	}
@@ -95,13 +102,13 @@ public class TeamService {
 	@Transactional(readOnly = true)
 	public TeamCreatePageDto getTeamCreatePage() {
 		List<SubCodeResponseDto> tracks = subCodeRepository
-			.findByMainCodeAndUseYnTrue("TRACK")
+			.findByMainCodeAndUseYnTrue("TRK")
 			.stream()
 			.map(sc -> new SubCodeResponseDto(sc.getSubCode(), sc.getSubCodeName()))
 			.collect(Collectors.toList());
 
 		List<SubCodeResponseDto> positions = subCodeRepository
-			.findByMainCodeAndUseYnTrue("POSITION")
+			.findByMainCodeAndUseYnTrue("POS")
 			.stream()
 			.map(sc -> new SubCodeResponseDto(sc.getSubCode(), sc.getSubCodeName()))
 			.collect(Collectors.toList());
@@ -148,6 +155,50 @@ public class TeamService {
 		}
 	}
 
+	//팀 나가기
+	@Transactional
+	public LeaveTeamResponseDto leaveTeam(Long studentId) {
+		Student student = studentService.findByStudentId(studentId);
+		if (student.getTeamId() == null) {
+			throw new ResponseStatusException(
+				HttpStatus.NOT_FOUND, "팀에 속해 있지 않습니다.");
+		}
+
+		Long teamId = student.getTeamId();
+
+		//존재하는 팀인지 확인
+		Team team = teamRepository.findTeamByTeamId(teamId)
+			.orElseThrow(() -> new ResponseStatusException(
+				HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다."));
+
+		//student 팀 값 null
+		student.setTeamId(null);
+		studentRepository.save(student);
+
+		//팀 전공/비전공 수정
+		if (Boolean.TRUE.equals(student.getMajorYn())) {
+			team.decrementMajorCount();
+		} else {
+			team.decrementNonMajorCount();
+		}
+
+		//팀 0명
+		List<Student> remainingMembers = studentRepository.findAllByTeamId(teamId);
+		boolean teamDeleted = false;
+
+		if (remainingMembers.isEmpty()) {
+			team.softDelete();
+			teamDeleted = true;
+		}
+
+		teamRepository.save(team);
+
+		return LeaveTeamResponseDto.builder()
+			.message(teamDeleted ? "팀에서 나갔습니다. 팀이 삭제되었습니다." : "팀에서 나갔습니다.")
+			.teamDeleted(teamDeleted)
+			.build();
+	}
+
 	//타 팀 상세조회
 	@Transactional(readOnly = true)
 	public TeamResponseDto getTeamDetail(Long teamId, Long studentId) {
@@ -177,7 +228,7 @@ public class TeamService {
 			))
 			.collect(Collectors.toList());
 
-		boolean isFavorite = favoriteService.checkFavoriteStatus(studentId, teamId);
+		boolean isFavorite = favoriteService.checkTeamFavoriteStatus(studentId, teamId);
 
 		return TeamResponseDto.builder()
 			.teamName(team.getName())
@@ -258,7 +309,7 @@ public class TeamService {
 			team.getTrack().getSubCodeName()
 		);
 
-		boolean isFavorite = favoriteService.checkFavoriteStatus(studentId, team.getTeamId());
+		boolean isFavorite = favoriteService.checkTeamFavoriteStatus(studentId, team.getTeamId());
 
 		return TeamListResponseDto.builder()
 			.teamId(team.getTeamId())

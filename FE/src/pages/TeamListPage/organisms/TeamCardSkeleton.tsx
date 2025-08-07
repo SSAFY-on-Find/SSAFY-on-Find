@@ -1,5 +1,7 @@
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton"
 
+import "react-loading-skeleton/dist/skeleton.css"
+
 export const TeamCardSkeleton = () => (
   <SkeletonTheme baseColor="#f3f4f6" highlightColor="#e5e7eb">
     {[...Array(6)].map((_, idx) => (

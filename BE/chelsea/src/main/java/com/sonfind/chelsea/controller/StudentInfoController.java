@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sonfind.chelsea.dto.studentInfo.StudentInfoGetResponseDto;
+import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoGetDetailResponseDto;
 import com.sonfind.chelsea.service.StudentInfoService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +29,7 @@ public class StudentInfoController {
 	@Operation(summary = "특정 교육생 자기소개 조회", description = "특정 교육생 studentId에 해당하는 자기소개 조회")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "조회 성공",
-			content = @Content(schema = @Schema(implementation = StudentInfoGetResponseDto.class))),
+			content = @Content(schema = @Schema(implementation = StudentInfoGetDetailResponseDto.class))),
 		@ApiResponse(responseCode = "404", description = "작성한 자기소개서가 없음",
 			content = @Content(
 				schema = @Schema(
@@ -41,7 +41,7 @@ public class StudentInfoController {
 	public ResponseEntity<Map<String, Object>> getStudentInfo(
 		@PathVariable Long studentId) {
 
-		StudentInfoGetResponseDto studentInfo = studentInfoService.getStudentInfo(studentId);
+		StudentInfoGetDetailResponseDto studentInfo = studentInfoService.getDetailStudentInfo(studentId);
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");

@@ -1,5 +1,7 @@
 export type { IMyTeam } from "./IMyTeam"
 export type { ITeamCard } from "./ITeamCard"
+export type { ITeamCreate, ITeamCreateResponse } from "./ITeamCreate"
+export type { ITeamCreateWarmup } from "./ITeamCreateWarmup"
 export type { ITeamDetails } from "./ITeamDetails"
 export type { ITeamFavorite } from "./ITeamFavorite"
 export type { ITeamMember } from "./ITeamMember"

@@ -6,11 +6,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.sonfind.chelsea.domain.studentInfo.UploadedFile;
+import com.sonfind.chelsea.types.FileType;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,9 +23,35 @@ public class FileService {
 	@Value("${upload.dir:/uploads}")
 	private String uploadDirPath;
 
-	public String uploadFile(MultipartFile file, String type) throws IOException {
-		Path uploadPath = Paths.get(uploadDirPath + "/" + type);
+	//프로필 이미지 저장 처리
+	public String saveProfileImage(MultipartFile profile) throws IOException {
 
+		if (profile == null || profile.isEmpty()) {
+			return "";
+		}
+		return uploadFile(profile, FileType.PROFILE);
+	}
+
+	//포트폴리오 저장
+	public UploadedFile savePortfolio(MultipartFile portfolio) throws IOException {
+
+		if (portfolio == null || portfolio.isEmpty()) {
+			return null;
+		}
+
+		String savedFilename = uploadFile(portfolio, FileType.PORTFOLIO);
+		return UploadedFile.builder()
+			.originalFileName(portfolio.getOriginalFilename())
+			.savedFileName(savedFilename)
+			.build();
+	}
+
+	// 파일 저장
+	private String uploadFile(MultipartFile file, FileType fileType) throws IOException {
+
+		validateFile(file, fileType);
+
+		Path uploadPath = Paths.get(uploadDirPath + "/" + fileType.getDirectoryName());
 		//해당하는 폴더가 없다면 새로 생성
 		if (!Files.exists(uploadPath)) {
 			Files.createDirectories(uploadPath);
@@ -36,74 +64,72 @@ public class FileService {
 		return savedFileName;
 	}
 
-	private String getSaveFileName(String originalFilename) {
-
-		String extension = "";
-		if (originalFilename.contains(".")) {
-			extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+	//파일 유효성 검사(크기 + 형식)
+	private void validateFile(MultipartFile file, FileType fileType) throws FileUploadException {
+		if (file.getSize() > fileType.getMaxSize()) {
+			throw new FileUploadException(
+				"파일 크기가 너무 큽니다. 최대 " + (fileType.getMaxSize() / 1024 / 1024) + "MB까지 업로드 할 수 있습니다."
+			);
 		}
 
+		String extension = getExtension(file.getOriginalFilename());
+		if (!fileType.getAllowedExtensions().contains(extension)) {
+			throw new FileUploadException("지원하지 않는 파일 형식입니다. ");
+		}
+	}
+
+	//파일 저장 이름 생성_난수값으로 생성
+	private String getSaveFileName(String originalFileName) {
+
+		String extension = getExtension(originalFileName);
 		String uuid = UUID.randomUUID().toString();
-		String saveFilename = uuid + extension;
 
-		return saveFilename;
+		return uuid + "." + extension;
 	}
 
-	public String saveProfileImage(MultipartFile profile) throws IOException {
+	// 파일 확장자 얻는 함수
+	private String getExtension(String fileName) {
 
-		String imageSaveUrl = "";
-
-		if (profile == null || profile.isEmpty()) {
-			//없으면 기본 이미지 처리
-		} else {
-			imageSaveUrl = uploadFile(profile, "profiles");
-		}
-		return imageSaveUrl;
-	}
-
-	public UploadedFile savePortfolio(MultipartFile portfolio) throws IOException {
-
-		if (portfolio == null || portfolio.isEmpty()) {
-			return null;
+		if (fileName == null || fileName.isEmpty()) {
+			return "";
 		}
 
-		String portfolioOriImageName = portfolio.getOriginalFilename();
-		String savedFilename = uploadFile(portfolio, "portfolios");
-
-		return UploadedFile.builder()
-			.originalFileName(portfolioOriImageName)
-			.savedFileName(savedFilename)
-			.build();
-	}
-
-	private boolean deleteFile(Path filePath) {
-		if (Files.exists(filePath)) {
-			try {
-				Files.delete(filePath);
-				return true;
-			} catch (IOException e) {
-				log.error("파일 삭제 실패");
-			}
-		} else {
-			log.warn("삭제할 파일이 존재하지 않습니다.");
+		int dotIndex = fileName.lastIndexOf(".");
+		if (dotIndex == -1) {
+			return "";
 		}
-		return false;
+
+		return fileName.substring(dotIndex + 1).toLowerCase();
 	}
 
+	//프로필 삭제
 	public void deleteProfileImage(String profileImageUrl) {
-		if (profileImageUrl == null || profileImageUrl.isEmpty()) {
-			return;
+		if (profileImageUrl != null || !profileImageUrl.equals("")) {
+			Path filePath = Paths.get(
+				uploadDirPath + "/" + FileType.PROFILE.getDirectoryName() + "/" + profileImageUrl);
+			deleteFile(filePath);
 		}
-		Path filePath = Paths.get(uploadDirPath + "/profiles/" + profileImageUrl);
-		deleteFile(filePath);
+
 	}
 
+	//포트폴리오 삭제
 	public void deletePortfolioFile(UploadedFile portfolio) {
-		if (portfolio == null) {
-			return;
+		if (portfolio != null) {
+			Path filePath = Paths.get(
+				uploadDirPath + "/" + FileType.PORTFOLIO.getDirectoryName() + "/" + portfolio.getSavedFileName());
+			deleteFile(filePath);
 		}
-		Path filePath = Paths.get(uploadDirPath + "/portfolios/" + portfolio.getSavedFileName());
-		deleteFile(filePath);
+
+	}
+
+	//파일 삭제
+	private boolean deleteFile(Path filePath) {
+		try {
+			return Files.deleteIfExists(filePath);
+		} catch (IOException e) {
+			log.error("파일 삭제 실패: {}", filePath, e);
+			return false;
+		}
 	}
 
 }

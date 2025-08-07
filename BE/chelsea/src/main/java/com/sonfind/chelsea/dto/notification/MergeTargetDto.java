@@ -13,5 +13,5 @@ public record MergeTargetDto(
 	int memberCount,
 	int majorCount,
 	int nonMajorCount
-) {
+) implements CommonField {
 }

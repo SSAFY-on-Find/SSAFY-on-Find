@@ -20,7 +20,7 @@ public class CorsConfig {
 
 		corsConfiguration.setAllowedOriginPatterns(Arrays.asList(
 			"http://localhost:*",
-			"https://i13a704.p.ssafy.io/api/v1"
+			"https://i13a704.p.ssafy.io"
 		));
 
 
