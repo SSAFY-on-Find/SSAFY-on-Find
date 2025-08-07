@@ -8,7 +8,6 @@ import static lombok.AccessLevel.*;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.domain.teams.Team;
@@ -70,10 +69,9 @@ public class ChatRoom extends BaseEntity {
 		chatRoomMember.changeChatRoom(this);
 	}
 
-	public Set<ChatRoomMember> getChatRoomMembersWithout(Student student) {
-		return this.chatRoomMembers.stream()
-			.filter(member -> !member.getStudent().equals(student))
-			.collect(Collectors.toSet());
+	public void removeChatRoomMember(ChatRoomMember chatRoomMember) {
+		chatRoomMembers.remove(chatRoomMember);
+		chatRoomMember.changeChatRoom(null);
 	}
 
 	public Student getOpponent(Student student) {
@@ -87,5 +85,11 @@ public class ChatRoom extends BaseEntity {
 			.findFirst()
 			.orElseThrow(() -> new IllegalStateException("채팅방에서 상대방을 찾을 수 없습니다."));
 	}
+
+	public boolean hasStudent(Student student) {
+		return this.chatRoomMembers.stream()
+			.anyMatch(member -> member.getStudent().equals(student));
+	}
+
 }
 

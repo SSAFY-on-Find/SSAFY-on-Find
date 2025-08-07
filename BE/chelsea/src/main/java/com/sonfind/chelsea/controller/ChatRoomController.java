@@ -26,7 +26,7 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 	private final ChatRoomService chatRoomService;
 
 	/**
-	 * 팀 내 채팅방 생성
+	 * 팀 채팅방 생성
 	 */
 	@PostMapping("teams/{teamId}")
 	public ResponseEntity<Map<String, Object>> createTeamChatRoom(
@@ -37,7 +37,38 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
 		body.put("data", Map.of("roomId", roomId));
+		return ResponseEntity.ok().body(body);
+	}
 
+	/**
+	 * 팀 채팅에 입장하기
+	 */
+	@PostMapping("rooms/{roomId}/join")
+	public ResponseEntity<Map<String, Object>> enterTeamChatRoom(
+		@SessionAttribute("loginUser") Long studentId,
+		@PathVariable Long roomId
+	) {
+		chatRoomService.enterStudent(studentId, roomId);
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", null);
+		return ResponseEntity.ok().body(body);
+	}
+
+	/**
+	 * 팀 채팅에서 나가기
+	 */
+	@PostMapping("rooms/{roomId}/leave")
+	public ResponseEntity<Map<String, Object>> exitTeamChatRoom(
+		@SessionAttribute("loginUser") Long studentId,
+		@PathVariable Long roomId
+	) {
+		chatRoomService.leaveStudent(studentId, roomId);
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", null);
 		return ResponseEntity.ok().body(body);
 	}
 
@@ -54,7 +85,6 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
 		body.put("data", Map.of("roomId", roomId));
-
 		return ResponseEntity.ok().body(body);
 	}
 
@@ -66,11 +96,10 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 		@SessionAttribute("loginUser") Long studentId
 	) {
 		ChatRoomListResponseDto dto = chatRoomService.getDirectChatRooms(studentId);
+
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
 		body.put("data", dto);
-
 		return ResponseEntity.ok().body(body);
 	}
-
 }

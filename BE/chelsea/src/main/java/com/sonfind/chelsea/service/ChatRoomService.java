@@ -102,4 +102,35 @@ public class ChatRoomService {
 
 		return new ChatRoomListResponseDto(directChatRoomInfoDtos);
 	}
+
+	@Transactional
+	public void enterStudent(Long studentId, Long roomId) {
+		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+			.orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+
+		Student student = studentRepository.findByStudentId(studentId)
+			.orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
+
+		if (chatRoom.hasStudent(student)) {
+			throw new IllegalStateException("이미 팀 채팅에 존재하는 학생입니다.");
+		}
+
+		chatRoom.addChatRoomMember(new ChatRoomMember(chatRoom, student));
+	}
+
+	@Transactional
+	public void leaveStudent(Long studentId, Long roomId) {
+		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+			.orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+
+		Student student = studentRepository.findByStudentId(studentId)
+			.orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
+
+		ChatRoomMember memberToRemove = chatRoom.getChatRoomMembers().stream()
+			.filter(m -> m.getStudent().equals(student))
+			.findFirst()
+			.orElseThrow(() -> new IllegalStateException("팀 채팅에 존재하지 않는 학생입니다."));
+
+		chatRoom.removeChatRoomMember(memberToRemove);
+	}
 }
