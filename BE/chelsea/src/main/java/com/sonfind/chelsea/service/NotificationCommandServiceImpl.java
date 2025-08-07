@@ -13,7 +13,6 @@ import com.sonfind.chelsea.domain.notification.NotificationDocument;
 import com.sonfind.chelsea.domain.notification.NotificationStatusDocument;
 import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
 import com.sonfind.chelsea.dto.notification.NotificationTypeInfo;
-import com.sonfind.chelsea.facade.StudentFacade;
 import com.sonfind.chelsea.global.event.InvitationRequestEvent;
 import com.sonfind.chelsea.repository.NotificationRepository;
 import com.sonfind.chelsea.repository.NotificationStatusRepository;
@@ -38,8 +37,6 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 	private final ApplicationEventPublisher eventPublisher;
 	private final NotificationStatusService statusService;
 	private final NotificationDocumentService documentService;
-	private final TeamService teamService;
-	private final StudentFacade studentFacade;
 
 	@Override
 	public void sendNotification(Long studentId, NotificationRequestDto dto) throws BadRequestException {
