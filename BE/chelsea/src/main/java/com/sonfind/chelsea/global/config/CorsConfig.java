@@ -23,6 +23,7 @@ public class CorsConfig {
 			"https://i13a704.p.ssafy.io"
 		));
 
+
 		corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 		corsConfiguration.addExposedHeader("Authorization");
 		corsConfiguration.addAllowedHeader("*");
