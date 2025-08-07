@@ -96,8 +96,7 @@ public class ChatRoomService {
 			.map(chatRoom -> {
 				Student opponent = chatRoom.getOpponent(student);
 				StudentInfo opponentInfo = opponentInfoMap.get(opponent.getStudentId());
-				String profileImageUrl = opponentInfo.getProfileImageUrl();
-				return new DirectChatRoomInfoDto(chatRoom.getId(), opponent.getName(), profileImageUrl);
+				return DirectChatRoomInfoDto.of(chatRoom.getId(), opponent, opponentInfo);
 			})
 			.toList();
 
