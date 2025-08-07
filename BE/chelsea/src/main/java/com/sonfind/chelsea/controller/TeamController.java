@@ -69,9 +69,21 @@ public class TeamController {
 	}
 
 	@GetMapping("warmup")
+	@Operation(summary = "팀 생성 페이지 조회", description = "팀 생성에 필요한 기본 정보를 조회합니다.")
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "201",
+			description = "팀 생성 페이지 조회 성공",
+			content = @Content(
+				schema = @Schema(
+					implementation = TeamCreatePageDto.class
+				)
+			)
+		)
+	})
 	public ResponseEntity<Map<String, Object>> getTeamCreatePage() {
 		TeamCreatePageDto teamCreatePageDto = teamService.getTeamCreatePage();
-		
+
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
 		body.put("data", teamCreatePageDto);
