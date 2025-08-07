@@ -1,21 +1,19 @@
 package com.sonfind.chelsea.service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.sonfind.chelsea.domain.Favorite.StudentFavorite;
 import com.sonfind.chelsea.domain.Favorite.TeamFavorite;
 import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.domain.teams.Team;
 import com.sonfind.chelsea.dto.Favorite.StudentFavoriteResponseDto;
 import com.sonfind.chelsea.dto.Favorite.TeamFavoriteResponseDto;
+import com.sonfind.chelsea.repository.StudentFavoriteRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
 import com.sonfind.chelsea.repository.TeamFavoriteRepository;
 import com.sonfind.chelsea.repository.TeamRepository;
@@ -28,6 +26,7 @@ public class FavoriteService {
 	private final TeamRepository teamRepository;
 	private final StudentRepository studentRepository;
 	private final TeamFavoriteRepository teamFavoriteRepository;
+	private final StudentFavoriteRepository studentFavoriteRepository;
 
 	//팀 좋아요(추가/제거)
 	public TeamFavoriteResponseDto toggleFavoriteTeam(Long studentId, Long teamId) {
@@ -74,37 +73,79 @@ public class FavoriteService {
 	//교육생 좋아요
 	public StudentFavoriteResponseDto toggleFavoriteStudent(Long studentId, Long targetStudentId) {
 		//본인 좋아요 안됨
-		if(studentId.equals(targetStudentId)) {
+		if (studentId.equals(targetStudentId)) {
 			throw new IllegalArgumentException("본인 좋아요는 안돼요.");
 		}
 
 		//학생 있음?
-		Student student = studentRepository.
+		Student student = studentRepository.findByStudentId(studentId)
+			.orElseThrow(() -> new IllegalArgumentException("없는 교육생입니다."));
+
+		//좋아요할 학생 있음?
+		Student targetStudent = studentRepository.findByStudentId(studentId)
+			.orElseThrow(() -> new ResponseStatusException(
+				HttpStatus.NOT_FOUND, "없는 교육생입니다."));
+
+		//기존 좋아요 상태 확인
+		Optional<StudentFavorite> existingFavorite = studentFavoriteRepository
+			.findByStudentStudentIdAndTargetStudentStudentId(studentId, targetStudentId);
+
+		//좋취
+		if (existingFavorite.isPresent()) {
+			studentFavoriteRepository.delete(existingFavorite.get());
+
+			return StudentFavoriteResponseDto.builder()
+				.isFavorite(false)
+				.build();
+		}
+		//좋아요
+		else {
+			StudentFavorite newFavorite = StudentFavorite.builder()
+				.isFavorite(true)
+				.student(student)
+				.targetStudent(targetStudent)
+				.build();
+
+			studentFavoriteRepository.save(newFavorite);
+
+			return StudentFavoriteResponseDto.builder()
+				.isFavorite(true)
+				.build();
+		}
 	}
 
-	//좋아요 상태 확인
+	//팀 좋아요 상태 확인
 	@Transactional(readOnly = true)
-	public Boolean checkFavoriteStatus(Long studentId, Long teamId) {
+	public Boolean checkTeamFavoriteStatus(Long studentId, Long teamId) {
 		return teamFavoriteRepository.findByStudentStudentIdAndTeamTeamId(studentId, teamId)
 			.map(TeamFavorite::getIsFavorite)
 			.orElse(false);
 	}
 
-	public Map<Long, Boolean> checkFavoriteStatusBatch(Long studentId, List<Long> teamIds) {
-		if (teamIds.isEmpty()) {
-			return new HashMap<>();
-		}
-
-		// 한 번의 쿼리로 즐겨찾기된 팀들 조회 (isFavorite = true인 것만)
-		List<Long> favoriteTeamIds = teamFavoriteRepository.findFavoriteTeamIdsByStudentIdAndTeamIds(studentId,
-			teamIds);
-
-		// 결과 Map 생성
-		return teamIds.stream()
-			.collect(Collectors.toMap(
-				teamId -> teamId,
-				teamId -> favoriteTeamIds.contains(teamId)
-			));
+	//교육생 좋아요 상태 확인
+	@Transactional(readOnly = true)
+	public Boolean checkStudentFavoriteStatus(Long studentId, Long targetStudentId) {
+		return studentFavoriteRepository.findByStudentStudentIdAndTargetStudentStudentId(studentId, targetStudentId)
+			.map(StudentFavorite::getIsFavorite)
+			.orElse(false);
 	}
+
+	//팀 좋아요 상태 일괄 확인
+	// public Map<Long, Boolean> checkTeamFavoriteStatusBatch(Long studentId, List<Long> teamIds) {
+	// 	if (teamIds.isEmpty()) {
+	// 		return new HashMap<>();
+	// 	}
+	//
+	// 	// 한 번의 쿼리로 즐겨찾기된 팀들 조회 (isFavorite = true인 것만)
+	// 	List<Long> favoriteTeamIds = teamFavoriteRepository.findFavoriteTeamIdsByStudentIdAndTeamIds(studentId,
+	// 		teamIds);
+	//
+	// 	// 결과 Map 생성
+	// 	return teamIds.stream()
+	// 		.collect(Collectors.toMap(
+	// 			teamId -> teamId,
+	// 			teamId -> favoriteTeamIds.contains(teamId)
+	// 		));
+	// }
 
 }

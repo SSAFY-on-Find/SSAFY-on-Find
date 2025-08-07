@@ -177,7 +177,7 @@ public class TeamService {
 			))
 			.collect(Collectors.toList());
 
-		boolean isFavorite = favoriteService.checkFavoriteStatus(studentId, teamId);
+		boolean isFavorite = favoriteService.checkTeamFavoriteStatus(studentId, teamId);
 
 		return TeamResponseDto.builder()
 			.teamName(team.getName())
@@ -258,7 +258,7 @@ public class TeamService {
 			team.getTrack().getSubCodeName()
 		);
 
-		boolean isFavorite = favoriteService.checkFavoriteStatus(studentId, team.getTeamId());
+		boolean isFavorite = favoriteService.checkTeamFavoriteStatus(studentId, team.getTeamId());
 
 		return TeamListResponseDto.builder()
 			.teamId(team.getTeamId())
