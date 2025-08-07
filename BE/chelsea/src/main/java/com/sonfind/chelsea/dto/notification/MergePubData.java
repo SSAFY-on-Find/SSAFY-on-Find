@@ -4,7 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record MergePubData(
-        NotificationMsgDto publisher,
-        MergeTargetDto subscriber
-) {
+	NotificationMsgDto publisher,
+	MergeTargetDto subscriber
+) implements HasPublisher, HasSubscriber {
 }
