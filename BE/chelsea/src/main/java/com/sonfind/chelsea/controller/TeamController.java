@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import com.sonfind.chelsea.dto.teams.CreateTeamRequestDto;
+import com.sonfind.chelsea.dto.teams.LeaveTeamResponseDto;
 import com.sonfind.chelsea.dto.teams.MyTeamResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamCreatePageDto;
 import com.sonfind.chelsea.dto.teams.TeamListResponseDto;
@@ -121,6 +123,53 @@ public class TeamController {
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
 		body.put("data", Map.of("teamId", teamId));
+
+		return ResponseEntity.ok().body(body);
+	}
+
+	//팀 나가기
+	@DeleteMapping("/leave")
+	@Operation(summary = "팀 나가기", description = "현재 소속된 팀에서 나갑니다. 팀이 빈 팀이 되면 자동으로 삭제됩니다.")
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "팀 나가기 성공",
+			content = @Content(
+				schema = @Schema(
+					implementation = LeaveTeamResponseDto.class
+				)
+			)
+		),
+		@ApiResponse(
+			responseCode = "400",
+			description = "팀에 속해 있지 않습니다.",
+			content = @Content(
+				schema = @Schema(
+					type = "object",
+					example = "{\"status\": \"FAIL\", \"message\": \"팀에 속해 있지 않습니다.\"}"
+				)
+			)
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "존재하지 않는 팀입니다.",
+			content = @Content(
+				schema = @Schema(
+					type = "object",
+					example = "{\"status\": \"FAIL\", \"message\": \"존재하지 않는 팀입니다.\"}"
+				)
+			)
+		)
+	})
+	public ResponseEntity<Map<String, Object>> leaveTeam(
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId) {
+
+		LeaveTeamResponseDto response = teamService.leaveTeam(studentId);
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", response);
 
 		return ResponseEntity.ok().body(body);
 	}
