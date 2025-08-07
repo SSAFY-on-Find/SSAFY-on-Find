@@ -24,40 +24,38 @@ export default function TeamListPage() {
   }
 
   return (
-    <div className="bg-background min-h-screen">
-      <div className="p-6">
-        <div className="mb-6 flex items-center gap-5">
-          <h1 className="text-text text-2xl font-bold">팀 목록</h1>
-          <div className="">
-            <Button size={"m"} isIcon={false} text="팀생성" onClick={() => navigate("/create-team")} />
-          </div>
+    <div className="bg-background min-h-screen p-8">
+      <div className="mb-6 flex items-center gap-5">
+        <h1 className="text-text text-2xl font-bold">팀 목록</h1>
+        <div className="">
+          <Button size={"m"} isIcon={false} text="팀생성" onClick={() => navigate("/create-team")} />
         </div>
-        <div className="flex flex-wrap gap-[10px]">
-          {isTeamsLoading ? (
-            <TeamCardSkeleton />
-          ) : (
-            teams.map((team) => (
-              <TeamCard
-                key={team.teamId}
-                {...team}
-                onClickFavorite={() => toggleFavorite(team.teamId)}
-                onClickCard={() => openDetailModal(team.teamId)}
-                variant="default"
-              />
-            ))
-          )}
-        </div>
-
-        {isDetailModalOpen && selectedTeamData && (
-          <TeamDetailModal isOpen={isDetailModalOpen} onClose={closeDetailModal} teamData={selectedTeamData} />
-        )}
-
-        {teams.length === 0 && (
-          <div className="py-12 text-center">
-            <div className="text-subtext">등록된 팀이 없습니다.</div>
-          </div>
+      </div>
+      <div className="flex flex-wrap gap-[10px]">
+        {isTeamsLoading ? (
+          <TeamCardSkeleton />
+        ) : (
+          teams.map((team) => (
+            <TeamCard
+              key={team.teamId}
+              {...team}
+              onClickFavorite={() => toggleFavorite(team.teamId)}
+              onClickCard={() => openDetailModal(team.teamId)}
+              variant="default"
+            />
+          ))
         )}
       </div>
+
+      {isDetailModalOpen && selectedTeamData && (
+        <TeamDetailModal isOpen={isDetailModalOpen} onClose={closeDetailModal} teamData={selectedTeamData} />
+      )}
+
+      {teams.length === 0 && (
+        <div className="py-12 text-center">
+          <div className="text-subtext">등록된 팀이 없습니다.</div>
+        </div>
+      )}
     </div>
   )
 }
