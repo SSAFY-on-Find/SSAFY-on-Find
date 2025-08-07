@@ -1,18 +1,74 @@
-import { useState } from "react"
-import { Eye, Search } from "lucide-react"
+import { useRef, useState } from "react"
+import ReactMarkdown from "react-markdown"
+import { toast } from "react-toastify"
+import { CirclePlus, Eye, Search, X } from "lucide-react"
 
-import { Button, InputBox, Segmented } from "@/components/atoms"
+import { Button, CheckTag, InputBox, Segmented, UserImg } from "@/components/atoms"
 import { useProfileCodes } from "@/hooks/useProfile"
 import { useProfileStore } from "@/stores/profileStroe"
 import { useUserStore } from "@/stores/userStore"
 
 import { FormCard, FormCheckTag, FormDropdown, FormInput } from "./organisms"
 
+import "github-markdown-css/github-markdown-light.css"
+
+const mbtiPairs = [
+  ["I", "E"],
+  ["N", "S"],
+  ["T", "F"],
+  ["P", "J"],
+]
+
 export default function ProfileCreatePage() {
   const { data: codes, isLoading, error } = useProfileCodes()
   const { user } = useUserStore()
-  const { position, track, techStack, goal, mbti, setCodes } = useProfileStore()
+  const { position, track, techStack, goal, profileImageUrl, strength, mbti, portfolio, description, setCodes } =
+    useProfileStore()
   const [activeMarkdownTab, setActiveMarkdownTab] = useState<"left" | "right">("left")
+  const [strengthInput, setStrengthInput] = useState("")
+  const [isEditingMbti, setIsEditingMbti] = useState(false)
+  const [mbtiSelected, setMbtiSelected] = useState(["I", "N", "T", "P"])
+  const profileImgInputRef = useRef<HTMLInputElement>(null)
+  const portfolioInputRef = useRef<HTMLInputElement>(null)
+
+  const handleProfileImgChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const url = URL.createObjectURL(file)
+      setCodes({ profileImageUrl: url })
+    }
+  }
+
+  const handlePortfolioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setCodes({
+        portfolio: {
+          savedFileName: "",
+          originalFileName: file.name,
+        },
+      })
+    }
+  }
+
+  function setMbtiToStore(mbtiArr: string[]) {
+    if (!codes) return
+    const mbtiString = mbtiArr.join("")
+    const selectedMbtiObj = codes.mbti.find((item) => item.subcodeName === mbtiString) ?? null
+    setCodes({ mbti: selectedMbtiObj })
+  }
+
+  const handleToggle = (idx: number, value: string) => {
+    const next = [...mbtiSelected]
+    next[idx] = value
+    setMbtiSelected(next)
+    setMbtiToStore(next)
+  }
+
+  const handleReset = () => {
+    setIsEditingMbti(false)
+    setCodes({ mbti: null })
+  }
 
   if (isLoading) return <div>로딩 중...</div>
   if (error || !codes) return <div>코드 리스트를 불러올 수 없습니다.</div>
@@ -85,7 +141,121 @@ export default function ProfileCreatePage() {
         />
       </FormCard>
       <FormCard title={"선택 정보"} info={"추가로 공유하고 싶은 정보를 입력해주세요."}>
-        <FormInput title={"이름"} text={""} size={"s"} placeholder={user?.name ?? ""} isDisabled={true} />
+        <div className="flex flex-col gap-1">
+          <div className="text-text text-sm font-normal">프로필 이미지</div>
+          <div className="p-3" onClick={() => profileImgInputRef.current?.click()}>
+            <input
+              type="file"
+              accept="image/*"
+              ref={profileImgInputRef}
+              style={{ display: "none" }}
+              onChange={handleProfileImgChange}
+            />
+            <UserImg name={user?.name} size={"xl"} showTeamBadge={false} isEdit={true} />
+          </div>
+        </div>
+        <div className="flex flex-col gap-1">
+          <div className="text-text text-sm font-normal">강점</div>
+          <InputBox
+            text={strengthInput}
+            size="s"
+            placeholder="강점을 키워드로 입력해주세요 (*키워드 당 공백제외 최대 5자, 총 3개까지 설정 가능합니다 ex: 발표잘함, 팀장가능 등)"
+            onChange={setStrengthInput}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                const value = strengthInput.trim()
+                if (value && !strength.includes(value) && value.replace(/\s/g, "").length <= 5 && strength.length < 3) {
+                  setCodes({ strength: [...strength, value] })
+                  setStrengthInput("")
+                } else if (!value) {
+                  toast.warn("키워드를 입력해주세요!")
+                } else if (strength.includes(value)) {
+                  toast.warn("이미 등록된 키워드입니다!")
+                } else if (value.replace(/\s/g, "").length > 5) {
+                  toast.warn("키워드는 최대 5글자까지 가능합니다!")
+                } else if (strength.length >= 3) {
+                  toast.warn("키워드는 총 3개까지 설정 가능합니다!")
+                }
+                e.preventDefault()
+              }
+            }}
+          />
+          <div className="mt-2 flex flex-wrap gap-2">
+            {strength.map((ele) => (
+              <CheckTag
+                key={ele}
+                tagContent={ele}
+                isChecked={true}
+                onToggle={() => {
+                  setCodes({ strength: strength.filter((v) => v !== ele) })
+                }}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="flex flex-col gap-1">
+          <div className="text-text text-sm font-normal">MBTI</div>
+          {!isEditingMbti ? (
+            <div className="w-30">
+              <Button
+                text="추가하기"
+                size={"m"}
+                variant="outline"
+                isIcon={true}
+                Icon={CirclePlus}
+                onClick={() => {
+                  setIsEditingMbti(true)
+                  setMbtiToStore(mbtiSelected)
+                }}
+              />
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              {mbtiPairs.map(([a, b], idx) => (
+                <div key={idx} className="flex gap-0.5 rounded-full bg-[#F3F4F6] px-2 py-1">
+                  <div key={idx} className="flex gap-0.5">
+                    {[a, b].map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => handleToggle(idx, type)}
+                        className={`aspect-square rounded-full border-0 px-2 py-1 text-xs font-bold ${
+                          mbtiSelected[idx] === type ? "bg-main text-white" : "text-text"
+                        }`}
+                        style={{ minWidth: 28 }}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              <button className="ml-2" onClick={handleReset} type="button" aria-label="MBTI 선택 닫기">
+                <X className="text-subtext hover:bg-main/10 h-5 w-5 cursor-pointer rounded-md" />
+              </button>
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col gap-1">
+          <div className="text-text text-sm font-normal">파일 첨부</div>
+          <div className="w-30" onClick={() => portfolioInputRef.current?.click()}>
+            <input
+              type="file"
+              accept=".pdf,.pptx,.hwp,.docx"
+              ref={portfolioInputRef}
+              style={{ display: "none" }}
+              onChange={handlePortfolioChange}
+            />
+            <Button
+              text={portfolio ? "변경하기" : "추가하기"}
+              isIcon={true}
+              Icon={CirclePlus}
+              variant={"outline"}
+              size={"m"}
+              onClick={() => {}}
+            />
+            {portfolio && <div className="text-subtext mt-2 ml-2 text-xs font-light">{portfolio.originalFileName}</div>}
+          </div>
+        </div>
       </FormCard>
       <FormCard title={"자유 형식 자기소개"} info={"마크다운 형식으로 자유롭게 자기소개를 작성해주세요."}>
         <Segmented
@@ -96,12 +266,19 @@ export default function ProfileCreatePage() {
           activeSegment={activeMarkdownTab}
           onSegmentChange={setActiveMarkdownTab}
         />
-        <InputBox
-          text={""}
-          size={"l"}
-          placeholder={"마크다운 형식으로 자유롭게 자기소개를 작성해 보세요!"}
-          variant="textarea"
-        />
+        {activeMarkdownTab === "left" ? (
+          <InputBox
+            text={description}
+            size="l"
+            placeholder="마크다운 형식으로 자유롭게 자기소개를 작성해 보세요!"
+            variant="textarea"
+            onChange={(value) => setCodes({ description: value })}
+          />
+        ) : (
+          <div className="markdown-body border-line min-h-[320px] rounded-md border bg-white p-4">
+            <ReactMarkdown>{description}</ReactMarkdown>
+          </div>
+        )}
       </FormCard>
       <Button text="저장하기" size={"m"} isIcon={false} onClick={() => {}} />
     </div>
