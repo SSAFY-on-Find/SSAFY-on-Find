@@ -78,26 +78,27 @@ export default function TeamCreatePage() {
 
   // 기존 return 문 앞에 추가
   return (
-    <div className="bg-background min-h-screen">
-      <div className="border-text border-1 p-1">
-        <h1 className="text-text text-2xl font-bold">팀 목록</h1>
-        <p>팀 규칙</p>
-        <p>* 팀원은 6인 1팀이 원칙입니다.</p>
-        <p>* 팀원은 비전공 2명, 전공 2명이 반드시 포함되어야 합니다.</p>
-        <p>* 특정 전공에 인원이 몰린 팀은 해체 후 리빌딩될 수 있습니다.</p>
+    <div className="bg-background min-h-screen p-8">
+      <div className="p-6">
+        <h1 className="text-text mb-[10px] text-2xl font-semibold">새로운 팀 생성</h1>
+        <div className="text-subtext text-sm font-normal">
+          <p>* 팀원은 6인 1팀이 원칙입니다.</p>
+          <p>* 팀원은 비전공 2명, 전공 2명이 반드시 포함되어야 합니다.</p>
+          <p>* 특정 전공에 인원이 몰린 팀은 해체 후 리빌딩될 수 있습니다.</p>
+        </div>
       </div>
-      <div className="border-text border-1 p-1">
-        <div className="border-text border-1 p-1">
-          <h1>팀 정보</h1>
-          <p>팀 한줄 소개</p>
+      <div className="border-line rounded-[8px] border-1 bg-white px-6 py-4">
+        <div className="pb-8">
+          <h1 className="text-text pb-4 text-lg font-semibold">팀 정보</h1>
+          <p className="text-text pb-[10px] text-sm font-medium">팀 한줄 소개</p>
           <InputBox
             text={createTeamData.description}
             size={"m"}
-            placeholder={"팀을 소개해주세요"}
+            placeholder={"팀을 소개하는 한줄 설명을 작성해주세요"}
             onChange={handleDescriptionChange}
             variant={"textarea"}
           />
-          <p>프로젝트 트랙</p>
+          <p className="text-text pb-[10px] text-sm font-medium">프로젝트 트랙</p>
           {teamWarmup && (
             <Dropdown
               placeholder={"트랙을 선택해주세요"}
@@ -111,20 +112,28 @@ export default function TeamCreatePage() {
             />
           )}
         </div>
-        <div className="border-text border-1 p-1">
-          <h1>모집 포지션</h1>
-          <p>모집할 팀원의 포지션을 설정해주세요. 나중에 수정할 수 있습니다!</p>
-          {teamWarmup?.positions.map((ele) => (
-            <CheckTag
-              key={ele.subcode}
-              tagContent={ele.subcodeName}
-              isChecked={selectedPositions.includes(ele.subcode)}
-              onToggle={handlePositionToggle(ele.subcode)}
-            />
-          ))}
+        <div className="pb-6">
+          <h1 className="text-text pb-4 text-lg font-semibold">모집 포지션</h1>
+          <p className="text-subtext pb-[10px] text-sm">
+            모집할 팀원의 포지션을 설정해주세요. 나중에 수정할 수 있습니다!
+          </p>
+          <div className="flex flex-wrap gap-1">
+            {teamWarmup?.positions.map((ele) => (
+              <CheckTag
+                key={ele.subcode}
+                tagContent={ele.subcodeName}
+                isChecked={selectedPositions.includes(ele.subcode)}
+                onToggle={handlePositionToggle(ele.subcode)}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="flex justify-end">
+          <div className="w-25">
+            <Button size={"m"} isIcon={false} text="팀 생성하기" onClick={handleCreateTeam} />
+          </div>
         </div>
       </div>
-      <Button size={"m"} isIcon={false} text="팀 생성하기" onClick={handleCreateTeam} />
     </div>
   )
 }
