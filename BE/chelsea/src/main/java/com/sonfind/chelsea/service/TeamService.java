@@ -18,6 +18,7 @@ import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 import com.sonfind.chelsea.dto.teams.CreateTeamRequestDto;
 import com.sonfind.chelsea.dto.teams.MyTeamResponseDto;
 import com.sonfind.chelsea.dto.teams.RecruitmentDto;
+import com.sonfind.chelsea.dto.teams.TeamCreatePageDto;
 import com.sonfind.chelsea.dto.teams.TeamListResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamMemberResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamResponseDto;
@@ -90,6 +91,24 @@ public class TeamService {
 		return team.getTeamId();
 	}
 
+	//팀 생성 페이지
+	@Transactional(readOnly = true)
+	public TeamCreatePageDto getTeamCreatePage() {
+		List<SubCodeResponseDto> tracks = subCodeRepository
+			.findByMainCodeAndUseYnTrue("TRACK")
+			.stream()
+			.map(sc -> new SubCodeResponseDto(sc.getSubCode(), sc.getSubCodeName()))
+			.collect(Collectors.toList());
+
+		List<SubCodeResponseDto> positions = subCodeRepository
+			.findByMainCodeAndUseYnTrue("POSITION")
+			.stream()
+			.map(sc -> new SubCodeResponseDto(sc.getSubCode(), sc.getSubCodeName()))
+			.collect(Collectors.toList());
+
+		return new TeamCreatePageDto(tracks, positions);
+	}
+
 	//팀 수정
 	@Transactional
 	public void updateTeam(Long teamId, Long studentId, UpdateTeamRequestDto request) {
@@ -158,7 +177,7 @@ public class TeamService {
 			))
 			.collect(Collectors.toList());
 
-		boolean isFavorite = favoriteService.checkFavoriteStatus(studentId, teamId);
+		boolean isFavorite = favoriteService.checkTeamFavoriteStatus(studentId, teamId);
 
 		return TeamResponseDto.builder()
 			.teamName(team.getName())
@@ -239,7 +258,7 @@ public class TeamService {
 			team.getTrack().getSubCodeName()
 		);
 
-		boolean isFavorite = favoriteService.checkFavoriteStatus(studentId, team.getTeamId());
+		boolean isFavorite = favoriteService.checkTeamFavoriteStatus(studentId, team.getTeamId());
 
 		return TeamListResponseDto.builder()
 			.teamId(team.getTeamId())
