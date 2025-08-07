@@ -1,4 +1,7 @@
+import { useNavigate } from "react-router-dom"
 import { Mailbox, Search } from "lucide-react"
+
+import { useUserStore } from "@/stores/userStore"
 
 function DeadlineNotification() {
   return (
@@ -22,19 +25,21 @@ function AlarmBox() {
   )
 }
 
-interface IHeaderProps {
-  classCode?: string
-}
+function Header() {
+  const navigate = useNavigate()
+  const user = useUserStore((state) => state.user)
 
-function Header({ classCode = "7" }: IHeaderProps) {
   return (
     <header className="fixed top-0 left-0 z-50 flex h-[64px] w-full items-center justify-center gap-3 bg-white px-5 py-4 shadow-xs">
-      <div className="text-main flex h-full w-[230px] items-center justify-start gap-2">
+      <div
+        className="text-main flex h-full w-[230px] cursor-pointer items-center justify-start gap-2"
+        onClick={() => navigate("/")}
+      >
         <Search />
         <h1 className="text-l font-bold">SSAFY On Find</h1>
       </div>
       <div className="flex h-full flex-1 items-center justify-between">
-        <h1 className="text-text text-xl font-bold">서울 {classCode}반</h1>
+        <h1 className="text-text text-xl font-bold">서울 {user?.className}</h1>
         <div className="flex h-full items-center justify-center gap-3">
           <DeadlineNotification />
           <AlarmBox />

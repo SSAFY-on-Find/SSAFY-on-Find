@@ -253,7 +253,7 @@ export default function ComponentTestPage() {
         <div className="mt-4">
           {activeMarkdownTab === "left" ? <div>마크다운으로 작성하세요!</div> : <div>마크다운으로 작성된 컨텐츠</div>}
         </div>
-        <div className="flex gap-4">
+        {/* <div className="flex gap-4">
           {teams.map((team) => (
             <TeamCard
               id={team.id}
@@ -270,7 +270,7 @@ export default function ComponentTestPage() {
               variant={team.variant}
             />
           ))}
-        </div>
+        </div> */}
       </div>
       <div>
         <h5>선택된 기술 스택 ID: {selectedTechStackIds.join(", ")}</h5>
@@ -522,11 +522,20 @@ export default function ComponentTestPage() {
           size={"l"}
         />
       </div>
-      <div className="bg-main p-2">
+      <div className="bg-main flex flex-row gap-5 p-2">
         <Button
-          text={"흰색"}
+          text={"흰색full"}
           isIcon={false}
-          variant="white"
+          variant="white-full"
+          onClick={function (): void {
+            throw new Error("Function not implemented.")
+          }}
+          size={"m"}
+        />
+        <Button
+          text={"흰색line"}
+          isIcon={false}
+          variant="white-line"
           onClick={function (): void {
             throw new Error("Function not implemented.")
           }}
