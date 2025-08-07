@@ -1,6 +1,9 @@
-import { useQuery } from "@tanstack/react-query"
+import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { teamApi } from "@/apis/teamApi"
+import type { ITeamCreate } from "@/types/team"
 import { sortTeamsByFavorite } from "@/utils"
 
 export const useTeams = () => {
@@ -65,5 +68,48 @@ export const useTeamDetails = (teamId: number) => {
     },
     gcTime: 10 * 60 * 1000,
     enabled: !!teamId,
+  })
+}
+
+export const useCreateTeam = () => {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (createTeamDto: ITeamCreate) => {
+      const response = await teamApi.createTeam(createTeamDto)
+      return response.data
+    },
+    onSuccess: () => {
+      toast.success("팀 생성 성공")
+      queryClient.invalidateQueries({ queryKey: ["myTeam"] })
+      queryClient.invalidateQueries({ queryKey: ["teams"] })
+      queryClient.invalidateQueries({ queryKey: ["team-warmup"] })
+      navigate("/myteam")
+    },
+    onError: (error) => {
+      toast.error("팀 생성 실패!")
+      console.log("팀 생성 실패 오류: ", error)
+    },
+  })
+}
+export const useTeamWarmup = () => {
+  return useQuery({
+    queryKey: ["team-warmup"],
+    queryFn: async () => {
+      try {
+        const response = await teamApi.getWarmup()
+        if (response.status !== "SUCCESS") {
+          throw new Error("팀 생성 웜업에 실패했습니다.")
+        }
+        return response.data
+      } catch (error) {
+        if (error instanceof Error) {
+          throw new Error(error.message)
+        }
+        throw new Error("팀 생성 웜업에 오류가 발생했습니다.")
+      }
+    },
+    gcTime: 10 * 60 * 1000,
   })
 }
