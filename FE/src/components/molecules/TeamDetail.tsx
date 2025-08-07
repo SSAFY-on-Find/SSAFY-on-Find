@@ -5,7 +5,7 @@ import { MainTag, PositionTag, UserImg } from "../atoms"
 function TeamDetail({
   teamName,
   teamDescription,
-  teamTrack,
+  track,
   majorCount,
   nonMajorCount,
   teamCount,
@@ -22,7 +22,7 @@ function TeamDetail({
       <div className="flex flex-col gap-2 p-8">
         <div className="inline-flex items-center gap-3">
           <h3 className="text-text text-2xl font-bold">{teamName}</h3>
-          <MainTag tagContent={teamTrack.subcodeName} />
+          <MainTag tagContent={track.subcodeName} />
         </div>
         <p className="text-subtext text-sm text-pretty">{teamDescription}</p>
       </div>
