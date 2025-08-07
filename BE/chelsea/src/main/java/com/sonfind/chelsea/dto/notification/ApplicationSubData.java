@@ -4,7 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record ApplicationSubData(
-        ApplicantDto publisher,
-        NotificationMsgDto subscriber
-) {
+	ApplicantDto publisher,
+	NotificationMsgDto subscriber
+) implements HasPublisher, HasSubscriber {
 }

@@ -11,5 +11,5 @@ public record InvitationNotificationResponseDto(
 	Long subId,
 	NotificationDomainType subType,
 	String updatedAt
-) {
+) implements HasResponse {
 }

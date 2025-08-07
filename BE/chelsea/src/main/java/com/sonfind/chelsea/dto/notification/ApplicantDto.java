@@ -12,5 +12,5 @@ public record ApplicantDto(
 	String track,
 	String isMajor,
 	String position
-) {
+) implements CommonField {
 }
