@@ -27,13 +27,14 @@ public class Student extends BaseEntity {
 	@Column(name = "student_id")
 	private long studentId;
 
+	@Column(nullable = false)
 	private String name;
 
-	@Column(name = "major_yn")
+	@Column(name = "major_yn", nullable = false)
 	private Boolean majorYn;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "class_code")
+	@JoinColumn(name = "class_code", nullable = false)
 	private SubCode classCode;
 
 	@Setter
