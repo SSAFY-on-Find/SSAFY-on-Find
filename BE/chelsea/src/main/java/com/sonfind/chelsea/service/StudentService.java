@@ -1,5 +1,6 @@
 package com.sonfind.chelsea.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sonfind.chelsea.domain.student.Student;
+import com.sonfind.chelsea.dto.dashboard.TeamRatioDto;
 import com.sonfind.chelsea.dto.student.request.StudentSignInRequestDto;
 import com.sonfind.chelsea.dto.student.response.StudentListQueryDto;
 import com.sonfind.chelsea.dto.student.response.StudentListResponseDto;
@@ -95,10 +97,39 @@ public class StudentService {
 		)).collect(Collectors.toList());
 	}
 
-	public StudentResponseDto createStudentResponse(Long studentId, String name, Boolean isMajor) {
-		return new StudentResponseDto(
-			studentId, name, getIsMajor(isMajor)
-		);
+	/**
+	 * 대시보드 용 팀 빌딩 진행률 조회 함수
+	 * */
+	@Transactional(readOnly = true)
+	public List<TeamRatioDto> getTeamRatio() {
+
+		List<Object[]> rawData = studentRepository.getTeamRatio();
+
+		List<TeamRatioDto> result = new ArrayList<>();
+		int totalStudentCount = 0;
+		int totalTeamMemberCount = 0;
+
+		for (Object[] row : rawData) {
+			String majorType = row[0].toString();
+			Long longTotalCount = (Long)row[1];
+			Long longTeamMemberCount = (Long)row[2];
+			int totalCount = longTotalCount.intValue();
+			int teamMemberCount = longTeamMemberCount.intValue();
+
+			totalStudentCount += totalCount;
+			totalTeamMemberCount += teamMemberCount;
+
+			result.add(TeamRatioDto.builder()
+				.type(majorType)
+				.totalStudentCount(totalCount)
+				.teamMemberCount(teamMemberCount).build());
+		}
+		result.add(TeamRatioDto.builder()
+			.type("전체")
+			.totalStudentCount(totalStudentCount)
+			.teamMemberCount(totalTeamMemberCount).build());
+
+		return result;
 	}
 
 	private static String getIsMajor(Boolean major) {
