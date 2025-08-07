@@ -9,8 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
-import com.sonfind.chelsea.dto.studentInfo.StudentInfoGetQueryDto;
+import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoGetQueryDto;
 
 @Repository
 public interface StudentInfoRepository extends JpaRepository<StudentInfo, Long> {
@@ -20,7 +21,7 @@ public interface StudentInfoRepository extends JpaRepository<StudentInfo, Long> 
 	@EntityGraph(attributePaths = "student.classCode")
 	Optional<StudentInfo> findByStudent_StudentId(Long studentId);
 
-	@Query("SELECT new com.sonfind.chelsea.dto.studentInfo.StudentInfoGetQueryDto("
+	@Query("SELECT new com.sonfind.chelsea.dto.studentInfo.response.StudentInfoGetQueryDto("
 		+ " s.studentId, s.name, s.majorYn, "
 		+ " pos.subCode, pos.subCodeName, "
 		+ "track.subCode, track.subCodeName, "
@@ -56,4 +57,6 @@ public interface StudentInfoRepository extends JpaRepository<StudentInfo, Long> 
 		WHERE si.student.studentId IN :studentIds
 		""")
 	List<StudentInfo> findBasicInfoByStudentIds(@Param("studentIds") List<Long> studentIds);
+
+	Long student(Student student);
 }

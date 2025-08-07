@@ -1,4 +1,4 @@
-package com.sonfind.chelsea.dto.studentInfo;
+package com.sonfind.chelsea.dto.studentInfo.response;
 
 import com.sonfind.chelsea.domain.studentInfo.UploadedFile;
 
