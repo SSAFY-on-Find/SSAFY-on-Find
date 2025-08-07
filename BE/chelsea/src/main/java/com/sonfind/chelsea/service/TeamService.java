@@ -159,6 +159,7 @@ public class TeamService {
 		}
 	}
 
+	//팀에 학생 추가
 	@Transactional
 	public void addStudentToTeam(Long teamId, Long studentId) {
 		//들어가고 싶은 팀
@@ -212,6 +213,65 @@ public class TeamService {
 		} else {
 			log.info("교육생 {}이 팀 {}에 합류했습니다.", studentId, teamId);
 		}
+	}
+
+	//두 팀 합치기
+	//sourceTeamId 뿌셔질 팀
+	//targetTeamId 유지되는 팀
+	@Transactional
+	public void mergeTeams(Long sourceTeamId, Long targetTeamId) {
+		//두 팀의 존재에 관하여
+		Team sourceTeam = teamRepository.findTeamByTeamId(sourceTeamId)
+			.orElseThrow(() -> new ResponseStatusException(
+				HttpStatus.NOT_FOUND, "합쳐질 팀이 존재하지 않습니다."));
+
+		Team targetTeam = teamRepository.findTeamByTeamId(targetTeamId)
+			.orElseThrow(() -> new ResponseStatusException(
+				HttpStatus.NOT_FOUND, "합칠 팀이 존재하지 않습니다."));
+
+		if (sourceTeam.isDeleted() || targetTeam.isDeleted()) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST, "삭제된 팀입니다.");
+		}
+		//같은 팀인지 확인
+		if (sourceTeamId.equals(targetTeamId)) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST, "같은 팀끼리는 합칠 수 없습니다.");
+		}
+
+		//각 팀의 학생 조회
+		//뿌셔지는 팀 학생
+		List<Student> sourceMembers = studentRepository.findAllByTeamId(sourceTeamId);
+		//유지되는 팀 학생
+		List<Student> targetMembers = studentRepository.findAllByTeamId(targetTeamId);
+
+		//합칠 때 팀 규칙 정원 확인
+		if (sourceMembers.size() + targetMembers.size() > 6) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST,
+				String.format("팀 규칙 정원이 초과됨니다. 현재 %d명, 최대 인원은 6명입니다.",
+					targetMembers.size() + sourceMembers.size()));
+		}
+
+		//소스 팀 멤버를 타켓 팀으로 이동
+		for (Student member : sourceMembers) {
+			member.setTeamId(targetTeamId);
+			studentRepository.save(member);
+
+			//전공/비전공 업데이트
+			if (Boolean.TRUE.equals(member.getMajorYn())) {
+				targetTeam.incrementMajorCount();
+			} else {
+				targetTeam.incrementNonMajorCount();
+			}
+		}
+
+		//소스 팀 삭제
+		sourceTeam.softDelete();
+		teamRepository.save(sourceTeam);
+		teamRepository.save(targetTeam);
+
+		log.info("팀 {}과 팀 {}이 합쳐졌습니다.", sourceTeamId, targetTeamId);
 	}
 
 	//팀에서 교육생 제거
@@ -275,65 +335,6 @@ public class TeamService {
 			.message(willBeEmptyTeam ? "팀에서 나갔습니다. 팀이 삭제되었습니다." : "팀에서 나갔습니다.")
 			.teamDeleted(willBeEmptyTeam)
 			.build();
-	}
-
-	//두 팀 합치기
-	//sourceTeamId 뿌셔질 팀
-	//targetTeamId 유지되는 팀
-	@Transactional
-	public void mergeTeams(Long sourceTeamId, Long targetTeamId) {
-		//두 팀의 존재에 관하여
-		Team sourceTeam = teamRepository.findTeamByTeamId(sourceTeamId)
-			.orElseThrow(() -> new ResponseStatusException(
-				HttpStatus.NOT_FOUND, "합쳐질 팀이 존재하지 않습니다."));
-
-		Team targetTeam = teamRepository.findTeamByTeamId(targetTeamId)
-			.orElseThrow(() -> new ResponseStatusException(
-				HttpStatus.NOT_FOUND, "합칠 팀이 존재하지 않습니다."));
-
-		if (sourceTeam.isDeleted() || targetTeam.isDeleted()) {
-			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST, "삭제된 팀입니다.");
-		}
-		//같은 팀인지 확인
-		if (sourceTeamId.equals(targetTeamId)) {
-			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST, "같은 팀끼리는 합칠 수 없습니다.");
-		}
-
-		//각 팀의 학생 조회
-		//뿌셔지는 팀 학생
-		List<Student> sourceMembers = studentRepository.findAllByTeamId(sourceTeamId);
-		//유지되는 팀 학생
-		List<Student> targetMembers = studentRepository.findAllByTeamId(targetTeamId);
-
-		//합칠 때 팀 규칙 정원 확인
-		if (sourceMembers.size() + targetMembers.size() > 6) {
-			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST,
-				String.format("팀 규칙 정원이 초과됨니다. 현재 %d명, 최대 인원은 6명입니다.",
-					targetMembers.size() + sourceMembers.size()));
-		}
-
-		//소스 팀 멤버를 타켓 팀으로 이동
-		for (Student member : sourceMembers) {
-			member.setTeamId(targetTeamId);
-			studentRepository.save(member);
-
-			//전공/비전공 업데이트
-			if (Boolean.TRUE.equals(member.getMajorYn())) {
-				targetTeam.incrementMajorCount();
-			} else {
-				targetTeam.incrementNonMajorCount();
-			}
-		}
-
-		//소스 팀 삭제
-		sourceTeam.softDelete();
-		teamRepository.save(sourceTeam);
-		teamRepository.save(targetTeam);
-
-		log.info("팀 {}과 팀 {}이 합쳐졌습니다.", sourceTeamId, targetTeamId);
 	}
 
 	//타 팀 상세조회
