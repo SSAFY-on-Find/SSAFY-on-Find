@@ -12,7 +12,15 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const { mutate: login, isPending, isError, error } = useStudentLogin()
   const { setUser } = useUserStore()
-
+  const handleFreePass = () => {
+    login("1300050", {
+      onSuccess: (user) => {
+        setUser(user)
+        navigate("/")
+        toast.success("로그인에 성공했습니다.")
+      },
+    })
+  }
   const handleLogin = () => {
     const studentId = inputBoxValue.trim()
     const regex = /^\d{7}$/
@@ -73,6 +81,7 @@ export default function LoginPage() {
             }}
           />
           <Button size={"l"} isIcon={false} text="로그인" onClick={handleLogin} />
+          <Button size={"l"} isIcon={false} text="Free Pass" onClick={handleFreePass} />
         </div>
 
         {/* Divider */}
