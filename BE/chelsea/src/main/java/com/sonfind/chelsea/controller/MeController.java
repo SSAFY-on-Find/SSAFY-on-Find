@@ -1,6 +1,5 @@
 package com.sonfind.chelsea.controller;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,7 +59,7 @@ public class MeController {
 		@RequestPart(value = "portfolio", required = false) MultipartFile portfolio,
 		@Parameter(hidden = true)
 		@SessionAttribute("loginUser") Long studentId
-	) throws IOException {
+	) {
 
 		studentInfoService.createStudentInfo(studentId, requestDto, profile, portfolio);
 
@@ -108,7 +107,7 @@ public class MeController {
 		@RequestPart(value = "portfolio", required = false) MultipartFile portfolio,
 		@Parameter(hidden = true)
 		@SessionAttribute("loginUser") Long studentId
-	) throws IOException {
+	) {
 
 		studentInfoService.updateStudentInfo(studentId, requestDto, profile, portfolio);
 
