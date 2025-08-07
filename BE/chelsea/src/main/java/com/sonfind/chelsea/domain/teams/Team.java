@@ -48,22 +48,35 @@ public class Team extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "track_code", nullable = false)
 	private SubCode track;
-	
+
 	@Column(name = "is_deleted")
 	@ColumnDefault("false")
 	private boolean isDeleted;
 
 	@Column(name = "major_count", nullable = false)
-	// @Builder.Default
-	private Integer majorCount;
+	@ColumnDefault("0")
+	@Builder.Default
+	private Integer majorCount = 0;
 
 	@Column(name = "non_major_count", nullable = false)
-	// @Builder.Default
-	private Integer nonMajorCount;
+	@ColumnDefault("0")
+	@Builder.Default
+	private Integer nonMajorCount = 0;
 
 	@OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
-	// @Builder.Default
+	@Builder.Default
 	private List<Recruitment> recruitments = new ArrayList<>();
+
+	public List<Recruitment> getRecruitments() {
+		if (this.recruitments == null) {
+			this.recruitments = new ArrayList<>();
+		}
+		return this.recruitments;
+	}
+
+	public void softDelete() {
+		this.isDeleted = true;
+	}
 
 	public void updateDescription(String description) {
 		this.description = description;
@@ -74,6 +87,9 @@ public class Team extends BaseEntity {
 	}
 
 	public void updatePositions(List<Recruitment> newRecruitments) {
+		if (this.recruitments == null) {
+			this.recruitments = new ArrayList<>();
+		}
 		this.recruitments.clear();
 		this.recruitments.addAll(newRecruitments);
 	}
