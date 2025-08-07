@@ -96,8 +96,9 @@ public class TeamService {
 		}
 
 		//학생 teamId 저장
-		student.setTeamId(team.getTeamId());
-		studentRepository.save(student);
+		// student.setTeamId(team.getTeamId());
+		// studentRepository.save(student);
+		addStudentToTeam(team.getTeamId(), studentId);
 
 		return team.getTeamId();
 	}
