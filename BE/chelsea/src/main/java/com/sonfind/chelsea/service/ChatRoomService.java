@@ -1,29 +1,35 @@
 package com.sonfind.chelsea.service;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sonfind.chelsea.domain.chat.ChatRoom;
 import com.sonfind.chelsea.domain.chat.ChatRoomMember;
 import com.sonfind.chelsea.domain.student.Student;
+import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 import com.sonfind.chelsea.domain.teams.Team;
-import com.sonfind.chelsea.repository.ChatRoomMemberRepository;
+import com.sonfind.chelsea.dto.chat.ChatRoomListResponseDto;
+import com.sonfind.chelsea.dto.chat.ChatRoomListResponseDto.DirectChatRoomInfoDto;
 import com.sonfind.chelsea.repository.ChatRoomRepository;
+import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
 import com.sonfind.chelsea.repository.TeamRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ChatRoomService {
 	private final StudentRepository studentRepository;
+	private final StudentInfoRepository studentInfoRepository;
 	private final TeamRepository teamRepository;
 	private final ChatRoomRepository chatRoomRepository;
-	private final ChatRoomMemberRepository chatRoomMemberRepository;
 
 	@Transactional
 	public Long createTeamChatRoom(Long teamId) {
@@ -35,13 +41,13 @@ public class ChatRoomService {
 		}
 
 		ChatRoom chatRoom = ChatRoom.createTeamChatRoom(team);
-		ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
+		List<Student> students = studentRepository.findAllByTeamId(teamId);
+		students.forEach(student -> {
+			ChatRoomMember member = new ChatRoomMember(chatRoom, student);
+			chatRoom.addChatRoomMember(member);
+		});
 
-		List<ChatRoomMember> chatRoomMembers = studentRepository.findAllByTeamId(teamId)
-			.stream()
-			.map(student -> new ChatRoomMember(chatRoom, student))
-			.toList();
-		chatRoomMemberRepository.saveAll(chatRoomMembers);
+		ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
 		return savedChatRoom.getId();
 	}
 
@@ -56,18 +62,45 @@ public class ChatRoomService {
 		Student targetStudent = studentRepository.findById(targetStudentId)
 			.orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
 
-		boolean isPresent = chatRoomRepository.findChatRoomBy(student, targetStudent).isPresent();
+		boolean isPresent = chatRoomRepository.findDirectChatRoomBy(student, targetStudent).isPresent();
 		if (isPresent) {
 			throw new IllegalStateException("이미 존재하는 채팅방입니다.");
 		}
 
 		ChatRoom chatRoom = ChatRoom.createDirectChatRoom();
+		chatRoom.addChatRoomMember(new ChatRoomMember(chatRoom, student));
+		chatRoom.addChatRoomMember(new ChatRoomMember(chatRoom, targetStudent));
+
 		ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
-
-		ChatRoomMember member1 = new ChatRoomMember(savedChatRoom, student);
-		ChatRoomMember member2 = new ChatRoomMember(savedChatRoom, targetStudent);
-		chatRoomMemberRepository.saveAll(Arrays.asList(member1, member2));
-
 		return savedChatRoom.getId();
+	}
+
+	public ChatRoomListResponseDto getDirectChatRooms(Long studentId) {
+		Student student = studentRepository.findById(studentId)
+			.orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
+
+		List<ChatRoom> directChatRooms = chatRoomRepository.findDirectChatRoomsWithMembersBy(student);
+		if (directChatRooms.isEmpty()) {
+			return new ChatRoomListResponseDto(Collections.emptyList());
+		}
+
+		List<Student> opponents = directChatRooms.stream()
+			.map(chatRoom -> chatRoom.getOpponent(student))
+			.toList();
+
+		List<StudentInfo> opponentInfos = studentInfoRepository.findAllByStudentIn(opponents);
+		Map<Long, StudentInfo> opponentInfoMap = opponentInfos.stream()
+			.collect(Collectors.toMap(info -> info.getStudent().getStudentId(), info -> info));
+
+		List<DirectChatRoomInfoDto> directChatRoomInfoDtos = directChatRooms.stream()
+			.map(chatRoom -> {
+				Student opponent = chatRoom.getOpponent(student);
+				StudentInfo opponentInfo = opponentInfoMap.get(opponent.getStudentId());
+				String profileImageUrl = opponentInfo.getProfileImageUrl();
+				return new DirectChatRoomInfoDto(chatRoom.getId(), opponent.getName(), profileImageUrl);
+			})
+			.toList();
+
+		return new ChatRoomListResponseDto(directChatRoomInfoDtos);
 	}
 }

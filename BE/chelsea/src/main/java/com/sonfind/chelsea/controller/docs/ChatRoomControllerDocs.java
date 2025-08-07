@@ -17,5 +17,8 @@ public interface ChatRoomControllerDocs {
 	@Operation(summary = "1:1 채팅방 생성", description = "다른 사람의 id를 이용하여 1:1 채팅방을 생성할 수 있습니다.")
 	ResponseEntity<Map<String, Object>> createDirectChatRoom(@Parameter(hidden = true) Long studentId,
 		DirectChatRoomRequestDto request);
+
+	@Operation(summary = "1:1 채팅방 목록 보기", description = "자신이 속한 1:1 채팅방 목록을 볼 수 있습니다.")
+	ResponseEntity<Map<String, Object>> getDirectChatRoom(@Parameter(hidden = true) Long studentId);
 }
 

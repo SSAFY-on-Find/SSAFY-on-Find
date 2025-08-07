@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoGetQueryDto;
 
@@ -56,4 +57,6 @@ public interface StudentInfoRepository extends JpaRepository<StudentInfo, Long> 
 		WHERE si.student.studentId IN :studentIds
 		""")
 	List<StudentInfo> findBasicInfoByStudentIds(@Param("studentIds") List<Long> studentIds);
+
+	List<StudentInfo> findAllByStudentIn(List<Student> students);
 }

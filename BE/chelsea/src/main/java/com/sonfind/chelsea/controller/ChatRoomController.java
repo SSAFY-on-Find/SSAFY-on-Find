@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import com.sonfind.chelsea.controller.docs.ChatRoomControllerDocs;
+import com.sonfind.chelsea.dto.chat.ChatRoomListResponseDto;
 import com.sonfind.chelsea.dto.chat.DirectChatRoomRequestDto;
 import com.sonfind.chelsea.service.ChatRoomService;
 
@@ -59,4 +61,16 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 	/**
 	 * 1:1 참여 중인 채팅방 목록 조회
 	 */
+	@GetMapping("/individual/me")
+	public ResponseEntity<Map<String, Object>> getDirectChatRoom(
+		@SessionAttribute("loginUser") Long studentId
+	) {
+		ChatRoomListResponseDto dto = chatRoomService.getDirectChatRooms(studentId);
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", dto);
+
+		return ResponseEntity.ok().body(body);
+	}
+
 }

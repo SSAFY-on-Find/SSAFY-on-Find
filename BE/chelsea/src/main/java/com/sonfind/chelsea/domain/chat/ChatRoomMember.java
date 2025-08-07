@@ -39,4 +39,8 @@ public class ChatRoomMember extends BaseEntity {
 		this.chatRoom = chatRoom;
 		this.student = student;
 	}
+
+	public void changeChatRoom(ChatRoom chatRoom) {
+		this.chatRoom = chatRoom;
+	}
 }
