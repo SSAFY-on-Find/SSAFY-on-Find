@@ -22,7 +22,7 @@ public class ChatController {
 	@MessageMapping("/team/message")
 	public void send(ChatMessageRequestDto request) {
 		chatService.saveChatMessage(request.studentId(), request);
-		simpMessageSendingOperations.convertAndSend("/topic/chatroom/" + request.roomId(), request.content());
+		simpMessageSendingOperations.convertAndSend("/topic/chatroom/" + request.roomId(), request);
 	}
 
 	/**
