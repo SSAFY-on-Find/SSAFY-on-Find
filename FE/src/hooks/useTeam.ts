@@ -1,5 +1,6 @@
+import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { teamApi } from "@/apis/teamApi"
 import type { ITeamCreate } from "@/types/team"
@@ -71,6 +72,9 @@ export const useTeamDetails = (teamId: number) => {
 }
 
 export const useCreateTeam = () => {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async (createTeamDto: ITeamCreate) => {
       const response = await teamApi.createTeam(createTeamDto)
@@ -78,6 +82,10 @@ export const useCreateTeam = () => {
     },
     onSuccess: () => {
       toast.success("팀 생성 성공")
+      queryClient.invalidateQueries({ queryKey: ["myTeam"] })
+      queryClient.invalidateQueries({ queryKey: ["teams"] })
+      queryClient.invalidateQueries({ queryKey: ["team-warmup"] })
+      navigate("/myteam")
     },
     onError: (error) => {
       toast.error("팀 생성 실패!")
