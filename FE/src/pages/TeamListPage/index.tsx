@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom"
+
 import { Button } from "@/components/atoms"
 import { TeamCard } from "@/components/molecules"
 import { TeamDetailModal } from "@/components/templates"
@@ -10,14 +12,12 @@ import { TeamCardSkeleton } from "./organisms/TeamCardSkeleton"
 import "react-loading-skeleton/dist/skeleton.css"
 
 export default function TeamListPage() {
-  const { data: teams = [], isLoading: isTeamsLoading, error, isError } = useTeams()
+  const { data: teams = [], isLoading: isTeamsLoading, isError } = useTeams()
   const { isDetailModalOpen, selectedTeamId, openDetailModal, closeDetailModal } = useTeamStore()
-  const {
-    data: selectedTeamData,
-    isLoading: isTeamDetailLoading,
-    error: detailError,
-  } = useTeamDetails(selectedTeamId || 0)
-  const { toggleFavorite, isLoading: teamFavoriteToggleLoading } = useTeamFavoriteToggle()
+  const { data: selectedTeamData } = useTeamDetails(selectedTeamId || 0)
+  const { toggleFavorite } = useTeamFavoriteToggle()
+
+  const navigate = useNavigate()
 
   if (isError) {
     return <div>다시 시도</div>
@@ -29,7 +29,7 @@ export default function TeamListPage() {
         <div className="mb-6 flex items-center gap-5">
           <h1 className="text-text text-2xl font-bold">팀 목록</h1>
           <div className="">
-            <Button size={"m"} isIcon={false} text="팀생성" onClick={() => ""} />
+            <Button size={"m"} isIcon={false} text="팀생성" onClick={() => navigate("/create-team")} />
           </div>
         </div>
         <div className="flex flex-wrap gap-[10px]">
