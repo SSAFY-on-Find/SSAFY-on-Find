@@ -82,7 +82,7 @@ public class FavoriteService {
 			.orElseThrow(() -> new IllegalArgumentException("없는 교육생입니다."));
 
 		//좋아요할 학생 있음?
-		Student targetStudent = studentRepository.findByStudentId(studentId)
+		Student targetStudent = studentRepository.findByStudentId(targetStudentId)
 			.orElseThrow(() -> new ResponseStatusException(
 				HttpStatus.NOT_FOUND, "없는 교육생입니다."));
 
