@@ -386,15 +386,15 @@ public class TeamService {
 	//내 팀 상세조회
 	@Transactional(readOnly = true)
 	public MyTeamResponseDto getMyTeamDetail(Long studentId) {
-		Student Student = studentService.findByStudentId(studentId);
-		if (Student.getTeamId() == null) {
+		Student student = studentService.findByStudentId(studentId);
+		if (student.getTeamId() == null) {
 			throw new ResponseStatusException(
 				HttpStatus.NOT_FOUND, "팀에 속해 있지 않습니다.");
 		}
 
-		TeamResponseDto teamInfo = getTeamDetail(Student.getTeamId(), studentId);
+		TeamResponseDto teamInfo = getTeamDetail(student.getTeamId(), studentId);
 
-		List<Student> teamMembers = studentRepository.findAllByTeamId(Student.getTeamId());
+		List<Student> teamMembers = studentRepository.findAllByTeamId(student.getTeamId());
 
 		int majorCount = (int)teamMembers.stream()
 			.mapToLong(member -> Boolean.TRUE.equals(member.getMajorYn()) ? 1L : 0L)
@@ -535,12 +535,12 @@ public class TeamService {
 	}
 
 	//팀원 정보 변환
-	private TeamMemberResponseDto convertToTeamMemberResponse(Student Student) {
+	private TeamMemberResponseDto convertToTeamMemberResponse(Student student) {
 		try {
-			StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(Student.getStudentId())
+			StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(student.getStudentId())
 				.orElse(null);
 
-			String major = Boolean.TRUE.equals(Student.getMajorYn()) ? "전공" : "비전공";
+			String major = Boolean.TRUE.equals(student.getMajorYn()) ? "전공" : "비전공";
 			String profileImageUrl = (studentInfo != null) ? studentInfo.getProfileImageUrl() : "";
 
 			SubCodeResponseDto position = null;
@@ -552,17 +552,17 @@ public class TeamService {
 			}
 
 			return TeamMemberResponseDto.builder()
-				.studentId(Student.getStudentId())
-				.name(Student.getName())
+				.studentId(student.getStudentId())
+				.name(student.getName())
 				.major(major)
 				.profileImageUrl(profileImageUrl)
 				.position(position)
 				.build();
 		} catch (Exception e) {
 			return TeamMemberResponseDto.builder()
-				.studentId(Student.getStudentId())
-				.name(Student.getName())
-				.major(Boolean.TRUE.equals(Student.getMajorYn()) ? "전공" : "비전공")
+				.studentId(student.getStudentId())
+				.name(student.getName())
+				.major(Boolean.TRUE.equals(student.getMajorYn()) ? "전공" : "비전공")
 				.profileImageUrl("")
 				.position(null)
 				.build();
