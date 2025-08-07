@@ -9,8 +9,6 @@ import { useTeamStore } from "@/stores/teamStore"
 
 import { TeamCardSkeleton } from "./organisms/TeamCardSkeleton"
 
-import "react-loading-skeleton/dist/skeleton.css"
-
 export default function TeamListPage() {
   const { data: teams = [], isLoading: isTeamsLoading, isError } = useTeams()
   const { isDetailModalOpen, selectedTeamId, openDetailModal, closeDetailModal } = useTeamStore()

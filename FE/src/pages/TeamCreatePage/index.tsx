@@ -4,6 +4,8 @@ import { Button, CheckTag, Dropdown, InputBox } from "@/components/atoms"
 import { useCreateTeam, useTeamWarmup } from "@/hooks/useTeam"
 import type { ITeamCreate } from "@/types/team"
 
+import TeamCreateSkeleton from "./organisms/TeamCreateSkeleton"
+
 export default function TeamCreatePage() {
   const createTeamMutation = useCreateTeam()
   const { data: teamWarmup, isLoading: isTeamWarmupLoading } = useTeamWarmup()
@@ -67,13 +69,8 @@ export default function TeamCreatePage() {
 
     createTeamMutation.mutate(createTeamData)
   }
-  // 로딩 상태 처리 추가
   if (isTeamWarmupLoading) {
-    return (
-      <div className="bg-background flex min-h-screen items-center justify-center">
-        <div className="text-text">로딩 중...</div>
-      </div>
-    )
+    return <TeamCreateSkeleton />
   }
 
   // 기존 return 문 앞에 추가
