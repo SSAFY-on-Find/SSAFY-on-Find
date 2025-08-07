@@ -20,6 +20,9 @@ public interface ChatRoomControllerDocs {
 	@Operation(summary = "팀 채팅방에 입장하기", description = "팀에 초대되었을 때, roomId을 이용하여 팀의 채팅방에 들어갈 수 있습니다.")
 	ResponseEntity<Map<String, Object>> enterTeamChatRoom(@Parameter(hidden = true) Long studentId, Long roomId);
 
+	@Operation(summary = "팀에 해당하는 팀 채팅 방 번호 반환하기", description = "팀을 통해 roomId을 알 수 있습니다.")
+	ResponseEntity<Map<String, Object>> getTeamChatRoom(@Parameter(hidden = true) Long studentId, Long teamId);
+
 	@Operation(summary = "1:1 채팅방 생성", description = "다른 사람의 id를 이용하여 1:1 채팅방을 생성할 수 있습니다.")
 	ResponseEntity<Map<String, Object>> createDirectChatRoom(@Parameter(hidden = true) Long studentId,
 		DirectChatRoomRequestDto request);

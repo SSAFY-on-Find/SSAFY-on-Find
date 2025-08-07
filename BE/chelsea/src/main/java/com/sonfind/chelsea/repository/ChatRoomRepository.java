@@ -28,4 +28,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 		"AND cr.id IN (SELECT crm2.chatRoom.id FROM ChatRoomMember crm2 WHERE crm2.student = :student)"
 	)
 	List<ChatRoom> findDirectChatRoomsWithMembersBy(@Param("student") Student student);
+
+	Optional<ChatRoom> findByTeam(Team team);
 }

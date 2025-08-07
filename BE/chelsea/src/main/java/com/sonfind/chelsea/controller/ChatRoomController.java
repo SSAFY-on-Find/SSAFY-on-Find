@@ -25,9 +25,6 @@ import lombok.RequiredArgsConstructor;
 public class ChatRoomController implements ChatRoomControllerDocs {
 	private final ChatRoomService chatRoomService;
 
-	/**
-	 * 팀 채팅방 생성
-	 */
 	@PostMapping("teams/{teamId}")
 	public ResponseEntity<Map<String, Object>> createTeamChatRoom(
 		@SessionAttribute("loginUser") Long studentId,
@@ -40,9 +37,19 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 		return ResponseEntity.ok().body(body);
 	}
 
-	/**
-	 * 팀 채팅에 입장하기
-	 */
+	@GetMapping("/teams/{teamId}")
+	public ResponseEntity<Map<String, Object>> getTeamChatRoom(
+		@SessionAttribute("loginUser") Long studentId,
+		@PathVariable Long teamId
+	) {
+		Long roomId = chatRoomService.findRoomByTeam(teamId);
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", Map.of("roomId", roomId));
+		return ResponseEntity.ok().body(body);
+	}
+
 	@PostMapping("rooms/{roomId}/join")
 	public ResponseEntity<Map<String, Object>> enterTeamChatRoom(
 		@SessionAttribute("loginUser") Long studentId,
@@ -56,9 +63,6 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 		return ResponseEntity.ok().body(body);
 	}
 
-	/**
-	 * 팀 채팅에서 나가기
-	 */
 	@PostMapping("rooms/{roomId}/leave")
 	public ResponseEntity<Map<String, Object>> exitTeamChatRoom(
 		@SessionAttribute("loginUser") Long studentId,
@@ -72,9 +76,6 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 		return ResponseEntity.ok().body(body);
 	}
 
-	/**
-	 * 1:1 채팅방 만들기
-	 */
 	@PostMapping("/individual")
 	public ResponseEntity<Map<String, Object>> createDirectChatRoom(
 		@SessionAttribute("loginUser") Long studentId,
@@ -88,9 +89,6 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 		return ResponseEntity.ok().body(body);
 	}
 
-	/**
-	 * 1:1 참여 중인 채팅방 목록 조회
-	 */
 	@GetMapping("/individual/me")
 	public ResponseEntity<Map<String, Object>> getDirectChatRoom(
 		@SessionAttribute("loginUser") Long studentId

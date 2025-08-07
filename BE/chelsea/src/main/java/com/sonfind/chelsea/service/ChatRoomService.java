@@ -133,4 +133,14 @@ public class ChatRoomService {
 
 		chatRoom.removeChatRoomMember(memberToRemove);
 	}
+
+	public Long findRoomByTeam(Long teamId) {
+		Team team = teamRepository.findById(teamId)
+			.orElseThrow(() -> new IllegalArgumentException("팀을 찾을 수 없습니다."));
+
+		ChatRoom chatRoom = chatRoomRepository.findByTeam(team)
+			.orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+
+		return chatRoom.getId();
+	}
 }
