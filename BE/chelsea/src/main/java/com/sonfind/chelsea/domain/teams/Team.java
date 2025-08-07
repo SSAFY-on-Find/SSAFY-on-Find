@@ -55,13 +55,13 @@ public class Team extends BaseEntity {
 
 	@Column(name = "major_count", nullable = false)
 	@ColumnDefault("0")
-	@Builder.Default
-	private Integer majorCount = 0;
+	// @Builder.Default
+	private int majorCount = 0;
 
 	@Column(name = "non_major_count", nullable = false)
 	@ColumnDefault("0")
-	@Builder.Default
-	private Integer nonMajorCount = 0;
+	// @Builder.Default
+	private int nonMajorCount = 0;
 
 	@OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
 	@Builder.Default

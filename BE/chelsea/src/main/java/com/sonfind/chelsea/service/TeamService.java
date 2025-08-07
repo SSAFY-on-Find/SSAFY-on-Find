@@ -68,7 +68,7 @@ public class TeamService {
 
 		//최초 생성자 전공?비전공?
 		int initialMajorCount = Boolean.TRUE.equals(student.getMajorYn()) ? 1 : 0;
-		int initialNonMajorCount = Boolean.TRUE.equals(student.getMajorYn()) ? 1 : 0;
+		int initialNonMajorCount = Boolean.FALSE.equals(student.getMajorYn()) ? 1 : 0;
 
 		//팀 명 없이 일단 저장
 		Team noTeamName = Team.builder()
