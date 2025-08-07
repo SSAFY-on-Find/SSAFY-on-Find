@@ -44,13 +44,21 @@ public class StudentInfoService {
 	 * */
 	@Transactional
 	public void createStudentInfo(Long studentId, StudentInfoCreateRequestDto requestDto, MultipartFile profile,
-		MultipartFile portfolio) throws IOException {
+		MultipartFile portfolio) {
 
-		String profileImageUrl = fileService.saveProfileImage(profile);
-		UploadedFile uploadPortfolio = fileService.savePortfolio(portfolio);
-		StudentInfo studentInfo = saveStudentInfo(studentId, requestDto, profileImageUrl, uploadPortfolio);
+		if (studentInfoRepository.existsByStudent_StudentId(studentId)) {
+			throw new IllegalStateException("이미 자기소개서를 작성했습니다.");
+		}
 
-		studentInfoRepository.save(studentInfo);
+		try {
+			String profileImageUrl = fileService.saveProfileImage(profile);
+			UploadedFile uploadPortfolio = fileService.savePortfolio(portfolio);
+			StudentInfo studentInfo = saveStudentInfo(studentId, requestDto, profileImageUrl, uploadPortfolio);
+
+			studentInfoRepository.save(studentInfo);
+		} catch (IOException e) {
+			throw new IllegalStateException("파일 저장 처리 중 오류가 발생했습니다." + e);
+		}
 
 	}
 
@@ -60,10 +68,7 @@ public class StudentInfoService {
 	@Transactional(readOnly = true)
 	public StudentInfoGetResponseDto getStudentInfo(Long studentId) {
 
-		boolean check = studentInfoRepository.existsByStudent_StudentId(studentId);
-
-		//이후에 error 처리
-		if (!check) {
+		if (!studentInfoRepository.existsByStudent_StudentId(studentId)) {
 			return null;
 		}
 
@@ -113,31 +118,34 @@ public class StudentInfoService {
 	 * */
 	@Transactional
 	public void updateStudentInfo(Long studentId, StudentInfoUpdateRequestDto requestDto, MultipartFile profile,
-		MultipartFile portfolio) throws IOException {
+		MultipartFile portfolio) {
 
 		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId)
 			.orElseThrow(() -> new EntityNotFoundException("해당 학생의 자기소개를 찾을 수 없습니다."));
 
-		//새로운 프로필 이미지 입력 시 변경
-		if (profile != null && !profile.isEmpty()) {
-			fileService.deleteProfileImage(studentInfo.getProfileImageUrl());
-			String newProfileImage = fileService.saveProfileImage(profile);
-			studentInfo.updateProfileImage(newProfileImage);
+		try {
+			//새로운 프로필 이미지 입력 시 변경
+			if (profile != null && !profile.isEmpty()) {
+				String newProfileImage = fileService.saveProfileImage(profile);
+				String oldProfileImage = studentInfo.getProfileImageUrl();
+				studentInfo.updateProfileImage(newProfileImage);
+				fileService.deleteProfileImage(oldProfileImage);
+			}
+			//새로운 포트폴리오 입력 시 변경
+			if (portfolio != null && !portfolio.isEmpty()) {
+				UploadedFile newPortfolio = fileService.savePortfolio(portfolio);
+				UploadedFile oldPortfolio = studentInfo.getPortfolio();
+				studentInfo.updatePortfolio(newPortfolio);
+				fileService.deletePortfolioFile(oldPortfolio);
+			}
 
+			List<String> requiredCodes = List.of(requestDto.track(), requestDto.position(), requestDto.goal(),
+				requestDto.mbti());
+			List<SubCode> subCodes = subCodeRepository.findAllBySubCodeIn(requiredCodes);
+			studentInfo.update(requestDto, subCodes);
+		} catch (IOException e) {
+			throw new IllegalStateException("파일 수정 처리 중 오류 발생했습니다.", e);
 		}
-		//새로운 포트폴리오 입력 시 변경
-		if (portfolio != null && !portfolio.isEmpty()) {
-			fileService.deletePortfolioFile(studentInfo.getPortfolio());
-			UploadedFile newPortfolio = fileService.savePortfolio(portfolio);
-			studentInfo.updatePortfolio(newPortfolio);
-		}
-
-		List<String> requiredCodes = List.of(requestDto.track(), requestDto.position(), requestDto.goal(),
-			requestDto.mbti());
-		List<SubCode> subCodes = subCodeRepository.findAllBySubCodeIn(requiredCodes);
-		studentInfo.update(requestDto, subCodes);
-
-		studentInfoRepository.save(studentInfo);
 	}
 
 	/**
@@ -191,6 +199,7 @@ public class StudentInfoService {
 	}
 
 	private SubCode getSubCodeByValue(String subCode) {
+
 		if (subCode == null || subCode.isBlank()) {
 			return null;
 		}
