@@ -4,7 +4,7 @@ interface IFormDropdown {
   title: string
   isNecessary?: boolean
   placeholder: string
-  options: string[]
+  options: { label: string; value: string }[]
   value?: string
   onChange?: (value: string) => void
 }
@@ -16,7 +16,7 @@ function FormDropdown({ title, isNecessary = false, placeholder, options, value,
         {title}
         {isNecessary && <span className="text-error"> *</span>}
       </div>
-      <Dropdown placeholder={placeholder} options={options} />
+      <Dropdown placeholder={placeholder} options={options} value={value} onChange={onChange} />
     </div>
   )
 }

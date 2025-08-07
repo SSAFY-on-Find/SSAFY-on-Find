@@ -29,7 +29,15 @@ function FormInput({
         {title}
         {isNecessary && <span className="text-error"> *</span>}
       </div>
-      <InputBox text={""} size={"s"} placeholder={placeholder} isDisabled={isDisabled} />
+      <InputBox
+        text={text}
+        size={size}
+        placeholder={placeholder}
+        isDisabled={isDisabled}
+        variant={variant}
+        onChange={onChange}
+        onKeyDown={onKeyDown}
+      />
     </div>
   )
 }
