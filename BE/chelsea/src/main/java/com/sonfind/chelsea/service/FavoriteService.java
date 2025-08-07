@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.sonfind.chelsea.domain.Favorite.TeamFavorite;
 import com.sonfind.chelsea.domain.student.Students;
 import com.sonfind.chelsea.domain.teams.Team;
+import com.sonfind.chelsea.dto.Favorite.StudentFavoriteResponseDto;
 import com.sonfind.chelsea.dto.Favorite.TeamFavoriteResponseDto;
 import com.sonfind.chelsea.repository.StudentRepository;
 import com.sonfind.chelsea.repository.TeamFavoriteRepository;
@@ -68,6 +69,17 @@ public class FavoriteService {
 				.isFavorite(true)
 				.build();
 		}
+	}
+
+	//교육생 좋아요
+	public StudentFavoriteResponseDto toggleFavoriteStudent(Long studentId, Long targetStudentId) {
+		//본인 좋아요 안됨
+		if(studentId.equals(targetStudentId)) {
+			throw new IllegalArgumentException("본인 좋아요는 안돼요.");
+		}
+
+		//학생 있음?
+		Student student = studentRepository.
 	}
 
 	//좋아요 상태 확인
