@@ -2,11 +2,11 @@ import { Route, Routes, useLocation } from "react-router-dom"
 import { ToastContainer } from "react-toastify"
 
 import { Header, SideBar } from "@/layout"
+import CreateProfile from "@/pages/CreateProfilePage"
 import Dashboard from "@/pages/DashboardPage"
 import Login from "@/pages/LoginPage"
 import MyProfile from "@/pages/MyProfilePage"
 import MyTeam from "@/pages/MyTeamPage"
-import CreateProfile from "@/pages/ProfileCreatePage"
 import StudentList from "@/pages/StudentListPage"
 import TeamList from "@/pages/TeamListPage"
 import { RoutePolicy } from "@/router"
@@ -25,7 +25,7 @@ function App() {
         {!hideLayout && <Header />}
         <div className={!hideLayout ? "mt-[64px]" : ""}>
           {!hideLayout && <SideBar />}
-          <main className={!hideLayout ? "border-main ml-[230px] border" : ""}>
+          <main className={!hideLayout ? "ml-[230px]" : ""}>
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/login" element={<Login />} />
