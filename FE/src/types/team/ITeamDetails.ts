@@ -6,7 +6,7 @@ import type { ITeamMember } from "./ITeamMember"
 export interface ITeamDetails {
   teamName: string
   teamDescription: string
-  teamTrack: ISubcode
+  track: ISubcode
   majorCount: number
   nonMajorCount: number
   teamCount: number

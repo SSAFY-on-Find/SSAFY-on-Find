@@ -1,7 +1,10 @@
 package com.sonfind.chelsea.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -12,12 +15,14 @@ import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 import com.sonfind.chelsea.domain.studentInfo.UploadedFile;
 import com.sonfind.chelsea.domain.teams.Team;
+import com.sonfind.chelsea.dto.dashboard.RatioResponseDto;
+import com.sonfind.chelsea.dto.dashboard.TrackAggregationResult;
+import com.sonfind.chelsea.dto.dashboard.TrackPositionMajorRatioResponseDto;
 import com.sonfind.chelsea.dto.student.response.StudentResponseDto;
 import com.sonfind.chelsea.dto.studentInfo.request.StudentInfoCreateRequestDto;
 import com.sonfind.chelsea.dto.studentInfo.request.StudentInfoUpdateRequestDto;
 import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoForNotificationResponseDto;
 import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoGetDetailResponseDto;
-import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoGetQueryDto;
 import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoGetSummaryResponseDto;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
@@ -72,47 +77,49 @@ public class StudentInfoService {
 	@Transactional(readOnly = true)
 	public StudentInfoGetDetailResponseDto getDetailStudentInfo(Long studentId) {
 
-		if (!studentInfoRepository.existsByStudent_StudentId(studentId)) {
-			return null;
-		}
+		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId).orElseThrow(null);
+		Student student = studentInfo.getStudent();
+		SubCode positionCode = studentInfo.getPositionCode();
+		SubCode trackCode = studentInfo.getTrackCode();
+		SubCode mbtiCode = studentInfo.getMbtiCode();
+		SubCode goalCode = studentInfo.getGoalCode();
+		Team team = teamRepository.findTeamByTeamId(student.getTeamId()).orElse(null);
+		TeamSimpleResponseDto teamResponse = null;
 
-		StudentInfoGetQueryDto studentInfo = studentInfoRepository.findStudentInfoByStudentId(studentId);
-
-		List<String> techStackCodes = StringListConverter.stringToList(studentInfo.techStackString());
+		//기술 스택처리
+		List<String> techStackCodes = StringListConverter.stringToList(studentInfo.getTechStack());
 		List<SubCodeResponseDto> techStackResponse = subCodeRepository.findAllBySubCodeIn(techStackCodes).stream()
 			.map(sc -> new SubCodeResponseDto(sc.getSubCode(), sc.getSubCodeName()))
 			.collect(Collectors.toList());
+		//강점 처리
+		List<String> strength = StringListConverter.stringToList(studentInfo.getStrength());
 
-		List<String> strength = StringListConverter.stringToList(studentInfo.strengthString());
-
-		StudentResponseDto studentResponse = studentService.createStudentResponse(studentInfo.studentId(),
-			studentInfo.name(),
-			studentInfo.isMajor());
-
-		SubCodeResponseDto positionCode = subCodeService.createSubCodeResponse(studentInfo.positionCode(),
-			studentInfo.positionCodeName());
-		SubCodeResponseDto trackCode = subCodeService.createSubCodeResponse(studentInfo.trackCode(),
-			studentInfo.trackCodeName());
-		SubCodeResponseDto goalCode = subCodeService.createSubCodeResponse(studentInfo.goalCode(),
-			studentInfo.goalCodeName());
-		SubCodeResponseDto mbtiCode = subCodeService.createSubCodeResponse(studentInfo.mbtiCode(),
-			studentInfo.mbtiCodeName());
-
-		TeamSimpleResponseDto teamResponse = teamService.createTeamSimpleResponseDto(studentInfo.teamId(),
-			studentInfo.teamName(), studentInfo.teamTrackCodeName(), studentInfo.majorCount(),
-			studentInfo.nonMajorCount());
+		if (team != null) {
+			teamResponse = TeamSimpleResponseDto.builder()
+				.teamId(team.getTeamId())
+				.name(team.getName())
+				.track(team.getTrack().getSubCodeName())
+				.majorCount(team.getMajorCount())
+				.nonMajorCount(team.getNonMajorCount())
+				.build();
+		}
 
 		return StudentInfoGetDetailResponseDto.builder()
-			.student(studentResponse)
-			.position(positionCode)
-			.track(trackCode)
-			.goal(goalCode)
-			.mbti(mbtiCode)
+			.student(StudentResponseDto.builder().studentId(studentId).name(student.getName())
+				.major(student.getMajorYn() ? "전공" : "비전공").build())
+			.position(SubCodeResponseDto.builder().subcode(positionCode.getSubCode()).subcodeName(
+				positionCode.getSubCodeName()).build())
+			.track(SubCodeResponseDto.builder().subcode(trackCode.getSubCode()).subcodeName(
+				trackCode.getSubCodeName()).build())
+			.goal(SubCodeResponseDto.builder().subcode(goalCode.getSubCode()).subcodeName(
+				goalCode.getSubCodeName()).build())
+			.mbti(SubCodeResponseDto.builder().subcode(mbtiCode.getSubCode()).subcodeName(
+				mbtiCode.getSubCodeName()).build())
 			.techStack(techStackResponse)
 			.strength(strength)
-			.description(studentInfo.description())
-			.profileImageUrl(studentInfo.profileImageUrl())
-			.portfolio(studentInfo.portfolio())
+			.description(studentInfo.getDescription())
+			.profileImageUrl(studentInfo.getProfileImageUrl())
+			.portfolio(studentInfo.getPortfolio())
 			.teamInfo(teamResponse)
 			.build();
 	}
@@ -142,19 +149,12 @@ public class StudentInfoService {
 		}
 
 		return StudentInfoGetSummaryResponseDto.builder()
-			.student(StudentResponseDto.builder()
-				.studentId(studentId)
-				.name(student.getName())
-				.major(student.getMajorYn() ? "전공" : "비전공")
-				.build())
-			.position(SubCodeResponseDto.builder()
-				.subcode(positionCode.getSubCode())
-				.subcodeName(positionCode.getSubCodeName())
-				.build())
-			.track(SubCodeResponseDto.builder()
-				.subcode(trackCode.getSubCode())
-				.subcodeName(trackCode.getSubCodeName())
-				.build())
+			.student(StudentResponseDto.builder().studentId(studentId).name(student.getName())
+				.major(student.getMajorYn() ? "전공" : "비전공").build())
+			.position(SubCodeResponseDto.builder().subcode(positionCode.getSubCode())
+				.subcodeName(positionCode.getSubCodeName()).build())
+			.track(SubCodeResponseDto.builder().subcode(trackCode.getSubCode())
+				.subcodeName(trackCode.getSubCodeName()).build())
 			.team(teamResponse)
 			.build();
 	}
@@ -215,6 +215,50 @@ public class StudentInfoService {
 			.track(getSubCodeByValue(findStuInfo.getTrackCode().getSubCode()).getSubCodeName())
 			.profileImageUrl(findStuInfo.getProfileImageUrl())
 			.build();
+	}
+
+	/**
+	 * 대시보드 용 희망 트랙별 포지션 비율 조회
+	 * */
+	@Transactional(readOnly = true)
+	public List<TrackPositionMajorRatioResponseDto> getTrackPositionRatio() {
+
+		List<Object[]> rawData = studentInfoRepository.getTrackPositionMajorRatio();
+		Map<String, TrackAggregationResult> aggregationMap = new HashMap<>();
+
+		//중간 집계 : 각 트랙별로 전공과 포지션 별로 학생 수 조합
+		for (Object[] row : rawData) {
+			String track = (String)row[0];
+			String position = (String)row[1];
+			String major = (String)row[2];
+			Long longCount = (Long)row[3];
+			int count = longCount.intValue();
+
+			TrackAggregationResult helper = aggregationMap.computeIfAbsent(track, k -> new TrackAggregationResult());
+
+			helper.totalCount += count;
+			helper.majorRecord.merge(major, count, Integer::sum);
+			helper.positionRecord.merge(position, count, Integer::sum);
+		}
+		// 최종 response 만들기
+		List<TrackPositionMajorRatioResponseDto> result = new ArrayList<>();
+		for (Map.Entry<String, TrackAggregationResult> entry : aggregationMap.entrySet()) {
+			String track = entry.getKey();
+			TrackAggregationResult helper = entry.getValue();
+
+			//majorRecord 맵을 List<RatioResponseDto>로 변환
+			List<RatioResponseDto> majorType = helper.majorRecord.entrySet().stream()
+				.map(e -> RatioResponseDto.builder().name(e.getKey()).count(e.getValue()).build()).toList();
+
+			List<RatioResponseDto> positionType = helper.positionRecord.entrySet().stream()
+				.map(e -> RatioResponseDto.builder().name(e.getKey()).count(e.getValue()).build()).toList();
+
+			result.add(TrackPositionMajorRatioResponseDto.builder()
+				.track(track).totalCount(helper.totalCount)
+				.majorType(majorType).positionType(positionType).build());
+		}
+
+		return result;
 	}
 
 	private StudentInfo saveStudentInfo(Long studentId, StudentInfoCreateRequestDto requestDto, String profileImageUrl,

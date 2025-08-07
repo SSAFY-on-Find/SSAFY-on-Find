@@ -1,4 +1,4 @@
-export * from "./IApiResponse"
-export * from "./IRecruitment"
-export * from "./ISubcode"
-export * from "./INotification"
+export type { IApiResponse } from "./IApiResponse"
+export type { INotification } from "./INotification"
+export type { IRecruitment } from "./IRecruitment"
+export type { ISubcode } from "./ISubcode"

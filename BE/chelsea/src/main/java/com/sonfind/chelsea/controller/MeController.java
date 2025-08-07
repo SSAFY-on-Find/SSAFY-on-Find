@@ -95,7 +95,7 @@ public class MeController {
 	@Operation(summary = "본인 간단 자기소개 조회", description = "본인 id에 해당하는 간단 자기소개 조회")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "조회 성공",
-			content = @Content(schema = @Schema(implementation = StudentInfoGetDetailResponseDto.class))),
+			content = @Content(schema = @Schema(implementation = StudentInfoGetSummaryResponseDto.class))),
 		@ApiResponse(responseCode = "404", description = "작성한 자기소개서가 없음",
 			content = @Content)
 	})
