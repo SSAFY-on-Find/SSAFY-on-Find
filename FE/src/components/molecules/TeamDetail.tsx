@@ -34,29 +34,48 @@ function TeamDetail({
         <p className="text-text mt-[30px] mb-[15px] text-sm font-semibold">현재팀원 ({teamCount} / 6)</p>
         <div className="flex">
           <div>
-            <p className="text-text mb-[10px] text-sm font-semibold">전공</p>
-            <div className="flex">
-              {majorMembers.map((ele) => (
-                <div className="flex flex-col items-center px-[10px]">
-                  <UserImg name={ele.name} size={"m"} showTeamBadge={false} />
-                  <p className="mt-2 mb-[5px] text-sm">{ele.name}</p>
-                  {ele.position && <PositionTag positionName={ele.position.subcodeName} />}
+            {majorMembers.length === 0 ? (
+              <></>
+            ) : (
+              <>
+                <p className="text-text mb-[10px] text-sm font-semibold">전공</p>
+                <div className="flex">
+                  {majorMembers.map((ele) => (
+                    <div className="flex flex-col items-center px-[10px]">
+                      <UserImg name={ele.name} size={"m"} showTeamBadge={false} />
+                      <p className="mt-2 mb-[5px] text-sm">{ele.name}</p>
+                      {ele.position && <PositionTag positionName={ele.position.subcodeName} />}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
           </div>
-          <div className="mx-4 w-px bg-gray-300"></div>
+          {majorMembers.length === 0 || nonMajorMembers.length === 0 ? (
+            <></>
+          ) : (
+            <>
+              <div className="mx-4 w-px bg-gray-300"></div>
+            </>
+          )}
+
           <div>
-            <p className="text-text mb-[10px] text-sm font-semibold">비전공</p>
-            <div className="flex">
-              {nonMajorMembers.map((ele) => (
-                <div className="flex flex-col items-center px-[10px]">
-                  <UserImg name={ele.name} size={"m"} showTeamBadge={false} />
-                  <p className="mt-2 mb-[5px] text-sm">{ele.name}</p>
-                  {ele.position && <PositionTag positionName={ele.position.subcodeName} />}
+            {nonMajorMembers.length === 0 ? (
+              <></>
+            ) : (
+              <>
+                <p className="text-text mb-[10px] text-sm font-semibold">비전공</p>
+                <div className="flex">
+                  {nonMajorMembers.map((ele) => (
+                    <div className="flex flex-col items-center px-[10px]">
+                      <UserImg name={ele.name} size={"m"} showTeamBadge={false} />
+                      <p className="mt-2 mb-[5px] text-sm">{ele.name}</p>
+                      {ele.position && <PositionTag positionName={ele.position.subcodeName} />}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
           </div>
         </div>
       </div>
