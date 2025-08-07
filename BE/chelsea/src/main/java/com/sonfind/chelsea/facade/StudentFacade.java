@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.dto.student.response.StudentResponseDto;
 import com.sonfind.chelsea.dto.student.response.StudentUnionForNotificationResponseDto;
-import com.sonfind.chelsea.dto.studentInfo.StudentInfoForNotificationResponseDto;
+import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoForNotificationResponseDto;
 import com.sonfind.chelsea.service.StudentInfoService;
 import com.sonfind.chelsea.service.StudentService;
 

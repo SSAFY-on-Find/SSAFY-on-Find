@@ -11,17 +11,20 @@ import org.springframework.web.multipart.MultipartFile;
 import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 import com.sonfind.chelsea.domain.studentInfo.UploadedFile;
+import com.sonfind.chelsea.domain.teams.Team;
 import com.sonfind.chelsea.dto.student.response.StudentResponseDto;
-import com.sonfind.chelsea.dto.studentInfo.StudentInfoCreateRequestDto;
-import com.sonfind.chelsea.dto.studentInfo.StudentInfoForNotificationResponseDto;
-import com.sonfind.chelsea.dto.studentInfo.StudentInfoGetQueryDto;
-import com.sonfind.chelsea.dto.studentInfo.StudentInfoGetResponseDto;
-import com.sonfind.chelsea.dto.studentInfo.StudentInfoUpdateRequestDto;
+import com.sonfind.chelsea.dto.studentInfo.request.StudentInfoCreateRequestDto;
+import com.sonfind.chelsea.dto.studentInfo.request.StudentInfoUpdateRequestDto;
+import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoForNotificationResponseDto;
+import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoGetDetailResponseDto;
+import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoGetQueryDto;
+import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoGetSummaryResponseDto;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
 import com.sonfind.chelsea.global.domain.SubCode;
 import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
+import com.sonfind.chelsea.repository.TeamRepository;
 import com.sonfind.chelsea.util.StringListConverter;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -33,6 +36,7 @@ public class StudentInfoService {
 
 	private final SubCodeRepository subCodeRepository;
 	private final StudentInfoRepository studentInfoRepository;
+	private final TeamRepository teamRepository;
 
 	private final StudentService studentService;
 	private final SubCodeService subCodeService;
@@ -63,10 +67,10 @@ public class StudentInfoService {
 	}
 
 	/**
-	 * 자기소개 조회 함수
+	 * 자기소개 상세 조회 함수
 	 * */
 	@Transactional(readOnly = true)
-	public StudentInfoGetResponseDto getStudentInfo(Long studentId) {
+	public StudentInfoGetDetailResponseDto getDetailStudentInfo(Long studentId) {
 
 		if (!studentInfoRepository.existsByStudent_StudentId(studentId)) {
 			return null;
@@ -98,7 +102,7 @@ public class StudentInfoService {
 			studentInfo.teamName(), studentInfo.teamTrackCodeName(), studentInfo.majorCount(),
 			studentInfo.nonMajorCount());
 
-		return StudentInfoGetResponseDto.builder()
+		return StudentInfoGetDetailResponseDto.builder()
 			.student(studentResponse)
 			.position(positionCode)
 			.track(trackCode)
@@ -110,6 +114,48 @@ public class StudentInfoService {
 			.profileImageUrl(studentInfo.profileImageUrl())
 			.portfolio(studentInfo.portfolio())
 			.teamInfo(teamResponse)
+			.build();
+	}
+
+	/**
+	 * 자기소개 간단 조회 함수
+	 * */
+	@Transactional(readOnly = true)
+	public StudentInfoGetSummaryResponseDto getSummaryStudentInfo(Long studentId) {
+
+		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId).orElseThrow(null);
+		Student student = studentInfo.getStudent();
+		SubCode positionCode = studentInfo.getPositionCode();
+		SubCode trackCode = studentInfo.getTrackCode();
+
+		Team team = teamRepository.findTeamByTeamId(student.getTeamId()).orElse(null);
+		TeamSimpleResponseDto teamResponse = null;
+
+		if (team != null) {
+			teamResponse = TeamSimpleResponseDto.builder()
+				.teamId(team.getTeamId())
+				.name(team.getName())
+				.track(team.getTrack().getSubCodeName())
+				.majorCount(team.getMajorCount())
+				.nonMajorCount(team.getNonMajorCount())
+				.build();
+		}
+
+		return StudentInfoGetSummaryResponseDto.builder()
+			.student(StudentResponseDto.builder()
+				.studentId(studentId)
+				.name(student.getName())
+				.major(student.getMajorYn() ? "전공" : "비전공")
+				.build())
+			.position(SubCodeResponseDto.builder()
+				.subcode(positionCode.getSubCode())
+				.subcodeName(positionCode.getSubCodeName())
+				.build())
+			.track(SubCodeResponseDto.builder()
+				.subcode(trackCode.getSubCode())
+				.subcodeName(trackCode.getSubCodeName())
+				.build())
+			.team(teamResponse)
 			.build();
 	}
 

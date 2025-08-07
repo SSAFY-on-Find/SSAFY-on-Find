@@ -15,9 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.sonfind.chelsea.dto.studentInfo.StudentInfoCreateRequestDto;
-import com.sonfind.chelsea.dto.studentInfo.StudentInfoGetResponseDto;
-import com.sonfind.chelsea.dto.studentInfo.StudentInfoUpdateRequestDto;
+import com.sonfind.chelsea.dto.studentInfo.request.StudentInfoCreateRequestDto;
+import com.sonfind.chelsea.dto.studentInfo.request.StudentInfoUpdateRequestDto;
+import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoGetDetailResponseDto;
+import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoGetSummaryResponseDto;
 import com.sonfind.chelsea.dto.subcode.SubCodeMeResponseDto;
 import com.sonfind.chelsea.global.commonSwagger.ApiCreateOperation;
 import com.sonfind.chelsea.global.commonSwagger.ApiGetOperation;
@@ -69,22 +70,45 @@ public class MeController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(body);
 	}
 
-	@Operation(summary = "본인 자기소개 조회", description = "본인 id에 해당하는 자기소개 조회")
+	@Operation(summary = "본인 상세 자기소개 조회", description = "본인 id에 해당하는 자기소개 조회")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "조회 성공",
-			content = @Content(schema = @Schema(implementation = StudentInfoGetResponseDto.class))),
+			content = @Content(schema = @Schema(implementation = StudentInfoGetDetailResponseDto.class))),
 		@ApiResponse(responseCode = "404", description = "작성한 자기소개서가 없음",
 			content = @Content)
 	})
-	@GetMapping
+	@GetMapping("/details")
 	public ResponseEntity<Map<String, Object>> getStudentInfo(
 		@Parameter(hidden = true)
 		@SessionAttribute("loginUser") Long studentId
 	) {
 
-		StudentInfoGetResponseDto studentInfo = studentInfoService.getStudentInfo(studentId);
+		StudentInfoGetDetailResponseDto studentInfo = studentInfoService.getDetailStudentInfo(studentId);
 
 		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", studentInfo);
+
+		return ResponseEntity.ok().body(body);
+	}
+
+	@Operation(summary = "본인 간단 자기소개 조회", description = "본인 id에 해당하는 간단 자기소개 조회")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "조회 성공",
+			content = @Content(schema = @Schema(implementation = StudentInfoGetDetailResponseDto.class))),
+		@ApiResponse(responseCode = "404", description = "작성한 자기소개서가 없음",
+			content = @Content)
+	})
+	@GetMapping("/summary")
+	public ResponseEntity<Map<String, Object>> getStudentSummary(
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId
+	) {
+
+		StudentInfoGetSummaryResponseDto studentInfo = studentInfoService.getSummaryStudentInfo(studentId);
+
+		Map<String, Object> body = new HashMap();
+
 		body.put("status", "SUCCESS");
 		body.put("data", studentInfo);
 
@@ -134,4 +158,5 @@ public class MeController {
 
 		return ResponseEntity.ok().body(body);
 	}
+
 }
