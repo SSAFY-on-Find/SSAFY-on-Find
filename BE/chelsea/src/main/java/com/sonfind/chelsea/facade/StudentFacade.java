@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.sonfind.chelsea.domain.student.Students;
+import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.dto.student.response.StudentResponseDto;
 import com.sonfind.chelsea.dto.student.response.StudentUnionForNotificationResponseDto;
 import com.sonfind.chelsea.dto.studentInfo.StudentInfoForNotificationResponseDto;
@@ -16,16 +16,17 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class StudentFacade {
+
 	private final StudentService studentService;
 	private final StudentInfoService studentInfoService;
 
 	// 학생 ID로 학생 정보를 조회하는 메소드
-	public Students findByStudentId(long studentId) {
+	public Student findByStudentId(long studentId) {
 		return studentService.findByStudentId(studentId);
 	}
 
 	// 팀 ID로 학생 정보 리스트를 조회하는 메소드
-	public List<Students> findAllByTeamId(Long teamId) {
+	public List<Student> findAllByTeamId(Long teamId) {
 		return studentService.findAllByTeamId(teamId);
 	}
 
@@ -50,8 +51,8 @@ public class StudentFacade {
 		if (teamId == null) {
 			return false; // 팀 ID가 없으면 false 반환
 		}
-		List<Students> teamMembers = studentService.findAllByTeamId(teamId);
-		for (Students member : teamMembers) {
+		List<Student> teamMembers = studentService.findAllByTeamId(teamId);
+		for (Student member : teamMembers) {
 			if (member.getStudentId() == StudentId) {
 				return true; // 학생이 팀의 멤버인 경우 true 반환
 			}

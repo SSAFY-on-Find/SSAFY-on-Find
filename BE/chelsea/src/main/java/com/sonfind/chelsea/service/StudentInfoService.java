@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.sonfind.chelsea.domain.student.Students;
+import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 import com.sonfind.chelsea.domain.studentInfo.UploadedFile;
 import com.sonfind.chelsea.dto.student.response.StudentResponseDto;
@@ -166,7 +166,7 @@ public class StudentInfoService {
 	private StudentInfo saveStudentInfo(Long studentId, StudentInfoCreateRequestDto requestDto, String profileImageUrl,
 		UploadedFile portfolio) {
 
-		Students students = studentService.findByStudentId(studentId);
+		Student Student = studentService.findByStudentId(studentId);
 
 		String techStackString = StringListConverter.listToString(requestDto.techStack());
 		String strengthString = StringListConverter.listToString(requestDto.strength());
@@ -177,7 +177,7 @@ public class StudentInfoService {
 		SubCode mbtiCode = getSubCodeByValue(requestDto.mbti());
 
 		return StudentInfo.builder()
-			.student(students)
+			.student(Student)
 			.techStack(techStackString)
 			.strength(strengthString)
 			.description(requestDto.description())

@@ -2,7 +2,7 @@ package com.sonfind.chelsea.domain.Favorite;
 
 import static lombok.AccessLevel.*;
 
-import com.sonfind.chelsea.domain.student.Students;
+import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.global.domain.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -39,10 +39,10 @@ public class StudentFavorite extends BaseEntity {
 
 	@ManyToOne
 	@JoinColumn(name = "student_id")
-	private Students student;
+	private Student student;
 
 	@ManyToOne
 	@JoinColumn(name = "target_student_id")
-	private Students targetStudent;
+	private Student targetStudent;
 
 }

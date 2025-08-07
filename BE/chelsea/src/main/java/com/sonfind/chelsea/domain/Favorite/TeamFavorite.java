@@ -2,7 +2,7 @@ package com.sonfind.chelsea.domain.Favorite;
 
 import static lombok.AccessLevel.*;
 
-import com.sonfind.chelsea.domain.student.Students;
+import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.domain.teams.Team;
 import com.sonfind.chelsea.global.domain.BaseEntity;
 
@@ -41,7 +41,7 @@ public class TeamFavorite extends BaseEntity {
 
 	@ManyToOne
 	@JoinColumn(name = "student_id")
-	private Students student;
+	private Student student;
 
 	@ManyToOne
 	@JoinColumn(name = "team_id")

@@ -1,50 +1,56 @@
+import { Button } from "@/components/atoms"
 import { TeamCard } from "@/components/molecules"
-import { useTeams } from "@/hooks/useTeam"
+import { TeamDetailModal } from "@/components/templates"
+import { useTeamFavoriteToggle } from "@/hooks/useFavorite"
+import { useTeamDetails, useTeams } from "@/hooks/useTeam"
 import { useTeamStore } from "@/stores/teamStore"
 
+import { TeamCardSkeleton } from "./organisms/TeamCardSkeleton"
+
+import "react-loading-skeleton/dist/skeleton.css"
+
 export default function TeamListPage() {
-  const { data: teams = [], isLoading, error, isError } = useTeams()
-  const { favoriteTeams, toggleFavorite, openDetailModal, closeDetailModal } = useTeamStore()
+  const { data: teams = [], isLoading: isTeamsLoading, error, isError } = useTeams()
+  const { isDetailModalOpen, selectedTeamId, openDetailModal, closeDetailModal } = useTeamStore()
+  const {
+    data: selectedTeamData,
+    isLoading: isTeamDetailLoading,
+    error: detailError,
+  } = useTeamDetails(selectedTeamId || 0)
+  const { toggleFavorite, isLoading: teamFavoriteToggleLoading } = useTeamFavoriteToggle()
 
-  if (isLoading) {
-    return <div>로딩중</div>
-  }
-
-  // 에러 상태
   if (isError) {
-    return (
-      <div className="bg-background flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="text-error mb-4">{error?.message || "팀 목록을 불러오는데 실패했습니다."}</div>
-          <button onClick={() => window.location.reload()} className="text-main hover:underline">
-            다시 시도
-          </button>
-        </div>
-      </div>
-    )
+    return <div>다시 시도</div>
   }
 
   return (
     <div className="bg-background min-h-screen">
       <div className="p-6">
-        <h1 className="text-text mb-6 text-2xl font-bold">팀 목록</h1>
-
-        <div className="mb-4">
-          <p className="text-subtext text-sm">총 {teams.length}개의 팀</p>
+        <div className="mb-6 flex items-center gap-5">
+          <h1 className="text-text text-2xl font-bold">팀 목록</h1>
+          <div className="">
+            <Button size={"m"} isIcon={false} text="팀생성" onClick={() => ""} />
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-[10px]">
+          {isTeamsLoading ? (
+            <TeamCardSkeleton />
+          ) : (
+            teams.map((team) => (
+              <TeamCard
+                key={team.teamId}
+                {...team}
+                onClickFavorite={() => toggleFavorite(team.teamId)}
+                onClickCard={() => openDetailModal(team.teamId)}
+                variant="default"
+              />
+            ))
+          )}
         </div>
 
-        {/* 실제 팀 카드들 */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {teams.map((team) => (
-            <TeamCard
-              key={team.teamId}
-              {...team}
-              isFavorite={favoriteTeams.includes(team.teamId)}
-              onClickFavorite={() => toggleFavorite(team.teamId)}
-              onClickCard={() => openDetailModal(team.teamId)}
-            />
-          ))}
-        </div>
+        {isDetailModalOpen && selectedTeamData && (
+          <TeamDetailModal isOpen={isDetailModalOpen} onClose={closeDetailModal} teamData={selectedTeamData} />
+        )}
 
         {teams.length === 0 && (
           <div className="py-12 text-center">

@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.sonfind.chelsea.domain.Favorite.TeamFavorite;
-import com.sonfind.chelsea.domain.student.Students;
+import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.domain.teams.Team;
 import com.sonfind.chelsea.dto.Favorite.StudentFavoriteResponseDto;
 import com.sonfind.chelsea.dto.Favorite.TeamFavoriteResponseDto;
@@ -32,7 +32,7 @@ public class FavoriteService {
 	//팀 좋아요(추가/제거)
 	public TeamFavoriteResponseDto toggleFavoriteTeam(Long studentId, Long teamId) {
 		//학생 있냐
-		Students student = studentRepository.findByStudentId(studentId)
+		Student student = studentRepository.findByStudentId(studentId)
 			.orElseThrow(() -> new IllegalArgumentException("학생 없음"));
 
 		//팀 있냐

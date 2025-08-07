@@ -7,15 +7,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.sonfind.chelsea.domain.student.Students;
+import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.dto.student.response.StudentListQueryDto;
 
 @Repository
-public interface StudentRepository extends JpaRepository<Students, Long> {
+public interface StudentRepository extends JpaRepository<Student, Long> {
 
-	Optional<Students> findByStudentId(Long studentId);
+	Optional<Student> findByStudentId(Long studentId);
 
-	List<Students> findAllByTeamId(Long teamId);
+	List<Student> findAllByTeamId(Long teamId);
 
 	@Query("SELECT new com.sonfind.chelsea.dto.student.response.StudentListQueryDto(" +
 		"s.studentId, s.name, s.majorYn, " +
@@ -32,6 +32,6 @@ public interface StudentRepository extends JpaRepository<Students, Long> {
 		"LEFT JOIN si.goalCode goal")
 	List<StudentListQueryDto> findStudentList();
 
-	List<Students> findAllByTeamIdIn(List<Long> teamIds);
+	List<Student> findAllByTeamIdIn(List<Long> teamIds);
 
 }
