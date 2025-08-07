@@ -3,7 +3,7 @@ package com.sonfind.chelsea.domain.chat;
 import static jakarta.persistence.FetchType.*;
 import static lombok.AccessLevel.*;
 
-import com.sonfind.chelsea.domain.student.Students;
+import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.global.domain.BaseEntity;
 
 import jakarta.persistence.Entity;
@@ -33,9 +33,9 @@ public class ChatRoomMember extends BaseEntity {
 
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "student_id", nullable = false)
-	private Students student;
+	private Student student;
 
-	public ChatRoomMember(ChatRoom chatRoom, Students student) {
+	public ChatRoomMember(ChatRoom chatRoom, Student student) {
 		this.chatRoom = chatRoom;
 		this.student = student;
 	}

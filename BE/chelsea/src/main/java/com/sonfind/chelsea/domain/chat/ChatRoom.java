@@ -48,7 +48,7 @@ public class ChatRoom extends BaseEntity {
 			.build();
 	}
 
-	public static ChatRoom createOneToOneChatRoom() {
+	public static ChatRoom createDirectChatRoom() {
 		return ChatRoom.builder()
 			.type(ONE_TO_ONE)
 			.build();
