@@ -17,7 +17,7 @@ public class ChatService {
 	private final ChatMessageRepository chatMessageRepository;
 
 	@Transactional
-	public void saveTeamChatMessage(Long studentId, ChatMessageRequestDto request) {
+	public void saveChatMessage(Long studentId, ChatMessageRequestDto request) {
 		ChatMessage chatMessage = ChatMessage.builder()
 			.writerId(studentId)
 			.roomId(request.roomId())
@@ -26,10 +26,5 @@ public class ChatService {
 			.build();
 
 		chatMessageRepository.save(chatMessage);
-	}
-
-	@Transactional
-	public void saveDirectChatMessage(Long studentId, ChatMessageRequestDto chat) {
-
 	}
 }

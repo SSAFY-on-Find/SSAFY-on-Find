@@ -21,7 +21,7 @@ public class ChatController {
 	 */
 	@MessageMapping("/team/message")
 	public void send(ChatMessageRequestDto request) {
-		chatService.saveTeamChatMessage(request.studentId(), request);
+		chatService.saveChatMessage(request.studentId(), request);
 		simpMessageSendingOperations.convertAndSend("/topic/chatroom/" + request.roomId(), request.content());
 	}
 
@@ -31,7 +31,7 @@ public class ChatController {
 	 */
 	@MessageMapping("/direct/message")
 	public void sendDirectMessage(ChatMessageRequestDto request) {
-		chatService.saveDirectChatMessage(request.studentId(), request);
+		chatService.saveChatMessage(request.studentId(), request);
 		simpMessageSendingOperations.convertAndSend("/queue/chatroom/" + request.roomId(), request);
 	}
 }
