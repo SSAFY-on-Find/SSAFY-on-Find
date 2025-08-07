@@ -1,10 +1,12 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import ReactMarkdown from "react-markdown"
+import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import { CirclePlus, Eye, Search, X } from "lucide-react"
 
 import { Button, CheckTag, InputBox, Segmented, UserImg } from "@/components/atoms"
 import { useProfileCodes } from "@/hooks/useProfile"
+import { useCreateProfile } from "@/hooks/useProfile"
 import { useProfileStore } from "@/stores/profileStroe"
 import { useUserStore } from "@/stores/userStore"
 
@@ -20,35 +22,65 @@ const mbtiPairs = [
 ]
 
 export default function ProfileCreatePage() {
-  const { data: codes, isLoading, error } = useProfileCodes()
+  const { data: codes, isLoading: isCodesLoading, error: codesError } = useProfileCodes()
   const { user } = useUserStore()
-  const { position, track, techStack, goal, profileImageUrl, strength, mbti, portfolio, description, setCodes } =
-    useProfileStore()
+  const { position, track, techStack, goal, strength, portfolio, description, setCodes } = useProfileStore()
   const [activeMarkdownTab, setActiveMarkdownTab] = useState<"left" | "right">("left")
   const [strengthInput, setStrengthInput] = useState("")
   const [isEditingMbti, setIsEditingMbti] = useState(false)
   const [mbtiSelected, setMbtiSelected] = useState(["I", "N", "T", "P"])
   const profileImgInputRef = useRef<HTMLInputElement>(null)
   const portfolioInputRef = useRef<HTMLInputElement>(null)
+  const { mutate: createProfile, isSuccess, error: createError } = useCreateProfile()
+  const profileStore = useProfileStore()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("자기소개가 성공적으로 저장되었습니다!")
+      navigate("/")
+    }
+  }, [isSuccess, navigate])
+
+  useEffect(() => {
+    if (createError) {
+      toast.error("자기소개 저장 중 오류가 발생했습니다.")
+    }
+  }, [createError])
 
   const handleProfileImgChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      const url = URL.createObjectURL(file)
-      setCodes({ profileImageUrl: url })
+      setCodes({ profileImageFile: file })
     }
   }
 
   const handlePortfolioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setCodes({
-        portfolio: {
-          savedFileName: "",
-          originalFileName: file.name,
-        },
-      })
+      setCodes({ portfolioFile: file })
     }
+  }
+
+  const handleSave = () => {
+    if (!position) {
+      toast.warn("희망 포지션을 선택해주세요.")
+      return
+    }
+    if (!track) {
+      toast.warn("희망 트랙을 선택해주세요.")
+      return
+    }
+    if (techStack.length === 0) {
+      toast.warn("기술 스택을 선택해주세요.")
+      return
+    }
+    if (!goal) {
+      toast.warn("목표를 선택해주세요.")
+      return
+    }
+
+    createProfile(profileStore)
   }
 
   function setMbtiToStore(mbtiArr: string[]) {
@@ -70,8 +102,8 @@ export default function ProfileCreatePage() {
     setCodes({ mbti: null })
   }
 
-  if (isLoading) return <div>로딩 중...</div>
-  if (error || !codes) return <div>코드 리스트를 불러올 수 없습니다.</div>
+  if (isCodesLoading) return <div>로딩 중...</div>
+  if (codesError || !codes) return <div>코드 리스트를 불러올 수 없습니다.</div>
 
   return (
     <div className="bg-background flex min-h-screen flex-col gap-7 px-15 py-10">
@@ -280,7 +312,14 @@ export default function ProfileCreatePage() {
           </div>
         )}
       </FormCard>
-      <Button text="저장하기" size={"m"} isIcon={false} onClick={() => {}} />
+      <Button
+        text="저장하기"
+        size={"m"}
+        isIcon={false}
+        onClick={() => {
+          handleSave()
+        }}
+      />
     </div>
   )
 }

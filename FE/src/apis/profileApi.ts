@@ -1,3 +1,4 @@
+import type { IProfileState } from "@/stores/profileStroe"
 import type { IApiResponse } from "@/types/common"
 import type { IProfileCode } from "@/types/profile"
 
@@ -7,6 +8,32 @@ const PROFILE_BASE_URL = "/me"
 export const profileApi = {
   getCode: async (): Promise<IApiResponse<IProfileCode>> => {
     const response = await api.get<IApiResponse<IProfileCode>>(PROFILE_BASE_URL + "/warm-up")
+    return response.data
+  },
+  createProfile: async (profile: IProfileState): Promise<IApiResponse<void>> => {
+    const formData = new FormData()
+
+    const data = {
+      position: profile.position?.subcodeName ?? "",
+      track: profile.track?.subcodeName ?? "",
+      techStack: profile.techStack.map((item) => item.subcodeName),
+      goal: profile.goal?.subcodeName ?? "",
+      mbti: profile.mbti?.subcodeName ?? "",
+      strength: profile.strength,
+      description: profile.description ?? "",
+    }
+
+    formData.append("requestDto", new Blob([JSON.stringify(data)], { type: "application/json" }))
+
+    if (profile.profileImageFile) {
+      formData.append("profileImage", profile.profileImageFile)
+    }
+    if (profile.portfolioFile) {
+      formData.append("portfolio", profile.portfolioFile, profile.portfolioFile.name)
+      formData.append("filename", profile.portfolioFile.name)
+    }
+
+    const response = await api.post<IApiResponse<void>>(PROFILE_BASE_URL, formData)
     return response.data
   },
 }

@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 
 import { profileApi } from "@/apis/profileApi"
+import type { IProfileState } from "@/stores/profileStroe"
 
 export const useProfileCodes = () => {
   return useQuery({
@@ -11,5 +12,24 @@ export const useProfileCodes = () => {
       return res.data
     },
     gcTime: 10 * 60 * 1000,
+  })
+}
+
+export const useCreateProfile = () => {
+  return useMutation({
+    mutationFn: async (profile: IProfileState) => {
+      try {
+        const res = await profileApi.createProfile(profile)
+        if (res.status !== "SUCCESS") {
+          throw new Error("자기소개 등록 실패")
+        }
+        return res
+      } catch (error) {
+        if (error instanceof Error) {
+          throw new Error(error.message)
+        }
+        throw new Error("자기소개 등록 중 오류가 발생했습니다.")
+      }
+    },
   })
 }
