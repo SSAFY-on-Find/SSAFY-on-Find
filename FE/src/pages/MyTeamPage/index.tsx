@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { createTeamChatRoom, getTeamChatRoomId } from "@/apis/chatRoom"
 import { teamApi } from "@/apis/teamApi"
 import { useUserStore } from "@/stores/userStore"
 import type { IMyTeam, ITeamMember } from "@/types/team"
 
-import TeamChat from "./organisms/teamChat"
+import TeamChat from "./organisms/TeamChat"
 
 export default function MyTeamPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient() // queryClient를 가져옵니다.
   const user = useUserStore((state) => state.user)
 
   const [chatRoomId, setChatRoomId] = useState<number | null>(null)
@@ -18,18 +19,12 @@ export default function MyTeamPage() {
   const teamId = user?.teamId
   const studentId = user?.studentId
 
-  // --- myTeamApi를 호출하여 팀 정보 전체를 가져오도록 수정 ---
-  const {
-    data: myTeamData, // select 옵션을 제거하고 원본 데이터를 받습니다.
-    isLoading: isMyTeamLoading,
-  } = useQuery<IMyTeam>({
-    // 반환 타입에서 TeamMember[]를 제거합니다.
-    queryKey: ["myTeam"], // /me 엔드포인트는 teamId가 필요 없으므로 제거합니다.
+  const { data: myTeamData, isLoading: isMyTeamLoading } = useQuery<IMyTeam>({
+    queryKey: ["myTeam"],
     queryFn: () => teamApi.getMyTeam().then((res) => res.data),
     enabled: !!teamId,
   })
 
-  // 가져온 myTeamData에서 채팅에 필요한 팀원 정보만 파싱합니다.
   const teamMembers: ITeamMember[] | undefined = myTeamData?.teamInfo.members?.map((user) => ({
     studentId: user.studentId,
     name: user.name,
@@ -45,6 +40,12 @@ export default function MyTeamPage() {
     data: createdRoomId,
   } = useMutation({
     mutationFn: (id: number) => createTeamChatRoom(id),
+    // --- 여기가 수정된 부분입니다 ---
+    onSuccess: () => {
+      // 채팅방 생성 성공 시, 채팅방 조회 쿼리를 무효화하여 다시 불러오게 합니다.
+      // 이렇게 하면 isError 상태가 초기화되고, isSuccess가 true가 됩니다.
+      queryClient.invalidateQueries({ queryKey: ["teamChatRoomId", teamId] })
+    },
     onError: () => {
       console.error("채팅방 생성에 실패했습니다.")
     },
@@ -76,18 +77,19 @@ export default function MyTeamPage() {
   }, [isSuccess, fetchedRoomId])
 
   useEffect(() => {
-    if (isError && teamId) {
+    // 채팅방 생성을 시도하는 로직은 그대로 둡니다.
+    if (isError && teamId && !isCreating) {
       createRoom(teamId)
     }
-  }, [isError, teamId, createRoom])
+  }, [isError, teamId, createRoom, isCreating])
 
   useEffect(() => {
+    // 이 로직은 생성 후 ID를 더 빨리 반영하기 위해 유지할 수 있습니다.
     if (createdRoomId) {
       setChatRoomId(createdRoomId)
     }
   }, [createdRoomId])
 
-  // 채팅방 정보와 팀원 정보를 모두 로딩 중일 때 로딩 상태로 간주
   const isLoading = isFetchingRoomId || isCreating || isMyTeamLoading
 
   return (
@@ -101,19 +103,15 @@ export default function MyTeamPage() {
         <div className="border-line flex h-[600px] w-[430px] flex-col rounded-lg border-1 bg-white">
           {isLoading && <div className="flex h-full items-center justify-center">채팅 정보를 불러오는 중...</div>}
 
-          {isError && !isCreating && (
+          {/* 채팅방이 최종적으로 없을 때만 에러 메시지를 표시하도록 수정 */}
+          {isError && !isCreating && !chatRoomId && (
             <div className="flex h-full items-center justify-center text-red-500">
               채팅방 정보를 가져오는데 실패했습니다.
             </div>
           )}
 
-          {/* 모든 정보(채팅방ID, 유저ID, 팀원목록)가 준비되었을 때 TeamChat 렌더링 */}
           {chatRoomId && studentId && teamMembers && (
-            <TeamChat
-              roomId={chatRoomId}
-              studentId={studentId}
-              members={teamMembers} // 파싱된 팀원 목록을 prop으로 전달
-            />
+            <TeamChat roomId={chatRoomId} studentId={studentId} members={teamMembers} />
           )}
         </div>
       </div>
