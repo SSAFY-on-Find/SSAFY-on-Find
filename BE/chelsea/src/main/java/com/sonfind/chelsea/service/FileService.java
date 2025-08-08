@@ -64,6 +64,7 @@ public class FileService {
 		Path filePath = uploadPath.resolve(savedFileName);
 		file.transferTo(filePath.toFile());
 
+		//return savedFileName;
 		return serviceUrl + "/uploads/" + fileType.getDirectoryName() + "/" + savedFileName;
 	}
 
@@ -134,5 +135,19 @@ public class FileService {
 			return false;
 		}
 	}
-	
+
+	// private String getFileUrl(String savedFileName, FileType fileType) {
+	// 	//String serviceUrl = "https://i13a704.p.ssafy.io";
+	// 	//String serviceUrl = "http://localhost:8080/api/v1";
+	//
+	// 	String fullUrl = "";
+	//
+	// 	if (savedFileName != null || !savedFileName.isEmpty()) {
+	// 		fullUrl = serviceUrl + "/uploads/" + fileType.getDirectoryName() + "/" + savedFileName;
+	//
+	// 	}
+	//
+	// 	return fullUrl;
+	// }
+
 }

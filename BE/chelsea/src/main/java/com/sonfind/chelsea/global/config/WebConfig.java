@@ -16,8 +16,8 @@ public class WebConfig implements WebMvcConfigurer {
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		//web에서 접근할 URL 경로 설정
-		String profileWebPath = "/uploads/profiles/**";
-		String portfolioWebPath = "/uploads/portfolios/**";
+		String profileWebPath = "/api/v1/uploads/profiles/**";
+		String portfolioWebPath = "/api/v1/uploads/portfolios/**";
 
 		String profileResourcePath = "file:///" + uploadDirPath + "/" + FileType.PROFILE.getDirectoryName() + "/";
 		String portfolioResourcePath = "file:///" + uploadDirPath + "/" + FileType.PORTFOLIO.getDirectoryName() + "/";
