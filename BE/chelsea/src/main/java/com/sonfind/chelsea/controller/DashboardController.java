@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/dashboard")
+@RequestMapping("/api/v1/dashboard")
 @Tag(name = "dashboard", description = "대시보드와 관련된 API")
 public class DashboardController {
 

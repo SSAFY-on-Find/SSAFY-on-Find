@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/students")
+@RequestMapping("/api/v1/students")
 @Tag(name = "students", description = "교육생과 관련된 API")
 public class StudentController {
 
