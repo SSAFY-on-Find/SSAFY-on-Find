@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { UserPlus } from "lucide-react"
 
 import { createTeamChatRoom, getTeamChatRoomId } from "@/apis/chatRoom"
 import { teamApi } from "@/apis/teamApi"
+import { TeamDetail } from "@/components/molecules"
+import { useTeamNotifications } from "@/hooks/useTeamNotifications"
 import { useUserStore } from "@/stores/userStore"
 import type { IMyTeam, ITeamMember } from "@/types/team"
 
+import ApplicantCard from "./organisms/ApplicantCard"
 import TeamChat from "./organisms/TeamChat"
 
 export default function MyTeamPage() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient() // queryClient를 가져옵니다.
+  const queryClient = useQueryClient()
   const user = useUserStore((state) => state.user)
 
   const [chatRoomId, setChatRoomId] = useState<number | null>(null)
@@ -19,6 +23,7 @@ export default function MyTeamPage() {
   const teamId = user?.teamId
   const studentId = user?.studentId
 
+  // --- 기존 팀 정보 및 채팅방 관련 로직 (수정 없음) ---
   const { data: myTeamData, isLoading: isMyTeamLoading } = useQuery<IMyTeam>({
     queryKey: ["myTeam"],
     queryFn: () => teamApi.getMyTeam().then((res) => res.data),
@@ -33,25 +38,14 @@ export default function MyTeamPage() {
     position: user.position,
   }))
 
-  // 채팅방 생성을 위한 useMutation
-  const {
-    mutate: createRoom,
-    isPending: isCreating,
-    data: createdRoomId,
-  } = useMutation({
+  const { mutate: createRoom, isPending: isCreating } = useMutation({
     mutationFn: (id: number) => createTeamChatRoom(id),
-    // --- 여기가 수정된 부분입니다 ---
     onSuccess: () => {
-      // 채팅방 생성 성공 시, 채팅방 조회 쿼리를 무효화하여 다시 불러오게 합니다.
-      // 이렇게 하면 isError 상태가 초기화되고, isSuccess가 true가 됩니다.
       queryClient.invalidateQueries({ queryKey: ["teamChatRoomId", teamId] })
     },
-    onError: () => {
-      console.error("채팅방 생성에 실패했습니다.")
-    },
+    onError: () => console.error("채팅방 생성에 실패했습니다."),
   })
 
-  // 채팅방 조회를 위한 useQuery
   const {
     data: fetchedRoomId,
     isFetching: isFetchingRoomId,
@@ -64,52 +58,73 @@ export default function MyTeamPage() {
     retry: false,
   })
 
+  // --- 👇 합류 신청 조회 로직 ---
+  const {
+    notifications: applicants,
+    isLoading: isLoadingApplicants,
+    error: applicantsError,
+  } = useTeamNotifications(teamId!, "receive")
+
+  // --- 기존 useEffect 로직 (수정 없음) ---
   useEffect(() => {
-    if (user && user.teamId === null) {
-      navigate("/create-team")
-    }
+    if (user && user.teamId === null) navigate("/create-team")
   }, [user, navigate])
 
   useEffect(() => {
-    if (isSuccess && fetchedRoomId) {
-      setChatRoomId(fetchedRoomId)
-    }
+    if (isSuccess && fetchedRoomId) setChatRoomId(fetchedRoomId)
   }, [isSuccess, fetchedRoomId])
 
   useEffect(() => {
-    // 채팅방 생성을 시도하는 로직은 그대로 둡니다.
-    if (isError && teamId && !isCreating) {
-      createRoom(teamId)
-    }
+    if (isError && teamId && !isCreating) createRoom(teamId)
   }, [isError, teamId, createRoom, isCreating])
-
-  useEffect(() => {
-    // 이 로직은 생성 후 ID를 더 빨리 반영하기 위해 유지할 수 있습니다.
-    if (createdRoomId) {
-      setChatRoomId(createdRoomId)
-    }
-  }, [createdRoomId])
 
   const isLoading = isFetchingRoomId || isCreating || isMyTeamLoading
 
   return (
     <div className="bg-background min-h-screen p-8">
-      <div className="flex justify-between border-1 p-1">
-        <div className="w-[650px] border-1 p-1">
-          <div className="flex border-1 p-1">내팀정보</div>
-          <div className="flex border-1 p-1">대기목록</div>
+      <div className="flex justify-between">
+        <div className="flex w-[650px] flex-col gap-8">
+          <div className="border-line flex rounded-xl border-1 bg-white pb-6">
+            {myTeamData?.teamInfo && <TeamDetail {...myTeamData?.teamInfo} varient="myteam" />}
+          </div>
+          {/* --- 👇 대기 목록 UI 렌더링 --- */}
+          <div className="border-line flex flex-col gap-4 rounded-xl border-1 bg-white p-6">
+            <div>
+              <div className="flex items-center gap-[15px]">
+                <h3 className="text-text text-2xl font-bold">대기목록</h3>
+                <UserPlus />
+              </div>
+              <p className="text-subtext text-sm text-pretty">
+                팀 합류를 신청한 교육생들입니다. 신중하게 검토 후 결정해주세요.
+              </p>
+            </div>
+
+            {/* 로딩 및 에러 상태 처리 */}
+            {isLoadingApplicants && <div>대기 목록을 불러오는 중...</div>}
+            {applicantsError && <div className="text-red-500">대기 목록을 불러오는 데 실패했습니다.</div>}
+
+            {!isLoadingApplicants && !applicantsError && (
+              <>
+                {applicants && applicants.length > 0 ? (
+                  // ✅ applicants 배열에 내용이 있을 경우, 목록을 렌더링합니다.
+                  applicants.map((applicant) => <ApplicantCard key={applicant.statusId} applicant={applicant} />)
+                ) : (
+                  // ✅ applicants 배열이 비어있을 경우, 이 문구가 표시됩니다.
+                  <p className="text-center text-gray-500">합류 신청자가 없습니다.</p>
+                )}
+              </>
+            )}
+          </div>
         </div>
 
         <div className="border-line flex h-[600px] w-[430px] flex-col rounded-lg border-1 bg-white">
+          {/* --- 기존 채팅 UI (수정 없음) --- */}
           {isLoading && <div className="flex h-full items-center justify-center">채팅 정보를 불러오는 중...</div>}
-
-          {/* 채팅방이 최종적으로 없을 때만 에러 메시지를 표시하도록 수정 */}
           {isError && !isCreating && !chatRoomId && (
             <div className="flex h-full items-center justify-center text-red-500">
               채팅방 정보를 가져오는데 실패했습니다.
             </div>
           )}
-
           {chatRoomId && studentId && teamMembers && (
             <TeamChat roomId={chatRoomId} studentId={Number(studentId)} members={teamMembers} />
           )}

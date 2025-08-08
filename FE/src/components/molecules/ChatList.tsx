@@ -5,12 +5,13 @@ interface IChatUser {
   major: string
   position: string
   hasTeam: boolean
+  profile?: string
 }
 
-function ChatListItem({ name, major, position, hasTeam }: IChatUser) {
+function ChatListItem({ name, major, position, hasTeam, profile }: IChatUser) {
   return (
     <div className="hover:bg-main/10 flex w-full cursor-pointer items-center justify-start gap-2 rounded-md px-1 py-1">
-      <UserImg name={name} size={"s"} showTeamBadge={true} hasTeam={hasTeam} />
+      <UserImg name={name} size={"s"} showTeamBadge={true} hasTeam={hasTeam} url={profile} />
       <div className="text-sm font-medium">{name}</div>
       <div className="flex items-center justify-center gap-1">
         <MajorTag tagContent={major} />

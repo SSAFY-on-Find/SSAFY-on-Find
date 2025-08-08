@@ -13,7 +13,7 @@ export default function LoginPage() {
   const { mutate: login, isPending, isError, error } = useStudentLogin()
   const { setUser } = useUserStore()
   const handleFreePass = () => {
-    login("1300050", {
+    login("1300001", {
       onSuccess: (user) => {
         setUser(user)
         navigate("/")
