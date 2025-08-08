@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -22,7 +22,24 @@ public class DashBoardQueryService {
 	 * @return TeamProgressDto 객체로 팀빌딩 진행률, 비전공자 수, 전공자 수를 포함합니다.
 	 */
 	public TeamProgressDto computeForTeamProgress() {
-		List<TeamRatioDto> teamRatio = studentService.getTeamRatio();
+		Map<String, TeamRatioDto> teamRatio = studentService.getTeamRatio();
 
+		String nonMajor = "비전공";
+		String major = "전공";
+
+		int totalStudentCount = teamRatio.values().stream()
+				.mapToInt(TeamRatioDto::totalStudentCount)
+				.sum();
+
+		int progressRate = (teamRatio.get(major).teamMemberCount() +
+				teamRatio.get(nonMajor).teamMemberCount()) * 100 / totalStudentCount;
+
+		return TeamProgressDto.builder()
+				.progressRate(progressRate)
+				.totalNonMajorCount(teamRatio.get(nonMajor).totalStudentCount())
+				.teamMemberNonMajorCount(teamRatio.get(nonMajor).teamMemberCount())
+				.totalMajorCount(teamRatio.get(major).totalStudentCount())
+				.teamMemberMajorCount(teamRatio.get(major).teamMemberCount())
+				.build();
 	}
 }
