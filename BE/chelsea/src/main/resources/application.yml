@@ -4,9 +4,16 @@ spring:
 
   profiles:
     active: ${SPRING_PROFILES_ACTIVE}
+
   servlet:
     multipart:
       enabled: true
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+        format_sql: true
       max-file-size: 50MB
       max-request-size: 55MB
 

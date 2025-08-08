@@ -27,15 +27,18 @@ import com.sonfind.chelsea.dto.teams.TeamRuleResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
 import com.sonfind.chelsea.dto.teams.UpdateTeamRequestDto;
 import com.sonfind.chelsea.global.domain.SubCode;
+import com.sonfind.chelsea.repository.StudentFavoriteRepository;
 import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
 import com.sonfind.chelsea.repository.TeamRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TeamService {
 
 	private final TeamRepository teamRepository;
@@ -46,6 +49,7 @@ public class TeamService {
 	private final SubCodeService subCodeService;
 	private final StudentService studentService;
 	private final FavoriteService favoriteService;
+	private final StudentFavoriteRepository studentFavoriteRepository;
 
 	//팀 생성
 	@Transactional
@@ -92,8 +96,9 @@ public class TeamService {
 		}
 
 		//학생 teamId 저장
-		student.setTeamId(team.getTeamId());
-		studentRepository.save(student);
+		// student.setTeamId(team.getTeamId());
+		// studentRepository.save(student);
+		addStudentToTeam(team.getTeamId(), studentId);
 
 		return team.getTeamId();
 	}
@@ -155,6 +160,162 @@ public class TeamService {
 		}
 	}
 
+	//팀에 학생 추가
+	@Transactional
+	public void addStudentToTeam(Long teamId, Long studentId) {
+		//들어가고 싶은 팀
+		Team targetTeam = teamRepository.findTeamByTeamId(teamId)
+			.orElseThrow(() -> new ResponseStatusException(
+				HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다."));
+		if (targetTeam.isDeleted()) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST, "삭제된 팀입니다.");
+		}
+
+		//학생
+		Student student = studentService.findByStudentId(studentId);
+		Long currentTeamId = student.getTeamId();
+
+		//들어가고 싶은 팀 정원
+		List<Student> targetTeamMembers = studentRepository.findAllByTeamId(teamId);
+
+		//이미 해당 팀이라면
+		if (teamId.equals(currentTeamId)) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST, "이미 해당 팀의 교육생 입니다.");
+		}
+
+		//정원 초과 확인
+		if (targetTeamMembers.size() >= 6) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST, "팀 정원이 초과됐습니다.");
+		}
+
+		//기존 팀이 있다면 삭제
+		if (currentTeamId != null) {
+			removeStudentFromTeam(currentTeamId, studentId);
+		}
+
+		//새 팀에 추가
+		student.setTeamId(teamId);
+		studentRepository.save(student);
+
+		//전공/비전공 업데이트
+		//팀 전공/비전공 수정
+		if (Boolean.TRUE.equals(student.getMajorYn())) {
+			targetTeam.decrementMajorCount();
+		} else {
+			targetTeam.decrementNonMajorCount();
+		}
+		teamRepository.save(targetTeam);
+
+		if (currentTeamId != null) {
+			log.info("교육생 {}이 팀 {}에서 팀 {}으로 이동했습니다.", studentId, currentTeamId, teamId);
+		} else {
+			log.info("교육생 {}이 팀 {}에 합류했습니다.", studentId, teamId);
+		}
+	}
+
+	//두 팀 합치기
+	//sourceTeamId 뿌셔질 팀
+	//targetTeamId 유지되는 팀
+	@Transactional
+	public void mergeTeams(Long sourceTeamId, Long targetTeamId) {
+		//두 팀의 존재에 관하여
+		Team sourceTeam = teamRepository.findTeamByTeamId(sourceTeamId)
+			.orElseThrow(() -> new ResponseStatusException(
+				HttpStatus.NOT_FOUND, "합쳐질 팀이 존재하지 않습니다."));
+
+		Team targetTeam = teamRepository.findTeamByTeamId(targetTeamId)
+			.orElseThrow(() -> new ResponseStatusException(
+				HttpStatus.NOT_FOUND, "합칠 팀이 존재하지 않습니다."));
+
+		if (sourceTeam.isDeleted() || targetTeam.isDeleted()) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST, "삭제된 팀입니다.");
+		}
+		//같은 팀인지 확인
+		if (sourceTeamId.equals(targetTeamId)) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST, "같은 팀끼리는 합칠 수 없습니다.");
+		}
+
+		//각 팀의 학생 조회
+		//뿌셔지는 팀 학생
+		List<Student> sourceMembers = studentRepository.findAllByTeamId(sourceTeamId);
+		//유지되는 팀 학생
+		List<Student> targetMembers = studentRepository.findAllByTeamId(targetTeamId);
+
+		//합칠 때 팀 규칙 정원 확인
+		if (sourceMembers.size() + targetMembers.size() > 6) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST,
+				String.format("팀 규칙 정원이 초과됨니다. 현재 %d명, 최대 인원은 6명입니다.",
+					targetMembers.size() + sourceMembers.size()));
+		}
+
+		//소스 팀 멤버를 타켓 팀으로 이동
+		for (Student member : sourceMembers) {
+			member.setTeamId(targetTeamId);
+			studentRepository.save(member);
+
+			//전공/비전공 업데이트
+			if (Boolean.TRUE.equals(member.getMajorYn())) {
+				targetTeam.incrementMajorCount();
+			} else {
+				targetTeam.incrementNonMajorCount();
+			}
+		}
+
+		//소스 팀 삭제
+		sourceTeam.softDelete();
+		teamRepository.save(sourceTeam);
+		teamRepository.save(targetTeam);
+
+		log.info("팀 {}과 팀 {}이 합쳐졌습니다.", sourceTeamId, targetTeamId);
+	}
+
+	//팀에서 교육생 제거
+	@Transactional
+	public void removeStudentFromTeam(Long teamId, Long studentId, boolean skilValidation) {
+		Team team = teamRepository.findTeamByTeamId(teamId)
+			.orElseThrow(() -> new ResponseStatusException(
+				HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다."));
+
+		Student student = studentService.findByStudentId(studentId);
+
+		if (!skilValidation && !teamId.equals(student.getTeamId())) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST, "해당 팀에 속하지 않은 교육생입니다.");
+		}
+
+		//팀에서 학생 제거
+		student.setTeamId(null);
+		studentRepository.save(student);
+
+		//팀 전공/비전공 수정
+		if (Boolean.TRUE.equals(student.getMajorYn())) {
+			team.decrementMajorCount();
+		} else {
+			team.decrementNonMajorCount();
+		}
+
+		List<Student> remainingMembers = studentRepository.findAllByTeamId(teamId);
+
+		if (remainingMembers.isEmpty()) {
+			team.softDelete();
+			log.info("팀 {}이 빈 팀이 되어 삭제되었습니다.", teamId);
+		}
+
+		teamRepository.save(team);
+		log.info("교육생 {}이 팀 {}에서 제거되었습니다.", studentId, teamId);
+	}
+
+	@Transactional
+	public void removeStudentFromTeam(Long teamId, Long studentId) {
+		removeStudentFromTeam(teamId, studentId, false);
+	}
+
 	//팀 나가기
 	@Transactional
 	public LeaveTeamResponseDto leaveTeam(Long studentId) {
@@ -166,36 +327,14 @@ public class TeamService {
 
 		Long teamId = student.getTeamId();
 
-		//존재하는 팀인지 확인
-		Team team = teamRepository.findTeamByTeamId(teamId)
-			.orElseThrow(() -> new ResponseStatusException(
-				HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다."));
+		List<Student> membersBeforeLeave = studentRepository.findAllByTeamId(teamId);
+		boolean willBeEmptyTeam = membersBeforeLeave.size() <= 1;
 
-		//student 팀 값 null
-		student.setTeamId(null);
-		studentRepository.save(student);
-
-		//팀 전공/비전공 수정
-		if (Boolean.TRUE.equals(student.getMajorYn())) {
-			team.decrementMajorCount();
-		} else {
-			team.decrementNonMajorCount();
-		}
-
-		//팀 0명
-		List<Student> remainingMembers = studentRepository.findAllByTeamId(teamId);
-		boolean teamDeleted = false;
-
-		if (remainingMembers.isEmpty()) {
-			team.softDelete();
-			teamDeleted = true;
-		}
-
-		teamRepository.save(team);
+		removeStudentFromTeam(teamId, studentId, true);
 
 		return LeaveTeamResponseDto.builder()
-			.message(teamDeleted ? "팀에서 나갔습니다. 팀이 삭제되었습니다." : "팀에서 나갔습니다.")
-			.teamDeleted(teamDeleted)
+			.message(willBeEmptyTeam ? "팀에서 나갔습니다. 팀이 삭제되었습니다." : "팀에서 나갔습니다.")
+			.teamDeleted(willBeEmptyTeam)
 			.build();
 	}
 
@@ -249,15 +388,15 @@ public class TeamService {
 	//내 팀 상세조회
 	@Transactional(readOnly = true)
 	public MyTeamResponseDto getMyTeamDetail(Long studentId) {
-		Student Student = studentService.findByStudentId(studentId);
-		if (Student.getTeamId() == null) {
+		Student student = studentService.findByStudentId(studentId);
+		if (student.getTeamId() == null) {
 			throw new ResponseStatusException(
 				HttpStatus.NOT_FOUND, "팀에 속해 있지 않습니다.");
 		}
 
-		TeamResponseDto teamInfo = getTeamDetail(Student.getTeamId(), studentId);
+		TeamResponseDto teamInfo = getTeamDetail(student.getTeamId(), studentId);
 
-		List<Student> teamMembers = studentRepository.findAllByTeamId(Student.getTeamId());
+		List<Student> teamMembers = studentRepository.findAllByTeamId(student.getTeamId());
 
 		int majorCount = (int)teamMembers.stream()
 			.mapToLong(member -> Boolean.TRUE.equals(member.getMajorYn()) ? 1L : 0L)
@@ -398,12 +537,12 @@ public class TeamService {
 	}
 
 	//팀원 정보 변환
-	private TeamMemberResponseDto convertToTeamMemberResponse(Student Student) {
+	private TeamMemberResponseDto convertToTeamMemberResponse(Student student) {
 		try {
-			StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(Student.getStudentId())
+			StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(student.getStudentId())
 				.orElse(null);
 
-			String major = Boolean.TRUE.equals(Student.getMajorYn()) ? "전공" : "비전공";
+			String major = Boolean.TRUE.equals(student.getMajorYn()) ? "전공" : "비전공";
 			String profileImageUrl = (studentInfo != null) ? studentInfo.getProfileImageUrl() : "";
 
 			SubCodeResponseDto position = null;
@@ -415,17 +554,17 @@ public class TeamService {
 			}
 
 			return TeamMemberResponseDto.builder()
-				.studentId(Student.getStudentId())
-				.name(Student.getName())
+				.studentId(student.getStudentId())
+				.name(student.getName())
 				.major(major)
 				.profileImageUrl(profileImageUrl)
 				.position(position)
 				.build();
 		} catch (Exception e) {
 			return TeamMemberResponseDto.builder()
-				.studentId(Student.getStudentId())
-				.name(Student.getName())
-				.major(Boolean.TRUE.equals(Student.getMajorYn()) ? "전공" : "비전공")
+				.studentId(student.getStudentId())
+				.name(student.getName())
+				.major(Boolean.TRUE.equals(student.getMajorYn()) ? "전공" : "비전공")
 				.profileImageUrl("")
 				.position(null)
 				.build();
