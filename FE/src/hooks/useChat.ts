@@ -5,7 +5,7 @@ import { useChatStore } from "@/stores/chatStore"
 import type { ChatMessage } from "@/types/chat/chat"
 
 // .env 파일에서 웹소켓 URL을 가져오고, 없을 경우 기본값을 사용합니다.
-const WEBSOCKET_URL = import.meta.env.VITE_APP_BASE_URL + "/ws-stomp" || "ws://localhost:8080/api/v1/ws-stomp"
+const WEBSOCKET_URL = import.meta.env.VITE_APP_BASE_URL + "ws-stomp" || "ws://localhost:8080/api/v1/ws-stomp"
 
 export const useChat = (roomId: number | null) => {
   // Stomp 클라이언트와 구독 객체를 ref로 관리하여 리렌더링 시에도 유지되도록 합니다.
