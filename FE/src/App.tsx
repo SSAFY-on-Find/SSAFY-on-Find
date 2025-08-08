@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { Route, Routes, useLocation } from "react-router-dom"
 import { ToastContainer } from "react-toastify"
 
@@ -10,6 +11,7 @@ import MyTeam from "@/pages/MyTeamPage"
 import StudentList from "@/pages/StudentListPage"
 import TeamList from "@/pages/TeamListPage"
 import { RoutePolicy } from "@/router"
+import { useUserStore } from "@/stores/userStore"
 
 import ComponentTestPage from "./components/ComponentTestPage"
 
@@ -18,6 +20,11 @@ import "@/index.css"
 function App() {
   const location = useLocation()
   const hideLayout = location.pathname === "/login"
+  // const initializeAuth = useUserStore((state) => state.initializeAuth)
+
+  // useEffect(() => {
+  //   initializeAuth()
+  // }, [initializeAuth])
 
   return (
     <RoutePolicy>

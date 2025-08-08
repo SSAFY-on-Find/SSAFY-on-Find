@@ -26,11 +26,10 @@ export const profileApi = {
     formData.append("requestDto", new Blob([JSON.stringify(data)], { type: "application/json" }))
 
     if (profile.profileImageFile) {
-      formData.append("profileImage", profile.profileImageFile)
+      formData.append("profile", profile.profileImageFile)
     }
     if (profile.portfolioFile) {
-      formData.append("portfolio", profile.portfolioFile, profile.portfolioFile.name)
-      formData.append("filename", profile.portfolioFile.name)
+      formData.append("portfolio", profile.portfolioFile)
     }
 
     const response = await api.post<IApiResponse<void>>(PROFILE_BASE_URL, formData)

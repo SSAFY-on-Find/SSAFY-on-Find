@@ -24,7 +24,8 @@ const mbtiPairs = [
 export default function ProfileCreatePage() {
   const { data: codes, isLoading: isCodesLoading, error: codesError } = useProfileCodes()
   const { user } = useUserStore()
-  const { position, track, techStack, goal, strength, portfolio, description, setCodes } = useProfileStore()
+  const { position, track, techStack, goal, strength, portfolio, portfolioFile, description, setCodes } =
+    useProfileStore()
   const [activeMarkdownTab, setActiveMarkdownTab] = useState<"left" | "right">("left")
   const [strengthInput, setStrengthInput] = useState("")
   const [isEditingMbti, setIsEditingMbti] = useState(false)
@@ -181,7 +182,7 @@ export default function ProfileCreatePage() {
           <div className="p-3" onClick={() => profileImgInputRef.current?.click()}>
             <input
               type="file"
-              accept="image/*"
+              accept=".png,.jpg,.jpeg"
               ref={profileImgInputRef}
               style={{ display: "none" }}
               onChange={handleProfileImgChange}
@@ -275,7 +276,7 @@ export default function ProfileCreatePage() {
           <div className="w-30" onClick={() => portfolioInputRef.current?.click()}>
             <input
               type="file"
-              accept=".pdf,.pptx,.hwp,.docx"
+              accept=".png,.pptx,.jpg,.pdf, .docx"
               ref={portfolioInputRef}
               style={{ display: "none" }}
               onChange={handlePortfolioChange}
@@ -288,7 +289,11 @@ export default function ProfileCreatePage() {
               size={"m"}
               onClick={() => {}}
             />
-            {portfolio && <div className="text-subtext mt-2 ml-2 text-xs font-light">{portfolio.originalFileName}</div>}
+            {(portfolioFile || portfolio) && (
+              <div className="text-subtext mt-2 ml-2 text-xs font-light">
+                {portfolioFile?.name ?? portfolio?.originalFileName}
+              </div>
+            )}
           </div>
         </div>
       </FormCard>
