@@ -2,12 +2,12 @@ package com.sonfind.chelsea.dto.dashboard;
 
 import lombok.Builder;
 
-import java.util.Map;
+import java.util.List;
 
 @Builder
 public record TeamInfoUpdateDto(
 		Long teamId,
 		String track,
-		Map<String, Integer> needByPosition
+		List<String> afterNeedByPosition
 ) {
 }
