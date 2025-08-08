@@ -111,7 +111,7 @@ export default function MyTeamPage() {
           )}
 
           {chatRoomId && studentId && teamMembers && (
-            <TeamChat roomId={chatRoomId} studentId={studentId} members={teamMembers} />
+            <TeamChat roomId={chatRoomId} studentId={Number(studentId)} members={teamMembers} />
           )}
         </div>
       </div>
