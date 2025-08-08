@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class ChatRoomController implements ChatRoomControllerDocs {
 	private final ChatRoomService chatRoomService;
 
-	@PostMapping("teams/{teamId}")
+	@PostMapping("/teams/{teamId}")
 	public ResponseEntity<Map<String, Object>> createTeamChatRoom(
 		@SessionAttribute("loginUser") Long studentId,
 		@PathVariable Long teamId) {
@@ -50,7 +50,7 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 		return ResponseEntity.ok().body(body);
 	}
 
-	@PostMapping("rooms/{roomId}/join")
+	@PostMapping("/rooms/{roomId}/join")
 	public ResponseEntity<Map<String, Object>> enterTeamChatRoom(
 		@SessionAttribute("loginUser") Long studentId,
 		@PathVariable Long roomId
@@ -63,7 +63,7 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 		return ResponseEntity.ok().body(body);
 	}
 
-	@PostMapping("rooms/{roomId}/leave")
+	@PostMapping("/rooms/{roomId}/leave")
 	public ResponseEntity<Map<String, Object>> exitTeamChatRoom(
 		@SessionAttribute("loginUser") Long studentId,
 		@PathVariable Long roomId
