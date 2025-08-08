@@ -38,3 +38,7 @@ logging:
 upload:
   dir: C:/ssafy/dev/uploads
 
+custom:
+  service:
+    url: "http://localhost:8080/api/v1"
+
