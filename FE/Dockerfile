@@ -8,6 +8,10 @@ RUN npm install
 
 COPY . .
 
+ARG VITE_APP_BASE_URL
+
+ENV VITE_APP_BASE_URL=$VITE_APP_BASE_URL
+
 RUN npx vite build
 
 FROM nginx:stable-alpine
