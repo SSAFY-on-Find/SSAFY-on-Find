@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/notifications")
+@RequestMapping("/api/v1/notifications")
 @Tag(name = "Notification Controller", description = "팀 합류 지원/초대 요청 API")
 public class NotificationController {
 
