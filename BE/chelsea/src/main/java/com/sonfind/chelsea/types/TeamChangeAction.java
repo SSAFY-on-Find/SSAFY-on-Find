@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum MemberChageAction {
-	JOINED("joined"),
-	LEFT("left");
+public enum TeamChangeAction {
+	CREATED("created"), // 팀 생성
+	DELETED("deleted"); // 팀 삭제
 
 	private final String action;
 }

@@ -12,8 +12,4 @@ public enum DashboardEventType {
 	STUDENT_INFO_UPDATED("student_info_updated"); // 학생 정보 업데이트(희망 트랙별 통계)
 
 	private final String value;
-
-	public String getValue() {
-		return value;
-	}
 }
