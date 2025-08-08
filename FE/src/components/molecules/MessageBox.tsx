@@ -1,5 +1,3 @@
-import React from "react"
-
 import { UserImg } from "../atoms"
 
 interface IMessageBox {
@@ -34,7 +32,7 @@ function MessageBox({ who, content, time, name = "누군가", profile }: IMessag
 
   // 상대방이 보낸 메시지는 왼쪽 정렬
   return (
-    <div className="mb-4 flex justify-start">
+    <div className="flex justify-start">
       <div className={`${commonBoxStyle} bg-line text-gray-800`}>
         <div className="mb-[9px] flex items-center gap-3">
           <UserImg name={name} size={"s"} showTeamBadge={false} />
