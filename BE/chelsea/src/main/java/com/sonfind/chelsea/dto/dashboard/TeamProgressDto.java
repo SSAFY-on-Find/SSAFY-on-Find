@@ -1,4 +1,13 @@
 package com.sonfind.chelsea.dto.dashboard;
 
-public record TeamProgressDto() {
+import lombok.Builder;
+
+@Builder
+public record TeamProgressDto(
+		int progressRate,
+		int totalNonMajorCount,
+		int teamMemberNonMajorCount,
+		int totalMajorCount,
+		int teamMemberMajorCount
+) {
 }

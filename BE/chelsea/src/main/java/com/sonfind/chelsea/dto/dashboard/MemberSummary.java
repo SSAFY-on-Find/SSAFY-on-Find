@@ -1,4 +1,13 @@
 package com.sonfind.chelsea.dto.dashboard;
 
-public record MemberSummary() {
+import lombok.Builder;
+
+@Builder
+public record MemberSummary(
+		Long id,
+		String name,
+		String profileImageUrl,
+		String majorType,
+		String position
+) {
 }

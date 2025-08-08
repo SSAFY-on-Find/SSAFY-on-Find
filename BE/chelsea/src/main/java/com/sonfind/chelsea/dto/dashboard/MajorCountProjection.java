@@ -1,6 +1,6 @@
 package com.sonfind.chelsea.dto.dashboard;
 
-public interface MjaorCountProjection {
+public interface MajorCountProjection {
 	Boolean getMajorYn();
 
 	Integer getCount();
