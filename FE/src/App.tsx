@@ -5,6 +5,7 @@ import { ToastContainer } from "react-toastify"
 import { Header, SideBar } from "@/layout"
 import CreateProfile from "@/pages/CreateProfilePage"
 import Dashboard from "@/pages/DashboardPage"
+import EditProfile from "@/pages/EditProfilePage"
 import Login from "@/pages/LoginPage"
 import MyProfile from "@/pages/MyProfilePage"
 import MyTeam from "@/pages/MyTeamPage"
@@ -41,8 +42,10 @@ function App() {
               <Route path="/teamlist" element={<TeamList />} />
               <Route path="/create-team" element={<TeamCreatePage />} />
               <Route path="/studentlist" element={<StudentList />} />
-              <Route path="/myprofile" element={<MyProfile />} />
+              {/* <Route path="/myprofile" element={<MyProfile />} /> */}
+              <Route path="/myprofile" element={<EditProfile />} />
               <Route path="/create-profile" element={<CreateProfile />} />
+              <Route path="/edit-profile" element={<EditProfile />} />
               <Route path="/component-test" element={<ComponentTestPage />} />
             </Routes>
           </main>
