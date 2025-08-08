@@ -13,6 +13,7 @@ public record StudentInfoGetSummaryResponseDto(
 
 	SubCodeResponseDto position,
 	SubCodeResponseDto track,
+	String profileImageUrl,
 
 	TeamSimpleResponseDto team
 ) {
