@@ -1,5 +1,5 @@
 export interface IStudentSignin {
-  studentId: number
+  studentId: string
   name: string
   major: string
   className: string
