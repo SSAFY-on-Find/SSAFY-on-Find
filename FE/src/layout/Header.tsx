@@ -1,6 +1,8 @@
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Mailbox, Search } from "lucide-react"
 
+import { NotificationModal } from "@/components/templates"
 import { useUserStore } from "@/stores/userStore"
 
 function DeadlineNotification() {
@@ -12,13 +14,18 @@ function DeadlineNotification() {
   )
 }
 
-function AlarmBox() {
+interface AlarmBoxProps {
+  onClick: () => void
+}
+
+function AlarmBox({ onClick }: AlarmBoxProps) {
   return (
     <div
-      className="bg-main flex aspect-square h-[120%] items-center justify-center rounded-full shadow-2xl"
+      className="bg-main flex aspect-square h-[120%] items-center justify-center rounded-full shadow-2xl cursor-pointer hover:opacity-90 transition-opacity"
       style={{
         boxShadow: "0 5px 15px -3px rgba(0, 0, 0, 0.10), 0 4px 6px -4px rgba(0, 0, 0, 0.10)",
       }}
+      onClick={onClick}
     >
       <Mailbox className="h-5 w-5 text-white" />
     </div>
@@ -28,24 +35,36 @@ function AlarmBox() {
 function Header() {
   const navigate = useNavigate()
   const user = useUserStore((state) => state.user)
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false)
+
+  const handleAlarmClick = () => {
+    setIsNotificationOpen(true)
+  }
+
+  const handleCloseNotification = () => {
+    setIsNotificationOpen(false)
+  }
 
   return (
-    <header className="fixed top-0 left-0 z-50 flex h-[64px] w-full items-center justify-center gap-3 bg-white px-5 py-4 shadow-xs">
-      <div
-        className="text-main flex h-full w-[230px] cursor-pointer items-center justify-start gap-2"
-        onClick={() => navigate("/")}
-      >
-        <Search />
-        <h1 className="text-l font-bold">SSAFY On Find</h1>
-      </div>
-      <div className="flex h-full flex-1 items-center justify-between">
-        <h1 className="text-text text-xl font-bold">서울 {user?.className}</h1>
-        <div className="flex h-full items-center justify-center gap-3">
-          <DeadlineNotification />
-          <AlarmBox />
+    <>
+      <header className="fixed top-0 left-0 z-50 flex h-[64px] w-full items-center justify-center gap-3 bg-white px-5 py-4 shadow-xs">
+        <div
+          className="text-main flex h-full w-[230px] cursor-pointer items-center justify-start gap-2"
+          onClick={() => navigate("/")}
+        >
+          <Search />
+          <h1 className="text-l font-bold">SSAFY On Find</h1>
         </div>
-      </div>
-    </header>
+        <div className="flex h-full flex-1 items-center justify-between">
+          <h1 className="text-text text-xl font-bold">서울 {user?.className}</h1>
+          <div className="flex h-full items-center justify-center gap-3">
+            <DeadlineNotification />
+            <AlarmBox onClick={handleAlarmClick} />
+          </div>
+        </div>
+      </header>
+      <NotificationModal isOpen={isNotificationOpen} onClose={handleCloseNotification} />
+    </>
   )
 }
 
