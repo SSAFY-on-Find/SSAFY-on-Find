@@ -29,5 +29,8 @@ public interface ChatRoomControllerDocs {
 
 	@Operation(summary = "1:1 채팅방 목록 보기", description = "자신이 속한 1:1 채팅방 목록을 볼 수 있습니다.")
 	ResponseEntity<Map<String, Object>> getDirectChatRoom(@Parameter(hidden = true) Long studentId);
+
+	@Operation(summary = "채팅 내역 보기", description = "자신이 속한 채팅방의 전체 텍스트 내용을 볼 수 있습니다.")
+	ResponseEntity<Map<String, Object>> getChatRoomMessages(@Parameter(hidden = true) Long studentId, Long roomId);
 }
 
