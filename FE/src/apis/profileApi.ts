@@ -1,4 +1,4 @@
-import type { IProfileState } from "@/stores/profileStroe"
+import type { IProfileState } from "@/stores/profileStore"
 import type { IApiResponse } from "@/types/common"
 import type { IProfileCode } from "@/types/profile"
 

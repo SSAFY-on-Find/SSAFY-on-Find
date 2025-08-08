@@ -8,7 +8,7 @@ import { Button, CheckTag, InputBox, Segmented, UserImg } from "@/components/ato
 import { FormCard, FormCheckTag, FormDropdown, FormInput } from "@/components/molecules"
 import { useProfileCodes } from "@/hooks/useProfile"
 import { useCreateProfile } from "@/hooks/useProfile"
-import { useProfileStore } from "@/stores/profileStroe"
+import { useProfileStore } from "@/stores/profileStore"
 import { useUserStore } from "@/stores/userStore"
 
 import "github-markdown-css/github-markdown-light.css"

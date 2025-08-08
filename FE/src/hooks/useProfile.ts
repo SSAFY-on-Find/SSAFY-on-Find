@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 
 import { profileApi } from "@/apis/profileApi"
-import type { IProfileState } from "@/stores/profileStroe"
+import type { IProfileState } from "@/stores/profileStore"
 
 export const useProfileCodes = () => {
   return useQuery({

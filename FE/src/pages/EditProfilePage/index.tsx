@@ -9,7 +9,7 @@ import { FormCard, FormCheckTag, FormDropdown, FormInput } from "@/components/mo
 import { useProfileCodes } from "@/hooks/useProfile"
 import { useEditProfile } from "@/hooks/useProfile"
 import { useGetProfile } from "@/hooks/useProfile"
-import { useProfileStore } from "@/stores/profileStroe"
+import { useProfileStore } from "@/stores/profileStore"
 import { useUserStore } from "@/stores/userStore"
 
 import "github-markdown-css/github-markdown-light.css"
