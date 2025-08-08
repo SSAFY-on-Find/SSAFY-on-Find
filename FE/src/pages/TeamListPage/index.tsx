@@ -6,6 +6,7 @@ import { TeamDetailModal } from "@/components/templates"
 import { useTeamFavoriteToggle } from "@/hooks/useFavorite"
 import { useTeamDetails, useTeams } from "@/hooks/useTeam"
 import { useTeamStore } from "@/stores/teamStore"
+import { useUserStore } from "@/stores/userStore"
 
 import { TeamCardSkeleton } from "./organisms/TeamCardSkeleton"
 
@@ -14,6 +15,8 @@ export default function TeamListPage() {
   const { isDetailModalOpen, selectedTeamId, openDetailModal, closeDetailModal } = useTeamStore()
   const { data: selectedTeamData } = useTeamDetails(selectedTeamId || 0)
   const { toggleFavorite } = useTeamFavoriteToggle()
+  const user = useUserStore()
+  const userTeamId = user.user?.teamId
 
   const navigate = useNavigate()
 
@@ -26,7 +29,11 @@ export default function TeamListPage() {
       <div className="mb-6 flex items-center gap-5">
         <h1 className="text-text text-2xl font-bold">팀 목록</h1>
         <div className="">
-          <Button size={"m"} isIcon={false} text="팀생성" onClick={() => navigate("/create-team")} />
+          {userTeamId ? (
+            <></>
+          ) : (
+            <Button size={"m"} isIcon={false} text="팀생성" onClick={() => navigate("/create-team")} />
+          )}
         </div>
       </div>
       <div className="flex flex-wrap gap-[10px]">
@@ -40,13 +47,20 @@ export default function TeamListPage() {
               onClickFavorite={() => toggleFavorite(team.teamId)}
               onClickCard={() => openDetailModal(team.teamId)}
               variant="default"
+              userTeamId={userTeamId}
             />
           ))
         )}
       </div>
 
-      {isDetailModalOpen && selectedTeamData && (
-        <TeamDetailModal isOpen={isDetailModalOpen} onClose={closeDetailModal} teamData={selectedTeamData} />
+      {isDetailModalOpen && selectedTeamData && selectedTeamId && (
+        <TeamDetailModal
+          userTeamId={userTeamId}
+          isOpen={isDetailModalOpen}
+          onClose={closeDetailModal}
+          teamData={selectedTeamData}
+          teamId={selectedTeamId}
+        />
       )}
 
       {teams.length === 0 && (
