@@ -42,7 +42,7 @@ public class DashboardController {
 	@GetMapping("/team-ratio")
 	public ResponseEntity<Map<String, Object>> getTeamRatio() {
 
-		List<TeamRatioDto> data = studentService.getTeamRatio();
+		Map<String, TeamRatioDto> data = studentService.getTeamRatio();
 
 		HashMap<String, Object> body = new HashMap<>();
 
