@@ -32,6 +32,8 @@ spring:
 logging:
   level:
     org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    org.springframework.messaging: INFO
+    org.springframework.web.socket: INFO
 
 upload:
   dir: C:/ssafy/dev/uploads

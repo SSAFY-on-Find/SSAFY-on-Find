@@ -9,6 +9,7 @@ import Login from "@/pages/LoginPage"
 import MyProfile from "@/pages/MyProfilePage"
 import MyTeam from "@/pages/MyTeamPage"
 import StudentList from "@/pages/StudentListPage"
+import TeamCreatePage from "@/pages/TeamCreatePage"
 import TeamList from "@/pages/TeamListPage"
 import { RoutePolicy } from "@/router"
 import { useUserStore } from "@/stores/userStore"
@@ -38,6 +39,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/myteam" element={<MyTeam />} />
               <Route path="/teamlist" element={<TeamList />} />
+              <Route path="/create-team" element={<TeamCreatePage />} />
               <Route path="/studentlist" element={<StudentList />} />
               <Route path="/myprofile" element={<MyProfile />} />
               <Route path="/create-profile" element={<CreateProfile />} />

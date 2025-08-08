@@ -1,4 +1,4 @@
-package com.sonfind.chelsea.dto.studentInfo;
+package com.sonfind.chelsea.dto.studentInfo.request;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public record StudentInfoCreateRequestDto(
+public record StudentInfoUpdateRequestDto(
 	@NotBlank String track,
 	@NotBlank String position,
 	@NotBlank String goal,

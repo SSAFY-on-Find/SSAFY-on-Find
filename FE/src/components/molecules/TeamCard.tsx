@@ -65,7 +65,7 @@ function TeamCard({
           ))}
         </div>
         <p className={`${textColor} mb-[10px] text-sm font-semibold`}>모집중인 포지션</p>
-        <div className="flex gap-[10px]">
+        <div className="flex gap-[10px] overflow-hidden">
           {recruitments.map((pos) => (
             <>
               {variant === "main" ? (

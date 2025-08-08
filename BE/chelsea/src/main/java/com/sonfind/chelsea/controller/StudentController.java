@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.dto.student.request.StudentSignInRequestDto;
@@ -18,6 +19,7 @@ import com.sonfind.chelsea.dto.student.response.StudentSignInResponseDto;
 import com.sonfind.chelsea.service.StudentService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -79,9 +81,12 @@ public class StudentController {
 				)))
 	})
 	@GetMapping
-	public ResponseEntity<Map<String, Object>> getStudentList() {
+	public ResponseEntity<Map<String, Object>> getStudentList(
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId
+	) {
 
-		List<StudentListResponseDto> data = studentService.getStudentList();
+		List<StudentListResponseDto> data = studentService.getStudentList(studentId);
 
 		Map<String, Object> body = new HashMap<String, Object>();
 

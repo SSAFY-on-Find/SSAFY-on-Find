@@ -7,7 +7,7 @@ import java.util.List;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.sonfind.chelsea.domain.student.Student;
-import com.sonfind.chelsea.dto.studentInfo.StudentInfoUpdateRequestDto;
+import com.sonfind.chelsea.dto.studentInfo.request.StudentInfoUpdateRequestDto;
 import com.sonfind.chelsea.global.domain.BaseEntity;
 import com.sonfind.chelsea.global.domain.SubCode;
 import com.sonfind.chelsea.util.StringListConverter;
@@ -17,6 +17,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -44,6 +45,7 @@ public class StudentInfo extends BaseEntity {
 	@JoinColumn(name = "student_id", referencedColumnName = "student_id")
 	Student student;
 
+	@Column(nullable = false)
 	private String techStack;
 
 	private String strength;
@@ -59,18 +61,18 @@ public class StudentInfo extends BaseEntity {
 	private String description;
 
 	@ManyToOne
-	@JoinColumn(name = "track_code")
+	@JoinColumn(name = "track_code", nullable = false)
 	private SubCode trackCode;
 
 	@ManyToOne
-	@JoinColumn(name = "position_code")
+	@JoinColumn(name = "position_code", nullable = false)
 	private SubCode positionCode;
 
-	@ManyToOne
-	@JoinColumn(name = "goal_code")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "goal_code", nullable = false)
 	private SubCode goalCode;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "mbti_code")
 	private SubCode mbtiCode;
 

@@ -1,4 +1,4 @@
-package com.sonfind.chelsea.dto.studentInfo;
+package com.sonfind.chelsea.dto.studentInfo.response;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
 import lombok.Builder;
 
 @Builder
-public record StudentInfoGetResponseDto(
+public record StudentInfoGetDetailResponseDto(
 
 	StudentResponseDto student,
 

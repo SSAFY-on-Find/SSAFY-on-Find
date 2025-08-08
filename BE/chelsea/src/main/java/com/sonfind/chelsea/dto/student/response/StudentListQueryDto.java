@@ -11,7 +11,8 @@ public record StudentListQueryDto(
 	String goalCode,
 	String goalCodeName,
 	String profileImageUrl,
-	String teamName
+	String teamName,
+	Boolean isFavorite
 ) {
 
 }
