@@ -99,23 +99,6 @@ public class StudentService {
 			.build();
 	}
 
-	//교육생 목록 조회
-	@Transactional(readOnly = true)
-	public List<StudentListResponseDto> getStudentList() {
-
-		List<StudentListQueryDto> queryResult = studentRepository.findStudentList();
-
-		return queryResult.stream().map(dto -> new StudentListResponseDto(
-			new StudentResponseDto(dto.studentId(), dto.name(), dto.major() ? "전공" : "비전공"),
-			new SubCodeResponseDto(dto.positionCode(), dto.positionCodeName()),
-			new SubCodeResponseDto(dto.trackCode(), dto.trackCodeName()),
-			new SubCodeResponseDto(dto.goalCode(), dto.goalCodeName()),
-			dto.profileImageUrl(),
-			false,
-			dto.teamName()
-		)).collect(Collectors.toList());
-	}
-
 	/**
 	 * 대시보드 용 팀 빌딩 진행률 조회 함수
 	 * */
