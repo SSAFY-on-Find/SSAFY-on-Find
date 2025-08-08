@@ -38,6 +38,9 @@ export default function ProfileCreatePage() {
   useEffect(() => {
     if (isSuccess) {
       toast.success("자기소개가 성공적으로 저장되었습니다!")
+      useUserStore.setState((state) => ({
+        user: state.user ? { ...state.user, isCreatedStudentInfo: true } : state.user,
+      }))
       navigate("/")
     }
   }, [isSuccess, navigate])
