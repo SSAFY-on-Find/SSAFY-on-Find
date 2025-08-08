@@ -6,6 +6,7 @@ public enum ErrorCode {
 	TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM_NOT_FOUND", "팀을 찾을 수 없습니다."),
 	STUDENT_NOT_FOUND(HttpStatus.NOT_FOUND, "STUDENT_NOT_FOUND", "교육생을 찾을 수 없습니다."),
 	VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "요청 값이 올바르지 않습니다."),
+	BAD_REQUEST(HttpStatus.BAD_REQUEST, "BAD_REQUEST", "잘못된 요청입니다."),
 	ACCESS_DENIED(HttpStatus.FORBIDDEN, "ACCESS_DENIED", "접근 권한이 없습니다."),
 	AUTH_REQUIRED(HttpStatus.FORBIDDEN, "AUTH_REQUIRED", "인증이 필요합니다."),
 	CONFLICT(HttpStatus.CONFLICT, "CONFLICT", "충돌이 발생했습니다."),
