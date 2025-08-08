@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 
 @Repository
@@ -18,6 +19,7 @@ public interface StudentInfoRepository extends JpaRepository<StudentInfo, Long> 
 	@EntityGraph(attributePaths = "student.classCode")
 	Optional<StudentInfo> findByStudent_StudentId(Long studentId);
 
+	List<StudentInfo> findAllByStudentIn(List<Student> students);
 	@Query(value = """
 			SELECT 
 				sc_track.sub_code_name AS track_name,
