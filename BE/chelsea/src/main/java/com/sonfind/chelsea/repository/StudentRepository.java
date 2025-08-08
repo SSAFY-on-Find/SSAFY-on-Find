@@ -32,6 +32,15 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 		"LEFT JOIN si.goalCode goal")
 	List<StudentListQueryDto> findStudentList();
 
+	@Query(value =
+		"SELECT CASE WHEN s.major_yn = TRUE THEN '전공' ELSE '비전공' END AS major_type, "
+			+ "COUNT(s.student_id) AS total_count, "
+			+ "COUNT(IFNULL(s.team_id,0)) AS teamMemberCount "
+			+ "FROM students s "
+			+ "LEFT JOIN team t ON s.team_id = t.team_id "
+			+ "GROUP BY major_type", nativeQuery = true)
+	List<Object[]> getTeamRatio();
+
 	List<Student> findAllByTeamIdIn(List<Long> teamIds);
 
 }
