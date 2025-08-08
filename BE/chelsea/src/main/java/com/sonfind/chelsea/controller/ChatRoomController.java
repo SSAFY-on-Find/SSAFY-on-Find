@@ -1,6 +1,7 @@
 package com.sonfind.chelsea.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import com.sonfind.chelsea.controller.docs.ChatRoomControllerDocs;
+import com.sonfind.chelsea.dto.chat.ChatMessageResponseDto;
 import com.sonfind.chelsea.dto.chat.ChatRoomListResponseDto;
 import com.sonfind.chelsea.dto.chat.DirectChatRoomRequestDto;
 import com.sonfind.chelsea.service.ChatRoomService;
@@ -98,6 +100,18 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
 		body.put("data", dto);
+		return ResponseEntity.ok().body(body);
+	}
+
+	@GetMapping("/{roomId}/messages")
+	public ResponseEntity<Map<String, Object>> getChatRoomMessages(
+		@SessionAttribute("loginUser") Long studentId,
+		@PathVariable Long roomId
+	) {
+		List<ChatMessageResponseDto> messages = chatRoomService.getMessages(studentId, roomId);
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", messages);
 		return ResponseEntity.ok().body(body);
 	}
 }
