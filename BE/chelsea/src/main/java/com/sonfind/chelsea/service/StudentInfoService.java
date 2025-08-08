@@ -155,6 +155,7 @@ public class StudentInfoService {
 				.subcodeName(positionCode.getSubCodeName()).build())
 			.track(SubCodeResponseDto.builder().subcode(trackCode.getSubCode())
 				.subcodeName(trackCode.getSubCodeName()).build())
+			.profileImageUrl(studentInfo.getProfileImageUrl())
 			.team(teamResponse)
 			.build();
 	}
