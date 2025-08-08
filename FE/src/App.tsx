@@ -9,6 +9,7 @@ import EditProfile from "@/pages/EditProfilePage"
 import Login from "@/pages/LoginPage"
 import MyProfile from "@/pages/MyProfilePage"
 import MyTeam from "@/pages/MyTeamPage"
+import StudentDetail from "@/pages/StudentDetailPage"
 import StudentList from "@/pages/StudentListPage"
 import TeamCreatePage from "@/pages/TeamCreatePage"
 import TeamList from "@/pages/TeamListPage"
@@ -43,7 +44,7 @@ function App() {
               <Route path="/create-team" element={<TeamCreatePage />} />
               <Route path="/studentlist" element={<StudentList />} />
               {/* <Route path="/myprofile" element={<MyProfile />} /> */}
-              <Route path="/myprofile" element={<EditProfile />} />
+              <Route path="/myprofile" element={<StudentDetail />} />
               <Route path="/create-profile" element={<CreateProfile />} />
               <Route path="/edit-profile" element={<EditProfile />} />
               <Route path="/component-test" element={<ComponentTestPage />} />
