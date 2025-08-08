@@ -35,7 +35,7 @@ function MessageBox({ who, content, time, name = "누군가", profile }: IMessag
     <div className="flex justify-start">
       <div className={`${commonBoxStyle} bg-line text-gray-800`}>
         <div className="mb-[9px] flex items-center gap-3">
-          <UserImg name={name} size={"s"} showTeamBadge={false} />
+          <UserImg name={name} size={"s"} showTeamBadge={false} url={profile} />
           <p className="text-text text-sm font-semibold">{name}</p>
         </div>
         <div className="flex flex-col gap-1">

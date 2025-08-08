@@ -21,7 +21,7 @@ interface AlarmBoxProps {
 function AlarmBox({ onClick }: AlarmBoxProps) {
   return (
     <div
-      className="bg-main flex aspect-square h-[120%] items-center justify-center rounded-full shadow-2xl cursor-pointer hover:opacity-90 transition-opacity"
+      className="bg-main flex aspect-square h-[120%] cursor-pointer items-center justify-center rounded-full shadow-2xl transition-opacity hover:opacity-90"
       style={{
         boxShadow: "0 5px 15px -3px rgba(0, 0, 0, 0.10), 0 4px 6px -4px rgba(0, 0, 0, 0.10)",
       }}

@@ -10,6 +10,7 @@ import { useChatStore } from "@/stores/chatStore"
 interface TeamMember {
   studentId: number
   name: string
+  profileImageUrl?: string
   // 필요하다면 프로필 이미지 등 다른 속성 추가 가능
 }
 
@@ -66,12 +67,14 @@ const TeamChat: React.FC<TeamChatProps> = ({ roomId, studentId, members }) => {
             const sender = members.find((member) => member.studentId === msg.studentId)
             // 보낸 사람의 이름. 정보가 없으면 ID를 표시합니다.
             const senderName = sender ? sender.name : `사용자 ${msg.studentId}`
+            const senderProfile = sender ? sender.profileImageUrl : ``
 
             return (
               <MessageBox
                 who={msg.studentId === studentId ? "me" : "other"}
                 content={msg.content}
                 name={senderName} // 찾은 이름을 props로 전달
+                profile={senderProfile}
                 time={new Date().toLocaleTimeString("ko-KR", {
                   hour: "2-digit",
                   minute: "2-digit",

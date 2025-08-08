@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { X, Users, User, Mail, Check } from "lucide-react"
+import { Check,Mail, User, Users, X } from "lucide-react"
 
 import { Button } from "@/components/atoms"
 import type { INotification, INotificationTab } from "@/types/common"
@@ -134,11 +134,9 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
 
   const handleAcceptInvitation = (notificationId: string) => {
     if (activeTab === "received") {
-      setNotifications(prev => 
-        prev.map(notification => 
-          notification.id === notificationId 
-            ? { ...notification, status: "ACCEPTED" as const }
-            : notification
+      setNotifications((prev) =>
+        prev.map((notification) =>
+          notification.id === notificationId ? { ...notification, status: "ACCEPTED" as const } : notification
         )
       )
     }
@@ -146,11 +144,9 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
 
   const handleRejectInvitation = (notificationId: string) => {
     if (activeTab === "received") {
-      setNotifications(prev => 
-        prev.map(notification => 
-          notification.id === notificationId 
-            ? { ...notification, status: "REJECTED" as const }
-            : notification
+      setNotifications((prev) =>
+        prev.map((notification) =>
+          notification.id === notificationId ? { ...notification, status: "REJECTED" as const } : notification
         )
       )
     }
@@ -158,11 +154,9 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
 
   const handleCancelInvitation = (notificationId: string) => {
     if (activeTab === "sent") {
-      setSentNotifications(prev => 
-        prev.map(notification => 
-          notification.id === notificationId 
-            ? { ...notification, status: "CANCELLED" as const }
-            : notification
+      setSentNotifications((prev) =>
+        prev.map((notification) =>
+          notification.id === notificationId ? { ...notification, status: "CANCELLED" as const } : notification
         )
       )
     }
@@ -171,16 +165,15 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
   return (
     <>
       {/* Sidebar */}
-      <div className={`fixed top-0 right-0 z-50 h-full w-96 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out ${
-        isOpen ? 'translate-x-0' : 'translate-x-full'
-      }`}>
+      <div
+        className={`fixed top-0 right-0 z-50 h-full w-96 transform bg-white shadow-2xl transition-transform duration-300 ease-in-out ${
+          isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex items-center justify-between border-b border-gray-200 p-4">
           <h2 className="text-lg font-semibold text-gray-900">알림</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-400 transition-colors hover:text-gray-600">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -191,10 +184,8 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-                activeTab === tab.id
-                  ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-500 hover:text-gray-700"
+              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                activeTab === tab.id ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500 hover:text-gray-700"
               }`}
             >
               {tab.label}
@@ -202,33 +193,29 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
           ))}
         </div>
 
-                 {/* Notifications List */}
-         <div className="overflow-y-auto h-[calc(100vh-120px)]">
-           {currentNotifications.length === 0 ? (
-             <div className="p-8 text-center text-gray-500">
-               알림이 없습니다.
-             </div>
-           ) : (
-             <div className="p-4 space-y-4">
-               {currentNotifications.map((notification) => (
-                                 <div
-                   key={notification.id}
-                   className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all duration-300 ease-in-out transform hover:scale-[1.02]"
-                 >
+        {/* Notifications List */}
+        <div className="h-[calc(100vh-120px)] overflow-y-auto">
+          {currentNotifications.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">알림이 없습니다.</div>
+          ) : (
+            <div className="space-y-4 p-4">
+              {currentNotifications.map((notification) => (
+                <div
+                  key={notification.id}
+                  className="transform rounded-lg border border-gray-200 bg-white p-4 transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-md"
+                >
                   <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-3 flex-1">
+                    <div className="flex flex-1 items-start space-x-3">
                       <div className="mt-1">{getNotificationIcon(notification.type)}</div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-medium text-gray-900 mb-1">
-                          {notification.title}
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-2">{notification.content}</p>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="mb-1 text-sm font-medium text-gray-900">{notification.title}</h3>
+                        <p className="mb-2 text-sm text-gray-600">{notification.content}</p>
                         <p className="text-xs text-gray-400">{notification.timestamp}</p>
                       </div>
                     </div>
                     <div className="ml-3">
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(
+                        className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${getStatusColor(
                           notification.status
                         )}`}
                       >
@@ -237,9 +224,11 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
                     </div>
                   </div>
 
-                                                         {/* Action buttons for received invitations */}
-                    {activeTab === "received" && notification.type === "INVITATION" && notification.status === "PENDING" && (
-                      <div className="flex space-x-2 mt-3 pt-3 border-t border-gray-100">
+                  {/* Action buttons for received invitations */}
+                  {activeTab === "received" &&
+                    notification.type === "INVITATION" &&
+                    notification.status === "PENDING" && (
+                      <div className="mt-3 flex space-x-2 border-t border-gray-100 pt-3">
                         <Button
                           text="거절"
                           variant="text"
@@ -259,19 +248,19 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
                       </div>
                     )}
 
-                    {/* Action buttons for sent invitations */}
-                    {activeTab === "sent" && notification.type === "INVITATION" && notification.status === "PENDING" && (
-                      <div className="flex space-x-2 mt-3 pt-3 border-t border-gray-100">
-                        <Button
-                          text="취소"
-                          variant="text"
-                          size="m"
-                          isIcon={true}
-                          Icon={X}
-                          onClick={() => handleCancelInvitation(notification.id)}
-                        />
-                      </div>
-                    )}
+                  {/* Action buttons for sent invitations */}
+                  {activeTab === "sent" && notification.type === "INVITATION" && notification.status === "PENDING" && (
+                    <div className="mt-3 flex space-x-2 border-t border-gray-100 pt-3">
+                      <Button
+                        text="취소"
+                        variant="text"
+                        size="m"
+                        isIcon={true}
+                        Icon={X}
+                        onClick={() => handleCancelInvitation(notification.id)}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
