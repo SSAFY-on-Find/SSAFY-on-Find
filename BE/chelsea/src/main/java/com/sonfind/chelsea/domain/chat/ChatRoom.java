@@ -90,6 +90,5 @@ public class ChatRoom extends BaseEntity {
 		return this.chatRoomMembers.stream()
 			.anyMatch(member -> member.getStudent().equals(student));
 	}
-
 }
 
