@@ -4,6 +4,10 @@ import type { ITeamCard } from "@/types/team"
 
 import { Button, MainTag, PositionTag, UserImg, WhiteTag } from "../atoms"
 
+interface ITeamCardElement extends ITeamCard {
+  userTeamId?: number
+}
+
 function TeamCard({
   teamId,
   teamName,
@@ -16,13 +20,28 @@ function TeamCard({
   onClickFavorite,
   onClickCard,
   variant = "default",
-}: ITeamCard) {
+  userTeamId,
+}: ITeamCardElement) {
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     onClickFavorite()
   }
   const handleButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation()
+  }
+
+  const renderButtons = () => {
+    if (userTeamId === null) {
+      return <Button size={"s"} isIcon={false} text="지원하기" variant={btnRecruit} onClick={() => {}} />
+    } else if (userTeamId !== teamId) {
+      return (
+        <>
+          <Button size={"s"} isIcon={false} text="지원하기" variant={btnRecruit} onClick={() => {}} />
+          <Button size={"s"} isIcon={false} text="팀 합치기 제안" variant={btnMerge} onClick={() => {}} />
+        </>
+      )
+    }
+    return null
   }
 
   // 카드 스타일
@@ -78,8 +97,7 @@ function TeamCard({
         </div>
       </div>
       <div className="flex gap-4 p-[25px] pt-0" onClick={handleButtonClick}>
-        <Button size={"s"} isIcon={false} text="지원하기" variant={btnRecruit} onClick={function (): void {}} />
-        <Button size={"s"} isIcon={false} text="팀 합치기 제안" variant={btnMerge} onClick={function (): void {}} />
+        {renderButtons()}
       </div>
     </div>
   )

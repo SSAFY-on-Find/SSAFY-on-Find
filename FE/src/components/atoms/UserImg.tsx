@@ -1,8 +1,10 @@
+import { Camera } from "lucide-react"
 interface IUserImg {
-  name: string
+  name: string | undefined
   size: "xs" | "s" | "m" | "l" | "xl"
   hasTeam?: boolean
   showTeamBadge: boolean
+  isEdit?: boolean
 }
 
 const sizeMap = {
@@ -21,7 +23,7 @@ const badgeSizeMap = {
   xl: "w-[32px] h-[32px] -right-[2px] -bottom-[2px]",
 }
 
-function UserImg({ name, size, hasTeam = false, showTeamBadge }: IUserImg) {
+function UserImg({ name, size, hasTeam = false, showTeamBadge, isEdit = false }: IUserImg) {
   const sizeClass = sizeMap[size] || sizeMap.m
   const badgeClass = badgeSizeMap[size] || badgeSizeMap.m
 
@@ -38,6 +40,7 @@ function UserImg({ name, size, hasTeam = false, showTeamBadge }: IUserImg) {
           className={`absolute ${badgeClass} rounded-full ${hasTeam ? "bg-main" : "border-main border-2 bg-white"} `}
         />
       )}
+      {isEdit && <Camera className={`absolute ${badgeClass} text-main cursor-pointer`} strokeWidth={1.3} />}
     </div>
   )
 }
