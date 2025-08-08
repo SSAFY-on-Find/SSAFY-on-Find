@@ -2,8 +2,10 @@ import { create } from "zustand"
 
 import type { IFile } from "@/types/common/IFile"
 import type { ISubcode } from "@/types/common/ISubcode"
+import type { IStudent } from "@/types/student"
 
 export interface IProfileState {
+  student: IStudent | null
   position: ISubcode | null
   track: ISubcode | null
   techStack: ISubcode[]
@@ -20,6 +22,7 @@ export interface IProfileState {
 }
 
 export const useProfileStore = create<IProfileState>((set) => ({
+  student: null,
   position: null,
   track: null,
   techStack: [],

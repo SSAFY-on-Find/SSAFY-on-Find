@@ -7,7 +7,8 @@ import { CirclePlus, Eye, Search, X } from "lucide-react"
 import { Button, CheckTag, InputBox, Segmented, UserImg } from "@/components/atoms"
 import { FormCard, FormCheckTag, FormDropdown, FormInput } from "@/components/molecules"
 import { useProfileCodes } from "@/hooks/useProfile"
-import { useCreateProfile } from "@/hooks/useProfile"
+import { useEditProfile } from "@/hooks/useProfile"
+import { useGetProfile } from "@/hooks/useProfile"
 import { useProfileStore } from "@/stores/profileStore"
 import { useUserStore } from "@/stores/userStore"
 
@@ -22,8 +23,9 @@ const mbtiPairs = [
 const PROFILE_MAX = 1 * 1024 * 1024
 const PORTFOLIO_MAX = 50 * 1024 * 1024
 
-export default function ProfileCreatePage() {
+export default function ProfileEditPage() {
   const { data: codes, isLoading: isCodesLoading, error: codesError } = useProfileCodes()
+  const { data: infos, isLoading: isInfosLoading, error: infosError } = useGetProfile()
   const { user } = useUserStore()
   const {
     position,
@@ -44,25 +46,44 @@ export default function ProfileCreatePage() {
   const [mbtiSelected, setMbtiSelected] = useState(["I", "N", "T", "P"])
   const profileImgInputRef = useRef<HTMLInputElement>(null)
   const portfolioInputRef = useRef<HTMLInputElement>(null)
-  const { mutate: createProfile, isSuccess, error: createError } = useCreateProfile()
+  const { mutate: editProfile, isSuccess, error: editError } = useEditProfile()
   const profileStore = useProfileStore()
   const navigate = useNavigate()
 
   useEffect(() => {
+    if (infos) {
+      setCodes({
+        position: infos.position,
+        track: infos.track,
+        techStack: infos.techStack,
+        goal: infos.goal,
+        strength: infos.strength,
+        mbti: infos.mbti,
+        portfolio: infos.portfolio,
+        description: infos.description,
+        profileImageFile: null,
+        portfolioFile: null,
+        profileImageUrl: infos.profileImageUrl,
+      })
+      if (infos.mbti?.subcodeName) {
+        setIsEditingMbti(true)
+        setMbtiSelected(infos.mbti.subcodeName.split(""))
+      }
+    }
+  }, [infos, setCodes])
+
+  useEffect(() => {
     if (isSuccess) {
       toast.success("자기소개가 성공적으로 저장되었습니다!")
-      useUserStore.setState((state) => ({
-        user: state.user ? { ...state.user, isCreatedStudentInfo: true } : state.user,
-      }))
       navigate("/")
     }
   }, [isSuccess, navigate])
 
   useEffect(() => {
-    if (createError) {
+    if (editError) {
       toast.error("자기소개 저장 중 오류가 발생했습니다.")
     }
-  }, [createError])
+  }, [editError])
 
   const handleProfileImgChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -108,7 +129,7 @@ export default function ProfileCreatePage() {
       return
     }
 
-    createProfile(profileStore)
+    editProfile(profileStore)
   }
 
   function setMbtiToStore(mbtiArr: string[]) {
@@ -130,13 +151,14 @@ export default function ProfileCreatePage() {
     setCodes({ mbti: null })
   }
 
-  if (isCodesLoading) return <div>로딩 중...</div>
+  if (isCodesLoading || isInfosLoading) return <div>로딩 중...</div>
   if (codesError || !codes) return <div>코드 리스트를 불러올 수 없습니다.</div>
+  if (infosError || !infos) return <div>저장된 자기소개 정보를 불러올 수 없습니다.</div>
 
   return (
     <div className="bg-background flex min-h-screen flex-col gap-7 px-15 py-10">
       <div className="flex flex-col gap-2">
-        <h1 className="text-text text-2xl font-bold">자기소개 작성</h1>
+        <h1 className="text-text text-2xl font-bold">자기소개 수정</h1>
         <p className="text-subtext text-sm">
           팀 빌딩에 활용될 자기소개를 작성해주세요. <span className="text-error">*</span> 표시는 필수 입력 사항입니다.
         </p>
@@ -351,7 +373,7 @@ export default function ProfileCreatePage() {
         )}
       </FormCard>
       <Button
-        text="등록하기"
+        text="저장하기"
         size={"m"}
         isIcon={false}
         onClick={() => {

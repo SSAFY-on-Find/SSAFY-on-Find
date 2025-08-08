@@ -42,7 +42,7 @@ function TeamDetail({
                 <div className="flex">
                   {majorMembers.map((ele) => (
                     <div className="flex flex-col items-center px-[10px]">
-                      <UserImg name={ele.name} size={"m"} showTeamBadge={false} />
+                      <UserImg name={ele.name} size={"m"} showTeamBadge={false} url={ele.profileImageUrl} />
                       <p className="mt-2 mb-[5px] text-sm">{ele.name}</p>
                       {ele.position && <PositionTag positionName={ele.position.subcodeName} />}
                     </div>
@@ -68,7 +68,7 @@ function TeamDetail({
                 <div className="flex">
                   {nonMajorMembers.map((ele) => (
                     <div className="flex flex-col items-center px-[10px]">
-                      <UserImg name={ele.name} size={"m"} showTeamBadge={false} />
+                      <UserImg name={ele.name} size={"m"} showTeamBadge={false} url={ele.profileImageUrl} />
                       <p className="mt-2 mb-[5px] text-sm">{ele.name}</p>
                       {ele.position && <PositionTag positionName={ele.position.subcodeName} />}
                     </div>
