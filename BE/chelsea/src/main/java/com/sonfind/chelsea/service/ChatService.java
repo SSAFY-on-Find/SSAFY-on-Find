@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.sonfind.chelsea.domain.chat.ChatMessage;
 import com.sonfind.chelsea.dto.chat.ChatMessageRequestDto;
+import com.sonfind.chelsea.dto.chat.ChatMessageResponseDto;
 import com.sonfind.chelsea.repository.ChatMessageRepository;
 
 import jakarta.transaction.Transactional;
@@ -17,7 +18,7 @@ public class ChatService {
 	private final ChatMessageRepository chatMessageRepository;
 
 	@Transactional
-	public void saveChatMessage(Long studentId, ChatMessageRequestDto request) {
+	public ChatMessageResponseDto saveChatMessage(Long studentId, ChatMessageRequestDto request) {
 		ChatMessage chatMessage = ChatMessage.builder()
 			.writerId(studentId)
 			.roomId(request.roomId())
@@ -25,6 +26,7 @@ public class ChatService {
 			.publishedAt(LocalDateTime.now())
 			.build();
 
-		chatMessageRepository.save(chatMessage);
+		ChatMessage savedChatMessage = chatMessageRepository.save(chatMessage);
+		return ChatMessageResponseDto.of(savedChatMessage);
 	}
 }
