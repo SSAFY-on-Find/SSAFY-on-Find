@@ -25,8 +25,19 @@ const PORTFOLIO_MAX = 50 * 1024 * 1024
 export default function ProfileCreatePage() {
   const { data: codes, isLoading: isCodesLoading, error: codesError } = useProfileCodes()
   const { user } = useUserStore()
-  const { position, track, techStack, goal, strength, portfolio, portfolioFile, description, setCodes } =
-    useProfileStore()
+  const {
+    position,
+    track,
+    techStack,
+    goal,
+    strength,
+    portfolio,
+    portfolioFile,
+    profileImageUrl,
+    profileImageFile,
+    description,
+    setCodes,
+  } = useProfileStore()
   const [activeMarkdownTab, setActiveMarkdownTab] = useState<"left" | "right">("left")
   const [strengthInput, setStrengthInput] = useState("")
   const [isEditingMbti, setIsEditingMbti] = useState(false)
@@ -200,7 +211,13 @@ export default function ProfileCreatePage() {
               style={{ display: "none" }}
               onChange={handleProfileImgChange}
             />
-            <UserImg name={user?.name} size={"xl"} showTeamBadge={false} isEdit={true} />
+            <UserImg
+              name={user?.name}
+              size={"xl"}
+              showTeamBadge={false}
+              isEdit={true}
+              url={profileImageFile ? URL.createObjectURL(profileImageFile) : profileImageUrl}
+            />
           </div>
         </div>
         <div className="flex flex-col gap-1">
