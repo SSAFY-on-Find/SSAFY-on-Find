@@ -55,10 +55,6 @@ public class StudentController {
 
 		StudentSignInResponseDto student = studentService.signIn(request);
 
-		HttpSession oldSession = httpServletRequest.getSession(false);
-		if (oldSession != null) {
-			oldSession.invalidate();
-		}
 		HttpSession newSession = httpServletRequest.getSession(true);
 		newSession.setAttribute("loginUser", student.studentId());
 		Map<String, Object> body = new HashMap<>();
@@ -80,6 +76,7 @@ public class StudentController {
 					example = "{\"status\": \"FAIL\", \"message\": \"작성한 자기소개서가 없습니다.\"}"
 				)))
 	})
+
 	@GetMapping
 	public ResponseEntity<Map<String, Object>> getStudentList(
 		@Parameter(hidden = true)
@@ -91,8 +88,9 @@ public class StudentController {
 		Map<String, Object> body = new HashMap<String, Object>();
 
 		body.put("status", "SUCCESS");
-		body.put("data", data);
+		body.put("data", Map.of("students", data));
 
 		return ResponseEntity.ok().body(body);
 	}
+
 }
