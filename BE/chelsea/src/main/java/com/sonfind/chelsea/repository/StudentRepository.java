@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.dto.student.response.StudentListQueryDto;
 
+import io.lettuce.core.dynamic.annotation.Param;
+
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
 
@@ -23,14 +25,18 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 		"track.subCode, track.subCodeName, " +
 		"goal.subCode, goal.subCodeName, " +
 		"si.profileImageUrl, " +
-		"t.name) " +
+		"t.name, sf.isFavorite) " +
 		"FROM StudentInfo si " +
 		"RIGHT JOIN si.student s " +
 		"LEFT JOIN Team t ON t.teamId = s.teamId " +
 		"LEFT JOIN si.positionCode pos " +
 		"LEFT JOIN si.trackCode track " +
-		"LEFT JOIN si.goalCode goal")
-	List<StudentListQueryDto> findStudentList();
+		"LEFT JOIN si.goalCode goal " +
+		"LEFT JOIN StudentFavorite sf ON s.studentId = sf.targetStudent.studentId AND sf.student.studentId = :studentId "
+		+
+		"ORDER BY sf.isFavorite DESC, s.teamId ASC ,BINARY(s.name)"
+	)
+	List<StudentListQueryDto> findStudentList(@Param("studentId") Long studentId);
 
 	@Query(value =
 		"SELECT CASE WHEN s.major_yn = TRUE THEN '전공' ELSE '비전공' END AS major_type, "

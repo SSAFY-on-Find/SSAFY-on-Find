@@ -53,6 +53,25 @@ public class StudentService {
 			.build();
 	}
 
+	/**
+	 * 전체 교육생 목록 조회
+	 * */
+	@Transactional(readOnly = true)
+	public List<StudentListResponseDto> getStudentList(Long studentId) {
+
+		List<StudentListQueryDto> queryResult = studentRepository.findStudentList(studentId);
+
+		return queryResult.stream().map(dto -> new StudentListResponseDto(
+			new StudentResponseDto(dto.studentId(), dto.name(), dto.major() ? "전공" : "비전공"),
+			new SubCodeResponseDto(dto.positionCode(), dto.positionCodeName()),
+			new SubCodeResponseDto(dto.trackCode(), dto.trackCodeName()),
+			new SubCodeResponseDto(dto.goalCode(), dto.goalCodeName()),
+			dto.profileImageUrl(),
+			dto.isFavorite() != null,
+			dto.teamName()
+		)).collect(Collectors.toList());
+	}
+
 	public Student findByStudentId(long studentId) {
 
 		Optional<Student> authOptional = studentRepository.findByStudentId(studentId);
