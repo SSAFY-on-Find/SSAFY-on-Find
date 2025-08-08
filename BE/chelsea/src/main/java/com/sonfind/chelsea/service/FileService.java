@@ -65,7 +65,7 @@ public class FileService {
 		file.transferTo(filePath.toFile());
 
 		//return savedFileName;
-		return serviceUrl + "/uploads/" + fileType.getDirectoryName() + "/" + savedFileName;
+		return serviceUrl + "/api/v1/uploads/" + fileType.getDirectoryName() + "/" + savedFileName;
 	}
 
 	//파일 유효성 검사(크기 + 형식)
