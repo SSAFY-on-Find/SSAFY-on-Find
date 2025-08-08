@@ -7,7 +7,8 @@ import { CirclePlus, Eye, Search, X } from "lucide-react"
 import { Button, CheckTag, InputBox, Segmented, UserImg } from "@/components/atoms"
 import { FormCard, FormCheckTag, FormDropdown, FormInput } from "@/components/molecules"
 import { useProfileCodes } from "@/hooks/useProfile"
-import { useCreateProfile } from "@/hooks/useProfile"
+import { useEditProfile } from "@/hooks/useProfile"
+import { useGetProfile } from "@/hooks/useProfile"
 import { useProfileStore } from "@/stores/profileStroe"
 import { useUserStore } from "@/stores/userStore"
 
@@ -24,6 +25,7 @@ const PORTFOLIO_MAX = 50 * 1024 * 1024
 
 export default function ProfileEditPage() {
   const { data: codes, isLoading: isCodesLoading, error: codesError } = useProfileCodes()
+  const { data: infos, isLoading: isInfosLoading, error: infosError } = useGetProfile()
   const { user } = useUserStore()
   const { position, track, techStack, goal, strength, portfolio, portfolioFile, description, setCodes } =
     useProfileStore()
@@ -33,25 +35,43 @@ export default function ProfileEditPage() {
   const [mbtiSelected, setMbtiSelected] = useState(["I", "N", "T", "P"])
   const profileImgInputRef = useRef<HTMLInputElement>(null)
   const portfolioInputRef = useRef<HTMLInputElement>(null)
-  const { mutate: createProfile, isSuccess, error: createError } = useCreateProfile()
+  const { mutate: editProfile, isSuccess, error: editError } = useEditProfile()
   const profileStore = useProfileStore()
   const navigate = useNavigate()
 
   useEffect(() => {
+    if (infos) {
+      setCodes({
+        position: infos.position,
+        track: infos.track,
+        techStack: infos.techStack,
+        goal: infos.goal,
+        strength: infos.strength,
+        mbti: infos.mbti,
+        portfolio: infos.portfolio,
+        description: infos.description,
+        profileImageFile: null,
+        portfolioFile: null,
+      })
+      if (infos.mbti?.subcodeName) {
+        setIsEditingMbti(true)
+        setMbtiSelected(infos.mbti.subcodeName.split(""))
+      }
+    }
+  }, [infos, setCodes])
+
+  useEffect(() => {
     if (isSuccess) {
       toast.success("자기소개가 성공적으로 저장되었습니다!")
-      useUserStore.setState((state) => ({
-        user: state.user ? { ...state.user, isCreatedStudentInfo: true } : state.user,
-      }))
       navigate("/")
     }
   }, [isSuccess, navigate])
 
   useEffect(() => {
-    if (createError) {
+    if (editError) {
       toast.error("자기소개 저장 중 오류가 발생했습니다.")
     }
-  }, [createError])
+  }, [editError])
 
   const handleProfileImgChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -97,7 +117,7 @@ export default function ProfileEditPage() {
       return
     }
 
-    createProfile(profileStore)
+    editProfile(profileStore)
   }
 
   function setMbtiToStore(mbtiArr: string[]) {

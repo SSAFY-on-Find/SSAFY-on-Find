@@ -334,7 +334,7 @@ export default function ProfileCreatePage() {
         )}
       </FormCard>
       <Button
-        text="저장하기"
+        text="등록하기"
         size={"m"}
         isIcon={false}
         onClick={() => {
