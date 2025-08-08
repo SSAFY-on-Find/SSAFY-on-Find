@@ -27,6 +27,8 @@ import com.sonfind.chelsea.dto.teams.TeamRuleResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
 import com.sonfind.chelsea.dto.teams.UpdateTeamRequestDto;
 import com.sonfind.chelsea.global.domain.SubCode;
+import com.sonfind.chelsea.global.error.BusinessException;
+import com.sonfind.chelsea.global.error.ErrorCode;
 import com.sonfind.chelsea.repository.StudentFavoriteRepository;
 import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
@@ -58,8 +60,7 @@ public class TeamService {
 		//팀에 속해 있는 교육생은 팀 생성 못함
 		Student student = studentService.findByStudentId(studentId);
 		if (student.getTeamId() != null) {
-			throw new ResponseStatusException(
-				HttpStatus.FORBIDDEN, "이미 팀에 속해있습니다");
+			throw new BusinessException(ErrorCode.CONFLICT);
 		}
 
 		//subCode로 track
@@ -460,17 +461,6 @@ public class TeamService {
 			.isRecruitingComplete(teamMembers.size() >= 6)
 			.isFavorite(isFavorite)
 			.build();
-	}
-
-	//교육생 프사 조회
-	private String getStudentProfileImage(Student student) {
-		try {
-			return studentInfoRepository.findByStudent_StudentId(student.getStudentId())
-				.map(StudentInfo::getProfileImageUrl)
-				.orElse("");
-		} catch (Exception e) {
-			return "";
-		}
 	}
 
 	//팀 이름 숫자만 파싱

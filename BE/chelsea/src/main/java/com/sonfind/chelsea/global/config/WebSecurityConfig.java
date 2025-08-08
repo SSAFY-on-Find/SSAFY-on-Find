@@ -8,6 +8,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import com.sonfind.chelsea.global.error.RestAccessDeniedHandler;
+import com.sonfind.chelsea.global.error.RestAuthenticationEntryPoint;
+
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -21,6 +24,9 @@ public class WebSecurityConfig {
 		httpSecurity
 			.csrf(AbstractHttpConfigurer::disable)
 			.cors(cors -> cors.configurationSource(corsConfigurationSource))
+			.exceptionHandling(e -> e
+				.authenticationEntryPoint(new RestAuthenticationEntryPoint())
+				.accessDeniedHandler(new RestAccessDeniedHandler()))
 			.authorizeHttpRequests((authorize) -> authorize
 				.requestMatchers("/api/v1/auth/**").permitAll()
 				.requestMatchers("/api/v1/students/**").permitAll()
@@ -34,7 +40,7 @@ public class WebSecurityConfig {
 					"/v3/api-docs/**",
 					"/webjars/**"
 				).permitAll()
-				.requestMatchers("/**").permitAll()
+				// .requestMatchers("/**").permitAll()
 				.anyRequest().authenticated());
 
 		return httpSecurity.build();
