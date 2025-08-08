@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/dashboard")
+@RequestMapping("/api/v1/dashboard")
 @Tag(name = "dashboard", description = "대시보드와 관련된 API")
 public class DashboardController {
 
@@ -42,7 +42,7 @@ public class DashboardController {
 	@GetMapping("/team-ratio")
 	public ResponseEntity<Map<String, Object>> getTeamRatio() {
 
-		List<TeamRatioDto> data = studentService.getTeamRatio();
+		Map<String, TeamRatioDto> data = studentService.getTeamRatio();
 
 		HashMap<String, Object> body = new HashMap<>();
 

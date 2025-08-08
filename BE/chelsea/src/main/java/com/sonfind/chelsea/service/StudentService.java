@@ -1,7 +1,8 @@
 package com.sonfind.chelsea.service;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -103,11 +104,11 @@ public class StudentService {
 	 * 대시보드 용 팀 빌딩 진행률 조회 함수
 	 * */
 	@Transactional(readOnly = true)
-	public List<TeamRatioDto> getTeamRatio() {
+	public Map<String, TeamRatioDto> getTeamRatio() {
 
 		List<Object[]> rawData = studentRepository.getTeamRatio();
 
-		List<TeamRatioDto> result = new ArrayList<>();
+		Map<String, TeamRatioDto> result = new HashMap<>();
 		int totalStudentCount = 0;
 		int totalTeamMemberCount = 0;
 
@@ -121,12 +122,12 @@ public class StudentService {
 			totalStudentCount += totalCount;
 			totalTeamMemberCount += teamMemberCount;
 
-			result.add(TeamRatioDto.builder()
+			result.put(majorType.equals("전공") ? "major" : "nonMajor", TeamRatioDto.builder()
 				.type(majorType)
 				.totalStudentCount(totalCount)
 				.teamMemberCount(teamMemberCount).build());
 		}
-		result.add(TeamRatioDto.builder()
+		result.put("all", TeamRatioDto.builder()
 			.type("전체")
 			.totalStudentCount(totalStudentCount)
 			.teamMemberCount(totalTeamMemberCount).build());

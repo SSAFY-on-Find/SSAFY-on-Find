@@ -3,7 +3,7 @@ import { ChevronDown } from "lucide-react"
 
 interface IDropdown {
   placeholder: string
-  options: string[]
+  options: { label: string; value: string }[]
   value?: string
   onChange?: (value: string) => void
 }
@@ -52,13 +52,13 @@ function Dropdown({ placeholder, options, value, onChange }: IDropdown) {
         >
           {options.map((option) => (
             <div
-              key={option}
-              onClick={() => handleSelect(option)}
+              key={option.value}
+              onClick={() => handleSelect(option.value)}
               className={`hover:bg-main/10 cursor-pointer px-4 py-2 text-sm ${
-                value === option ? "bg-main/10 font-semibold" : ""
+                value === option.value ? "bg-main/10 font-semibold" : ""
               }`}
             >
-              {option}
+              {option.label}
             </div>
           ))}
         </div>

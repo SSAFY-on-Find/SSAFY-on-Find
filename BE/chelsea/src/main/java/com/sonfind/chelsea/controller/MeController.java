@@ -66,6 +66,7 @@ public class MeController {
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
+		body.put("data", null);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(body);
 	}
@@ -107,7 +108,7 @@ public class MeController {
 
 		StudentInfoGetSummaryResponseDto studentInfo = studentInfoService.getSummaryStudentInfo(studentId);
 
-		Map<String, Object> body = new HashMap();
+		Map<String, Object> body = new HashMap<>();
 
 		body.put("status", "SUCCESS");
 		body.put("data", studentInfo);
@@ -137,6 +138,7 @@ public class MeController {
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
+		body.put("data", null);
 
 		return ResponseEntity.ok().body(body);
 	}

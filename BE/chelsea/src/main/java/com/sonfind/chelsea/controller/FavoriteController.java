@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/favorites")
+@RequestMapping("/api/v1/favorites")
 @Tag(name = "favorites", description = "즐겨찾기 관련 API")
 public class FavoriteController {
 	private final FavoriteService favoriteService;
