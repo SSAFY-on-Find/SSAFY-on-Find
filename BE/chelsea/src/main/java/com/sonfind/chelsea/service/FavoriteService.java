@@ -130,22 +130,4 @@ public class FavoriteService {
 			.orElse(false);
 	}
 
-	//팀 좋아요 상태 일괄 확인
-	// public Map<Long, Boolean> checkTeamFavoriteStatusBatch(Long studentId, List<Long> teamIds) {
-	// 	if (teamIds.isEmpty()) {
-	// 		return new HashMap<>();
-	// 	}
-	//
-	// 	// 한 번의 쿼리로 즐겨찾기된 팀들 조회 (isFavorite = true인 것만)
-	// 	List<Long> favoriteTeamIds = teamFavoriteRepository.findFavoriteTeamIdsByStudentIdAndTeamIds(studentId,
-	// 		teamIds);
-	//
-	// 	// 결과 Map 생성
-	// 	return teamIds.stream()
-	// 		.collect(Collectors.toMap(
-	// 			teamId -> teamId,
-	// 			teamId -> favoriteTeamIds.contains(teamId)
-	// 		));
-	// }
-
 }
