@@ -8,7 +8,6 @@ import org.apache.coyote.BadRequestException;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -31,32 +30,31 @@ import lombok.extern.slf4j.Slf4j;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-	private ProblemDetail pd(ErrorCode ec, String detail, HttpServletRequest req) {
-		ProblemDetail p = ProblemDetail.forStatus(ec.status);
-		p.setDetail(Optional.ofNullable(detail).orElse(ec.message));
-		p.setProperty("path", req.getRequestURI());
-		return p;
-	}
-
 	// 비즈니스 예외
 	@ExceptionHandler(BusinessException.class)
-	public ResponseEntity<ProblemDetail> handleBusinessException(BusinessException ex, HttpServletRequest req) {
+	public ResponseEntity<ApiErrorResponse> handleBusinessException(BusinessException ex, HttpServletRequest req) {
 		ErrorCode ec = ex.getErrorCode();
-		log.warn("Business exception: {} - {}", ex.getMessage());
-		return ResponseEntity.status(ec.status).body(pd(ec, ex.getMessage(), req));
+		log.warn("Business exception: {} - {}", ec.name(), ex.getMessage());
+
+		ApiErrorResponse errorResponse = ApiErrorResponse.of(ex.getMessage(), req.getRequestURI());
+		return ResponseEntity.status(ec.status).body(errorResponse);
 	}
 
 	// @Valid DTO 바인딩 실패
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<ProblemDetail> handleInvalid(MethodArgumentNotValidException ex, HttpServletRequest req) {
-		ErrorCode ec = ErrorCode.VALIDATION_FAILED;
-		ProblemDetail p = pd(ec, ec.message, req);
-		Map<String, String> errors = ex.getBindingResult().getFieldErrors().stream()
+	public ResponseEntity<ApiErrorResponse> handleInvalid(MethodArgumentNotValidException ex, HttpServletRequest req) {
+		Map<String, String> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
 			.collect(Collectors.toMap(FieldError::getField,
 				fe -> Optional.ofNullable(fe.getDefaultMessage()).orElse("invalid"), (a, b) -> a));
-		p.setProperty("errors", errors);
-		log.warn("Validation failed: {}", errors);
-		return ResponseEntity.badRequest().body(p);
+
+		String message = fieldErrors.isEmpty()
+			? "요청 값이 올바르지 않습니다."
+			: fieldErrors.values().iterator().next();
+
+		ApiErrorResponse errorResponse = ApiErrorResponse.ofValidation(message, req.getRequestURI(), fieldErrors);
+
+		log.warn("Validation failed: {}", fieldErrors);
+		return ResponseEntity.badRequest().body(errorResponse);
 	}
 
 	// 파라미터 타입/누락/json 파싱 실패
@@ -65,108 +63,114 @@ public class GlobalExceptionHandler {
 		HttpMessageNotReadableException.class,
 		MethodArgumentTypeMismatchException.class
 	})
-	public ResponseEntity<ProblemDetail> handleBadRequest(Exception ex, HttpServletRequest req) {
-		ErrorCode ec = ErrorCode.VALIDATION_FAILED;
+	public ResponseEntity<ApiErrorResponse> handleBadRequest(Exception ex, HttpServletRequest req) {
 		log.warn("Bad request: {}", ex.getMessage());
-		return ResponseEntity.badRequest().body(pd(ec, ex.getMessage(), req));
+
+		ApiErrorResponse errorResponse = ApiErrorResponse.of("요청 값이 올바르지 않습니다.", req.getRequestURI());
+		return ResponseEntity.badRequest().body(errorResponse);
 	}
 
 	// 쿼리 파라미터/경로 변수에 대한 @Validated(메소드 레벨) 위반
 	@ExceptionHandler(ConstraintViolationException.class)
-	public ResponseEntity<ProblemDetail> handleConstraintViolation(ConstraintViolationException ex,
+	public ResponseEntity<ApiErrorResponse> handleConstraintViolation(ConstraintViolationException ex,
 		HttpServletRequest req) {
-		ErrorCode ec = ErrorCode.VALIDATION_FAILED;
-		ProblemDetail p = pd(ec, ex.getMessage(), req);
-		Map<String, String> errors = ex.getConstraintViolations().stream()
+
+		Map<String, String> fieldErrors = ex.getConstraintViolations().stream()
 			.collect(Collectors.toMap(v -> v.getPropertyPath().toString(),
 				v -> v.getMessage(), (a, b) -> a));
-		p.setProperty("errors", errors);
-		log.warn("Constraint violation: {}", errors);
-		return ResponseEntity.badRequest().body(p);
+
+		String message = fieldErrors.isEmpty()
+			? "요청 값이 올바르지 않습니다."
+			: fieldErrors.values().iterator().next();
+
+		ApiErrorResponse errorResponse = ApiErrorResponse.ofValidation(message, req.getRequestURI(), fieldErrors);
+
+		log.warn("Constraint violation: {}", fieldErrors);
+		return ResponseEntity.badRequest().body(errorResponse);
 	}
 
 	// 파일 업로드 크기 초과
 	@ExceptionHandler(MaxUploadSizeExceededException.class)
-	public ResponseEntity<ProblemDetail> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex,
+	public ResponseEntity<ApiErrorResponse> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex,
 		HttpServletRequest req) {
-		ErrorCode ec = ErrorCode.FILE_SIZE_EXCEEDED;
 		log.warn("File size exceeded: {}", ex.getMessage());
-		return ResponseEntity.badRequest().body(pd(ec, ec.message, req));
+
+		ApiErrorResponse errorResponse = ApiErrorResponse.of("파일 크기가 너무 큽니다.", req.getRequestURI());
+		return ResponseEntity.badRequest().body(errorResponse);
 	}
 
 	// 파일 업로드 관련 예외 (Apache Commons FileUpload)
 	@ExceptionHandler(FileUploadException.class)
-	public ResponseEntity<ProblemDetail> handleFileUpload(FileUploadException ex, HttpServletRequest req) {
-		ErrorCode ec = ErrorCode.FILE_UPLOAD_ERROR;
+	public ResponseEntity<ApiErrorResponse> handleFileUpload(FileUploadException ex, HttpServletRequest req) {
 		log.warn("File upload error: {}", ex.getMessage());
-		return ResponseEntity.badRequest().body(pd(ec, ex.getMessage(), req));
+
+		ApiErrorResponse errorResponse = ApiErrorResponse.of("파일 업로드 중 오류가 발생했습니다.", req.getRequestURI());
+		return ResponseEntity.badRequest().body(errorResponse);
 	}
 
 	// Security (컨트롤러 이후 레이어에서 발생한 경우)
 	@ExceptionHandler(AccessDeniedException.class)
-	public ResponseEntity<ProblemDetail> handleAccessDenied(AccessDeniedException ex, HttpServletRequest req) {
-		ErrorCode ec = ErrorCode.ACCESS_DENIED;
+	public ResponseEntity<ApiErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest req) {
 		log.warn("Access denied: {}", ex.getMessage());
-		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(pd(ec, ec.message, req));
+
+		ApiErrorResponse errorResponse = ApiErrorResponse.of("접근 권한이 없습니다.", req.getRequestURI());
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
 	}
 
 	// DB 제약 위반 충돌
 	@ExceptionHandler(DataIntegrityViolationException.class)
-	public ResponseEntity<ProblemDetail> handleConflict(DataIntegrityViolationException ex, HttpServletRequest req) {
-		ErrorCode ec = ErrorCode.CONFLICT;
+	public ResponseEntity<ApiErrorResponse> handleConflict(DataIntegrityViolationException ex, HttpServletRequest req) {
 		log.warn("Data integrity violation: {}", ex.getMessage());
-		return ResponseEntity.status(HttpStatus.CONFLICT).body(pd(ec, "데이터 제약 조건을 위반했습니다.", req));
+
+		ApiErrorResponse errorResponse = ApiErrorResponse.of("데이터 제약 조건을 위반했습니다.", req.getRequestURI());
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
 	}
 
 	// HTTP 메서드 미지원
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-	public ResponseEntity<ProblemDetail> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex,
+	public ResponseEntity<ApiErrorResponse> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex,
 		HttpServletRequest req) {
-		ProblemDetail p = ProblemDetail.forStatus(HttpStatus.METHOD_NOT_ALLOWED);
-		p.setTitle("METHOD_NOT_ALLOWED");
-		p.setDetail(ex.getMessage());
-		p.setProperty("path", req.getRequestURI());
 		log.warn("Method not allowed: {}", ex.getMessage());
-		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(p);
+
+		ApiErrorResponse errorResponse = ApiErrorResponse.of("지원하지 않는 HTTP 메서드입니다.", req.getRequestURI());
+		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errorResponse);
 	}
 
 	// 기존 ResponseStatusException 호환성 유지
 	@ExceptionHandler(ResponseStatusException.class)
-	public ResponseEntity<ProblemDetail> handleResponseStatusException(ResponseStatusException ex,
+	public ResponseEntity<ApiErrorResponse> handleResponseStatusException(ResponseStatusException ex,
 		HttpServletRequest req) {
-		ProblemDetail p = ProblemDetail.forStatus(ex.getStatusCode());
-		p.setTitle(ex.getStatusCode().toString());
-		p.setDetail(ex.getReason());
-		p.setProperty("path", req.getRequestURI());
 		log.warn("ResponseStatusException: {} - {}", ex.getStatusCode(), ex.getReason());
-		return ResponseEntity.status(ex.getStatusCode()).body(p);
+
+		String message = Optional.ofNullable(ex.getReason()).orElse("서버 오류가 발생했습니다.");
+		ApiErrorResponse errorResponse = ApiErrorResponse.of(message, req.getRequestURI());
+		return ResponseEntity.status(ex.getStatusCode()).body(errorResponse);
 	}
 
 	// Apache Coyote BadRequestException (NotificationService에서 사용)
 	@ExceptionHandler(BadRequestException.class)
-	public ResponseEntity<ProblemDetail> handleBadRequestException(BadRequestException ex, HttpServletRequest req) {
-		ErrorCode ec = ErrorCode.BAD_REQUEST;
+	public ResponseEntity<ApiErrorResponse> handleBadRequestException(BadRequestException ex, HttpServletRequest req) {
 		log.warn("BadRequestException: {}", ex.getMessage());
-		return ResponseEntity.badRequest().body(pd(ec, ex.getMessage(), req));
+
+		ApiErrorResponse errorResponse = ApiErrorResponse.of(ex.getMessage(), req.getRequestURI());
+		return ResponseEntity.badRequest().body(errorResponse);
 	}
 
 	// JPA EntityNotFoundException
 	@ExceptionHandler(EntityNotFoundException.class)
-	public ResponseEntity<ProblemDetail> handleEntityNotFound(EntityNotFoundException ex, HttpServletRequest req) {
-		// 일반적인 NOT_FOUND로 처리하거나, 구체적인 에러코드가 필요하면 분기 처리
-		ProblemDetail p = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
-		p.setTitle("ENTITY_NOT_FOUND");
-		p.setDetail(ex.getMessage());
-		p.setProperty("path", req.getRequestURI());
+	public ResponseEntity<ApiErrorResponse> handleEntityNotFound(EntityNotFoundException ex, HttpServletRequest req) {
 		log.warn("Entity not found: {}", ex.getMessage());
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(p);
+
+		ApiErrorResponse errorResponse = ApiErrorResponse.of("요청한 리소스를 찾을 수 없습니다.", req.getRequestURI());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
 	}
 
 	// 안전망
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<ProblemDetail> handleEtc(Exception ex, HttpServletRequest req) {
+	public ResponseEntity<ApiErrorResponse> handleEtc(Exception ex, HttpServletRequest req) {
 		log.error("Unhandled Exception", ex);
-		ErrorCode ec = ErrorCode.INTERNAL_ERROR;
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(pd(ec, ec.message, req));
+
+		ApiErrorResponse errorResponse = ApiErrorResponse.of("서버 내부 오류가 발생했습니다.", req.getRequestURI());
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
 	}
 }

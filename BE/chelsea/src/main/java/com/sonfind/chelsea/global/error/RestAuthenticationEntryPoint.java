@@ -2,25 +2,25 @@ package com.sonfind.chelsea.global.error;
 
 import java.io.IOException;
 
-import org.springframework.http.ProblemDetail;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+	private final ObjectMapper objectMapper = new ObjectMapper();
+
 	@Override
 	public void commence(HttpServletRequest req, HttpServletResponse res, AuthenticationException ex) throws
 		IOException {
-		ProblemDetail p = ProblemDetail.forStatus(ErrorCode.AUTH_REQUIRED.status);
-		p.setTitle(ErrorCode.AUTH_REQUIRED.name()); // .code → .name()
-		p.setDetail(ErrorCode.AUTH_REQUIRED.message);
-		p.setProperty("path", req.getRequestURI());
-		res.setStatus(ErrorCode.AUTH_REQUIRED.status.value());
-		res.setContentType("application/problem+json");
-		res.getWriter().write("""
-			{"type":"about:blank", "title":"AUTH_REQUIRED", "status":401, "detail":"인증이 필요합니다."}
-			""");
+		ApiErrorResponse errorResponse = ApiErrorResponse.of("인증이 필요합니다.", req.getRequestURI());
+
+		res.setStatus(401);
+		res.setContentType("application/json; charset=UTF-8");
+		res.getWriter().write(objectMapper.writeValueAsString(errorResponse));
 	}
 }
