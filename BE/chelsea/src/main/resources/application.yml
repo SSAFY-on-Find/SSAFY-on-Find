@@ -22,3 +22,5 @@ server:
   servlet:
     context-path: /api/v1
 
+springdoc:
+  override-with-generic-response: false

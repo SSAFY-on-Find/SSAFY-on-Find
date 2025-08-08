@@ -26,10 +26,9 @@ import com.sonfind.chelsea.dto.teams.TeamRuleResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
 import com.sonfind.chelsea.dto.teams.UpdateTeamRequestDto;
 import com.sonfind.chelsea.global.domain.SubCode;
+import com.sonfind.chelsea.global.error.AppException;
 import com.sonfind.chelsea.global.error.BusinessException;
 import com.sonfind.chelsea.global.error.ErrorCode;
-import com.sonfind.chelsea.global.error.TeamNotFoundException;
-import com.sonfind.chelsea.repository.StudentFavoriteRepository;
 import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
@@ -48,10 +47,8 @@ public class TeamService {
 	private final StudentRepository studentRepository;
 	private final StudentInfoRepository studentInfoRepository;
 
-	private final SubCodeService subCodeService;
 	private final StudentService studentService;
 	private final FavoriteService favoriteService;
-	private final StudentFavoriteRepository studentFavoriteRepository;
 
 	//팀 생성
 	@Transactional
@@ -60,14 +57,14 @@ public class TeamService {
 		//팀에 속해 있는 교육생은 팀 생성 못함
 		Student student = studentService.findByStudentId(studentId);
 		if (student.getTeamId() != null) {
-			throw new BusinessException(ErrorCode.CONFLICT);
+			throw AppException.teamAlreadyJoined();
 		}
 
 		//subCode로 track
 		//없는 트랙이면 badrequest
 		SubCode track = getSubCodeByValue(request.track());
 		if (track == null) {
-			throw new BusinessException(ErrorCode.VALIDATION_FAILED);
+			throw AppException.trackNotFound();
 		}
 
 		//최초 생성자 전공?비전공?
@@ -128,12 +125,12 @@ public class TeamService {
 		//팀에 속해 있지 않은 교육생은 수정 불가
 		Student Student = studentService.findByStudentId(studentId);
 		if (!teamId.equals(Student.getTeamId())) {
-			throw new BusinessException(ErrorCode.CONFLICT);
+			throw AppException.teamPermissionDenied();
 		}
 
 		//존재하는 팀인지 확인
 		Team team = teamRepository.findTeamByTeamId(teamId)
-			.orElseThrow(TeamNotFoundException::new);
+			.orElseThrow(AppException::teamNotFound);
 
 		//팀 설명 수정
 		if (request.description() != null) {
@@ -144,7 +141,7 @@ public class TeamService {
 		if (request.track() != null) {
 			SubCode track = getSubCodeByValue(request.track());
 			if (track == null) {
-				throw new BusinessException(ErrorCode.VALIDATION_FAILED);
+				throw AppException.trackNotFound();
 			}
 			team.updateTrack(track);
 		}
@@ -161,10 +158,10 @@ public class TeamService {
 	public void addStudentToTeam(Long teamId, Long studentId) {
 		//들어가고 싶은 팀
 		Team targetTeam = teamRepository.findTeamByTeamId(teamId)
-			.orElseThrow(TeamNotFoundException::new);
+			.orElseThrow(AppException::teamNotFound);
 
 		if (targetTeam.isDeleted()) {
-			throw new BusinessException(ErrorCode.BAD_REQUEST);
+			throw AppException.teamDeletedAccess();
 		}
 
 		//학생
@@ -176,12 +173,12 @@ public class TeamService {
 
 		//이미 해당 팀이라면
 		if (teamId.equals(currentTeamId)) {
-			throw new BusinessException(ErrorCode.CONFLICT);
+			throw AppException.teamAlreadyJoined();
 		}
 
 		//정원 초과 확인
 		if (targetTeamMembers.size() >= 6) {
-			throw new BusinessException(ErrorCode.CONFLICT);
+			throw AppException.teamFull();
 		}
 
 		//기존 팀이 있다면 삭제
@@ -216,10 +213,10 @@ public class TeamService {
 	public void mergeTeams(Long sourceTeamId, Long targetTeamId) {
 		//두 팀의 존재에 관하여
 		Team sourceTeam = teamRepository.findTeamByTeamId(sourceTeamId)
-			.orElseThrow(TeamNotFoundException::new);
+			.orElseThrow(AppException::teamNotFound);
 
 		Team targetTeam = teamRepository.findTeamByTeamId(targetTeamId)
-			.orElseThrow(TeamNotFoundException::new);
+			.orElseThrow(AppException::teamNotFound);
 
 		if (sourceTeam.isDeleted() || targetTeam.isDeleted()) {
 			throw new BusinessException(ErrorCode.BAD_REQUEST);
@@ -263,14 +260,14 @@ public class TeamService {
 
 	//팀에서 교육생 제거
 	@Transactional
-	public void removeStudentFromTeam(Long teamId, Long studentId, boolean skilValidation) {
+	public void removeStudentFromTeam(Long teamId, Long studentId, boolean skipValidation) {
 		Team team = teamRepository.findTeamByTeamId(teamId)
-			.orElseThrow(TeamNotFoundException::new);
+			.orElseThrow(AppException::teamNotFound);
 
 		Student student = studentService.findByStudentId(studentId);
 
-		if (!skilValidation && !teamId.equals(student.getTeamId())) {
-			throw new BusinessException(ErrorCode.BAD_REQUEST);
+		if (!skipValidation && !teamId.equals(student.getTeamId())) {
+			throw AppException.teamNotInTeam();
 		}
 
 		//팀에서 학생 제거
@@ -305,7 +302,7 @@ public class TeamService {
 	public LeaveTeamResponseDto leaveTeam(Long studentId) {
 		Student student = studentService.findByStudentId(studentId);
 		if (student.getTeamId() == null) {
-			throw new BusinessException(ErrorCode.BAD_REQUEST);
+			throw AppException.teamNotInTeam();
 		}
 
 		Long teamId = student.getTeamId();
@@ -326,7 +323,7 @@ public class TeamService {
 	public TeamResponseDto getTeamDetail(Long teamId, Long studentId) {
 		//존재하는 팀인지 확인
 		Team team = teamRepository.findTeamByTeamId(teamId)
-			.orElseThrow(TeamNotFoundException::new);
+			.orElseThrow(AppException::teamNotFound);
 
 		List<Student> teamMembers = studentRepository.findAllByTeamId(teamId);
 
@@ -372,7 +369,7 @@ public class TeamService {
 	public MyTeamResponseDto getMyTeamDetail(Long studentId) {
 		Student student = studentService.findByStudentId(studentId);
 		if (student.getTeamId() == null) {
-			throw new BusinessException(ErrorCode.BAD_REQUEST);
+			throw AppException.teamNotInTeam();
 		}
 
 		TeamResponseDto teamInfo = getTeamDetail(student.getTeamId(), studentId);
@@ -548,7 +545,7 @@ public class TeamService {
 			.map(name -> {
 				SubCode pos = getSubCodeByValue(name);
 				if (pos == null) {
-					throw new BusinessException(ErrorCode.VALIDATION_FAILED);
+					throw AppException.positionNotFound();
 				}
 				return Recruitment.builder()
 					.position(pos)
@@ -569,7 +566,7 @@ public class TeamService {
 		Optional<Team> optionalTeam = teamRepository.findById(teamId);
 
 		if (optionalTeam.isEmpty()) {
-			throw new TeamNotFoundException();
+			throw AppException.teamNotFound();
 		}
 
 		Team team = optionalTeam.get();

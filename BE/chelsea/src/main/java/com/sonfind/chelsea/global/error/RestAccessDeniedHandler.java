@@ -13,7 +13,7 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
 	@Override
 	public void handle(HttpServletRequest req, HttpServletResponse res, AccessDeniedException ex) throws IOException {
 		ProblemDetail p = ProblemDetail.forStatus(ErrorCode.ACCESS_DENIED.status);
-		p.setTitle(ErrorCode.ACCESS_DENIED.code);
+		p.setTitle(ErrorCode.ACCESS_DENIED.name()); // .code → .name()
 		p.setDetail(ErrorCode.ACCESS_DENIED.message);
 		p.setProperty("path", req.getRequestURI());
 		res.setStatus(ErrorCode.ACCESS_DENIED.status.value());

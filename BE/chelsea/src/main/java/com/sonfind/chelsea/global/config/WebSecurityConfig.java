@@ -40,7 +40,7 @@ public class WebSecurityConfig {
 					"/v3/api-docs/**",
 					"/webjars/**"
 				).permitAll()
-				// .requestMatchers("/**").permitAll()
+				.requestMatchers("/**").permitAll()
 				.anyRequest().authenticated());
 
 		return httpSecurity.build();

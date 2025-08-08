@@ -14,7 +14,7 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 	public void commence(HttpServletRequest req, HttpServletResponse res, AuthenticationException ex) throws
 		IOException {
 		ProblemDetail p = ProblemDetail.forStatus(ErrorCode.AUTH_REQUIRED.status);
-		p.setTitle(ErrorCode.AUTH_REQUIRED.code);
+		p.setTitle(ErrorCode.AUTH_REQUIRED.name()); // .code → .name()
 		p.setDetail(ErrorCode.AUTH_REQUIRED.message);
 		p.setProperty("path", req.getRequestURI());
 		res.setStatus(ErrorCode.AUTH_REQUIRED.status.value());
