@@ -14,11 +14,11 @@ export const profileApi = {
     const formData = new FormData()
 
     const data = {
-      position: profile.position?.subcodeName ?? "",
-      track: profile.track?.subcodeName ?? "",
-      techStack: profile.techStack.map((item) => item.subcodeName),
-      goal: profile.goal?.subcodeName ?? "",
-      mbti: profile.mbti?.subcodeName ?? "",
+      position: profile.position?.subcode ?? "",
+      track: profile.track?.subcode ?? "",
+      techStack: profile.techStack.map((item) => item.subcode),
+      goal: profile.goal?.subcode ?? "",
+      mbti: profile.mbti?.subcode ?? "",
       strength: profile.strength,
       description: profile.description ?? "",
     }

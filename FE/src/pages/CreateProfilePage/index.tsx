@@ -20,6 +20,8 @@ const mbtiPairs = [
   ["T", "F"],
   ["P", "J"],
 ]
+const PROFILE_MAX = 1 * 1024 * 1024
+const PORTFOLIO_MAX = 50 * 1024 * 1024
 
 export default function ProfileCreatePage() {
   const { data: codes, isLoading: isCodesLoading, error: codesError } = useProfileCodes()
@@ -54,16 +56,28 @@ export default function ProfileCreatePage() {
 
   const handleProfileImgChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      setCodes({ profileImageFile: file })
+
+    if (!file) return
+    if (file.size > PROFILE_MAX) {
+      toast.warn(`이미지 크기는 최대 1MB까지 업로드할 수 있습니다. (현재 ${(file.size / 1024 / 1024).toFixed(2)}MB)`)
+      e.target.value = ""
+      return
     }
+
+    setCodes({ profileImageFile: file })
   }
 
   const handlePortfolioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      setCodes({ portfolioFile: file })
+
+    if (!file) return
+    if (file.size > PORTFOLIO_MAX) {
+      toast.warn(`파일 크기는 최대 50MB까지 업로드할 수 있습니다. (현재 ${(file.size / 1024 / 1024).toFixed(2)}MB)`)
+      e.target.value = ""
+      return
     }
+
+    setCodes({ portfolioFile: file })
   }
 
   const handleSave = () => {
