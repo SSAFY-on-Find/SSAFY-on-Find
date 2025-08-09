@@ -27,12 +27,12 @@ function StudentCard({ student, position, track, goal, profileImageUrl, isFavori
         <div className="text-subtext text-sm">{student.studentId}</div>
       </div>
       <div className="flex flex-col gap-2">
-        <div className="flex flex-row gap-2">
-          <MainTag tagContent={teamName} fillBg={true} />
+        <div className="flex flex-row justify-center gap-2">
+          {teamName && <MainTag tagContent={teamName} fillBg={true} />}
           <MajorTag tagContent={student.major} />
           <PositionTag positionName={position.subcodeName} />
         </div>
-        <div className="flex flex-row gap-2">
+        <div className="flex flex-row justify-center gap-2">
           <NormalTag tagContent={track.subcodeName} />
           <NormalTag tagContent={`${goal.subcodeName} 우선`} />
         </div>

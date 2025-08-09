@@ -35,3 +35,17 @@ export const useStudentInfo = (studentId: number) => {
     enabled: !!studentId,
   })
 }
+
+export const useStudentList = () => {
+  return useQuery({
+    queryKey: ["StudentList"],
+    queryFn: async () => {
+      const response = await studentApi.getStudentList()
+      if (response.status !== "SUCCESS") {
+        throw new Error("교육생 목록 조회에 실패했습니다.")
+      }
+      return response.data.students
+    },
+    gcTime: 10 * 60 * 1000,
+  })
+}
