@@ -1,7 +1,6 @@
 import { useMemo } from "react"
 import ReactMarkdown from "react-markdown"
 import { useNavigate, useParams } from "react-router-dom"
-import { FilePenLine } from "lucide-react"
 
 import { Button, MajorTag, NormalTag, PositionTag } from "@/components/atoms"
 import { StudentInfo } from "@/components/molecules"
@@ -45,8 +44,12 @@ export default function StudentDetailPage() {
     }
   }, [data, parsedId])
 
-  if (!studentId || Number.isNaN(parsedId)) {
-    return <div className="text-text flex min-h-screen items-center justify-center">잘못된 학생 ID 입니다.</div>
+  if (!studentId || Number.isNaN(parsedId) || studentId.length !== 7) {
+    return (
+      <div className="text-text bg-background flex min-h-screen items-center justify-center">
+        잘못된 학생 ID 입니다.
+      </div>
+    )
   }
 
   if (isLoading) {
@@ -69,19 +72,14 @@ export default function StudentDetailPage() {
 
   return (
     <div className="bg-background flex min-h-screen flex-col gap-7 px-15 py-10">
-      {/* 마이 페이지 일때만 */}
-      <div className="w-30">
-        <Button
-          size={"m"}
-          isIcon={true}
-          Icon={FilePenLine}
-          variant="outline"
-          text="편집"
-          onClick={() => navigate("/edit-profile")}
-        />
-      </div>
       <div>
-        <StudentInfo name={student?.name ?? ""} studentId={student?.studentId?.toString() ?? ""} teamInfo={teamInfo} />
+        <StudentInfo
+          isFavorite={isFavorite}
+          name={student?.name ?? ""}
+          studentId={student?.studentId?.toString() ?? ""}
+          imgUrl={profileImageUrl ?? ""}
+          teamInfo={teamInfo}
+        />
       </div>
       <div className="border-line flex w-full flex-col gap-7 rounded-lg border bg-white p-10">
         <div className="flex flex-col gap-1">
@@ -117,9 +115,11 @@ export default function StudentDetailPage() {
           </div>
         </div>
       </div>
-      <div className="markdown-body border-line items-center justify-start rounded-lg border bg-white p-10">
-        <ReactMarkdown>{description}</ReactMarkdown>
-      </div>
+      {description && (
+        <div className="markdown-body border-line items-center justify-start rounded-lg border bg-white p-10">
+          <ReactMarkdown>{description}</ReactMarkdown>
+        </div>
+      )}
     </div>
   )
 }

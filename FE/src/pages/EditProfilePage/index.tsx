@@ -75,7 +75,7 @@ export default function ProfileEditPage() {
   useEffect(() => {
     if (isSuccess) {
       toast.success("자기소개가 성공적으로 저장되었습니다!")
-      navigate("/")
+      navigate("/myprofile")
     }
   }, [isSuccess, navigate])
 
