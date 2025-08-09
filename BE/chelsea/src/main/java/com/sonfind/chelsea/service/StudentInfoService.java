@@ -27,6 +27,7 @@ import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoGetSummaryRespons
 import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
 import com.sonfind.chelsea.global.domain.SubCode;
+import com.sonfind.chelsea.repository.StudentFavoriteRepository;
 import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
 import com.sonfind.chelsea.repository.TeamRepository;
@@ -42,10 +43,9 @@ public class StudentInfoService {
 	private final SubCodeRepository subCodeRepository;
 	private final StudentInfoRepository studentInfoRepository;
 	private final TeamRepository teamRepository;
+	private final StudentFavoriteRepository favoriteRepository;
 
 	private final StudentService studentService;
-	private final SubCodeService subCodeService;
-	private final TeamService teamService;
 	private final FileService fileService;
 
 	/**
@@ -75,53 +75,11 @@ public class StudentInfoService {
 	 * 자기소개 상세 조회 함수
 	 * */
 	@Transactional(readOnly = true)
-	public StudentInfoGetDetailResponseDto getDetailStudentInfo(Long studentId) {
+	public StudentInfoGetDetailResponseDto getMeDetailStudentInfo(Long studentId) {
+		StudentInfoGetDetailResponseDto.StudentInfoGetDetailResponseDtoBuilder builder = buildDetailResponseDto(
+			studentId);
 
-		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId).orElseThrow(null);
-		Student student = studentInfo.getStudent();
-		SubCode positionCode = studentInfo.getPositionCode();
-		SubCode trackCode = studentInfo.getTrackCode();
-		SubCode mbtiCode = studentInfo.getMbtiCode();
-		SubCode goalCode = studentInfo.getGoalCode();
-		Team team = teamRepository.findTeamByTeamId(student.getTeamId()).orElse(null);
-		TeamSimpleResponseDto teamResponse = null;
-
-		//기술 스택처리
-		List<String> techStackCodes = StringListConverter.stringToList(studentInfo.getTechStack());
-		List<SubCodeResponseDto> techStackResponse = subCodeRepository.findAllBySubCodeIn(techStackCodes).stream()
-			.map(sc -> new SubCodeResponseDto(sc.getSubCode(), sc.getSubCodeName()))
-			.collect(Collectors.toList());
-		//강점 처리
-		List<String> strength = StringListConverter.stringToList(studentInfo.getStrength());
-
-		if (team != null) {
-			teamResponse = TeamSimpleResponseDto.builder()
-				.teamId(team.getTeamId())
-				.name(team.getName())
-				.track(team.getTrack().getSubCodeName())
-				.majorCount(team.getMajorCount())
-				.nonMajorCount(team.getNonMajorCount())
-				.build();
-		}
-
-		return StudentInfoGetDetailResponseDto.builder()
-			.student(StudentResponseDto.builder().studentId(studentId).name(student.getName())
-				.major(student.getMajorYn() ? "전공" : "비전공").build())
-			.position(SubCodeResponseDto.builder().subcode(positionCode.getSubCode()).subcodeName(
-				positionCode.getSubCodeName()).build())
-			.track(SubCodeResponseDto.builder().subcode(trackCode.getSubCode()).subcodeName(
-				trackCode.getSubCodeName()).build())
-			.goal(SubCodeResponseDto.builder().subcode(goalCode.getSubCode()).subcodeName(
-				goalCode.getSubCodeName()).build())
-			.mbti(SubCodeResponseDto.builder().subcode(mbtiCode.getSubCode()).subcodeName(
-				mbtiCode.getSubCodeName()).build())
-			.techStack(techStackResponse)
-			.strength(strength)
-			.description(studentInfo.getDescription())
-			.profileImageUrl(studentInfo.getProfileImageUrl())
-			.portfolio(studentInfo.getPortfolio())
-			.teamInfo(teamResponse)
-			.build();
+		return builder.isFavorite(false).build();
 	}
 
 	/**
@@ -155,6 +113,7 @@ public class StudentInfoService {
 				.subcodeName(positionCode.getSubCodeName()).build())
 			.track(SubCodeResponseDto.builder().subcode(trackCode.getSubCode())
 				.subcodeName(trackCode.getSubCodeName()).build())
+			.profileImageUrl(studentInfo.getProfileImageUrl())
 			.team(teamResponse)
 			.build();
 	}
@@ -261,6 +220,17 @@ public class StudentInfoService {
 		return result;
 	}
 
+	public StudentInfoGetDetailResponseDto getOtherDetailStudentInfo(Long loginStudentId, Long targetStudentId) {
+		StudentInfoGetDetailResponseDto.StudentInfoGetDetailResponseDtoBuilder builder = buildDetailResponseDto(
+			targetStudentId);
+
+		boolean isFavorite = favoriteRepository.existsByStudentStudentIdAndTargetStudentStudentId(loginStudentId,
+			targetStudentId);
+
+		return builder.isFavorite(isFavorite).build();
+
+	}
+
 	private StudentInfo saveStudentInfo(Long studentId, StudentInfoCreateRequestDto requestDto, String profileImageUrl,
 		UploadedFile portfolio) {
 
@@ -295,6 +265,65 @@ public class StudentInfoService {
 		}
 
 		return subCodeRepository.findBySubCode(subCode);
+	}
+
+	/**
+	 * 자기소개 상세 조회 공통 함수
+	 * */
+	private StudentInfoGetDetailResponseDto.StudentInfoGetDetailResponseDtoBuilder buildDetailResponseDto(
+		Long studentId) {
+
+		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId)
+			.orElseThrow(() -> new EntityNotFoundException("해당 학생의 자기소개를 찾을 수 없습니다."));
+
+		Student student = studentInfo.getStudent();
+		SubCode positionCode = studentInfo.getPositionCode();
+		SubCode trackCode = studentInfo.getTrackCode();
+		SubCode mbtiCode = studentInfo.getMbtiCode();
+		SubCode goalCode = studentInfo.getGoalCode();
+		Team team = teamRepository.findTeamByTeamId(student.getTeamId()).orElse(null);
+		TeamSimpleResponseDto teamResponse = null;
+		SubCodeResponseDto mbtiCodeResponse = null;
+
+		//기술 스택처리
+		List<String> techStackCodes = StringListConverter.stringToList(studentInfo.getTechStack());
+		List<SubCodeResponseDto> techStackResponse = subCodeRepository.findAllBySubCodeIn(techStackCodes).stream()
+			.map(sc -> new SubCodeResponseDto(sc.getSubCode(), sc.getSubCodeName()))
+			.collect(Collectors.toList());
+		//강점 처리
+		List<String> strength = StringListConverter.stringToList(studentInfo.getStrength());
+
+		if (team != null) {
+			teamResponse = TeamSimpleResponseDto.builder()
+				.teamId(team.getTeamId())
+				.name(team.getName())
+				.track(team.getTrack().getSubCodeName())
+				.majorCount(team.getMajorCount())
+				.nonMajorCount(team.getNonMajorCount())
+				.build();
+		}
+
+		if (mbtiCode != null) {
+			mbtiCodeResponse = SubCodeResponseDto.builder().subcode(mbtiCode.getSubCode()).subcodeName(
+				mbtiCode.getSubCodeName()).build();
+		}
+
+		return StudentInfoGetDetailResponseDto.builder()
+			.student(StudentResponseDto.builder().studentId(studentId).name(student.getName())
+				.major(student.getMajorYn() ? "전공" : "비전공").build())
+			.position(SubCodeResponseDto.builder().subcode(positionCode.getSubCode()).subcodeName(
+				positionCode.getSubCodeName()).build())
+			.track(SubCodeResponseDto.builder().subcode(trackCode.getSubCode()).subcodeName(
+				trackCode.getSubCodeName()).build())
+			.goal(SubCodeResponseDto.builder().subcode(goalCode.getSubCode()).subcodeName(
+				goalCode.getSubCodeName()).build())
+			.mbti(mbtiCodeResponse)
+			.techStack(techStackResponse)
+			.strength(strength)
+			.description(studentInfo.getDescription())
+			.profileImageUrl(studentInfo.getProfileImageUrl())
+			.portfolio(studentInfo.getPortfolio())
+			.teamInfo(teamResponse);
 	}
 
 }

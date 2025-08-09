@@ -3,6 +3,7 @@ import { toast } from "react-toastify"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { teamApi } from "@/apis/teamApi"
+import { useUserStore } from "@/stores/userStore"
 import type { ITeamCreate } from "@/types/team"
 import { sortTeamsByFavorite } from "@/utils"
 
@@ -74,17 +75,21 @@ export const useTeamDetails = (teamId: number) => {
 export const useCreateTeam = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { updateUserTeamId } = useUserStore.getState()
 
   return useMutation({
     mutationFn: async (createTeamDto: ITeamCreate) => {
       const response = await teamApi.createTeam(createTeamDto)
       return response.data
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("팀 생성 성공")
       queryClient.invalidateQueries({ queryKey: ["myTeam"] })
       queryClient.invalidateQueries({ queryKey: ["teams"] })
-      queryClient.invalidateQueries({ queryKey: ["team-warmup"] })
+      if (data && data.teamId) {
+        updateUserTeamId(data.teamId)
+      }
+
       navigate("/myteam")
     },
     onError: (error) => {

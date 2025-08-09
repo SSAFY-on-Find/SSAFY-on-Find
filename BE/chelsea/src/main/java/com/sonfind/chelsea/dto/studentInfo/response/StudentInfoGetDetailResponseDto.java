@@ -23,6 +23,7 @@ public record StudentInfoGetDetailResponseDto(
 	String description,
 	String profileImageUrl,
 	UploadedFile portfolio,
+	Boolean isFavorite,
 
 	TeamSimpleResponseDto teamInfo
 ) {

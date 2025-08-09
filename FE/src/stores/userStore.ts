@@ -7,6 +7,7 @@ interface UserState {
   // isLoading: boolean
   setUser: (user: IStudentSignin) => void
   resetUser: () => void
+  updateUserTeamId: (teamId: number) => void
   // initializeAuth: () => Promise<void>
 }
 
@@ -22,6 +23,11 @@ export const useUserStore = create<UserState>((set) => ({
   // isLoading: true,
   setUser: (user) => set({ user }),
   resetUser: () => set({ user: null }),
+  updateUserTeamId: (teamId) =>
+    set((state) => ({
+      user: state.user ? { ...state.user, teamId: teamId } : null,
+    })),
+
   // initializeAuth: async () => {
   //   console.log('🔍 initializeAuth 시작')
   //   set({ isLoading: true })

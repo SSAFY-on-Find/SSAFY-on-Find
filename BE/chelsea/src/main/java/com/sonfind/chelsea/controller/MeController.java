@@ -84,7 +84,7 @@ public class MeController {
 		@SessionAttribute("loginUser") Long studentId
 	) {
 
-		StudentInfoGetDetailResponseDto studentInfo = studentInfoService.getDetailStudentInfo(studentId);
+		StudentInfoGetDetailResponseDto studentInfo = studentInfoService.getMeDetailStudentInfo(studentId);
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
