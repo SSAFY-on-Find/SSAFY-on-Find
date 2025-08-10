@@ -1,7 +1,9 @@
-import { StudentInfo } from "@/components/molecules"
+import { StudentInfo, TeamCard } from "@/components/molecules"
 
 import DashboardCard from "./organisms/DashboardCard"
 import TeamBuildingProgress from "./organisms/TeamBuildingProgress"
+import TeamCardCarousel from "./organisms/TeamCardCarousel"
+import { teamCardListDummy } from "./teamdummy"
 
 type Section = {
   type: "전체" | "전공" | "비전공"
@@ -46,7 +48,14 @@ export default function DashboardPage() {
       {/* 팀/교육생 추천 */}
       <div className="flex flex-row gap-3">
         <DashboardCard title={"팀원을 구하고 있어요! 🚀"}>
-          <div>chart</div>
+          {/* <div className="flex flex-row gap-3 mt-5">
+            {teamCardListDummy.slice(0, 2).map((item) => (
+              <TeamCard key={item.teamId} {...item} />
+            ))}
+          </div> */}
+          <div className="mt-5">
+            <TeamCardCarousel items={teamCardListDummy} />
+          </div>
         </DashboardCard>
         <DashboardCard title={"이 친구 어때요? 😊"}>
           <div>chart</div>
