@@ -63,7 +63,7 @@ public class Team extends BaseEntity {
 	// @Builder.Default
 	private int nonMajorCount = 0;
 
-	@OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private List<Recruitment> recruitments = new ArrayList<>();
 
