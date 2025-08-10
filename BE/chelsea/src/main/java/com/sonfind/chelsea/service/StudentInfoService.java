@@ -12,8 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.sonfind.chelsea.domain.student.Student;
+import com.sonfind.chelsea.domain.studentInfo.Portfolio;
+import com.sonfind.chelsea.domain.studentInfo.Profile;
 import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
-import com.sonfind.chelsea.domain.studentInfo.UploadedFile;
 import com.sonfind.chelsea.domain.teams.Team;
 import com.sonfind.chelsea.dto.dashboard.RatioResponseDto;
 import com.sonfind.chelsea.dto.dashboard.TrackAggregationResult;
@@ -60,9 +61,9 @@ public class StudentInfoService {
 		}
 
 		try {
-			String profileImageUrl = fileService.saveProfileImage(profile);
-			UploadedFile uploadPortfolio = fileService.savePortfolio(portfolio);
-			StudentInfo studentInfo = saveStudentInfo(studentId, requestDto, profileImageUrl, uploadPortfolio);
+			Profile uploadProfile = fileService.saveProfileImage(profile);
+			Portfolio uploadPortfolio = fileService.savePortfolio(portfolio);
+			StudentInfo studentInfo = saveStudentInfo(studentId, requestDto, uploadProfile, uploadPortfolio);
 
 			studentInfoRepository.save(studentInfo);
 		} catch (IOException e) {
@@ -113,7 +114,7 @@ public class StudentInfoService {
 				.subcodeName(positionCode.getSubCodeName()).build())
 			.track(SubCodeResponseDto.builder().subcode(trackCode.getSubCode())
 				.subcodeName(trackCode.getSubCodeName()).build())
-			.profileImageUrl(studentInfo.getProfileImageUrl())
+			.profileImageUrl(getProfileImageUrl(studentInfo.getProfile()))
 			.team(teamResponse)
 			.build();
 	}
@@ -131,15 +132,15 @@ public class StudentInfoService {
 		try {
 			//새로운 프로필 이미지 입력 시 변경
 			if (profile != null && !profile.isEmpty()) {
-				String newProfileImage = fileService.saveProfileImage(profile);
-				String oldProfileImage = studentInfo.getProfileImageUrl();
+				Profile newProfileImage = fileService.saveProfileImage(profile);
+				Profile oldProfileImage = studentInfo.getProfile();
 				studentInfo.updateProfileImage(newProfileImage);
 				fileService.deleteProfileImage(oldProfileImage);
 			}
 			//새로운 포트폴리오 입력 시 변경
 			if (portfolio != null && !portfolio.isEmpty()) {
-				UploadedFile newPortfolio = fileService.savePortfolio(portfolio);
-				UploadedFile oldPortfolio = studentInfo.getPortfolio();
+				Portfolio newPortfolio = fileService.savePortfolio(portfolio);
+				Portfolio oldPortfolio = studentInfo.getPortfolio();
 				studentInfo.updatePortfolio(newPortfolio);
 				fileService.deletePortfolioFile(oldPortfolio);
 			}
@@ -172,7 +173,7 @@ public class StudentInfoService {
 			.studentId(studentId)
 			.position(getSubCodeByValue(findStuInfo.getPositionCode().getSubCode()).getSubCodeName())
 			.track(getSubCodeByValue(findStuInfo.getTrackCode().getSubCode()).getSubCodeName())
-			.profileImageUrl(findStuInfo.getProfileImageUrl())
+			.profileImageUrl(getProfileImageUrl(findStuInfo.getProfile()))
 			.build();
 	}
 
@@ -231,8 +232,8 @@ public class StudentInfoService {
 
 	}
 
-	private StudentInfo saveStudentInfo(Long studentId, StudentInfoCreateRequestDto requestDto, String profileImageUrl,
-		UploadedFile portfolio) {
+	private StudentInfo saveStudentInfo(Long studentId, StudentInfoCreateRequestDto requestDto, Profile profile,
+		Portfolio portfolio) {
 
 		Student Student = studentService.findByStudentId(studentId);
 
@@ -253,7 +254,7 @@ public class StudentInfoService {
 			.positionCode(positionCode)
 			.goalCode(goalCode)
 			.mbtiCode(mbtiCode)
-			.profileImageUrl(profileImageUrl)
+			.profile(profile)
 			.portfolio(portfolio)
 			.build();
 	}
@@ -321,9 +322,16 @@ public class StudentInfoService {
 			.techStack(techStackResponse)
 			.strength(strength)
 			.description(studentInfo.getDescription())
-			.profileImageUrl(studentInfo.getProfileImageUrl())
+			.profileImageUrl(getProfileImageUrl(studentInfo.getProfile()))
 			.portfolio(studentInfo.getPortfolio())
 			.teamInfo(teamResponse);
+	}
+
+	private String getProfileImageUrl(Profile profile) {
+		if (profile != null) {
+			return profile.getProfileImageUrl();
+		}
+		return "";
 	}
 
 }
