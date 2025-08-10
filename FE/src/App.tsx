@@ -16,6 +16,7 @@ import { RoutePolicy } from "@/router"
 import { useUserStore } from "@/stores/userStore"
 
 import ComponentTestPage from "./components/ComponentTestPage"
+import TeamEditPage from "./pages/TeamUpdatePage"
 
 import "@/index.css"
 
@@ -41,6 +42,7 @@ function App() {
               <Route path="/myteam" element={<MyTeam />} />
               <Route path="/teamlist" element={<TeamList />} />
               <Route path="/create-team" element={<TeamCreatePage />} />
+              <Route path="/edit-team" element={<TeamEditPage />} />
               <Route path="/studentlist" element={<StudentList />} />
               {/* <Route path="/myprofile" element={<MyProfile />} /> */}
               <Route path="/myprofile" element={<EditProfile />} />

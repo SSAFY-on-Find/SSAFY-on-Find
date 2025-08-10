@@ -32,4 +32,8 @@ export const teamApi = {
     const response = await api.get<IApiResponse<ITeamCreateWarmup>>(TEAM_BASE_URL + "/warmup")
     return response.data
   },
+  updateTeam: async (teamId: number, createTeamDto: ITeamCreate): Promise<IApiResponse<ITeamCreateResponse>> => {
+    const response = await api.patch<IApiResponse<ITeamCreateResponse>>(TEAM_BASE_URL + "/" + teamId, createTeamDto)
+    return response.data
+  },
 }

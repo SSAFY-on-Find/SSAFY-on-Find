@@ -118,3 +118,30 @@ export const useTeamWarmup = () => {
     gcTime: 10 * 60 * 1000,
   })
 }
+
+export const useUpdateTeam = () => {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { updateUserTeamId } = useUserStore.getState()
+
+  return useMutation({
+    mutationFn: async ({ teamId, updateTeamDto }: { teamId: number; updateTeamDto: ITeamCreate }) => {
+      const response = await teamApi.updateTeam(teamId, updateTeamDto)
+      return response.data
+    },
+    onSuccess: (data) => {
+      toast.success("팀 수정 성공")
+      queryClient.invalidateQueries({ queryKey: ["myTeam"] })
+      queryClient.invalidateQueries({ queryKey: ["teams"] })
+      if (data && data.teamId) {
+        updateUserTeamId(data.teamId)
+      }
+
+      navigate("/myteam")
+    },
+    onError: (error) => {
+      toast.error("팀 수정 실패!")
+      console.log("팀 수정 실패 오류: ", error)
+    },
+  })
+}

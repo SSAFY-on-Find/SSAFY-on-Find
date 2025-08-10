@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { FilePenLine, LogOut } from "lucide-react"
 
 import type { ITeamDetails } from "@/types/team"
@@ -18,8 +19,13 @@ function TeamDetail({
   isFavorite,
   varient,
 }: ITeamDetailMole) {
+  const navigate = useNavigate()
   const majorMembers = members.filter((ele) => ele.major === "전공")
   const nonMajorMembers = members.filter((ele) => ele.major === "비전공")
+  const handleEditClick = () => {
+    // props로 받은 teamId를 사용해 수정 페이지로 이동합니다.
+    navigate(`/edit-team`)
+  }
   return (
     <div className="w-full">
       <div className="flex flex-col gap-2 p-8">
@@ -31,7 +37,14 @@ function TeamDetail({
           {varient === "myteam" ? (
             <div className="flex gap-3">
               <div className="w-20">
-                <Button size={"m"} isIcon={true} Icon={FilePenLine} variant="text" text="편집" onClick={() => ""} />
+                <Button
+                  size={"m"}
+                  isIcon={true}
+                  Icon={FilePenLine}
+                  variant="text"
+                  text="편집"
+                  onClick={handleEditClick}
+                />
               </div>
               <div className="w-20">
                 <Button size={"m"} isIcon={true} Icon={LogOut} variant="danger" text="탈퇴" onClick={() => ""} />
