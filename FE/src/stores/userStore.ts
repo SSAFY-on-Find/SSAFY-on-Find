@@ -7,7 +7,7 @@ interface UserState {
   // isLoading: boolean
   setUser: (user: IStudentSignin) => void
   resetUser: () => void
-  updateUserTeamId: (teamId: number) => void
+  updateUserTeamId: (teamId?: number | null) => void
   // initializeAuth: () => Promise<void>
 }
 

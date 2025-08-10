@@ -1,3 +1,4 @@
+export type { ILeaveTeamResponse } from "./ILeaveTeamResponse"
 export type { IMyTeam } from "./IMyTeam"
 export type { ITeamCard } from "./ITeamCard"
 export type { ITeamCreate, ITeamCreateResponse } from "./ITeamCreate"

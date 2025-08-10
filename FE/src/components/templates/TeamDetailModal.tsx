@@ -10,7 +10,7 @@ interface ITeamDetailModal {
   isOpen: boolean
   onClose: () => void
   teamData: ITeamDetails
-  userTeamId?: number
+  userTeamId?: number | null
 }
 
 function TeamDetailModal({ teamId, isOpen, onClose, teamData, userTeamId }: ITeamDetailModal) {
