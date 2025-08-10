@@ -1,8 +1,7 @@
 package com.sonfind.chelsea.service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,9 +14,8 @@ import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 import com.sonfind.chelsea.domain.studentInfo.UploadedFile;
 import com.sonfind.chelsea.domain.teams.Team;
+import com.sonfind.chelsea.dto.dashboard.PositionMajorRatioResponseDto;
 import com.sonfind.chelsea.dto.dashboard.RatioResponseDto;
-import com.sonfind.chelsea.dto.dashboard.TrackAggregationResult;
-import com.sonfind.chelsea.dto.dashboard.TrackPositionMajorRatioResponseDto;
 import com.sonfind.chelsea.dto.student.response.StudentResponseDto;
 import com.sonfind.chelsea.dto.studentInfo.request.StudentInfoCreateRequestDto;
 import com.sonfind.chelsea.dto.studentInfo.request.StudentInfoUpdateRequestDto;
@@ -180,42 +178,32 @@ public class StudentInfoService {
 	 * 대시보드 용 희망 트랙별 포지션 비율 조회
 	 * */
 	@Transactional(readOnly = true)
-	public List<TrackPositionMajorRatioResponseDto> getTrackPositionRatio() {
+	public Map<String, PositionMajorRatioResponseDto> getPositionRatio() {
 
-		List<Object[]> rawData = studentInfoRepository.getTrackPositionMajorRatio();
-		Map<String, TrackAggregationResult> aggregationMap = new HashMap<>();
+		List<Object[]> rawData = studentInfoRepository.getPositionMajorRatio();
+		Map<String, PositionMajorRatioResponseDto> result = new LinkedHashMap<>();
 
-		//중간 집계 : 각 트랙별로 전공과 포지션 별로 학생 수 조합
-		for (Object[] row : rawData) {
-			String track = (String)row[0];
-			String position = (String)row[1];
-			String major = (String)row[2];
-			Long longCount = (Long)row[3];
-			int count = longCount.intValue();
+		Map<String, List<Object[]>> midResult = rawData.stream()
+			.collect(Collectors.groupingBy(row -> (String)row[0], LinkedHashMap::new, Collectors.toList()));
 
-			TrackAggregationResult helper = aggregationMap.computeIfAbsent(track, k -> new TrackAggregationResult());
+		midResult.forEach((positionName, rows) -> {
+			List<RatioResponseDto> majorTypeRatios = rows.stream()
+				.map(row -> {
+					String majorType = (String)row[1];
+					int count = ((Number)row[2]).intValue();
+					return new RatioResponseDto(majorType, count);
+				})
+				.toList();
 
-			helper.totalCount += count;
-			helper.majorRecord.merge(major, count, Integer::sum);
-			helper.positionRecord.merge(position, count, Integer::sum);
-		}
-		// 최종 response 만들기
-		List<TrackPositionMajorRatioResponseDto> result = new ArrayList<>();
-		for (Map.Entry<String, TrackAggregationResult> entry : aggregationMap.entrySet()) {
-			String track = entry.getKey();
-			TrackAggregationResult helper = entry.getValue();
+			int totalCount = majorTypeRatios.stream().mapToInt(RatioResponseDto::count).sum();
 
-			//majorRecord 맵을 List<RatioResponseDto>로 변환
-			List<RatioResponseDto> majorType = helper.majorRecord.entrySet().stream()
-				.map(e -> RatioResponseDto.builder().name(e.getKey()).count(e.getValue()).build()).toList();
+			PositionMajorRatioResponseDto dto = PositionMajorRatioResponseDto.builder()
+				.totalCount(totalCount)
+				.majorType(majorTypeRatios)
+				.build();
 
-			List<RatioResponseDto> positionType = helper.positionRecord.entrySet().stream()
-				.map(e -> RatioResponseDto.builder().name(e.getKey()).count(e.getValue()).build()).toList();
-
-			result.add(TrackPositionMajorRatioResponseDto.builder()
-				.track(track).totalCount(helper.totalCount)
-				.majorType(majorType).positionType(positionType).build());
-		}
+			result.put(positionName, dto);
+		});
 
 		return result;
 	}
