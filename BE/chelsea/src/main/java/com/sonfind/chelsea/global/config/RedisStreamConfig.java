@@ -1,4 +1,6 @@
 package com.sonfind.chelsea.global.config;
+import com.sonfind.chelsea.global.event.InvitationResponseEvent;
+import com.sonfind.chelsea.types.NotificationStatus;
 
 
 import com.sonfind.chelsea.global.event.InvitationRequestEvent;
@@ -66,36 +68,61 @@ public class RedisStreamConfig {
     container.receive(Consumer.from("notif_group", hostnameOrInstanceId()),
             StreamOffset.create("notification_stream", ReadOffset.lastConsumed()),
             message -> {
+              boolean success = false;
               try {
                 Map<String, String> valueMap = message.getValue();
-                ObjectId notificationId = new ObjectId((valueMap.get("notificationId")));
+
+                // Common fields
+                ObjectId notificationId = new ObjectId(valueMap.get("notificationId"));
                 long pubId = Long.parseLong(valueMap.get("pubId"));
                 NotificationDomainType pubType = NotificationDomainType.valueOf(valueMap.get("pubType"));
                 long subId = Long.parseLong(valueMap.get("subId"));
                 NotificationDomainType subType = NotificationDomainType.valueOf(valueMap.get("subType"));
-                NotificationType eventType = NotificationType.valueOf(valueMap.get("eventType"));
                 Date ts = new Date(Long.parseLong(valueMap.get("ts")));
 
-                // 이벤트 발행
-                InvitationRequestEvent event = InvitationRequestEvent.of(
-                        RedisStreamConfig.this,
-                        notificationId,
-                        pubId,
-                        pubType,
-                        subId,
-                        subType,
-                        ts,
-                        eventType
-                );
-
-                eventPublisher.publishEvent(event);
-
-
+                String phase = valueMap.getOrDefault("phase", "REQUEST");
+                if ("REQUEST".equalsIgnoreCase(phase)) {
+                  // REQUEST: use NotificationType
+                  NotificationType eventType = NotificationType.valueOf(valueMap.get("eventType"));
+                  InvitationRequestEvent event = InvitationRequestEvent.of(
+                          RedisStreamConfig.this,
+                          notificationId,
+                          pubId, pubType,
+                          subId, subType,
+                          ts,
+                          eventType
+                  );
+                  eventPublisher.publishEvent(event);
+                  success = true;
+                } else if ("RESPONSE".equalsIgnoreCase(phase)) {
+                  // RESPONSE: use NotificationStatus
+                  NotificationStatus status = NotificationStatus.valueOf(valueMap.get("status"));
+                  InvitationResponseEvent event = InvitationResponseEvent.of(
+                          RedisStreamConfig.this,
+                          notificationId,
+                          pubId, pubType,
+                          subId, subType,
+                          status,
+                          ts
+                  );
+                  eventPublisher.publishEvent(event);
+                  success = true;
+                } else {
+                  log.warn("[Streams] Unknown phase={} for message id={}", phase, message.getId());
+                }
               } catch (Exception e) {
-                log.error("[Streams] Failed to handle noitification_stream id={} - {}", message.getId(), e.getMessage(), e);
+                log.error("[Streams] Failed to handle notification_stream id={} - {}", message.getId(), e.getMessage(), e);
               }
-            t.opsForStream().acknowledge("notification_stream", "notif_group", message.getId());
-    });
+
+              if (success) {
+                try {
+                  t.opsForStream().acknowledge("notification_stream", "notif_group", message.getId());
+                } catch (Exception ackEx) {
+                  log.error("[Streams] ACK failed for id={} - {}", message.getId(), ackEx.getMessage(), ackEx);
+                }
+              }
+            }
+    );
     container.start();
     log.info("Notification stream listener container started");
     return container;
