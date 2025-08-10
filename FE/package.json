@@ -20,7 +20,10 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.6",
+    "@nivo/bar": "^0.99.0",
+    "@nivo/funnel": "^0.99.0",
     "@nivo/radial-bar": "^0.99.0",
+    "@nivo/waffle": "^0.99.0",
     "@stomp/stompjs": "^7.1.1",
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/react-query": "^5.83.0",

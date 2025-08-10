@@ -69,7 +69,7 @@ function ProgressBar({
         </span>
       </div>
 
-      <div className="h-3 w-full rounded-full bg-zinc-200">
+      <div className="bg-line h-3 w-full rounded-full">
         <div
           className="h-3 rounded-full bg-[#6C5CE7] transition-[width] duration-700 ease-out"
           style={{ width: mounted ? `${ratio}%` : 0 }}
