@@ -13,7 +13,7 @@ interface Recommendation {
 
 // API 호출 함수를 정의합니다.
 const fetchRecommendations = async (studentId: number): Promise<Recommendation[]> => {
-  const response = await api.post<Recommendation[]>(`http://127.0.0.1:8000/api/v1/recommendations/${studentId}`)
+  const response = await api.post<Recommendation[]>(`http://localhost:9000/api/v1/recommendations/${studentId}`)
   return response.data
 }
 export default function AI() {
