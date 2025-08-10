@@ -1,8 +1,26 @@
 import { StudentInfo } from "@/components/molecules"
 
 import DashboardCard from "./organisms/DashboardCard"
+import TeamBuildingProgress from "./organisms/TeamBuildingProgress"
+
+type Section = {
+  type: "전체" | "전공" | "비전공"
+  totalStudentCount: number
+  teamMemberCount: number
+}
+type TeamBuildingApi = {
+  all: Section
+  major: Section
+  nonMajor: Section
+}
 
 export default function DashboardPage() {
+  const dummy: TeamBuildingApi = {
+    all: { type: "전체", totalStudentCount: 100, teamMemberCount: 30 },
+    major: { type: "전공", totalStudentCount: 25, teamMemberCount: 12 },
+    nonMajor: { type: "비전공", totalStudentCount: 25, teamMemberCount: 18 },
+  }
+
   return (
     <div className="bg-background flex min-h-screen flex-col gap-5 px-15 py-10">
       {/* 대시보드 */}
@@ -17,7 +35,7 @@ export default function DashboardPage() {
             isMyProfile={true}
           />
           <DashboardCard title={"팀 빌딩 진행률 🏃‍♀️"}>
-            <div>chart</div>
+            <TeamBuildingProgress data={dummy} />
           </DashboardCard>
         </div>
         <DashboardCard title={"희망 트랙별 포지션 비율 📊"}>
