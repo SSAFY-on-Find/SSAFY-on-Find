@@ -1,6 +1,7 @@
 import { Heart } from "lucide-react"
 
 import { Button, CircleGrid, MainTag, UserImg } from "@/components/atoms"
+import { useStudentFavoriteToggle } from "@/hooks/useFavorite"
 import type { ITeamInfo } from "@/types/team"
 
 interface IStudentInfo {
@@ -13,6 +14,8 @@ interface IStudentInfo {
 }
 
 function StudentInfo({ name, studentId, imgUrl, teamInfo, isMyProfile = false, isFavorite = false }: IStudentInfo) {
+  const { toggleFavorite, isLoading } = useStudentFavoriteToggle()
+
   return (
     <div className="border-line flex w-full flex-row items-center justify-center gap-20 rounded-lg border bg-white p-10">
       <div className="flex flex-col items-center justify-center gap-1">
@@ -23,6 +26,10 @@ function StudentInfo({ name, studentId, imgUrl, teamInfo, isMyProfile = false, i
               className={`absolute right-2 bottom-1 cursor-pointer ${isFavorite ? "text-error" : "text-subtext"}`}
               size={24}
               fill={isFavorite ? "currentColor" : "none"}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (!isLoading(Number(studentId))) toggleFavorite(Number(studentId))
+              }}
             />
           )}
         </div>

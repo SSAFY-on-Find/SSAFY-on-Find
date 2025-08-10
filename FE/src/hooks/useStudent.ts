@@ -32,6 +32,8 @@ export const useStudentInfo = (studentId: number) => {
       return response.data
     },
     gcTime: 10 * 60 * 1000,
+    staleTime: 0, // 캐시를 즉시 stale 처리
+    refetchOnMount: "always", // 마운트 시 항상 재요청
     enabled: !!studentId,
   })
 }
