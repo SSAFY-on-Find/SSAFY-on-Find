@@ -42,3 +42,7 @@ custom:
   service:
     url: "http://localhost:8080"
 
+notification:
+  dispatch:
+    publishSpringEvents: false
+
