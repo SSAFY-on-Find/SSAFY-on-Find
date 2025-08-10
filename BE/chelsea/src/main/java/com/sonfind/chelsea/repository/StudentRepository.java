@@ -24,7 +24,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 		"pos.subCode, pos.subCodeName, " +
 		"track.subCode, track.subCodeName, " +
 		"goal.subCode, goal.subCodeName, " +
-		"si.profileImageUrl, " +
+		"si.profile.profileImageUrl, " +
 		"t.name, sf.isFavorite) " +
 		"FROM StudentInfo si " +
 		"RIGHT JOIN si.student s " +

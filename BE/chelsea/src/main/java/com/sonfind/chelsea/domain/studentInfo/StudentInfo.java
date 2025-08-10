@@ -50,13 +50,16 @@ public class StudentInfo extends BaseEntity {
 
 	private String strength;
 
-	@Column(name = "profile_image_url")
-	private String profileImageUrl;
+	@Embedded
+	@AttributeOverride(name = "savedFileName", column = @Column(name = "profile_saved_filename"))
+	@AttributeOverride(name = "profileImageUrl", column = @Column(name = "profile_image_url"))
+	private Profile profile;
 
 	@Embedded
 	@AttributeOverride(name = "savedFileName", column = @Column(name = "portfolio_saved_filename"))
+	@AttributeOverride(name = "portfolioFileUrl", column = @Column(name = "portfolio_file_url"))
 	@AttributeOverride(name = "originalFileName", column = @Column(name = "portfolio_original_filename"))
-	private UploadedFile portfolio;
+	private Portfolio portfolio;
 
 	private String description;
 
@@ -118,11 +121,11 @@ public class StudentInfo extends BaseEntity {
 			.orElse(null);
 	}
 
-	public void updateProfileImage(String profileImageUrl) {
-		this.profileImageUrl = profileImageUrl;
+	public void updateProfileImage(Profile profile) {
+		this.profile = profile;
 	}
 
-	public void updatePortfolio(UploadedFile portfolio) {
+	public void updatePortfolio(Portfolio portfolio) {
 		this.portfolio = portfolio;
 	}
 

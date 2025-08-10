@@ -466,8 +466,8 @@ public class TeamService {
 	private String getStudentProfileImage(Student student) {
 		try {
 			return studentInfoRepository.findByStudent_StudentId(student.getStudentId())
-				.map(StudentInfo::getProfileImageUrl)
-				.orElse("");
+				.map(studentInfo -> studentInfo.getProfile().getProfileImageUrl())
+				.orElse(null);
 		} catch (Exception e) {
 			return "";
 		}
@@ -543,7 +543,8 @@ public class TeamService {
 				.orElse(null);
 
 			String major = Boolean.TRUE.equals(student.getMajorYn()) ? "전공" : "비전공";
-			String profileImageUrl = (studentInfo != null) ? studentInfo.getProfileImageUrl() : "";
+			String profileImageUrl = (studentInfo != null && studentInfo.getProfile() != null) ?
+				studentInfo.getProfile().getProfileImageUrl() : "";
 
 			SubCodeResponseDto position = null;
 			if (studentInfo != null && studentInfo.getPositionCode() != null) {
