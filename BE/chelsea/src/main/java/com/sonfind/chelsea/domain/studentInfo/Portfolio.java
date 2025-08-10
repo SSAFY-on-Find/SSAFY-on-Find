@@ -11,9 +11,10 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class UploadedFile {
+public class Portfolio {
 
 	private String savedFileName;
+	private String portfolioFileUrl;
 	private String originalFileName;
 
 }
