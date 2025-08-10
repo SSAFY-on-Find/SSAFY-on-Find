@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import { FilePenLine, LogOut } from "lucide-react"
 
+import { useLeaveTeam } from "@/hooks/useTeam"
 import type { ITeamDetails } from "@/types/team"
 
 import { Button, MainTag, PositionTag, UserImg } from "../atoms"
@@ -20,11 +21,16 @@ function TeamDetail({
   varient,
 }: ITeamDetailMole) {
   const navigate = useNavigate()
+  const { mutate: leaveTeam } = useLeaveTeam()
   const majorMembers = members.filter((ele) => ele.major === "전공")
   const nonMajorMembers = members.filter((ele) => ele.major === "비전공")
   const handleEditClick = () => {
-    // props로 받은 teamId를 사용해 수정 페이지로 이동합니다.
     navigate(`/edit-team`)
+  }
+  const handleLeaveTeam = () => {
+    if (window.confirm("정말로 팀에서 탈퇴하시겠습니까?")) {
+      leaveTeam() // 확인을 누르면 mutation 실행
+    }
   }
   return (
     <div className="w-full">
@@ -47,7 +53,7 @@ function TeamDetail({
                 />
               </div>
               <div className="w-20">
-                <Button size={"m"} isIcon={true} Icon={LogOut} variant="danger" text="탈퇴" onClick={() => ""} />
+                <Button size={"m"} isIcon={true} Icon={LogOut} variant="danger" text="탈퇴" onClick={handleLeaveTeam} />
               </div>
             </div>
           ) : (

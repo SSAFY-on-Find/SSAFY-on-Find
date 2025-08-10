@@ -145,3 +145,28 @@ export const useUpdateTeam = () => {
     },
   })
 }
+export const useLeaveTeam = () => {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { updateUserTeamId } = useUserStore.getState()
+
+  return useMutation({
+    mutationFn: teamApi.leaveTeam,
+    onSuccess: (response) => {
+      toast.success(response.data.message || "팀에서 성공적으로 탈퇴했습니다.")
+      queryClient.setQueryData(["myTeam"], null)
+      queryClient.invalidateQueries({ queryKey: ["myTeam"] })
+      queryClient.invalidateQueries({ queryKey: ["teams"] })
+      updateUserTeamId(null)
+      navigate("/teamlist")
+    },
+    onError: (error) => {
+      if (error) {
+        toast.error(error.message || "팀 탈퇴에 실패했습니다.")
+      } else {
+        toast.error("팀 탈퇴 중 오류가 발생했습니다.")
+      }
+      console.error("팀 탈퇴 실패 오류: ", error)
+    },
+  })
+}

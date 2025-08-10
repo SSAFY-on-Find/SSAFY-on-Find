@@ -1,5 +1,6 @@
 import type { IApiResponse } from "@/types/common"
 import type {
+  ILeaveTeamResponse,
   IMyTeam,
   ITeamCard,
   ITeamCreate,
@@ -34,6 +35,10 @@ export const teamApi = {
   },
   updateTeam: async (teamId: number, createTeamDto: ITeamCreate): Promise<IApiResponse<ITeamCreateResponse>> => {
     const response = await api.patch<IApiResponse<ITeamCreateResponse>>(TEAM_BASE_URL + "/" + teamId, createTeamDto)
+    return response.data
+  },
+  leaveTeam: async (): Promise<IApiResponse<ILeaveTeamResponse>> => {
+    const response = await api.delete<IApiResponse<ILeaveTeamResponse>>(TEAM_BASE_URL + "/leave")
     return response.data
   },
 }
