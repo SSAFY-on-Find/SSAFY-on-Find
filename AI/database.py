@@ -31,7 +31,9 @@ def fetch_students_data():
     query = """
      SELECT
         s.student_id,
+        s.name,
         s.major_yn,
+        si.profile_image_url,
         si.strength,
         si.description,
         pos.sub_code_name AS `position`,
