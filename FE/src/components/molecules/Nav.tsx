@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom"
-import { ChartColumnIncreasing, FlaskConical, Notebook, Settings, User, Users } from "lucide-react"
+import { ChartColumnIncreasing, Notebook, Settings, User, Users } from "lucide-react"
 
 interface INavProps {
   navIcon: React.ElementType
@@ -31,7 +31,6 @@ function Nav() {
       <NavBtn navIcon={Users} navTitle="팀 목록" to="/teamlist" />
       <NavBtn navIcon={User} navTitle="교육생 목록" to="/studentlist" />
       <NavBtn navIcon={Settings} navTitle="마이 페이지" to="/myprofile" />
-      <NavBtn navIcon={FlaskConical} navTitle="FastAPI AI TEST" to="/ai" />
     </nav>
   )
 }

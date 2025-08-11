@@ -9,6 +9,10 @@ export const studentApi = {
     const response = await api.post<IApiResponse<IStudentSignin>>(STUDENT_BASE_URL + "/sign-in", { studentId })
     return response.data
   },
+  logout: async (): Promise<IApiResponse<void>> => {
+    const response = await api.post<IApiResponse<void>>(STUDENT_BASE_URL + "/sign-out")
+    return response.data
+  },
   getStudentList: async (): Promise<IApiResponse<{ students: IStudentCard[] }>> => {
     const response = await api.get<IApiResponse<{ students: IStudentCard[] }>>(STUDENT_BASE_URL)
     return response.data

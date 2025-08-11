@@ -2,6 +2,8 @@ import { useEffect } from "react"
 import { Navigate, Route, Routes, useLocation } from "react-router-dom"
 import { ToastContainer } from "react-toastify"
 
+import Loading from "@/components/templates/Loading"
+import { useAuth } from "@/hooks/useStudent"
 import { Header, SideBar } from "@/layout"
 import CreateProfile from "@/pages/CreateProfilePage"
 import Dashboard from "@/pages/DashboardPage"
@@ -13,14 +15,8 @@ import StudentDetail from "@/pages/StudentDetailPage"
 import StudentList from "@/pages/StudentListPage"
 import TeamCreatePage from "@/pages/TeamCreatePage"
 import TeamList from "@/pages/TeamListPage"
-import { RoutePolicy } from "@/router"
+import TeamEditPage from "@/pages/TeamUpdatePage"
 import { useUserStore } from "@/stores/userStore"
-
-import ComponentTestPage from "./components/ComponentTestPage"
-import Loading from "./components/templates/Loading"
-import { useAuth } from "./hooks/useStudent"
-import AI from "./pages/AITestPage"
-import TeamEditPage from "./pages/TeamUpdatePage"
 
 import "@/index.css"
 
@@ -94,8 +90,6 @@ function App() {
             <Route path="/myprofile" element={<MyProfile />} />
             <Route path="/create-profile" element={<CreateProfile />} />
             <Route path="/edit-profile" element={<EditProfile />} />
-            <Route path="/component-test" element={<ComponentTestPage />} />
-            <Route path="/ai" element={<AI />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
