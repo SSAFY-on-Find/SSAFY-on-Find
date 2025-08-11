@@ -8,10 +8,10 @@
  * @property {string} [publishedAt] - 메시지 발행 시간 (서버에서 생성)
  */
 export interface ChatMessage {
-  roomId: number
   studentId: number
+  roomId: number
   content: string
-  publishedAt?: string
+  publishedAt: string
 }
 
 /**
@@ -19,7 +19,7 @@ export interface ChatMessage {
  */
 export interface ChatRoom {
   id: number
-  name: string // 예시 필드, 실제 백엔드 모델에 맞게 수정 필요
+  name: string
   members: number[] // 예시 필드
 }
 

@@ -5,42 +5,53 @@ import { Button, InputBox } from "@/components/atoms"
 import { MessageBox } from "@/components/molecules"
 import { useChat } from "@/hooks/useChat"
 import { useChatStore } from "@/stores/chatStore"
+import type { ChatMessage } from "@/types/chat/chat"
+import { formatMessageTime } from "@/utils"
 
-// 팀 멤버의 타입 정의
 interface TeamMember {
   studentId: number
   name: string
   profileImageUrl?: string
-  // 필요하다면 프로필 이미지 등 다른 속성 추가 가능
 }
 
 interface TeamChatProps {
   roomId: number
   studentId: number
-  members: TeamMember[] // 팀원 목록을 props로 받도록 추가
+  members: TeamMember[]
+  initialMessages?: ChatMessage[]
 }
 
-const TeamChat: React.FC<TeamChatProps> = ({ roomId, studentId, members }) => {
+const TeamChat: React.FC<TeamChatProps> = ({ roomId, studentId, members, initialMessages }) => {
   const { connect, disconnect, sendMessage, error } = useChat(roomId)
-  const { messages, isConnected, clearMessages } = useChatStore()
+  const { messages, isConnected, clearMessages, setMessages } = useChatStore()
   const [newMessage, setNewMessage] = useState("")
   const chatWindowRef = useRef<HTMLDivElement>(null)
 
+  //  1: 웹소켓 연결/해제 관리. roomId가 바뀔 때만 실행됩니다.
   useEffect(() => {
-    if (roomId) connect()
+    if (roomId) {
+      connect()
+    }
     return () => {
       disconnect()
       clearMessages()
     }
   }, [roomId, connect, disconnect, clearMessages])
 
+  //  2: 이전 메시지 초기화. initialMessages가 처음 들어왔을 때 실행됩니다.
+  useEffect(() => {
+    if (initialMessages) {
+      setMessages(initialMessages)
+    }
+  }, [initialMessages, setMessages])
+
+  //  3: 메시지 목록이 변경되면 스크롤을 맨 아래로 이동
   useEffect(() => {
     if (chatWindowRef.current) {
       chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight
     }
   }, [messages])
 
-  // 메시지 전송 로직
   const handleSendMessage = () => {
     if (newMessage.trim() && isConnected) {
       sendMessage({
@@ -62,23 +73,19 @@ const TeamChat: React.FC<TeamChatProps> = ({ roomId, studentId, members }) => {
 
       <main ref={chatWindowRef} className="flex-1 overflow-y-auto bg-white p-4">
         <div className="flex flex-col gap-4">
-          {messages.map((msg, index) => {
-            // members 배열에서 studentId를 기준으로 보낸 사람의 정보를 찾습니다.
+          {messages.map((msg) => {
             const sender = members.find((member) => member.studentId === msg.studentId)
-            // 보낸 사람의 이름. 정보가 없으면 ID를 표시합니다.
             const senderName = sender ? sender.name : `사용자 ${msg.studentId}`
             const senderProfile = sender ? sender.profileImageUrl : ``
 
             return (
               <MessageBox
+                key={`${msg.studentId}-${msg.publishedAt}`}
                 who={msg.studentId === studentId ? "me" : "other"}
                 content={msg.content}
-                name={senderName} // 찾은 이름을 props로 전달
+                name={senderName}
                 profile={senderProfile}
-                time={new Date().toLocaleTimeString("ko-KR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                time={formatMessageTime(msg.publishedAt)}
               />
             )
           })}
@@ -95,7 +102,10 @@ const TeamChat: React.FC<TeamChatProps> = ({ roomId, studentId, members }) => {
               onChange={setNewMessage}
               isDisabled={!isConnected}
               onKeyDown={(e) => {
-                if (e.key === "Enter") handleSendMessage()
+                if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+                  e.preventDefault()
+                  handleSendMessage()
+                }
               }}
             />
           </div>

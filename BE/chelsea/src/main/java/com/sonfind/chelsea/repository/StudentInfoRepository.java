@@ -25,17 +25,18 @@ public interface StudentInfoRepository extends JpaRepository<StudentInfo, Long> 
 			SELECT 
 				sc_pos.sub_code_name AS position_name,
 				CASE 
-					WHEN s.major_yn = TRUE THEN '전공'
-					ELSE '비전공'
-				END AS major_type,
+					WHEN s.team_id IS NULL THEN 'notTeam'
+					ELSE 'isTeam'
+				END AS team_type,
 				COUNT(si.id) AS student_count
 			FROM student_info si
-			LEFT JOIN student s ON si.student_id = s.student_id
+			INNER JOIN student s ON si.student_id = s.student_id
 			LEFT JOIN sub_code sc_pos ON si.position_code = sc_pos.sub_code
+			LEFT JOIN team t ON s.team_id = t.team_id
 			GROUP BY
-					position_name, major_type
+					position_name, team_type
 			ORDER BY 
-					position_name DESC ,major_type, student_count;
+					position_name DESC ,team_type, student_count;
 		""", nativeQuery = true)
 	List<Object[]> getPositionMajorRatio();
 }

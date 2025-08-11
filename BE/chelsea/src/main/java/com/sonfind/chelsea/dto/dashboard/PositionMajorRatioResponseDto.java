@@ -8,6 +8,6 @@ import lombok.Builder;
 public record PositionMajorRatioResponseDto(
 	int totalCount,
 
-	List<RatioResponseDto> majorType
+	List<RatioResponseDto> teamType
 ) {
 }

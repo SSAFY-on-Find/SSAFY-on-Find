@@ -123,8 +123,41 @@ public class TeamService {
 			.map(sc -> new SubCodeResponseDto(sc.getSubCode(), sc.getSubCodeName()))
 			.collect(Collectors.toList());
 
-		return new TeamCreatePageDto(tracks, positions);
+		//db에서 팀 규칙 조회
+		List<TeamRuleResponseDto> teamRules = getTeamRulesForCreatePage();
+
+		return new TeamCreatePageDto(tracks, positions, teamRules);
 	}
+
+	//db에서 팀 규칙 조회
+	private List<TeamRuleResponseDto> getTeamRulesForCreatePage() {
+		//DB에서 useYn True인 규칙 조회
+		List<SubCode> rules = subCodeRepository.findByMainCodeAndUseYnTrue("RULE");
+
+		return rules.stream()
+			.map(rule -> TeamRuleResponseDto.builder()
+				.ruleCode(rule.getSubCode())
+				.ruleName(rule.getSubCodeName())
+				.ruleDescription(rule.getSubCodeDescription())
+				.isOk(false)
+				.requiredStatus(null)
+				.build())
+			.sorted((r1, r2) -> r1.ruleCode().compareTo(r2.ruleCode()))
+			.collect(Collectors.toList());
+
+	}
+
+	// 규칙 코드별 필요 조건 문자열 반환 메서드
+	// private String getRequiredStatusByRuleCode(String ruleCode) {
+	// 	return switch (ruleCode) {
+	// 		case "RULE001" -> "6명";
+	// 		case "RULE002" -> "전공자 2명 이상";
+	// 		case "RULE003" -> "비전공자 2명 이상";
+	// 		default -> {
+	// 			yield "조건 확인 필요";
+	// 		}
+	// 	};
+	// }
 
 	//팀 수정
 	@Transactional

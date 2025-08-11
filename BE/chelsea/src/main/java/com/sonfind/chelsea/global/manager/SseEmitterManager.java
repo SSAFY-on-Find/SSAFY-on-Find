@@ -1,18 +1,17 @@
 package com.sonfind.chelsea.global.manager;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * SSE Emitter 관리 매니저
- *
+ * <p>
  * - 클라이언트마다 하나의 SseEmitter를 생성하고 관리
  * - 연결(completion, timeout, error) 이벤트를 처리하여 map에서 제거
  * - 필요한 경우, 초기 커넥션 확인용 코멘트를 전송
@@ -32,7 +31,7 @@ public class SseEmitterManager {
 	/**
 	 * 새로운 SSE 연결을 생성하고 관리 맵에 등록
 	 *
-	 * @param pubId  연결을 요청한 사용자 ID
+	 * @param pubId 연결을 요청한 사용자 ID
 	 * @return SseEmitter (스트리밍 응답 채널)
 	 * @throws RuntimeException 초기 이벤트 전송에 실패할 경우
 	 */
@@ -63,8 +62,8 @@ public class SseEmitterManager {
 	/**
 	 * 특정 사용자의 SSE 연결로 데이터를 전송
 	 *
-	 * @param subId  수신 대상 사용자 ID
-	 * @param data    전송할 페이로드 (JSON 직렬화 가능한 객체)
+	 * @param subId 수신 대상 사용자 ID
+	 * @param data  전송할 페이로드 (JSON 직렬화 가능한 객체)
 	 */
 	public void sendTo(Long subId, Object data) {
 		SseEmitter emitter = emittersMap.get(subId);
@@ -72,12 +71,39 @@ public class SseEmitterManager {
 			try {
 				// 이벤트 이름 "notification" 으로 데이터 전송
 				emitter.send(SseEmitter.event()
-					.name("notification")
-					.data(data));
+						.name("notification")
+						.data(data));
 			} catch (Exception e) {
 				// 전송 실패 시 로그 기록 후 map에서 제거
 				log.error("Failed to send SSE event to user {}: {}", subId, e.getMessage());
 				emittersMap.remove(subId);
+			}
+		}
+	}
+
+	/**
+	 * 모든 연결된 사용자에게 이벤트를 브로드캐스트
+	 *
+	 * @param eventName
+	 * @param payload
+	 */
+	public void broadcast(String eventName, Object payload) {
+		for (Map.Entry<Long, SseEmitter> entry : emittersMap.entrySet()) {
+			SseEmitter emitter = entry.getValue();
+			try {
+				emitter.send(SseEmitter.event()
+						.name(eventName)
+						.data(payload)
+				);
+			} catch (Exception e) {
+				try {
+					emitter.completeWithError(e);
+				} catch (Exception ignore) {
+					log.error("Failed to complete emitter for user {}: {}", entry.getKey(), ignore.getMessage());
+				} finally {
+					emittersMap.remove(entry.getKey());
+					log.error("Removed emitter for user {} due to error: {}", entry.getKey(), e);
+				}
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 // src/api/chatRoom.ts
-import type { DirectChatRoomRequest } from "@/types/chat/chat"
+import type { ChatMessage, DirectChatRoomRequest } from "@/types/chat/chat"
 
 import api from "./index"
 
@@ -37,5 +37,22 @@ export const createDirectChatRoom = async (data: DirectChatRoomRequest): Promise
  */
 export const getMyDirectChatRooms = async () => {
   const response = await api.get("/chat-rooms/individual/me")
+  return response.data.data
+}
+/**
+ * @description 채팅방을 나갑니다.
+ * @param roomId 채팅방 ID
+ */
+export const leaveChatRoom = async (roomId: number): Promise<void> => {
+  await api.post(`/chat-rooms/rooms/${roomId}/leave`)
+}
+
+/**
+ * @description 채팅방의 이전 메시지 목록을 불러옵니다.
+ * @param roomId 채팅방 ID
+ * @returns 메시지 목록
+ */
+export const getChatMessages = async (roomId: number): Promise<ChatMessage[]> => {
+  const response = await api.get(`/chat-rooms/${roomId}/messages`)
   return response.data.data
 }

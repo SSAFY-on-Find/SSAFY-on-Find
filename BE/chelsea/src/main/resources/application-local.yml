@@ -42,3 +42,15 @@ custom:
   service:
     url: "http://localhost:8080"
 
+notification:
+  dispatch:
+    publishSpringEvent: false
+    publishSpringEventForResponse: false
+  streams:
+    stream: notification_stream
+    group: notif_group
+    dlq: notification_stream:dlq
+    min-idle-ms: 60000
+    reclaim-interval-ms: 30000
+    scan-pending-interval-ms: 60000
+    max-deliveries: 5
