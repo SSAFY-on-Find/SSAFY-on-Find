@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 
+import { authApi } from "@/apis/authApi"
 import { studentApi, studentInfoApi } from "@/apis/studentApi"
 
 export const useStudentLogin = () => {
@@ -18,6 +19,22 @@ export const useStudentLogin = () => {
         throw new Error("로그인 중 오류가 발생했습니다.")
       }
     },
+  })
+}
+
+export const useAuth = () => {
+  return useQuery({
+    queryKey: ["user-auth"],
+    queryFn: async () => {
+      const response = await authApi.getAuth()
+      if (response.status !== "SUCCESS") {
+        throw new Error("세션 인증에 실패했습니다.")
+      }
+      return response.data
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: false,
   })
 }
 
