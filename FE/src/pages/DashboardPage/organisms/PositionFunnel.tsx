@@ -75,7 +75,6 @@ function MajorWaffle({
         total={cells}
         rows={rows}
         columns={columns}
-        // colors={(d) => (d.id === "isTeam" ? "#6C5CE7" : "#E6E6E6")}
         colors={(d) => (d.id === "isTeam" ? teamColor : "var(--color-line)")}
         margin={{ top: 2, right: 2, bottom: 2, left: 2 }}
         padding={1}
@@ -141,9 +140,8 @@ export default function PositionFunnel({ api }: Props) {
       <div style={{ height: chartHeight }} className="relative min-w-0 flex-1">
         <ResponsiveFunnel<FunnelDatum>
           data={funnelDataWithColor}
-          margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
+          margin={{ top: 8, right: 30, bottom: 8, left: 30 }}
           valueFormat={(v) => `${v}명`}
-          // colors={{ scheme: "purple_blue" }}
           colors={{ datum: "color" }}
           shapeBlending={0.6}
           direction="vertical"
