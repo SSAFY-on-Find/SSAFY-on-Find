@@ -17,6 +17,7 @@ import { RoutePolicy } from "@/router"
 import { useUserStore } from "@/stores/userStore"
 
 import ComponentTestPage from "./components/ComponentTestPage"
+import AI from "./pages/AITestPage"
 import TeamEditPage from "./pages/TeamUpdatePage"
 
 import "@/index.css"
@@ -50,6 +51,7 @@ function App() {
             <Route path="/create-profile" element={<CreateProfile />} />
             <Route path="/edit-profile" element={<EditProfile />} />
             <Route path="/component-test" element={<ComponentTestPage />} />
+            <Route path="/ai" element={<AI />} />
           </Routes>
         </main>
       </div>
