@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { ResponsiveRadialBar } from "@nivo/radial-bar"
+import { BasicTooltip } from "@nivo/tooltip"
 
 import type { ITeamRatio } from "@/types/dashboard"
 
@@ -127,6 +128,7 @@ export default function TeamBuildingProgress({ data }: { data: ITeamRatio }) {
             motionConfig="default"
             transitionMode="startAngle"
             isInteractive={true}
+            tooltip={() => <BasicTooltip id="빌딩 완료" value={`${y} / ${max} 명`} color="#6C5CE7" enableChip />}
           />
         </div>
         {/* 중앙 퍼센트 라벨 */}

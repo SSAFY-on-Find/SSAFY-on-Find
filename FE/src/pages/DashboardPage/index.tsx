@@ -1,92 +1,22 @@
 import { StudentInfo } from "@/components/molecules"
 import Loading from "@/components/templates/Loading"
-import { useSummaryInfo, useTeamRatio } from "@/hooks/useDashboard"
+import { usePositionRatio, useSummaryInfo, useTeamRatio } from "@/hooks/useDashboard"
 
 import DashboardCard from "./organisms/DashboardCard"
-import type { PositionApi } from "./organisms/PositionFunnel"
 import TrackPositionFunnel from "./organisms/PositionFunnel"
 import TeamBuildingProgress from "./organisms/TeamBuildingProgress"
 import TeamCardCarousel from "./organisms/TeamCardCarousel"
 import { teamCardListDummy } from "./teamdummy"
 
-type Section = {
-  type: "전체" | "전공" | "비전공"
-  totalStudentCount: number
-  teamMemberCount: number
-}
-type TeamBuildingApi = {
-  all: Section
-  major: Section
-  nonMajor: Section
-}
-
 export default function DashboardPage() {
   const { data: summary, isLoading: isSummaryLoading, error: summaryError } = useSummaryInfo()
   const { data: teamRatio, isLoading: isTeamRatioLoading, error: teamRatioError } = useTeamRatio()
+  const { data: positionRatio, isLoading: isPositionRatioLoading, error: positionRatioError } = usePositionRatio()
 
-  const dummy: TeamBuildingApi = {
-    all: { type: "전체", totalStudentCount: 100, teamMemberCount: 30 },
-    major: { type: "전공", totalStudentCount: 25, teamMemberCount: 12 },
-    nonMajor: { type: "비전공", totalStudentCount: 25, teamMemberCount: 18 },
-  }
-
-  const trackdummy: PositionApi = {
-    status: "SUCCESS",
-    data: [
-      {
-        position: "프론트",
-        totalCount: 16,
-        majorType: [
-          { name: "비전공", count: 8 },
-          { name: "전공", count: 8 },
-        ],
-      },
-      {
-        position: "백엔드",
-        totalCount: 14,
-        majorType: [
-          { name: "비전공", count: 6 },
-          { name: "전공", count: 8 },
-        ],
-      },
-      {
-        position: "인프라",
-        totalCount: 9,
-        majorType: [
-          { name: "비전공", count: 3 },
-          { name: "전공", count: 6 },
-        ],
-      },
-      {
-        position: "모바일",
-        totalCount: 7,
-        majorType: [
-          { name: "비전공", count: 4 },
-          { name: "전공", count: 3 },
-        ],
-      },
-      {
-        position: "AI",
-        totalCount: 6,
-        majorType: [
-          { name: "비전공", count: 2 },
-          { name: "전공", count: 4 },
-        ],
-      },
-      {
-        position: "임베디드",
-        totalCount: 5,
-        majorType: [
-          { name: "비전공", count: 2 },
-          { name: "전공", count: 3 },
-        ],
-      },
-    ],
-  }
-
-  if (isSummaryLoading || isTeamRatioLoading) return <Loading fullScreen />
+  if (isSummaryLoading || isTeamRatioLoading || isPositionRatioLoading) return <Loading fullScreen />
   if (summaryError) return <div>프로필 요약 정보를 불러올 수 없습니다.</div>
   if (teamRatioError) return <div>팀 빌딩 현황 정보를 불러올 수 없습니다.</div>
+  if (positionRatioError) return <div>포지션별 팀 빌딩 현황 정보를 불러올 수 없습니다.</div>
 
   return (
     <div className="bg-background flex min-h-screen flex-col gap-5 px-15 py-10">
@@ -105,10 +35,8 @@ export default function DashboardPage() {
             {teamRatio ? <TeamBuildingProgress data={teamRatio} /> : null}
           </DashboardCard>
         </div>
-        <DashboardCard title={"희망 트랙별 포지션 비율 📊"}>
-          <div className="mt-4">
-            <TrackPositionFunnel api={trackdummy} />
-          </div>
+        <DashboardCard title={"포지션별 팀 빌딩 현황 📊"}>
+          <div className="mt-4">{positionRatio ? <TrackPositionFunnel api={positionRatio} /> : null}</div>
         </DashboardCard>
       </div>
 
