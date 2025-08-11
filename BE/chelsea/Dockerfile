@@ -2,13 +2,13 @@ FROM openjdk:21-slim AS builder
 
 WORKDIR /app
 
-ENV TZ=Asia/Seoul
-
 COPY build/libs/chelsea-0.0.1-SNAPSHOT.jar app.jar
 
 FROM openjdk:21-slim
 
 WORKDIR /app
+
+ENV TZ=Asia/Seoul
 
 COPY --from=builder /app/app.jar .
 
