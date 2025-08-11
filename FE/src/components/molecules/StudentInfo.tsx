@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { Heart } from "lucide-react"
 
 import { Button, CircleGrid, MainTag, MajorTag, NormalTag, PositionTag, UserImg } from "@/components/atoms"
@@ -28,6 +29,7 @@ function StudentInfo({
   variant = "detail",
 }: IStudentInfo) {
   const { toggleFavorite, isLoading } = useStudentFavoriteToggle()
+  const navigate = useNavigate()
 
   return (
     <div
@@ -68,15 +70,26 @@ function StudentInfo({
           <CircleGrid memberCount={teamInfo.majorCount + teamInfo.nonMajorCount} variant={variant} />
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="flex min-w-20 flex-col gap-2">
           <div className={`text-subtext text-center ${variant === "dashboard" ? "text-sm" : ""}`}>
-            {" "}
-            아직 팀이 없습니다.
+            {variant === "dashboard" ? (
+              <>
+                아직 팀이 <br /> 없습니다.
+              </>
+            ) : (
+              "아직 팀이 없습니다."
+            )}
           </div>
           {isMyProfile && (
-            <Button text="팀 생성하기" size={variant === "dashboard" ? "s" : "m"} isIcon={false} onClick={() => {}} />
+            <Button
+              text="팀 생성하기"
+              size={variant === "dashboard" ? "s" : "m"}
+              isIcon={false}
+              onClick={() => {
+                navigate("/create-team")
+              }}
+            />
           )}
-          {/* 초대하기...? 채팅하기...? */}
         </div>
       )}
     </div>

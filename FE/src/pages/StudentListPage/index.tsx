@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom"
 
 import { SearchBar } from "@/components/atoms"
 import { StudentCard } from "@/components/molecules"
+import Loading from "@/components/templates/Loading"
 import { useProfileCodes } from "@/hooks/useProfile"
 import { useStudentList } from "@/hooks/useStudent"
 
@@ -108,7 +109,7 @@ export default function StudentListPage() {
     })
   }, [students, searchQuery, selectedPositions, selectedTracks, selectedMajor, teamFilter])
 
-  if (isCodesLoading || isStudentsLoading) return <div>로딩 중...</div>
+  if (isCodesLoading || isStudentsLoading) return <Loading fullScreen />
   if (codesError || !codes) return <div>코드 리스트를 불러올 수 없습니다.</div>
   if (studentsError) return <div>교육생 목록을 불러올 수 없습니다.</div>
 

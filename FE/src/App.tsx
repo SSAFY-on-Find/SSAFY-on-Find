@@ -17,6 +17,7 @@ import { RoutePolicy } from "@/router"
 import { useUserStore } from "@/stores/userStore"
 
 import ComponentTestPage from "./components/ComponentTestPage"
+import Loading from "./components/templates/Loading"
 import { useAuth } from "./hooks/useStudent"
 import AI from "./pages/AITestPage"
 import TeamEditPage from "./pages/TeamUpdatePage"
@@ -38,11 +39,7 @@ function App() {
 
   // 2) 로딩 화면
   if (isLoading) {
-    return (
-      <div className="bg-background flex min-h-screen items-center justify-center">
-        <div className="text-subtext text-xl font-semibold">세션 확인 중...</div>
-      </div>
-    )
+    return <Loading text="세션 확인 중..." fullScreen />
   }
 
   // 3) 비로그인: 로그인 라우트만 노출
