@@ -12,6 +12,7 @@ public record ChatRoomListResponseDto(
 
 	public record DirectChatRoomInfoDto(
 		Long chatRoomId,
+		Long targetUserId,
 		String targetUsername,
 		String targetProfileImageUrl,
 		String major,
@@ -28,7 +29,7 @@ public record ChatRoomListResponseDto(
 				opponentInfo.getPositionCode().getSubCode(),
 				opponentInfo.getPositionCode().getSubCodeName()
 			);
-			return new DirectChatRoomInfoDto(chatRoomId, opponent.getName(), profileImageUrl, major, positionDto,
+			return new DirectChatRoomInfoDto(chatRoomId, opponent.getStudentId(), opponent.getName(), profileImageUrl, major, positionDto,
 				hasTeam);
 		}
 	}
