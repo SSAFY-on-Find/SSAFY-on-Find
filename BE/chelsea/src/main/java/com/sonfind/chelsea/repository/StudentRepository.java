@@ -43,7 +43,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 			+ "COUNT(s.student_id) AS total_count, "
 			+ "COUNT(IFNULL(s.team_id,0)) AS teamMemberCount "
 			+ "FROM students s "
-			+ "LEFT JOIN team t ON s.team_id = t.team_id "
+			+ "LEFT JOIN teams t ON s.team_id = t.team_id "
 			+ "GROUP BY major_type", nativeQuery = true)
 	List<Object[]> getTeamRatio();
 
