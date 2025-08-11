@@ -77,7 +77,7 @@ export default function MyTeamPage() {
   const isLoading = isFetchingRoomId || isCreating || isMyTeamLoading
 
   return (
-    <div className="bg-background min-h-screen p-8">
+    <div className="bg-background min-h-screen px-15 py-10">
       <div className="flex justify-between">
         <div className="flex w-[650px] flex-col gap-8">
           <div className="border-line flex rounded-xl border-1 bg-white pb-6">
