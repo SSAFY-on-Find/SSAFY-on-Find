@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.sonfind.chelsea.dto.student.response.StudentSignInResponseDto;
 import com.sonfind.chelsea.dto.studentInfo.request.StudentInfoCreateRequestDto;
 import com.sonfind.chelsea.dto.studentInfo.request.StudentInfoUpdateRequestDto;
 import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoGetDetailResponseDto;
@@ -23,6 +24,7 @@ import com.sonfind.chelsea.dto.subcode.SubCodeMeResponseDto;
 import com.sonfind.chelsea.global.commonSwagger.ApiCreateOperation;
 import com.sonfind.chelsea.global.commonSwagger.ApiGetOperation;
 import com.sonfind.chelsea.service.StudentInfoService;
+import com.sonfind.chelsea.service.StudentService;
 import com.sonfind.chelsea.service.SubCodeService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,6 +45,7 @@ public class MeController {
 
 	private final StudentInfoService studentInfoService;
 	private final SubCodeService subCodeService;
+	private final StudentService studentService;
 
 	@ApiCreateOperation(summary = "본인 자기소개 등록")
 	@ApiResponses(value = {
@@ -157,6 +160,23 @@ public class MeController {
 
 		body.put("status", "SUCCESS");
 		body.put("data", data);
+
+		return ResponseEntity.ok().body(body);
+	}
+
+	@ApiGetOperation(summary = "로그인 확인")
+	@GetMapping("/loginCheck")
+	public ResponseEntity<Map<String, Object>> getLoginCheck(
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId
+	) {
+
+		StudentSignInResponseDto student = studentService.getLoginCheck(studentId);
+
+		Map<String, Object> body = new HashMap<>();
+
+		body.put("status", "SUCCESS");
+		body.put("data", student);
 
 		return ResponseEntity.ok().body(body);
 	}
