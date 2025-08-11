@@ -9,6 +9,7 @@ import EditProfile from "@/pages/EditProfilePage"
 import Login from "@/pages/LoginPage"
 import MyProfile from "@/pages/MyProfilePage"
 import MyTeam from "@/pages/MyTeamPage"
+import StudentDetail from "@/pages/StudentDetailPage"
 import StudentList from "@/pages/StudentListPage"
 import TeamCreatePage from "@/pages/TeamCreatePage"
 import TeamList from "@/pages/TeamListPage"
@@ -29,30 +30,30 @@ function App() {
   // }, [initializeAuth])
 
   return (
-    <RoutePolicy>
-      <div className="App">
-        {!hideLayout && <Header />}
-        <div className={!hideLayout ? "mt-[64px]" : ""}>
-          {!hideLayout && <SideBar />}
-          <main className={!hideLayout ? "ml-[230px]" : ""}>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/myteam" element={<MyTeam />} />
-              <Route path="/teamlist" element={<TeamList />} />
-              <Route path="/create-team" element={<TeamCreatePage />} />
-              <Route path="/studentlist" element={<StudentList />} />
-              {/* <Route path="/myprofile" element={<MyProfile />} /> */}
-              <Route path="/myprofile" element={<EditProfile />} />
-              <Route path="/create-profile" element={<CreateProfile />} />
-              <Route path="/edit-profile" element={<EditProfile />} />
-              <Route path="/component-test" element={<ComponentTestPage />} />
-            </Routes>
-          </main>
-        </div>
-        <ToastContainer position="bottom-right" autoClose={3000} theme="light" />
+    // <RoutePolicy>
+    <div className="App">
+      {!hideLayout && <Header />}
+      <div className={!hideLayout ? "mt-[64px]" : ""}>
+        {!hideLayout && <SideBar />}
+        <main className={!hideLayout ? "ml-[230px]" : ""}>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/myteam" element={<MyTeam />} />
+            <Route path="/teamlist" element={<TeamList />} />
+            <Route path="/create-team" element={<TeamCreatePage />} />
+            <Route path="/studentlist" element={<StudentList />} />
+            <Route path="/studentlist/:studentId" element={<StudentDetail />} />
+            <Route path="/myprofile" element={<MyProfile />} />
+            <Route path="/create-profile" element={<CreateProfile />} />
+            <Route path="/edit-profile" element={<EditProfile />} />
+            <Route path="/component-test" element={<ComponentTestPage />} />
+          </Routes>
+        </main>
       </div>
-    </RoutePolicy>
+      <ToastContainer position="bottom-right" autoClose={3000} theme="light" />
+    </div>
+    // </RoutePolicy>
   )
 }
 
