@@ -41,7 +41,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 	@Query(value =
 		"SELECT CASE WHEN s.major_yn = TRUE THEN '전공' ELSE '비전공' END AS major_type, "
 			+ "COUNT(s.student_id) AS total_count, "
-			+ "COUNT(IFNULL(s.team_id,0)) AS teamMemberCount "
+			+ "COUNT(s.team_id) AS teamMemberCount "
 			+ "FROM students s "
 			+ "LEFT JOIN teams t ON s.team_id = t.team_id "
 			+ "GROUP BY major_type", nativeQuery = true)
