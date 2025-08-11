@@ -35,7 +35,7 @@ function App() {
         {!hideLayout && <Header />}
         <div className={!hideLayout ? "mt-[64px]" : ""}>
           {!hideLayout && <SideBar />}
-          <main className={!hideLayout ? "ml-[230px]" : ""}>
+          <main className={!hideLayout ? "ml-[260px]" : ""}>
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/login" element={<Login />} />

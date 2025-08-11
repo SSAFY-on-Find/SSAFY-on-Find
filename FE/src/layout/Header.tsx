@@ -49,7 +49,7 @@ function Header() {
     <>
       <header className="fixed top-0 left-0 z-50 flex h-[64px] w-full items-center justify-center gap-3 bg-white px-5 py-4 shadow-xs">
         <div
-          className="text-main flex h-full w-[230px] cursor-pointer items-center justify-start gap-2"
+          className="text-main flex h-full w-[260px] cursor-pointer items-center justify-start gap-2"
           onClick={() => navigate("/")}
         >
           <Search />

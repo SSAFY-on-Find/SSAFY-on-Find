@@ -34,7 +34,7 @@ function SideBar() {
 
   return (
     <>
-      <aside className="bg-background fixed top-[64px] left-0 flex h-[calc(100vh-64px)] w-[230px] flex-col">
+      <aside className="bg-background fixed top-[64px] left-0 flex h-[calc(100vh-64px)] w-[260px] flex-col px-2">
         <Nav />
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="mt-5 flex flex-row justify-between">
