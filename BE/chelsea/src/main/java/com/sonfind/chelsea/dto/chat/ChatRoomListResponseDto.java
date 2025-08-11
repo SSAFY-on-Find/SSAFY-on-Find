@@ -20,7 +20,8 @@ public record ChatRoomListResponseDto(
 	) {
 		public static DirectChatRoomInfoDto of(Long chatRoomId, Student opponent, StudentInfo opponentInfo) {
 			String major = opponent.getMajorYn() ? "전공" : "비전공";
-			String profileImageUrl = opponentInfo.getProfileImageUrl();
+			String profileImageUrl =
+				opponentInfo.getProfile() == null ? "" : opponentInfo.getProfile().getProfileImageUrl();
 			boolean hasTeam = opponent.getTeamId() != null;
 
 			SubCodeResponseDto positionDto = new SubCodeResponseDto(
