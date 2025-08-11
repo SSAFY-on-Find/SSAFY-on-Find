@@ -1,18 +1,19 @@
 import { useMemo } from "react"
 import ReactMarkdown from "react-markdown"
-import { useNavigate } from "react-router-dom"
-import { FilePenLine } from "lucide-react"
+import { useNavigate, useParams } from "react-router-dom"
 
 import { Button, MajorTag, NormalTag, PositionTag } from "@/components/atoms"
 import { StudentInfo } from "@/components/molecules"
-import { useGetProfile } from "@/hooks/useProfile"
+import { useStudentInfo } from "@/hooks/useStudent"
 import type { ISubcode } from "@/types/common"
 
 import "github-markdown-css/github-markdown-light.css"
 
-export default function MyProfile() {
+export default function StudentDetailPage() {
   const navigate = useNavigate()
-  const { data, isLoading, isError, error } = useGetProfile()
+  const { studentId } = useParams<{ studentId: string }>()
+  const parsedId = Number(studentId)
+  const { data, isLoading, isError, error } = useStudentInfo(parsedId)
   const {
     student,
     position,
@@ -24,6 +25,7 @@ export default function MyProfile() {
     description,
     profileImageUrl,
     portfolio,
+    isFavorite,
     teamInfo,
   } = useMemo(() => {
     return {
@@ -37,9 +39,18 @@ export default function MyProfile() {
       description: data?.description ?? null,
       profileImageUrl: data?.profileImageUrl ?? null,
       portfolio: data?.portfolio ?? null,
+      isFavorite: data?.isFavorite ?? false,
       teamInfo: data?.teamInfo ?? null,
     }
-  }, [data])
+  }, [data, parsedId])
+
+  if (!studentId || Number.isNaN(parsedId) || studentId.length !== 7) {
+    return (
+      <div className="text-text bg-background flex min-h-screen items-center justify-center">
+        잘못된 학생 ID 입니다.
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (
@@ -52,7 +63,7 @@ export default function MyProfile() {
   if (isError) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3">
-        <div className="text-text">내 프로필 정보를 불러오지 못했습니다.</div>
+        <div className="text-text">학생 정보를 불러오지 못했습니다.</div>
         <div className="text-subtext text-sm">{(error as Error)?.message}</div>
         <Button variant="outline" text="뒤로가기" onClick={() => navigate(-1)} size={"m"} isIcon={false} />
       </div>
@@ -61,19 +72,9 @@ export default function MyProfile() {
 
   return (
     <div className="bg-background flex min-h-screen flex-col gap-7 px-15 py-10">
-      <div className="w-30">
-        <Button
-          size={"m"}
-          isIcon={true}
-          Icon={FilePenLine}
-          variant="outline"
-          text="편집"
-          onClick={() => navigate("/edit-profile")}
-        />
-      </div>
       <div>
         <StudentInfo
-          isMyProfile={true}
+          isFavorite={isFavorite}
           name={student?.name ?? ""}
           studentId={student?.studentId?.toString() ?? ""}
           imgUrl={profileImageUrl ?? ""}

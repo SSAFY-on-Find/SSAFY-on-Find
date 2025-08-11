@@ -1,5 +1,7 @@
+import { useNavigate } from "react-router-dom"
 import { FilePenLine, LogOut } from "lucide-react"
 
+import { useLeaveTeam } from "@/hooks/useTeam"
 import type { ITeamDetails } from "@/types/team"
 
 import { Button, MainTag, PositionTag, UserImg } from "../atoms"
@@ -18,8 +20,18 @@ function TeamDetail({
   isFavorite,
   varient,
 }: ITeamDetailMole) {
+  const navigate = useNavigate()
+  const { mutate: leaveTeam } = useLeaveTeam()
   const majorMembers = members.filter((ele) => ele.major === "전공")
   const nonMajorMembers = members.filter((ele) => ele.major === "비전공")
+  const handleEditClick = () => {
+    navigate(`/edit-team`)
+  }
+  const handleLeaveTeam = () => {
+    if (window.confirm("정말로 팀에서 탈퇴하시겠습니까?")) {
+      leaveTeam() // 확인을 누르면 mutation 실행
+    }
+  }
   return (
     <div className="w-full">
       <div className="flex flex-col gap-2 p-8">
@@ -31,10 +43,17 @@ function TeamDetail({
           {varient === "myteam" ? (
             <div className="flex gap-3">
               <div className="w-20">
-                <Button size={"m"} isIcon={true} Icon={FilePenLine} variant="text" text="편집" onClick={() => ""} />
+                <Button
+                  size={"m"}
+                  isIcon={true}
+                  Icon={FilePenLine}
+                  variant="text"
+                  text="편집"
+                  onClick={handleEditClick}
+                />
               </div>
               <div className="w-20">
-                <Button size={"m"} isIcon={true} Icon={LogOut} variant="danger" text="탈퇴" onClick={() => ""} />
+                <Button size={"m"} isIcon={true} Icon={LogOut} variant="danger" text="탈퇴" onClick={handleLeaveTeam} />
               </div>
             </div>
           ) : (

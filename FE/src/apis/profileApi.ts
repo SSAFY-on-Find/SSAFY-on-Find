@@ -1,6 +1,7 @@
 import type { IProfileState } from "@/stores/profileStore"
 import type { IApiResponse } from "@/types/common"
 import type { IProfileCode } from "@/types/profile"
+import type { IStudentInfo } from "@/types/student"
 
 import api from "./index"
 
@@ -35,8 +36,8 @@ export const profileApi = {
     const response = await api.post<IApiResponse<void>>(PROFILE_BASE_URL, formData)
     return response.data
   },
-  getProfile: async (): Promise<IApiResponse<IProfileState>> => {
-    const response = await api.get<IApiResponse<IProfileState>>(PROFILE_BASE_URL + "/details")
+  getProfile: async (): Promise<IApiResponse<IStudentInfo>> => {
+    const response = await api.get<IApiResponse<IStudentInfo>>(PROFILE_BASE_URL + "/details")
     return response.data
   },
   editProfile: async (profile: IProfileState): Promise<IApiResponse<void>> => {
