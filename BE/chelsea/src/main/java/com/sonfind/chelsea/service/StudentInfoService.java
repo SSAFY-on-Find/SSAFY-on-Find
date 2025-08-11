@@ -188,19 +188,19 @@ public class StudentInfoService {
 			.collect(Collectors.groupingBy(row -> (String)row[0], LinkedHashMap::new, Collectors.toList()));
 
 		midResult.forEach((positionName, rows) -> {
-			List<RatioResponseDto> majorTypeRatios = rows.stream()
+			List<RatioResponseDto> teamTypeRatios = rows.stream()
 				.map(row -> {
-					String majorType = (String)row[1];
+					String teamType = (String)row[1];
 					int count = ((Number)row[2]).intValue();
-					return new RatioResponseDto(majorType, count);
+					return new RatioResponseDto(teamType, count);
 				})
 				.toList();
 
-			int totalCount = majorTypeRatios.stream().mapToInt(RatioResponseDto::count).sum();
+			int totalCount = teamTypeRatios.stream().mapToInt(RatioResponseDto::count).sum();
 
 			PositionMajorRatioResponseDto dto = PositionMajorRatioResponseDto.builder()
 				.totalCount(totalCount)
-				.majorType(majorTypeRatios)
+				.teamType(teamTypeRatios)
 				.build();
 
 			result.put(positionName, dto);
