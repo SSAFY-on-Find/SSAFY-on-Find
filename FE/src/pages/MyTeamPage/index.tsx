@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { UserPlus } from "lucide-react"
 
-import { createTeamChatRoom, getChatMessages, getTeamChatRoomId } from "@/apis/chatRoom"
+import { createTeamChatRoom, getChatMessages, getTeamChatRoomId, leaveChatRoom } from "@/apis/chatRoom"
 import { teamApi } from "@/apis/teamApi"
 import { TeamDetail } from "@/components/molecules"
 import { useTeamNotifications } from "@/hooks/useTeamNotifications"
@@ -33,7 +33,36 @@ export default function MyTeamPage() {
     profileImageUrl: user.profileImageUrl,
     position: user.position,
   }))
-
+  const { mutate: leaveRoom } = useMutation({
+    mutationFn: (id: number) => leaveChatRoom(id),
+    onSuccess: () => {
+      console.log("채팅방에서 성공적으로 나갔습니다.")
+    },
+    onError: (error) => {
+      console.error("채팅방 나가기 실패:", error)
+    },
+  })
+  const { mutate: leaveTeam } = useMutation({
+    mutationFn: () => teamApi.leaveTeam(), // teamApi에 leaveTeam 함수가 있다고 가정
+    onSuccess: () => {
+      // 1. 팀 탈퇴 성공 시, 채팅방 나가기 실행
+      if (chatRoomId) {
+        leaveRoom(chatRoomId)
+      }
+      queryClient.invalidateQueries({ queryKey: ["myTeam"] })
+      alert("팀에서 성공적으로 탈퇴했습니다.")
+      navigate("/") // 메인 페이지 등으로 이동
+    },
+    onError: (error) => {
+      alert("팀 탈퇴에 실패했습니다.")
+      console.error(error)
+    },
+  })
+  const handleLeaveTeam = () => {
+    if (window.confirm("정말로 팀에서 탈퇴하시겠습니까?")) {
+      leaveTeam()
+    }
+  }
   const { mutate: createRoom, isPending: isCreating } = useMutation({
     mutationFn: (id: number) => createTeamChatRoom(id),
     onSuccess: () => {
@@ -88,7 +117,9 @@ export default function MyTeamPage() {
       <div className="flex justify-between">
         <div className="flex w-[650px] flex-col gap-8">
           <div className="border-line flex rounded-xl border-1 bg-white pb-6">
-            {myTeamData?.teamInfo && <TeamDetail {...myTeamData?.teamInfo} varient="myteam" />}
+            {myTeamData?.teamInfo && (
+              <TeamDetail {...myTeamData?.teamInfo} varient="myteam" onLeaveTeam={handleLeaveTeam} />
+            )}
           </div>
           <div className="border-line flex flex-col gap-4 rounded-xl border-1 bg-white p-6">
             <div>
