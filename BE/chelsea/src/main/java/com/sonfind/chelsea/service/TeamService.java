@@ -223,9 +223,9 @@ public class TeamService {
 		}
 		teamRepository.save(targetTeam);
 
-		//멤버 정보 생성 및 이벤트 발행
+		//멤버 정보 생성 및 이벤트 발행(팀 목록에서의 갱신 및 대시보드)
 		MemberSummary memberSummary = createMemberSummary(student);
-		dashBoardCommandService.publishTeamMemberChangedEvent(teamId, MemberChageAction.JOINED, memberSummary);
+		teamMemberChangeEventPublisher(teamId, MemberChageAction.JOINED, memberSummary);
 
 		if (currentTeamId != null) {
 			log.info("교육생 {}이 팀 {}에서 팀 {}으로 이동했습니다.", studentId, currentTeamId, teamId);
@@ -355,8 +355,8 @@ public class TeamService {
 		//팀에서 나가버렷~~
 		removeStudentFromTeam(teamId, studentId, true);
 
-		//팀 나가기 이벤트 발행
-		dashBoardCommandService.publishTeamMemberChangedEvent(teamId, MemberChageAction.LEFT, memberSummary);
+		//팀 나가기 이벤트 발행(팀 목록에서의 갱신 및 대시보드)
+		teamMemberChangeEventPublisher(teamId, MemberChageAction.LEFT, memberSummary);
 
 		return LeaveTeamResponseDto.builder()
 				.message(willBeEmptyTeam ? "팀에서 나갔습니다. 팀이 삭제되었습니다." : "팀에서 나갔습니다.")
@@ -672,6 +672,13 @@ public class TeamService {
 					.build();
 		}
 
+	}
+
+	private void teamMemberChangeEventPublisher(Long teamId, MemberChageAction action, MemberSummary memberSummary) {
+		// 팀 빌딩 진행률 업데이트(대시보드 갱신)
+		dashBoardCommandService.publishTeamBuildingProgressEvent();
+		// 팀원 변경 이벤트 발행
+		dashBoardCommandService.publishTeamMemberChangedEvent(teamId, action, memberSummary);
 	}
 
 }

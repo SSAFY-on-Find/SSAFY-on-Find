@@ -195,10 +195,6 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 					now
 			));
 		}
-
-		// 팀 빌딩 진행률 업데이트(대시보드 갱신)
-		dashBoardCommandService.publishTeamBuildingProgressEvent();
-
 		log.info("초대/지원이 수락되었습니다: notificationId={}, statusId={}", notificationId, statusId);
 	}
 
