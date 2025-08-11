@@ -11,7 +11,7 @@ interface ITeamCardElement extends ITeamCard {
 function TeamCard({
   teamId,
   teamName,
-  teamDescription,
+  description,
   track,
   recruitments,
   members,
@@ -36,18 +36,19 @@ function TeamCard({
     } else if (userTeamId !== teamId) {
       return (
         <>
-          <Button size={"s"} isIcon={false} text="지원하기" variant={btnRecruit} onClick={() => {}} />
-          <Button size={"s"} isIcon={false} text="팀 합치기 제안" variant={btnMerge} onClick={() => {}} />
+          <Button size={"m"} isIcon={false} text="지원하기" variant={btnRecruit} onClick={() => {}} />
+          <Button size={"m"} isIcon={false} text="팀 합치기" variant={btnMerge} onClick={() => {}} />
         </>
       )
     }
-    return null
+    return <Button size={"m"} isIcon={false} text="내 팀 바로가기" variant={btnRecruit} onClick={() => {}} />
   }
 
   // 카드 스타일
-  const bgColor = variant === "main" ? "bg-gradient-to-tl from-main to-main/80" : ""
+  const bgColor = variant === "main" ? "bg-gradient-to-tl from-main to-main/80" : "bg-white"
   const textColor = variant === "main" ? "text-white" : "text-text"
-  const titleColor = variant === "main" ? "text-white" : "text-main"
+  const descriptionColor = variant === "main" ? "text-white" : "text-subtext"
+  const titleColor = variant === "main" ? "text-white" : "text-text"
   const heartColor = variant === "main" ? "text-white" : "text-subtext"
   const heartFillColor = variant === "main" ? "fill-white text-white" : "fill-red-500 text-red-500"
   const btnRecruit = variant === "main" ? "white-full" : "primary"
@@ -56,9 +57,9 @@ function TeamCard({
     <div
       key={teamId}
       onClick={onClickCard}
-      className={`${bgColor} border-main flex max-w-[260px] min-w-[260px] flex-col rounded-md border-2`}
+      className={`${bgColor} border-line flex max-h-[300px] min-h-[300px] max-w-[260px] min-w-[260px] flex-col justify-between rounded-lg border-2 px-2 py-1`}
     >
-      <div className="flex flex-col gap-[11px] p-[25px] pb-[18px]">
+      <div className="flex flex-col gap-[11px] p-[18px] pb-[18px]">
         <div className="inline-flex items-center justify-between">
           <div className="inline-flex items-center gap-3">
             <h3 className={`${titleColor} text-2xl font-bold`}>{teamName}</h3>
@@ -68,14 +69,16 @@ function TeamCard({
               <MainTag tagContent={track.subcodeName} />
             )}
           </div>
-          <Heart
-            className={`cursor-pointer transition-colors ${isFavorite ? heartFillColor : heartColor}`}
-            onClick={handleFavoriteClick}
-          />
+          {userTeamId !== teamId && (
+            <Heart
+              className={`cursor-pointer transition-colors ${isFavorite ? heartFillColor : heartColor}`}
+              onClick={handleFavoriteClick}
+            />
+          )}
         </div>
-        <p className={`${textColor} line-clamp-2 text-sm`}>{teamDescription}</p>
+        <p className={`${descriptionColor} line-clamp-2 min-h-8 text-sm`}>{description}</p>
       </div>
-      <div className="p-[18px] pt-0">
+      <div className="p-[20px] pt-0">
         <div className="mb-5 flex px-[5px]">
           {members.map((ele, idx) => (
             <div key={ele.studentId} className={idx > 0 ? "-ml-2" : ""}>
@@ -96,7 +99,7 @@ function TeamCard({
           ))}
         </div>
       </div>
-      <div className="flex gap-4 p-[25px] pt-0" onClick={handleButtonClick}>
+      <div className="flex gap-4 p-[18px] pt-0" onClick={handleButtonClick}>
         {renderButtons()}
       </div>
     </div>

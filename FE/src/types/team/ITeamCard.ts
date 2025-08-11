@@ -6,7 +6,7 @@ import type { ITeamMember } from "./ITeamMember"
 export interface ITeamCard {
   teamId: number
   teamName: string
-  teamDescription: string
+  description: string
   track: ISubcode
   recruitments: IRecruitment[]
   members: ITeamMember[]

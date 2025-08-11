@@ -17,7 +17,12 @@ function StudentCard({ student, position, track, goal, profileImageUrl, isFavori
       }}
     >
       <div className="relative">
-        <UserImg name={student.name} size={"xl"} showTeamBadge={false} url={profileImageUrl} />
+        <UserImg
+          name={student.name}
+          size={"xl"}
+          showTeamBadge={false}
+          url={profileImageUrl === null ? "" : profileImageUrl}
+        />
         <Heart
           className={`absolute right-2 bottom-1 cursor-pointer ${isFavorite ? "text-error" : "text-subtext"}`}
           size={24}

@@ -27,7 +27,7 @@ const membersA: ITeamMember[] = [
 export const teamCardDummy: ITeamCard = {
   teamId: 101,
   teamName: "팀 001",
-  teamDescription: "혁신적인 웹 서비스를 함께 만들 팀원을 찾고 있어요!",
+  description: "혁신적인 웹 서비스를 함께 만들 팀원을 찾고 있어요!",
   track: TR_WEB,
   recruitments: [REC_FE, REC_BE, REC_INF], // ✅ IRecruitment 사용
   members: membersA, // ✅ ITeamMember(position: ISubcode)
@@ -44,7 +44,7 @@ export const teamCardListDummy: ITeamCard[] = [
   {
     teamId: 202,
     teamName: "팀 002",
-    teamDescription: "RN + Nest로 MVP! iOS/Android 환영",
+    description: "RN + Nest로 MVP! iOS/Android 환영",
     track: { subcode: "trc_mob", subcodeName: "모바일" },
     recruitments: [REC_MOB, REC_BE],
     members: [
@@ -60,7 +60,7 @@ export const teamCardListDummy: ITeamCard[] = [
   {
     teamId: 303,
     teamName: "팀 003",
-    teamDescription: "K8s/모니터링/CI-CD 셋업",
+    description: "K8s/모니터링/CI-CD 셋업",
     track: { subcode: "trc_inf", subcodeName: "인프라" },
     recruitments: [REC_INF, REC_BE],
     members: [
@@ -75,7 +75,7 @@ export const teamCardListDummy: ITeamCard[] = [
   {
     teamId: 404,
     teamName: "팀 004",
-    teamDescription: "LLM + RAG 검색/요약",
+    description: "LLM + RAG 검색/요약",
     track: { subcode: "trc_ai", subcodeName: "AI" },
     recruitments: [REC_AI, REC_FE],
     members: [{ studentId: 1300301, name: "문싸피", major: "전공", profileImageUrl: "", position: POS_AI }],
