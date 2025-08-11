@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ReadOffset;
@@ -12,6 +13,7 @@ import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.stream.StreamMessageListenerContainer;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -28,13 +30,26 @@ public class RedisStreamConfig {
 	@Bean
 	CommandLineRunner initGroups(StringRedisTemplate t) {
 		return args -> {
-			try {
-				// "notification_stream" 스트림에 "notif_group"이라는 그룹을 생성
-				// ReadOffset.from("0-0")는 스트림의 시작부터 읽기 시작하도록 설정
-				t.opsForStream().createGroup("notification_stream", ReadOffset.from("0-0"), "notif_group");
+			final String stream = "notification_stream";
+			final String group = "notif_group";
+
+			try (RedisConnection conn = t.getConnectionFactory().getConnection()) {
+				byte[] key = t.getStringSerializer().serialize(stream);
+				byte[] create = "CREATE".getBytes(StandardCharsets.UTF_8);
+				byte[] grp = group.getBytes(StandardCharsets.UTF_8);
+				byte[] dollar = "$".getBytes(StandardCharsets.UTF_8);
+				byte[] mk = "MKSTREAM".getBytes(StandardCharsets.UTF_8);
+
+				// XGROUP CREATE <stream> <group> $ MKSTREAM
+				try {
+					conn.execute("XGROUP", create, key, grp, dollar, mk);
+					log.info("Created consumer group '{}' with MKSTREAM on '{}'", group, stream);
+				} catch (Exception e) {
+					// 이미 있으면 BUSYGROUP 오류 무시
+					log.info("Consumer group '{}' already exists on '{}': {}", group, stream, e.getMessage());
+				}
 			} catch (Exception e) {
-				// 그룹이 이미 존재하는 경우 예외가 발생할 수 있으므로 무시하고 로그만 남김
-				log.warn("Notification stream group already exists or could not be created: {}", e.getMessage());
+				log.warn("Init stream/group failed: {}", e.getMessage());
 			}
 		};
 	}
