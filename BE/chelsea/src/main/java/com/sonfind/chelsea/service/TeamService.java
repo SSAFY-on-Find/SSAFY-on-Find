@@ -493,6 +493,7 @@ public class TeamService {
 	}
 
 	//팀 전체 목록 조회
+	//기존 75번 쿼리
 	@Transactional(readOnly = true)
 	public List<TeamListResponseDto> getAllTeams(Long studentId) {
 		List<Team> teams = teamRepository.findByIsDeletedIsFalseOrderByTeamIdAsc();
@@ -505,6 +506,10 @@ public class TeamService {
 			)
 			.collect(Collectors.toList());
 	}
+
+	//쿼리 최적화 1: DTO 프로젝션 사용 (repo의 3,4번 쿼리)
+
+	//쿼리 최적화 2: Fetch Join 사용(repo의 1,2번 쿼리)
 
 	//team2teamlistresponseDto
 	private TeamListResponseDto convertToTeamListResponse(Team team, Long studentId) {
