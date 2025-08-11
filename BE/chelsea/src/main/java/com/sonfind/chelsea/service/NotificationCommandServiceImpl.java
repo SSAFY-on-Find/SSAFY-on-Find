@@ -132,21 +132,19 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 	}
 
 	@Override
-	public void acceptInvitation(Long studentId, String statusId) throws BadRequestException {
-		ObjectId ststusObjId = new ObjectId(statusId);
+	public void acceptInvitation(Long studentId, String notificationId) throws BadRequestException {
+		ObjectId objId = new ObjectId(notificationId);
 
 		Date now = getCurrentDate();
 
 		// 1) 내 상태 조회·검증
-		NotificationStatusDocument me = statusRepo.findById(ststusObjId)
-				.orElseThrow(() -> new BadRequestException("잘못된 알림입니다."));
-		ObjectId notificationId = me.getNotificationId();
-		NotificationResponseDto findNotification = notificationQueryService.getNotificationInfo(notificationId);
+		NotificationStatusDocument me = statusRepo.findByNotificationIdAndTargetIdAndRoleAndStatus(objId, studentId, RecipientRole.SUBSCRIBER, NotificationStatus.PENDING);
 
-		if (me.getRole() != RecipientRole.SUBSCRIBER ||
-				!me.getTargetId().equals(studentId)) {
-			throw new BadRequestException("알림 수락 권한이 없습니다.");
-		}
+		checkNotificationStatusDocumentNotNull(studentId, notificationId, me);
+
+
+		// 2) 알림 정보 조회
+		NotificationResponseDto findNotification = notificationQueryService.getNotificationInfo(objId);
 
 		exeMergeOrAddMemberAtTeam(studentId, findNotification);
 
@@ -157,11 +155,11 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 
 		// 4) 동일 notificationId를 가진 모든 상태 조회
 		List<NotificationStatusDocument> allStatuses =
-				statusRepo.findByNotificationId(notificationId);
+				statusRepo.findByNotificationId(objId);
 
 		// 5) 다른 상태들도 일괄 변경
 		allStatuses.stream()
-				.filter(s -> !s.getId().equals(ststusObjId))
+				.filter(s -> !s.getId().equals(objId))
 				.forEach(s -> {
 					s.setStatus(NotificationStatus.ACCEPTED);
 					s.setUpdatedAt(now);
@@ -169,7 +167,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 		statusRepo.saveAll(allStatuses);
 
 		// 6) SSE 이벤트 발행
-		NotificationDocument doc = notificationRepo.findById(notificationId)
+		NotificationDocument doc = notificationRepo.findById(objId)
 				.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
 
 		// Stream publish for RESPONSE
@@ -177,7 +175,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				MapRecord.create(
 						"notification_stream", Map.of(
 								"phase", "RESPONSE",
-								"notificationId", notificationId.toHexString(),
+								"notificationId", objId.toHexString(),
 								"pubId", String.valueOf(doc.getPublisherId()),
 								"pubType", doc.getPublisherType().name(),
 								"subId", String.valueOf(doc.getSubscriberId()),
@@ -191,28 +189,25 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 		if (publishSpringEventForResponse) {
 			eventPublisher.publishEvent(InvitationResponseEvent.of(
 					this,
-					notificationId,
+					objId,
 					doc.getPublisherId(), doc.getPublisherType(),
 					doc.getSubscriberId(), doc.getSubscriberType(),
 					NotificationStatus.ACCEPTED,
 					now
 			));
 		}
-		log.info("초대/지원이 수락되었습니다: notificationId={}, statusId={}", notificationId, statusId);
+		log.info("초대/지원이 수락되었습니다: notificationId={}", objId);
 	}
 
 	@Override
-	public void rejectInvitation(Long studentId, String statusId) throws BadRequestException {
-		ObjectId statusObjId = new ObjectId(statusId);
+	public void rejectInvitation(Long studentId, String notificationId) throws BadRequestException {
+		ObjectId objId = new ObjectId(notificationId);
 		Date now = getCurrentDate();
 
 		// 1) 내 상태 조회·검증
-		NotificationStatusDocument me = statusRepo.findById(statusObjId)
-				.orElseThrow(() -> new BadRequestException("잘못된 알림입니다."));
-		if (me.getRole() != RecipientRole.SUBSCRIBER ||
-				!me.getTargetId().equals(studentId)) {
-			throw new BadRequestException("알림 거절 권한이 없습니다.");
-		}
+		NotificationStatusDocument me = statusRepo.findByNotificationIdAndTargetIdAndRoleAndStatus(objId, studentId, RecipientRole.SUBSCRIBER, NotificationStatus.PENDING);
+
+		checkNotificationStatusDocumentNotNull(studentId, notificationId, me);
 
 		// 2) 내 상태만 먼저 변경
 		me.setStatus(NotificationStatus.REJECTED);
@@ -220,13 +215,12 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 		statusRepo.save(me);
 
 		// 3) 동일 notificationId를 가진 모든 상태 조회
-		ObjectId notificationId = me.getNotificationId();
 		List<NotificationStatusDocument> allStatuses =
-				statusRepo.findByNotificationId(notificationId);
+				statusRepo.findByNotificationId(objId);
 
 		// 4) 다른 상태들도 일괄 변경
 		allStatuses.stream()
-				.filter(s -> !s.getId().equals(statusObjId))
+				.filter(s -> !s.getId().equals(objId))
 				.forEach(s -> {
 					s.setStatus(NotificationStatus.REJECTED);
 					s.setUpdatedAt(now);
@@ -234,7 +228,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 		statusRepo.saveAll(allStatuses);
 
 		// 5) SSE 이벤트 발행
-		NotificationDocument doc = notificationRepo.findById(notificationId)
+		NotificationDocument doc = notificationRepo.findById(objId)
 				.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
 
 		// Stream publish for RESPONSE
@@ -242,7 +236,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				MapRecord.create(
 						"notification_stream", Map.of(
 								"phase", "RESPONSE",
-								"notificationId", notificationId.toHexString(),
+								"notificationId", objId.toHexString(),
 								"pubId", String.valueOf(doc.getPublisherId()),
 								"pubType", doc.getPublisherType().name(),
 								"subId", String.valueOf(doc.getSubscriberId()),
@@ -256,7 +250,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 		if (publishSpringEventForResponse) {
 			eventPublisher.publishEvent(InvitationResponseEvent.of(
 					this,
-					notificationId,
+					objId,
 					doc.getPublisherId(), doc.getPublisherType(),
 					doc.getSubscriberId(), doc.getSubscriberType(),
 					NotificationStatus.REJECTED,
@@ -264,34 +258,30 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 			));
 		}
 
-		log.info("초대/지원이 거절되었습니다: notificationId={}, statusId={}", notificationId, statusId);
+		log.info("초대/지원이 거절되었습니다: notificationId={}", objId);
 	}
 
 	@Override
-	public void cancelInvitation(Long studentId, String statusId) throws BadRequestException {
-		ObjectId statusObjId = new ObjectId(statusId);
+	public void cancelInvitation(Long studentId, String notificationId) throws BadRequestException {
+		ObjectId objId = new ObjectId(notificationId);
 		Date now = getCurrentDate();
 
 		// 1) 내 상태 조회·검증
-		NotificationStatusDocument me = statusRepo.findById(statusObjId)
-				.orElseThrow(() -> new BadRequestException("잘못된 알림입니다."));
-		if (me.getRole() != RecipientRole.PUBLISHER ||
-				!me.getTargetId().equals(studentId)) {
-			throw new BadRequestException("알림 취소 권한이 없습니다.");
-		}
+		NotificationStatusDocument me = statusRepo.findByNotificationIdAndTargetIdAndRoleAndStatus(objId, studentId, RecipientRole.PUBLISHER, NotificationStatus.PENDING);
+
+		checkNotificationStatusDocumentNotNull(studentId, notificationId, me);
 
 		// 2) 내 상태만 먼저 변경
 		me.setStatus(NotificationStatus.CANCELED);
 		statusRepo.save(me);
 
 		// 3) 동일 notificationId를 가진 모든 상태 조회
-		ObjectId notificationId = me.getNotificationId();
 		List<NotificationStatusDocument> allStatuses =
-				statusRepo.findByNotificationId(notificationId);
+				statusRepo.findByNotificationId(objId);
 
 		// 4) 다른 상태들도 일괄 변경
 		allStatuses.stream()
-				.filter(s -> !s.getId().equals(statusObjId))
+				.filter(s -> !s.getId().equals(objId))
 				.forEach(s -> {
 					s.setStatus(NotificationStatus.CANCELED);
 					s.setUpdatedAt(now);
@@ -299,7 +289,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 		statusRepo.saveAll(allStatuses);
 
 		// 5) SSE 이벤트 발행
-		NotificationDocument doc = notificationRepo.findById(notificationId)
+		NotificationDocument doc = notificationRepo.findById(objId)
 				.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
 
 		// Stream publish for RESPONSE
@@ -307,7 +297,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				MapRecord.create(
 						"notification_stream", Map.of(
 								"phase", "RESPONSE",
-								"notificationId", notificationId.toHexString(),
+								"notificationId", objId.toHexString(),
 								"pubId", String.valueOf(doc.getPublisherId()),
 								"pubType", doc.getPublisherType().name(),
 								"subId", String.valueOf(doc.getSubscriberId()),
@@ -321,7 +311,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 		if (publishSpringEventForResponse) {
 			eventPublisher.publishEvent(InvitationResponseEvent.of(
 					this,
-					notificationId,
+					objId,
 					doc.getPublisherId(), doc.getPublisherType(),
 					doc.getSubscriberId(), doc.getSubscriberType(),
 					NotificationStatus.CANCELED,
@@ -329,7 +319,14 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 			));
 		}
 
-		log.info("알림이 취소되었습니다: notificationId={}, statusId={}", notificationId, statusId);
+		log.info("알림이 취소되었습니다: notificationId={}", notificationId);
+	}
+
+	private static void checkNotificationStatusDocumentNotNull(Long studentId, String notificationId, NotificationStatusDocument me) throws BadRequestException {
+		if (me == null) {
+			log.info("잘못된 알림입니다: notificationId={}, studentId={}", notificationId, studentId);
+			throw new BadRequestException("잘못된 알림입니다.");
+		}
 	}
 
 	/**
