@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 
 import com.sonfind.chelsea.dto.teams.CreateTeamRequestDto;
 import com.sonfind.chelsea.dto.teams.LeaveTeamResponseDto;
-import com.sonfind.chelsea.dto.teams.MergeTeamsRequestDto;
 import com.sonfind.chelsea.dto.teams.MyTeamResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamCreatePageDto;
 import com.sonfind.chelsea.dto.teams.TeamListResponseDto;
@@ -176,24 +175,24 @@ public class TeamController {
 	}
 
 	//팀 합치기 api 테스트용
-	@PostMapping("/merge")
-	public ResponseEntity<Map<String, Object>> mergeTeams(
-		@RequestBody @Valid MergeTeamsRequestDto request,
-		@Parameter(hidden = true)
-		@SessionAttribute("loginUser") Long studentId) {
-
-		teamService.mergeTeams(request.sourceTeamId(), request.targetTeamId());
-
-		Map<String, Object> body = new HashMap<>();
-		body.put("status", "SUCCESS");
-		body.put("message", "팀이 성공적으로 합쳐졌습니다.");
-		body.put("data", Map.of(
-			"sourceTeamId", request.sourceTeamId(),
-			"targetTeamId", request.targetTeamId()
-		));
-
-		return ResponseEntity.ok().body(body);
-	}
+	// @PostMapping("/merge")
+	// public ResponseEntity<Map<String, Object>> mergeTeams(
+	// 	@RequestBody @Valid MergeTeamsRequestDto request,
+	// 	@Parameter(hidden = true)
+	// 	@SessionAttribute("loginUser") Long studentId) {
+	//
+	// 	teamService.mergeTeams(request.sourceTeamId(), request.targetTeamId());
+	//
+	// 	Map<String, Object> body = new HashMap<>();
+	// 	body.put("status", "SUCCESS");
+	// 	body.put("message", "팀이 성공적으로 합쳐졌습니다.");
+	// 	body.put("data", Map.of(
+	// 		"sourceTeamId", request.sourceTeamId(),
+	// 		"targetTeamId", request.targetTeamId()
+	// 	));
+	//
+	// 	return ResponseEntity.ok().body(body);
+	// }
 
 	//타 팀 상세조회
 	@GetMapping("/{teamId}")

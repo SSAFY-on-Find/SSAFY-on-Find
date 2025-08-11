@@ -1,12 +1,10 @@
 package com.sonfind.chelsea.service;
 
-import org.springframework.stereotype.Service;
-
 import com.sonfind.chelsea.facade.StudentFacade;
 import com.sonfind.chelsea.global.manager.SseEmitterManager;
 import com.sonfind.chelsea.types.NotificationDomainType;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -23,14 +21,19 @@ public class SseService {
 	// 팀용
 	public void broadcastToTeam(Long teamId, Object payload) {
 		studentFacade.findAllByTeamId(teamId)
-			.forEach(member -> emitterManager.sendTo(member.getStudentId(), payload));
+				.forEach(member -> emitterManager.sendTo(member.getStudentId(), payload));
+	}
+
+	// 모든 사용자에게 브로드캐스트(eg. 대시보드)
+	public void broadcastToAll(String eventName, Object payload) {
+		emitterManager.broadcast(eventName, payload);
 	}
 
 	// domainType/id 에 따라 자동으로 분기 처리
 	public void dispatch(
-		Long id,
-		NotificationDomainType domainType,
-		Object payload
+			Long id,
+			NotificationDomainType domainType,
+			Object payload
 	) {
 		if (domainType == NotificationDomainType.TEAM) {
 			broadcastToTeam(id, payload);

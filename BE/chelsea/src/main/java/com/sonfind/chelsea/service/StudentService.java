@@ -37,21 +37,7 @@ public class StudentService {
 
 		Long studentId = Long.parseLong(request.studentId());
 
-		Student student = studentRepository.findByStudentId(studentId)
-			.orElseThrow(EntityNotFoundException::new);
-
-		String className = student.getClassCode().getSubCodeName();
-
-		boolean isCreatedStudentInfo = studentInfoRepository.existsByStudent_StudentId(studentId);
-
-		return StudentSignInResponseDto.builder()
-			.studentId(student.getStudentId())
-			.name(student.getName())
-			.major(getIsMajor(student.getMajorYn()))
-			.className(className)
-			.teamId(student.getTeamId())
-			.isCreatedStudentInfo(isCreatedStudentInfo)
-			.build();
+		return getLoginCheck(studentId);
 	}
 
 	/**
@@ -133,6 +119,25 @@ public class StudentService {
 			.teamMemberCount(totalTeamMemberCount).build());
 
 		return result;
+	}
+
+	public StudentSignInResponseDto getLoginCheck(long studentId) {
+
+		Student student = studentRepository.findByStudentId(studentId)
+			.orElseThrow(EntityNotFoundException::new);
+
+		String className = student.getClassCode().getSubCodeName();
+
+		boolean isCreatedStudentInfo = studentInfoRepository.existsByStudent_StudentId(studentId);
+
+		return StudentSignInResponseDto.builder()
+			.studentId(student.getStudentId())
+			.name(student.getName())
+			.major(getIsMajor(student.getMajorYn()))
+			.className(className)
+			.teamId(student.getTeamId())
+			.isCreatedStudentInfo(isCreatedStudentInfo)
+			.build();
 	}
 
 	private static String getIsMajor(Boolean major) {

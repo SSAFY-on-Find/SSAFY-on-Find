@@ -15,7 +15,7 @@ from database import fetch_students_data
 # --- FastAPI 앱 생성 및 CORS 설정 ---
 app = FastAPI()
 
-origins = ["http://localhost:5173" ] 
+origins = ["http://localhost:5173","https://i13a704.p.ssafy.io/" ] 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -42,7 +42,7 @@ prompt_template = PromptTemplate.from_template(prompt_template_string)
 chain = prompt_template | llm
 
 
-@app.post("/api/v1/recommendations/{student_id}")
+@app.post("/fastapi/v1/recommendations/{student_id}")
 async def get_recommendations(student_id: int):
     # 1. DB에서 전체 학생 데이터 로드 (이제 name, profile_image_url 포함)
     all_students = fetch_students_data()
