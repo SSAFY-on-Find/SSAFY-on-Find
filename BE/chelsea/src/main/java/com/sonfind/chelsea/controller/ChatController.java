@@ -5,6 +5,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
 
 import com.sonfind.chelsea.dto.chat.ChatMessageRequestDto;
+import com.sonfind.chelsea.dto.chat.ChatMessageResponseDto;
 import com.sonfind.chelsea.service.ChatService;
 
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,8 @@ public class ChatController {
 	 */
 	@MessageMapping("/team/message")
 	public void send(ChatMessageRequestDto request) {
-		chatService.saveChatMessage(request.studentId(), request);
-		simpMessageSendingOperations.convertAndSend("/topic/chatroom/" + request.roomId(), request);
+		ChatMessageResponseDto chatMessageResponseDto = chatService.saveChatMessage(request.studentId(), request);
+		simpMessageSendingOperations.convertAndSend("/topic/chatroom/" + request.roomId(), chatMessageResponseDto);
 	}
 
 	/**
@@ -31,7 +32,7 @@ public class ChatController {
 	 */
 	@MessageMapping("/direct/message")
 	public void sendDirectMessage(ChatMessageRequestDto request) {
-		chatService.saveChatMessage(request.studentId(), request);
-		simpMessageSendingOperations.convertAndSend("/queue/chatroom/" + request.roomId(), request);
+		ChatMessageResponseDto chatMessageResponseDto = chatService.saveChatMessage(request.studentId(), request);
+		simpMessageSendingOperations.convertAndSend("/queue/chatroom/" + request.roomId(), chatMessageResponseDto);
 	}
 }

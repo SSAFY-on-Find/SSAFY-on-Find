@@ -22,4 +22,6 @@ public interface StudentFavoriteRepository extends JpaRepository<StudentFavorite
 		@Param("studentId") Long studentId,
 		@Param("targetStudentIds") List<Long> targetStudentIds);
 
+	Boolean existsByStudentStudentIdAndTargetStudentStudentId(Long studentId, Long targetStudentId);
+
 }

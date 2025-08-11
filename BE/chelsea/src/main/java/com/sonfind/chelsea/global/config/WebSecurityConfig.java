@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -27,6 +28,10 @@ public class WebSecurityConfig {
 			.exceptionHandling(e -> e
 				.authenticationEntryPoint(new RestAuthenticationEntryPoint())
 				.accessDeniedHandler(new RestAccessDeniedHandler()))
+			.sessionManagement(session -> session.sessionFixation(
+					SessionManagementConfigurer.SessionFixationConfigurer::changeSessionId)
+				.maximumSessions(1)
+				.maxSessionsPreventsLogin(false))
 			.authorizeHttpRequests((authorize) -> authorize
 				.requestMatchers("/api/v1/auth/**").permitAll()
 				.requestMatchers("/api/v1/students/**").permitAll()
@@ -34,6 +39,7 @@ public class WebSecurityConfig {
 				.requestMatchers("/api/v1/teams", "/api/v1/teams/**").permitAll()
 				.requestMatchers("/api/v1/notifications/**").permitAll()
 				.requestMatchers("/api/v1/invitations/**").permitAll()
+				.requestMatchers("/api/v1/uploads/**").permitAll()
 				.requestMatchers(
 					"/swagger-ui/**",
 					"/swagger-ui.html",

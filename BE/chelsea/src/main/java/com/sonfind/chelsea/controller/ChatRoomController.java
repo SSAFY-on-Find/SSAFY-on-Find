@@ -1,6 +1,7 @@
 package com.sonfind.chelsea.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import com.sonfind.chelsea.controller.docs.ChatRoomControllerDocs;
+import com.sonfind.chelsea.dto.chat.ChatMessageResponseDto;
 import com.sonfind.chelsea.dto.chat.ChatRoomListResponseDto;
 import com.sonfind.chelsea.dto.chat.DirectChatRoomRequestDto;
 import com.sonfind.chelsea.service.ChatRoomService;
@@ -21,11 +23,11 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/chat-rooms")
+@RequestMapping("/api/v1/chat-rooms")
 public class ChatRoomController implements ChatRoomControllerDocs {
 	private final ChatRoomService chatRoomService;
 
-	@PostMapping("teams/{teamId}")
+	@PostMapping("/teams/{teamId}")
 	public ResponseEntity<Map<String, Object>> createTeamChatRoom(
 		@SessionAttribute("loginUser") Long studentId,
 		@PathVariable Long teamId) {
@@ -50,7 +52,7 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 		return ResponseEntity.ok().body(body);
 	}
 
-	@PostMapping("rooms/{roomId}/join")
+	@PostMapping("/rooms/{roomId}/join")
 	public ResponseEntity<Map<String, Object>> enterTeamChatRoom(
 		@SessionAttribute("loginUser") Long studentId,
 		@PathVariable Long roomId
@@ -63,7 +65,7 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 		return ResponseEntity.ok().body(body);
 	}
 
-	@PostMapping("rooms/{roomId}/leave")
+	@PostMapping("/rooms/{roomId}/leave")
 	public ResponseEntity<Map<String, Object>> exitTeamChatRoom(
 		@SessionAttribute("loginUser") Long studentId,
 		@PathVariable Long roomId
@@ -98,6 +100,18 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
 		body.put("data", dto);
+		return ResponseEntity.ok().body(body);
+	}
+
+	@GetMapping("/{roomId}/messages")
+	public ResponseEntity<Map<String, Object>> getChatRoomMessages(
+		@SessionAttribute("loginUser") Long studentId,
+		@PathVariable Long roomId
+	) {
+		List<ChatMessageResponseDto> messages = chatRoomService.getMessages(studentId, roomId);
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", messages);
 		return ResponseEntity.ok().body(body);
 	}
 }

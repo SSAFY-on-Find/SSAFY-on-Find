@@ -17,6 +17,7 @@ export default function TeamCreatePage() {
   })
 
   const [selectedTrackCode, setSelectedTrackCode] = useState<string>("")
+  const [selectedTrackCodeName, setSelectedTrackCodeName] = useState<string>("")
   const [selectedPositions, setSelectedPositions] = useState<string[]>([])
 
   const handleDescriptionChange = (value: string) => {
@@ -26,10 +27,13 @@ export default function TeamCreatePage() {
     }))
   }
 
-  const handleTrackChange = (selectedTrackName: string) => {
-    const selectedTrack = teamWarmup?.tracks.find((track) => track.subcodeName === selectedTrackName)
+  const handleTrackChange = (subcode: string) => {
+    console.log("handleTrackChange - selectedTrackName", subcode)
+    const selectedTrack = teamWarmup?.tracks.find((track) => track.subcode === subcode)
+    console.log("selectedTrack", selectedTrack)
     if (selectedTrack) {
       setSelectedTrackCode(selectedTrack.subcode)
+      setSelectedTrackCodeName(selectedTrack.subcodeName)
       setCreateTeamData((prev) => ({
         ...prev,
         track: selectedTrack.subcode,
@@ -99,12 +103,13 @@ export default function TeamCreatePage() {
           {teamWarmup && (
             <Dropdown
               placeholder={"트랙을 선택해주세요"}
-              value={
-                selectedTrackCode
-                  ? teamWarmup?.tracks.find((t) => t.subcode === selectedTrackCode)?.subcodeName || ""
-                  : ""
+              value={selectedTrackCodeName}
+              options={
+                teamWarmup?.tracks.map((track) => ({
+                  label: track.subcodeName,
+                  value: track.subcode,
+                })) || []
               }
-              options={teamWarmup?.tracks.map((track) => track.subcodeName)}
               onChange={handleTrackChange}
             />
           )}

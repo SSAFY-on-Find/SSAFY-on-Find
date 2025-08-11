@@ -1,7 +1,13 @@
+import { useNavigate } from "react-router-dom"
+import { FilePenLine, LogOut } from "lucide-react"
+
+import { useLeaveTeam } from "@/hooks/useTeam"
 import type { ITeamDetails } from "@/types/team"
 
-import { MainTag, PositionTag, UserImg } from "../atoms"
-
+import { Button, MainTag, PositionTag, UserImg } from "../atoms"
+interface ITeamDetailMole extends ITeamDetails {
+  varient?: "myteam"
+}
 function TeamDetail({
   teamName,
   teamDescription,
@@ -12,17 +18,47 @@ function TeamDetail({
   positions,
   members,
   isFavorite,
-}: ITeamDetails) {
-  console.log("members", members)
-  console.log("positions", positions)
+  varient,
+}: ITeamDetailMole) {
+  const navigate = useNavigate()
+  const { mutate: leaveTeam } = useLeaveTeam()
   const majorMembers = members.filter((ele) => ele.major === "전공")
   const nonMajorMembers = members.filter((ele) => ele.major === "비전공")
+  const handleEditClick = () => {
+    navigate(`/edit-team`)
+  }
+  const handleLeaveTeam = () => {
+    if (window.confirm("정말로 팀에서 탈퇴하시겠습니까?")) {
+      leaveTeam() // 확인을 누르면 mutation 실행
+    }
+  }
   return (
-    <div>
+    <div className="w-full">
       <div className="flex flex-col gap-2 p-8">
-        <div className="inline-flex items-center gap-3">
-          <h3 className="text-text text-2xl font-bold">{teamName}</h3>
-          <MainTag tagContent={track.subcodeName} />
+        <div className="flex justify-between">
+          <div className="inline-flex items-center gap-3">
+            <h3 className="text-text text-2xl font-bold">{teamName}</h3>
+            <MainTag tagContent={track.subcodeName} />
+          </div>
+          {varient === "myteam" ? (
+            <div className="flex gap-3">
+              <div className="w-20">
+                <Button
+                  size={"m"}
+                  isIcon={true}
+                  Icon={FilePenLine}
+                  variant="text"
+                  text="편집"
+                  onClick={handleEditClick}
+                />
+              </div>
+              <div className="w-20">
+                <Button size={"m"} isIcon={true} Icon={LogOut} variant="danger" text="탈퇴" onClick={handleLeaveTeam} />
+              </div>
+            </div>
+          ) : (
+            <></>
+          )}
         </div>
         <p className="text-subtext text-sm text-pretty">{teamDescription}</p>
       </div>
@@ -42,7 +78,7 @@ function TeamDetail({
                 <div className="flex">
                   {majorMembers.map((ele) => (
                     <div className="flex flex-col items-center px-[10px]">
-                      <UserImg name={ele.name} size={"m"} showTeamBadge={false} />
+                      <UserImg name={ele.name} size={"m"} showTeamBadge={false} url={ele.profileImageUrl} />
                       <p className="mt-2 mb-[5px] text-sm">{ele.name}</p>
                       {ele.position && <PositionTag positionName={ele.position.subcodeName} />}
                     </div>
@@ -68,7 +104,7 @@ function TeamDetail({
                 <div className="flex">
                   {nonMajorMembers.map((ele) => (
                     <div className="flex flex-col items-center px-[10px]">
-                      <UserImg name={ele.name} size={"m"} showTeamBadge={false} />
+                      <UserImg name={ele.name} size={"m"} showTeamBadge={false} url={ele.profileImageUrl} />
                       <p className="mt-2 mb-[5px] text-sm">{ele.name}</p>
                       {ele.position && <PositionTag positionName={ele.position.subcodeName} />}
                     </div>

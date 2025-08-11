@@ -23,6 +23,9 @@ public class FileService {
 	@Value("${upload.dir:/uploads}")
 	private String uploadDirPath;
 
+	@Value("${custom.service.url}")
+	private String serviceUrl;
+
 	//프로필 이미지 저장 처리
 	public String saveProfileImage(MultipartFile profile) throws IOException {
 
@@ -61,7 +64,8 @@ public class FileService {
 		Path filePath = uploadPath.resolve(savedFileName);
 		file.transferTo(filePath.toFile());
 
-		return savedFileName;
+		//return savedFileName;
+		return serviceUrl + "/api/v1/uploads/" + fileType.getDirectoryName() + "/" + savedFileName;
 	}
 
 	//파일 유효성 검사(크기 + 형식)
@@ -131,5 +135,19 @@ public class FileService {
 			return false;
 		}
 	}
+
+	// private String getFileUrl(String savedFileName, FileType fileType) {
+	// 	//String serviceUrl = "https://i13a704.p.ssafy.io";
+	// 	//String serviceUrl = "http://localhost:8080/api/v1";
+	//
+	// 	String fullUrl = "";
+	//
+	// 	if (savedFileName != null || !savedFileName.isEmpty()) {
+	// 		fullUrl = serviceUrl + "/uploads/" + fileType.getDirectoryName() + "/" + savedFileName;
+	//
+	// 	}
+	//
+	// 	return fullUrl;
+	// }
 
 }
