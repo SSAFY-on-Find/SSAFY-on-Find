@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 
+import { aiApi } from "@/apis/aiApi"
 import { dashboardApi } from "@/apis/dashboardApi"
-import type { PositionRow, PositionType } from "@/types/dashboard"
+import type { IAiRecommend, PositionRow, PositionType } from "@/types/dashboard"
 
 export const useSummaryInfo = () => {
   return useQuery({
@@ -51,11 +52,11 @@ export const usePositionRatio = () => {
   })
 }
 
-export const useRecommandTeam = () => {
+export const useRecommendTeam = () => {
   return useQuery({
-    queryKey: ["dashboard-recommandTeam"],
+    queryKey: ["dashboard-recommendTeam"],
     queryFn: async () => {
-      const response = await dashboardApi.getRecommandTeam()
+      const response = await dashboardApi.getRecommendTeam()
       if (response.status !== "SUCCESS") {
         throw new Error("추천 팀 목록 조회에 실패했습니다.")
       }
@@ -65,3 +66,8 @@ export const useRecommandTeam = () => {
     gcTime: 10 * 60 * 1000,
   })
 }
+
+export const useAIRecommendations = () =>
+  useMutation<IAiRecommend[], Error, number>({
+    mutationFn: (studentId) => aiApi.getRecommendations(studentId),
+  })

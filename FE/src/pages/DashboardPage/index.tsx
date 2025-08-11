@@ -1,6 +1,16 @@
+import { useEffect } from "react"
+
+import { MajorTag, NormalTag, PositionTag, Tooltip, UserImg } from "@/components/atoms"
 import { StudentInfo } from "@/components/molecules"
 import Loading from "@/components/templates/Loading"
-import { usePositionRatio, useRecommandTeam, useSummaryInfo, useTeamRatio } from "@/hooks/useDashboard"
+import {
+  useAIRecommendations,
+  usePositionRatio,
+  useRecommendTeam,
+  useSummaryInfo,
+  useTeamRatio,
+} from "@/hooks/useDashboard"
+import { useUserStore } from "@/stores/userStore"
 
 import DashboardCard from "./organisms/DashboardCard"
 import TrackPositionFunnel from "./organisms/PositionFunnel"
@@ -8,17 +18,24 @@ import TeamBuildingProgress from "./organisms/TeamBuildingProgress"
 import TeamCardCarousel from "./organisms/TeamCardCarousel"
 
 export default function DashboardPage() {
+  const studentId = useUserStore((s) => s.user?.studentId)
   const { data: summary, isLoading: isSummaryLoading, error: summaryError } = useSummaryInfo()
   const { data: teamRatio, isLoading: isTeamRatioLoading, error: teamRatioError } = useTeamRatio()
   const { data: positionRatio, isLoading: isPositionRatioLoading, error: positionRatioError } = usePositionRatio()
-  const { data: recommandTeam, isLoading: isRecommandTeamLoading, error: recommandTeamError } = useRecommandTeam()
+  const { data: recommendTeam, isLoading: isRecommendTeamLoading, error: recommendTeamError } = useRecommendTeam()
 
-  if (isSummaryLoading || isTeamRatioLoading || isPositionRatioLoading || isRecommandTeamLoading)
-    return <Loading fullScreen />
+  const aiRecommend = useAIRecommendations()
+
+  useEffect(() => {
+    if (studentId && aiRecommend.isIdle) aiRecommend.mutate(Number(studentId))
+  }, [studentId])
+
+  if (isSummaryLoading || isTeamRatioLoading || isPositionRatioLoading || isRecommendTeamLoading)
+    return <Loading fullScreen text="정보를 불러오는 중..." />
   if (summaryError) return <div>프로필 요약 정보를 불러올 수 없습니다.</div>
   if (teamRatioError) return <div>팀 빌딩 현황 정보를 불러올 수 없습니다.</div>
   if (positionRatioError) return <div>포지션별 팀 빌딩 현황 정보를 불러올 수 없습니다.</div>
-  if (recommandTeamError) return <div>추천 팀 목록을 불러올 수 없습니다.</div>
+  if (recommendTeamError) return <div>추천 팀 목록을 불러올 수 없습니다.</div>
 
   return (
     <div className="bg-background flex min-h-screen flex-col gap-5 px-15 py-10">
@@ -44,19 +61,50 @@ export default function DashboardPage() {
 
       {/* 팀/교육생 추천 */}
       <div className="flex flex-row gap-3">
-        <DashboardCard title={"이 팀 어때요? 🚀"}>
-          {recommandTeam ? (
-            recommandTeam.message ? (
-              <div className="text-subtext text-center whitespace-pre-line">{recommandTeam.message}</div>
+        <DashboardCard title={`${summary?.student.name} 님을 위한 팀 추천 🚀`}>
+          {recommendTeam ? (
+            recommendTeam.message ? (
+              <div className="text-subtext text-center whitespace-pre-line">{recommendTeam.message}</div>
             ) : (
               <div className="mt-5">
-                <TeamCardCarousel items={recommandTeam.items} />
+                <TeamCardCarousel items={recommendTeam.items} />
               </div>
             )
           ) : null}
         </DashboardCard>
-        <DashboardCard title={"이 친구 어때요? 😊"}>
-          <div>chart</div>
+        <DashboardCard title={"AI 추천 개인 궁합도 😊"}>
+          {aiRecommend.isPending && (
+            <div className="text-subtext mt-15 text-center">
+              <Loading text="AI가 최적의 팀원을 분석 중입니다..." bg="bg-white" />
+            </div>
+          )}
+          {aiRecommend.isSuccess && (
+            <div className="mt-3 flex flex-col gap-2">
+              {aiRecommend?.data?.map((rec, index) => (
+                <div key={rec.studentId}>
+                  <Tooltip content={rec.reason} side="top" className="block w-full">
+                    <div className="hover:bg-main/10 flex items-center justify-between rounded-lg p-2 transition-colors">
+                      {/* Left Section */}
+                      <div className="flex items-center gap-3">
+                        <span className="text-text w-8 text-lg font-bold">{index + 1}위</span>
+                        <UserImg name={rec.name} url={rec.profileImageUrl ?? ""} size="m" showTeamBadge={false} />
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                          <span className="text-text font-semibold">{rec.name}</span>
+                          <div className="mt-1 flex items-center gap-2 sm:mt-0">
+                            {rec.majorYn ? <MajorTag tagContent="전공" /> : <MajorTag tagContent="비전공" />}
+                            <NormalTag tagContent={`${rec.goal} 우선`} />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Section */}
+                      <span className="text-main text-lg font-bold">{rec.score}%</span>
+                    </div>
+                  </Tooltip>
+                </div>
+              ))}
+            </div>
+          )}
         </DashboardCard>
       </div>
     </div>

@@ -21,7 +21,7 @@ export const dashboardApi = {
     const response = await api.get<IApiResponse<PositionRatioRecord>>(DASHBOARD_BASE_URL + "/position-ratio")
     return response.data
   },
-  getRecommandTeam: async (): Promise<IApiResponse<TeamRecommendApiData>> => {
+  getRecommendTeam: async (): Promise<IApiResponse<TeamRecommendApiData>> => {
     const response = await api.get<IApiResponse<TeamRecommendApiData>>(DASHBOARD_BASE_URL + "/team-recommend")
     return response.data
   },
