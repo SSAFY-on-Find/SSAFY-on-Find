@@ -15,8 +15,8 @@ export default function TeamListPage() {
   const { isDetailModalOpen, selectedTeamId, openDetailModal, closeDetailModal } = useTeamStore()
   const { data: selectedTeamData } = useTeamDetails(selectedTeamId || 0)
   const { toggleFavorite } = useTeamFavoriteToggle()
-  const user = useUserStore()
-  const userTeamId = user.user?.teamId
+  const userTeamId = useUserStore((state) => state.user?.teamId)
+  console.log("userTeamId", userTeamId)
 
   const navigate = useNavigate()
 

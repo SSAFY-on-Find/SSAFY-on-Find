@@ -3,6 +3,6 @@ export interface IStudentSignin {
   name: string
   major: string
   className: string
-  teamId?: number
+  teamId?: number | null
   isCreatedStudentInfo: boolean
 }
