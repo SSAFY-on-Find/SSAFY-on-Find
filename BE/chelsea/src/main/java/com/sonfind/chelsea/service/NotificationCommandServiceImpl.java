@@ -2,14 +2,17 @@ package com.sonfind.chelsea.service;
 
 import com.sonfind.chelsea.domain.notification.NotificationDocument;
 import com.sonfind.chelsea.domain.notification.NotificationStatusDocument;
+import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
 import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
 import com.sonfind.chelsea.dto.notification.NotificationTypeInfo;
+import com.sonfind.chelsea.facade.StudentFacade;
 import com.sonfind.chelsea.global.event.InvitationRequestEvent;
 import com.sonfind.chelsea.global.event.InvitationResponseEvent;
 import com.sonfind.chelsea.repository.NotificationRepository;
 import com.sonfind.chelsea.repository.NotificationStatusRepository;
 import com.sonfind.chelsea.service.validator.NotificationValidator;
+import com.sonfind.chelsea.types.NotificationDomainType;
 import com.sonfind.chelsea.types.NotificationStatus;
 import com.sonfind.chelsea.types.RecipientRole;
 import com.sonfind.chelsea.util.NotificationTypeConverter;
@@ -45,6 +48,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 	private final TeamService teamService;
 	private final NotificationQueryService notificationQueryService;
 	private final DashBoardCommandService dashBoardCommandService;
+	private final StudentFacade studentFacade;
 
 	// 알림 발송 이벤트를 발행할지 여부를 설정하는 프로퍼티
 	@Value("${notification.dispatch.publishSpringEvent:false}")
@@ -144,8 +148,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 			throw new BadRequestException("알림 수락 권한이 없습니다.");
 		}
 
-		// 2) 팀에 학생 추가 및 팀원 변경 이벤트 발행(팀 목록 혹은 팀 상세보기 갱신용)
-		teamService.addStudentToTeam(findNotification.subscriberId(), findNotification.publisherId());
+		exeMergeOrAddMemberAtTeam(studentId, findNotification);
 
 		// 3) 내 상태만 먼저 변경
 		me.setStatus(NotificationStatus.ACCEPTED);
@@ -327,6 +330,26 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 		}
 
 		log.info("알림이 취소되었습니다: notificationId={}, statusId={}", notificationId, statusId);
+	}
+
+	/**
+	 * 팀에 학생을 추가하거나 팀을 합치는 로직을 실행합니다.
+	 * - 팀 합치기: 발신 팀 ID와 수신 팀 ID를 사용하여 팀을 합칩니다.
+	 * - 개인 초대/지원: 발신 팀 ID
+	 *
+	 * @param studentId
+	 * @param findNotification
+	 */
+	private void exeMergeOrAddMemberAtTeam(Long studentId, NotificationResponseDto findNotification) {
+		if (findNotification.publisherType() == NotificationDomainType.TEAM &&
+				findNotification.subscriberType() == NotificationDomainType.TEAM) {
+			Student findStudent = studentFacade.findByStudentId(studentId);
+			// 2) 팀에 학생 추가 및 팀원 변경 이벤트 발행(팀 목록 혹은 팀 상세보기 갱신용) - 팀 합치기(합치기 발신 팀ID, 합치기 수신 팀ID)
+			teamService.mergeTeams(findNotification.publisherId(), findStudent.getTeamId());
+		} else {
+			// 2) 팀에 학생 추가 및 팀원 변경 이벤트 발행(팀 목록 혹은 팀 상세보기 갱신용) - 개인 초대/지원
+			teamService.addStudentToTeam(findNotification.subscriberId(), findNotification.publisherId());
+		}
 	}
 
 	/**

@@ -6,7 +6,6 @@ import com.sonfind.chelsea.domain.teams.Recruitment;
 import com.sonfind.chelsea.domain.teams.Team;
 import com.sonfind.chelsea.dto.dashboard.MemberSummary;
 import com.sonfind.chelsea.dto.dashboard.TeamInfoUpdateDto;
-import com.sonfind.chelsea.dto.dashboard.TeamMemberChangedDto;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 import com.sonfind.chelsea.dto.teams.*;
 import com.sonfind.chelsea.global.domain.SubCode;
@@ -281,12 +280,7 @@ public class TeamService {
 			}
 
 			// 각 멤버별 합류 이벤트 발행
-			TeamMemberChangedDto memberChangedDto = TeamMemberChangedDto.builder()
-					.teamId(targetTeamId)
-					.action(MemberChageAction.JOINED)
-					.member(memberSummary)
-					.build();
-			eventPublisher.publishEvent(memberChangedDto);
+			teamMemberChangeEventPublisher(targetTeamId, MemberChageAction.JOINED, memberSummary);
 		}
 
 		//소스 팀 삭제
