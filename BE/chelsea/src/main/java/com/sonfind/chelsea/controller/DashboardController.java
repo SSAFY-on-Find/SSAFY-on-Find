@@ -63,12 +63,18 @@ public class DashboardController {
 		@SessionAttribute("loginUser") Long studentId
 	) {
 
-		List<TeamListResponseDto> data = teamService.getRecommendTeamList(studentId);
-
 		HashMap<String, Object> body = new HashMap<>();
 
+		List<TeamListResponseDto> data = teamService.getRecommendTeamList(studentId);
+
 		body.put("status", "SUCCESS");
-		body.put("data", data);
+		if (data.getFirst().teamId() == 0) {
+			body.put("data", Map.of("message", "생성된 팀이 없습니다."));
+		} else if (data.isEmpty()) {
+			body.put("data", Map.of("message", "추천된 팀이 없습니다."));
+		} else {
+			body.put("data", data);
+		}
 
 		return ResponseEntity.ok().body(body);
 	}
