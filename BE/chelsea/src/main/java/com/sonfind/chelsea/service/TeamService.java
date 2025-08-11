@@ -33,6 +33,7 @@ import com.sonfind.chelsea.global.domain.SubCode;
 import com.sonfind.chelsea.global.error.AppException;
 import com.sonfind.chelsea.global.error.BusinessException;
 import com.sonfind.chelsea.global.error.ErrorCode;
+import com.sonfind.chelsea.repository.RecruitmentRepository;
 import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
@@ -51,6 +52,7 @@ public class TeamService {
 	private final SubCodeRepository subCodeRepository;
 	private final StudentRepository studentRepository;
 	private final StudentInfoRepository studentInfoRepository;
+	private final RecruitmentRepository recruitmentRepository;
 
 	private final StudentService studentService;
 	private final FavoriteService favoriteService;
@@ -497,6 +499,55 @@ public class TeamService {
 	public List<TeamListResponseDto> getAllTeams(Long studentId) {
 		List<Team> teams = teamRepository.findByIsDeletedIsFalseOrderByTeamIdAsc();
 
+		return teams.stream()
+			.map(team -> convertToTeamListResponse(team, studentId))
+			.sorted(
+				Comparator.comparing(TeamListResponseDto::isRecruitingComplete)
+					.thenComparing(dto -> parseTeamNumber(dto.teamName()))
+			)
+			.collect(Collectors.toList());
+	}
+
+	public List<TeamListResponseDto> getRecommendTeamList(Long studentId) {
+
+		Student student = studentService.findByStudentId(studentId);
+		Long teamId = student.getTeamId();
+		//내가 팀에 소속되어 있지 않은 경우
+		List<TeamListResponseDto> result = null;
+		SubCode trackCode = null;
+		List<SubCode> positionCodes = null;
+		int teamMemberCount = 0;
+		List<Long> teamMember = null;
+
+		if (teamId == null) {
+			StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId)
+				.orElseThrow(AppException::studentInfoNotFound);
+			trackCode = studentInfo.getTrackCode();
+			positionCodes = List.of(studentInfo.getPositionCode());
+			teamMemberCount = 1;
+			teamMember = List.of(studentId);
+		} else {    //내가 팀에 소속된 경우
+			Team team = teamRepository.findTeamByTeamId(teamId).orElseThrow(AppException::teamNotFound);
+			teamMemberCount = team.getMajorCount() + team.getNonMajorCount();
+			teamMember = studentRepository.findAllByTeamId(teamId)
+				.stream()
+				.map(Student::getTeamId)
+				.collect(Collectors.toList());
+			trackCode = team.getTrack();
+			positionCodes = recruitmentRepository.findPositionByTeamId(teamId);
+		}
+
+		List<Long> candidateTeamId = teamRepository.findCandidateTeams(trackCode, positionCodes,
+			teamMemberCount);
+		List<Team> teamInfo = teamRepository.findRecommend(teamMember, candidateTeamId, teamId, teamMemberCount);
+		result = teamInfo.stream()
+			.map(team -> convertToTeamListResponse(team, studentId))
+			.collect(Collectors.toList());
+
+		return result;
+	}
+
+	private List<TeamListResponseDto> getTeamList(List<Team> teams, Long studentId) {
 		return teams.stream()
 			.map(team -> convertToTeamListResponse(team, studentId))
 			.sorted(
