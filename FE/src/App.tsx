@@ -16,10 +16,11 @@ import TeamList from "@/pages/TeamListPage"
 import { useUserStore } from "@/stores/userStore"
 
 import ComponentTestPage from "./components/ComponentTestPage"
+import ChatView from "./components/templates/ChatView"
 import { useAuth } from "./hooks/useStudent"
-import MainLayout from "./layout/MainLayout"
 import AI from "./pages/AITestPage"
 import TeamEditPage from "./pages/TeamUpdatePage"
+import { useChatViewStore } from "./stores/useChatViewStore"
 
 import "@/index.css"
 
@@ -31,6 +32,8 @@ function App() {
   const { data: authUser, isLoading, isError } = useAuth()
   const setUser = useUserStore((s) => s.setUser)
   const resetUser = useUserStore((s) => s.resetUser)
+  // 사이드바와 1대1 채팅을 위한 라우트
+  const { activeRoomId, activeRoomType } = useChatViewStore()
   useEffect(() => {
     if (authUser) setUser(authUser)
     if (isError) resetUser()
@@ -87,23 +90,22 @@ function App() {
         {!hideLayout && <SideBar />}
         <main className={!hideLayout ? "ml-[260px]" : ""}>
           <Routes>
-            <Route element={<MainLayout />}>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/myteam" element={<MyTeam />} />
-              <Route path="/teamlist" element={<TeamList />} />
-              <Route path="/create-team" element={<TeamCreatePage />} />
-              <Route path="/edit-team" element={<TeamEditPage />} />
-              <Route path="/studentlist" element={<StudentList />} />
-              <Route path="/studentlist/:studentId" element={<StudentDetail />} />
-              <Route path="/myprofile" element={<MyProfile />} />
-              <Route path="/create-profile" element={<CreateProfile />} />
-              <Route path="/edit-profile" element={<EditProfile />} />
-              <Route path="/component-test" element={<ComponentTestPage />} />
-              <Route path="/ai" element={<AI />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Route>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/myteam" element={<MyTeam />} />
+            <Route path="/teamlist" element={<TeamList />} />
+            <Route path="/create-team" element={<TeamCreatePage />} />
+            <Route path="/edit-team" element={<TeamEditPage />} />
+            <Route path="/studentlist" element={<StudentList />} />
+            <Route path="/studentlist/:studentId" element={<StudentDetail />} />
+            <Route path="/myprofile" element={<MyProfile />} />
+            <Route path="/create-profile" element={<CreateProfile />} />
+            <Route path="/edit-profile" element={<EditProfile />} />
+            <Route path="/component-test" element={<ComponentTestPage />} />
+            <Route path="/ai" element={<AI />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
+        {activeRoomId && activeRoomType === "direct" && <ChatView />}
       </div>
       <ToastContainer position="bottom-right" autoClose={3000} theme="light" />
     </>
