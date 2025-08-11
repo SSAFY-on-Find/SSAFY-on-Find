@@ -1,4 +1,3 @@
-// src/store/chatStore.ts
 import { create } from "zustand"
 
 import type { ChatMessage } from "@/types/chat/chat"
@@ -9,6 +8,7 @@ interface ChatState {
   addMessage: (message: ChatMessage) => void
   setConnected: (status: boolean) => void
   clearMessages: () => void
+  setMessages: (messages: ChatMessage[]) => void
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -17,4 +17,5 @@ export const useChatStore = create<ChatState>((set) => ({
   addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
   setConnected: (status) => set({ isConnected: status }),
   clearMessages: () => set({ messages: [] }),
+  setMessages: (messages) => set({ messages: messages }),
 }))
