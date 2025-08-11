@@ -53,11 +53,12 @@ function TeamCard({
   const heartFillColor = variant === "main" ? "fill-white text-white" : "fill-red-500 text-red-500"
   const btnRecruit = variant === "main" ? "white-full" : "primary"
   const btnMerge = variant === "main" ? "white-line" : "outline"
+  const hoverStyle = variant === "main" ? "hover:-translate-y-0.5" : "hover:-translate-y-1"
   return (
     <div
       key={teamId}
       onClick={onClickCard}
-      className={`${bgColor} border-line flex max-h-[300px] min-h-[300px] max-w-[260px] min-w-[260px] cursor-pointer flex-col justify-between rounded-lg border-2 px-2 py-1 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg`}
+      className={`${bgColor} ${hoverStyle} border-line flex max-h-[300px] min-h-[300px] max-w-[260px] min-w-[260px] cursor-pointer flex-col justify-between rounded-lg border-2 px-2 py-1 shadow-sm transition-all duration-300 ease-out hover:shadow-lg`}
     >
       <div className="flex flex-col gap-[11px] p-[18px] pb-[18px]">
         <div className="inline-flex items-center justify-between">

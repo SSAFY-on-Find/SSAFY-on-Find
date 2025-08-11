@@ -50,3 +50,18 @@ export const usePositionRatio = () => {
     gcTime: 10 * 60 * 1000,
   })
 }
+
+export const useRecommandTeam = () => {
+  return useQuery({
+    queryKey: ["dashboard-recommandTeam"],
+    queryFn: async () => {
+      const response = await dashboardApi.getRecommandTeam()
+      if (response.status !== "SUCCESS") {
+        throw new Error("추천 팀 목록 조회에 실패했습니다.")
+      }
+      const d = response.data
+      return Array.isArray(d) ? { items: d, message: null } : { items: [], message: d.message }
+    },
+    gcTime: 10 * 60 * 1000,
+  })
+}
