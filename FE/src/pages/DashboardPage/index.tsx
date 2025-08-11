@@ -1,6 +1,6 @@
 import { StudentInfo } from "@/components/molecules"
 import Loading from "@/components/templates/Loading"
-import { useSummaryInfo } from "@/hooks/useDashboard"
+import { useSummaryInfo, useTeamRatio } from "@/hooks/useDashboard"
 
 import DashboardCard from "./organisms/DashboardCard"
 import type { PositionApi } from "./organisms/PositionFunnel"
@@ -22,6 +22,7 @@ type TeamBuildingApi = {
 
 export default function DashboardPage() {
   const { data: summary, isLoading: isSummaryLoading, error: summaryError } = useSummaryInfo()
+  const { data: teamRatio, isLoading: isTeamRatioLoading, error: teamRatioError } = useTeamRatio()
 
   const dummy: TeamBuildingApi = {
     all: { type: "전체", totalStudentCount: 100, teamMemberCount: 30 },
@@ -83,8 +84,9 @@ export default function DashboardPage() {
     ],
   }
 
-  if (isSummaryLoading) return <Loading fullScreen />
+  if (isSummaryLoading || isTeamRatioLoading) return <Loading fullScreen />
   if (summaryError) return <div>프로필 요약 정보를 불러올 수 없습니다.</div>
+  if (teamRatioError) return <div>팀 빌딩 현황 정보를 불러올 수 없습니다.</div>
 
   return (
     <div className="bg-background flex min-h-screen flex-col gap-5 px-15 py-10">
@@ -100,7 +102,7 @@ export default function DashboardPage() {
             isMyProfile={true}
           />
           <DashboardCard title={"팀 빌딩 진행률 🏃‍♀️"}>
-            <TeamBuildingProgress data={dummy} />
+            {teamRatio ? <TeamBuildingProgress data={teamRatio} /> : null}
           </DashboardCard>
         </div>
         <DashboardCard title={"희망 트랙별 포지션 비율 📊"}>
