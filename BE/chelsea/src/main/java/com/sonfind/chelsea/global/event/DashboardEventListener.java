@@ -53,17 +53,6 @@ public class DashboardEventListener {
 		sseService.broadcastToAll("TeamMemberChanged", payload);
 	}
 
-//	/**
-//	 * 팀 업데이트 대시보드 이벤트 리스너
-//	 * 이 이벤트는 팀의 업데이트 상태를 처리합니다.
-//	 * - 팀 소개 변경
-//	 * - 팀 트랙 변경
-//	 * - 팀원 추가/삭제
-//	 */
-//	@EventListener
-//	public void onTeamUpdateStatusDashboardEvent() {
-//
-//	}
 //
 //	/**
 //	 * 학생의 희망 포지션 대시보드 이벤트 리스너

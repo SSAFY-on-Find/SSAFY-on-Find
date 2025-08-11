@@ -42,12 +42,10 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 	private final NotificationValidator notificationValidator;
 	private final NotificationTypeConverter typeConverter;
 	private final ApplicationEventPublisher eventPublisher;
-	private final NotificationStatusService statusService;
 	private final NotificationDocumentService documentService;
 	private final StringRedisTemplate stringRedisTemplate;
 	private final TeamService teamService;
 	private final NotificationQueryService notificationQueryService;
-	private final DashBoardCommandService dashBoardCommandService;
 	private final StudentFacade studentFacade;
 
 	// 알림 발송 이벤트를 발행할지 여부를 설정하는 프로퍼티
