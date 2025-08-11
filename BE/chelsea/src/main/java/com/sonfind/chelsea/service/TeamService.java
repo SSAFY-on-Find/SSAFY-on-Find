@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,7 +26,9 @@ import com.sonfind.chelsea.dto.teams.TeamRuleResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
 import com.sonfind.chelsea.dto.teams.UpdateTeamRequestDto;
 import com.sonfind.chelsea.global.domain.SubCode;
-import com.sonfind.chelsea.repository.StudentFavoriteRepository;
+import com.sonfind.chelsea.global.error.AppException;
+import com.sonfind.chelsea.global.error.BusinessException;
+import com.sonfind.chelsea.global.error.ErrorCode;
 import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
@@ -46,10 +47,8 @@ public class TeamService {
 	private final StudentRepository studentRepository;
 	private final StudentInfoRepository studentInfoRepository;
 
-	private final SubCodeService subCodeService;
 	private final StudentService studentService;
 	private final FavoriteService favoriteService;
-	private final StudentFavoriteRepository studentFavoriteRepository;
 
 	//팀 생성
 	@Transactional
@@ -58,16 +57,14 @@ public class TeamService {
 		//팀에 속해 있는 교육생은 팀 생성 못함
 		Student student = studentService.findByStudentId(studentId);
 		if (student.getTeamId() != null) {
-			throw new ResponseStatusException(
-				HttpStatus.FORBIDDEN, "이미 팀에 속해있습니다");
+			throw AppException.teamAlreadyJoined();
 		}
 
 		//subCode로 track
 		//없는 트랙이면 badrequest
 		SubCode track = getSubCodeByValue(request.track());
 		if (track == null) {
-			throw new ResponseStatusException(
-				HttpStatus.NOT_FOUND, "없는 트랙입니다");
+			throw AppException.trackNotFound();
 		}
 
 		//최초 생성자 전공?비전공?
@@ -128,15 +125,12 @@ public class TeamService {
 		//팀에 속해 있지 않은 교육생은 수정 불가
 		Student Student = studentService.findByStudentId(studentId);
 		if (!teamId.equals(Student.getTeamId())) {
-			throw new ResponseStatusException(
-				HttpStatus.FORBIDDEN, "팀에 속해 있지 않은 교육생은 수정할 수 없습니다."
-			);
+			throw AppException.teamPermissionDenied();
 		}
 
 		//존재하는 팀인지 확인
 		Team team = teamRepository.findTeamByTeamId(teamId)
-			.orElseThrow(() -> new ResponseStatusException(
-				HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다."));
+			.orElseThrow(AppException::teamNotFound);
 
 		//팀 설명 수정
 		if (request.description() != null) {
@@ -147,8 +141,7 @@ public class TeamService {
 		if (request.track() != null) {
 			SubCode track = getSubCodeByValue(request.track());
 			if (track == null) {
-				throw new ResponseStatusException(
-					HttpStatus.NOT_FOUND, "없는 트랙입니다.");
+				throw AppException.trackNotFound();
 			}
 			team.updateTrack(track);
 		}
@@ -165,11 +158,10 @@ public class TeamService {
 	public void addStudentToTeam(Long teamId, Long studentId) {
 		//들어가고 싶은 팀
 		Team targetTeam = teamRepository.findTeamByTeamId(teamId)
-			.orElseThrow(() -> new ResponseStatusException(
-				HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다."));
+			.orElseThrow(AppException::teamNotFound);
+
 		if (targetTeam.isDeleted()) {
-			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST, "삭제된 팀입니다.");
+			throw AppException.teamDeletedAccess();
 		}
 
 		//학생
@@ -181,14 +173,12 @@ public class TeamService {
 
 		//이미 해당 팀이라면
 		if (teamId.equals(currentTeamId)) {
-			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST, "이미 해당 팀의 교육생 입니다.");
+			throw AppException.teamAlreadyJoined();
 		}
 
 		//정원 초과 확인
 		if (targetTeamMembers.size() >= 6) {
-			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST, "팀 정원이 초과됐습니다.");
+			throw AppException.teamFull();
 		}
 
 		//기존 팀이 있다면 삭제
@@ -223,21 +213,17 @@ public class TeamService {
 	public void mergeTeams(Long sourceTeamId, Long targetTeamId) {
 		//두 팀의 존재에 관하여
 		Team sourceTeam = teamRepository.findTeamByTeamId(sourceTeamId)
-			.orElseThrow(() -> new ResponseStatusException(
-				HttpStatus.NOT_FOUND, "합쳐질 팀이 존재하지 않습니다."));
+			.orElseThrow(AppException::teamNotFound);
 
 		Team targetTeam = teamRepository.findTeamByTeamId(targetTeamId)
-			.orElseThrow(() -> new ResponseStatusException(
-				HttpStatus.NOT_FOUND, "합칠 팀이 존재하지 않습니다."));
+			.orElseThrow(AppException::teamNotFound);
 
 		if (sourceTeam.isDeleted() || targetTeam.isDeleted()) {
-			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST, "삭제된 팀입니다.");
+			throw new BusinessException(ErrorCode.BAD_REQUEST);
 		}
 		//같은 팀인지 확인
 		if (sourceTeamId.equals(targetTeamId)) {
-			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST, "같은 팀끼리는 합칠 수 없습니다.");
+			throw new BusinessException(ErrorCode.BAD_REQUEST);
 		}
 
 		//각 팀의 학생 조회
@@ -248,10 +234,7 @@ public class TeamService {
 
 		//합칠 때 팀 규칙 정원 확인
 		if (sourceMembers.size() + targetMembers.size() > 6) {
-			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST,
-				String.format("팀 규칙 정원이 초과됨니다. 현재 %d명, 최대 인원은 6명입니다.",
-					targetMembers.size() + sourceMembers.size()));
+			throw new BusinessException(ErrorCode.CONFLICT);
 		}
 
 		//소스 팀 멤버를 타켓 팀으로 이동
@@ -277,16 +260,14 @@ public class TeamService {
 
 	//팀에서 교육생 제거
 	@Transactional
-	public void removeStudentFromTeam(Long teamId, Long studentId, boolean skilValidation) {
+	public void removeStudentFromTeam(Long teamId, Long studentId, boolean skipValidation) {
 		Team team = teamRepository.findTeamByTeamId(teamId)
-			.orElseThrow(() -> new ResponseStatusException(
-				HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다."));
+			.orElseThrow(AppException::teamNotFound);
 
 		Student student = studentService.findByStudentId(studentId);
 
-		if (!skilValidation && !teamId.equals(student.getTeamId())) {
-			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST, "해당 팀에 속하지 않은 교육생입니다.");
+		if (!skipValidation && !teamId.equals(student.getTeamId())) {
+			throw AppException.teamNotInTeam();
 		}
 
 		//팀에서 학생 제거
@@ -321,8 +302,7 @@ public class TeamService {
 	public LeaveTeamResponseDto leaveTeam(Long studentId) {
 		Student student = studentService.findByStudentId(studentId);
 		if (student.getTeamId() == null) {
-			throw new ResponseStatusException(
-				HttpStatus.NOT_FOUND, "팀에 속해 있지 않습니다.");
+			throw AppException.teamNotInTeam();
 		}
 
 		Long teamId = student.getTeamId();
@@ -343,8 +323,7 @@ public class TeamService {
 	public TeamResponseDto getTeamDetail(Long teamId, Long studentId) {
 		//존재하는 팀인지 확인
 		Team team = teamRepository.findTeamByTeamId(teamId)
-			.orElseThrow(() -> new ResponseStatusException(
-				HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다."));
+			.orElseThrow(AppException::teamNotFound);
 
 		List<Student> teamMembers = studentRepository.findAllByTeamId(teamId);
 
@@ -390,8 +369,7 @@ public class TeamService {
 	public MyTeamResponseDto getMyTeamDetail(Long studentId) {
 		Student student = studentService.findByStudentId(studentId);
 		if (student.getTeamId() == null) {
-			throw new ResponseStatusException(
-				HttpStatus.NOT_FOUND, "팀에 속해 있지 않습니다.");
+			throw AppException.teamNotInTeam();
 		}
 
 		TeamResponseDto teamInfo = getTeamDetail(student.getTeamId(), studentId);
@@ -579,8 +557,7 @@ public class TeamService {
 			.map(name -> {
 				SubCode pos = getSubCodeByValue(name);
 				if (pos == null) {
-					throw new ResponseStatusException(
-						HttpStatus.NOT_FOUND, "없는 포지션입니다: " + name);
+					throw AppException.positionNotFound();
 				}
 				return Recruitment.builder()
 					.position(pos)
@@ -601,8 +578,7 @@ public class TeamService {
 		Optional<Team> optionalTeam = teamRepository.findById(teamId);
 
 		if (optionalTeam.isEmpty()) {
-			throw new ResponseStatusException(
-				HttpStatus.NOT_FOUND, "존재하지 않는 팀입니다.");
+			throw AppException.teamNotFound();
 		}
 
 		Team team = optionalTeam.get();

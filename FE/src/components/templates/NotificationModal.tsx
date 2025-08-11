@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Check,Mail, User, Users, X } from "lucide-react"
+import { Check, Mail, User, Users, X } from "lucide-react"
 
 import { Button } from "@/components/atoms"
 import type { INotification, INotificationTab } from "@/types/common"
