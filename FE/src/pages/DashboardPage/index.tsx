@@ -1,4 +1,6 @@
 import { StudentInfo } from "@/components/molecules"
+import Loading from "@/components/templates/Loading"
+import { useSummaryInfo } from "@/hooks/useDashboard"
 
 import DashboardCard from "./organisms/DashboardCard"
 import type { PositionApi } from "./organisms/PositionFunnel"
@@ -19,6 +21,8 @@ type TeamBuildingApi = {
 }
 
 export default function DashboardPage() {
+  const { data: summary, isLoading: isSummaryLoading, error: summaryError } = useSummaryInfo()
+
   const dummy: TeamBuildingApi = {
     all: { type: "전체", totalStudentCount: 100, teamMemberCount: 30 },
     major: { type: "전공", totalStudentCount: 25, teamMemberCount: 12 },
@@ -79,16 +83,19 @@ export default function DashboardPage() {
     ],
   }
 
+  if (isSummaryLoading) return <Loading fullScreen />
+  if (summaryError) return <div>프로필 요약 정보를 불러올 수 없습니다.</div>
+
   return (
     <div className="bg-background flex min-h-screen flex-col gap-5 px-15 py-10">
       {/* 대시보드 */}
       <div className="text-text flex flex-row gap-3">
         <div className="flex flex-col gap-3">
           <StudentInfo
-            name={"김싸피"}
-            studentId={"1300001"}
-            imgUrl={""}
-            teamInfo={{ teamId: 1, name: "팀 001", track: "웹기술", majorCount: 3, nonMajorCount: 1 }}
+            name={summary?.student.name ?? ""}
+            studentId={String(summary?.student.studentId)}
+            imgUrl={summary?.profileImageUrl ?? ""}
+            teamInfo={summary?.team ?? null}
             variant="dashboard"
             isMyProfile={true}
           />
@@ -106,11 +113,6 @@ export default function DashboardPage() {
       {/* 팀/교육생 추천 */}
       <div className="flex flex-row gap-3">
         <DashboardCard title={"팀원을 구하고 있어요! 🚀"}>
-          {/* <div className="flex flex-row gap-3 mt-5">
-            {teamCardListDummy.slice(0, 2).map((item) => (
-              <TeamCard key={item.teamId} {...item} />
-            ))}
-          </div> */}
           <div className="mt-5">
             <TeamCardCarousel items={teamCardListDummy} />
           </div>
