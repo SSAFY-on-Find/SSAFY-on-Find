@@ -56,7 +56,7 @@ function Header() {
           <h1 className="text-l font-bold">SSAFY On Find</h1>
         </div>
         <div className="flex h-full flex-1 items-center justify-between">
-          <h1 className="text-text text-xl font-bold">
+          <h1 className="text-text pl-8 text-xl font-bold">
             서울 {user?.className}{" "}
             <span className="text-subtext pl-2 text-base font-medium">
               {user?.name} ({user?.studentId})

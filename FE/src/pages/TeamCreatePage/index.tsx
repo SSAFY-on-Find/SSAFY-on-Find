@@ -79,7 +79,7 @@ export default function TeamCreatePage() {
 
   // 기존 return 문 앞에 추가
   return (
-    <div className="bg-background min-h-screen p-8">
+    <div className="bg-background min-h-screen px-15 py-10">
       <div className="p-6">
         <h1 className="text-text mb-[10px] text-2xl font-semibold">새로운 팀 생성</h1>
         <div className="text-subtext text-sm font-normal">
