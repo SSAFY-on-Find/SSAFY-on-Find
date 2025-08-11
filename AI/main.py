@@ -15,7 +15,7 @@ from database import fetch_students_data
 # --- FastAPI 앱 생성 및 CORS 설정 ---
 app = FastAPI()
 
-origins = ["http://localhost:5173" ] 
+origins = ["http://localhost:5173","https://i13a704.p.ssafy.io/" ] 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

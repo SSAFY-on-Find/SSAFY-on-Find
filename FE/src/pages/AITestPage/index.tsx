@@ -17,7 +17,7 @@ interface Recommendation {
 }
 
 const fetchRecommendations = async (studentId: number): Promise<Recommendation[]> => {
-  const response = await api.post<Recommendation[]>(`http://localhost:9000/api/v1/recommendations/${studentId}`)
+  const response = await api.post<Recommendation[]>(`https://i13a704.p.ssafy.io/fastapi/v1/recommendations/${studentId}`)
   return response.data
 }
 export default function AI() {
