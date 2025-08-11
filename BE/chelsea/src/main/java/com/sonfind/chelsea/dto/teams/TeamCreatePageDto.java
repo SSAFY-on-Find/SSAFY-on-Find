@@ -6,6 +6,7 @@ import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 
 public record TeamCreatePageDto(
 	List<SubCodeResponseDto> tracks,
-	List<SubCodeResponseDto> positions
+	List<SubCodeResponseDto> positions,
+	List<TeamRuleResponseDto> teamRules
 ) {
 }

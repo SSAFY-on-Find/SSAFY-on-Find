@@ -146,8 +146,7 @@ VALUES ('CLS001', 'CLS', '1반', '1반을(를) 나타내는 코드. (코드: CLS
 INSERT IGNORE INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_by, created_at)
 VALUES ('RULE001', 'RULE', 'SIZE_LIMIT', '6인 1팀 원칙', true, '0001234', NOW()),
        ('RULE002', 'RULE', 'MIN_MAJOR', '전공자 2인 이상', true, '0001234', NOW()),
-       ('RULE003', 'RULE', 'MIN_NON_MAJOR', '비전공자 2인 이상', true, '0001234', NOW()),
-       ('RULE004', 'RULE', 'BUILD_END_DATE', '팀 빌딩 종료 시간', true, '0001234', NOW());
+       ('RULE003', 'RULE', 'MIN_NON_MAJOR', '비전공자 2인 이상', true, '0001234', NOW());
 
 -- ------------------------------------------------------------------
 -- Sample data for Teams table (12 rows)
