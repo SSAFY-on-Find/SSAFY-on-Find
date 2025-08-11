@@ -13,11 +13,11 @@ import StudentDetail from "@/pages/StudentDetailPage"
 import StudentList from "@/pages/StudentListPage"
 import TeamCreatePage from "@/pages/TeamCreatePage"
 import TeamList from "@/pages/TeamListPage"
-import { RoutePolicy } from "@/router"
 import { useUserStore } from "@/stores/userStore"
 
 import ComponentTestPage from "./components/ComponentTestPage"
 import { useAuth } from "./hooks/useStudent"
+import MainLayout from "./layout/MainLayout"
 import AI from "./pages/AITestPage"
 import TeamEditPage from "./pages/TeamUpdatePage"
 
@@ -87,19 +87,21 @@ function App() {
         {!hideLayout && <SideBar />}
         <main className={!hideLayout ? "ml-[260px]" : ""}>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/myteam" element={<MyTeam />} />
-            <Route path="/teamlist" element={<TeamList />} />
-            <Route path="/create-team" element={<TeamCreatePage />} />
-            <Route path="/edit-team" element={<TeamEditPage />} />
-            <Route path="/studentlist" element={<StudentList />} />
-            <Route path="/studentlist/:studentId" element={<StudentDetail />} />
-            <Route path="/myprofile" element={<MyProfile />} />
-            <Route path="/create-profile" element={<CreateProfile />} />
-            <Route path="/edit-profile" element={<EditProfile />} />
-            <Route path="/component-test" element={<ComponentTestPage />} />
-            <Route path="/ai" element={<AI />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route element={<MainLayout />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/myteam" element={<MyTeam />} />
+              <Route path="/teamlist" element={<TeamList />} />
+              <Route path="/create-team" element={<TeamCreatePage />} />
+              <Route path="/edit-team" element={<TeamEditPage />} />
+              <Route path="/studentlist" element={<StudentList />} />
+              <Route path="/studentlist/:studentId" element={<StudentDetail />} />
+              <Route path="/myprofile" element={<MyProfile />} />
+              <Route path="/create-profile" element={<CreateProfile />} />
+              <Route path="/edit-profile" element={<EditProfile />} />
+              <Route path="/component-test" element={<ComponentTestPage />} />
+              <Route path="/ai" element={<AI />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
           </Routes>
         </main>
       </div>
