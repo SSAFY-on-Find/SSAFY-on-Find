@@ -5,6 +5,7 @@ import { FilePenLine } from "lucide-react"
 
 import { Button, MajorTag, NormalTag, PositionTag } from "@/components/atoms"
 import { StudentInfo } from "@/components/molecules"
+import Loading from "@/components/templates/Loading"
 import { useGetProfile } from "@/hooks/useProfile"
 import type { ISubcode } from "@/types/common"
 
@@ -42,11 +43,7 @@ export default function MyProfile() {
   }, [data])
 
   if (isLoading) {
-    return (
-      <div className="bg-background flex min-h-screen flex-col gap-7 px-15 py-10">
-        <div className="text-text">로딩 중입니다.</div>
-      </div>
-    )
+    return <Loading fullScreen />
   }
 
   if (isError) {
