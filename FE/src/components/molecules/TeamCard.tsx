@@ -57,7 +57,7 @@ function TeamCard({
     <div
       key={teamId}
       onClick={onClickCard}
-      className={`${bgColor} border-line flex max-h-[300px] min-h-[300px] max-w-[260px] min-w-[260px] flex-col justify-between rounded-lg border-2 px-2 py-1`}
+      className={`${bgColor} border-line flex max-h-[300px] min-h-[300px] max-w-[260px] min-w-[260px] cursor-pointer flex-col justify-between rounded-lg border-2 px-2 py-1 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg`}
     >
       <div className="flex flex-col gap-[11px] p-[18px] pb-[18px]">
         <div className="inline-flex items-center justify-between">

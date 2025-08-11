@@ -11,7 +11,7 @@ function StudentCard({ student, position, track, goal, profileImageUrl, isFavori
 
   return (
     <div
-      className="border-line flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border bg-white px-20 py-5"
+      className="border-line flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border bg-white px-20 py-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg"
       onClick={() => {
         navigate(`/studentlist/${student.studentId}`)
       }}
