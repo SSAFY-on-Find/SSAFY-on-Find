@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -13,6 +14,9 @@ import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 import com.sonfind.chelsea.domain.teams.Recruitment;
 import com.sonfind.chelsea.domain.teams.Team;
+import com.sonfind.chelsea.dto.dashboard.MemberSummary;
+import com.sonfind.chelsea.dto.dashboard.TeamInfoUpdateDto;
+import com.sonfind.chelsea.dto.dashboard.TeamMemberChangedDto;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 import com.sonfind.chelsea.dto.teams.CreateTeamRequestDto;
 import com.sonfind.chelsea.dto.teams.LeaveTeamResponseDto;
@@ -33,6 +37,7 @@ import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
 import com.sonfind.chelsea.repository.TeamRepository;
+import com.sonfind.chelsea.types.MemberChageAction;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +54,9 @@ public class TeamService {
 
 	private final StudentService studentService;
 	private final FavoriteService favoriteService;
+
+	//이벤트 발행기
+	private final ApplicationEventPublisher eventPublisher;
 
 	//팀 생성
 	@Transactional
@@ -132,24 +140,51 @@ public class TeamService {
 		Team team = teamRepository.findTeamByTeamId(teamId)
 			.orElseThrow(AppException::teamNotFound);
 
+		// 이벤트 발행용 변경사항 추적
+		boolean hasChanges = false;
+		String updatedTrack = null;
+		String updateDescription = null;
+		List<String> updatePositions = null;
+
 		//팀 설명 수정
 		if (request.description() != null) {
 			team.updateDescription(request.description());
+			updateDescription = request.description();
+			hasChanges = true;
 		}
 
 		//희망 트랙 수정
 		if (request.track() != null) {
-			SubCode track = getSubCodeByValue(request.track());
-			if (track == null) {
+			SubCode newTrack = getSubCodeByValue(request.track());
+			if (newTrack == null) {
 				throw AppException.trackNotFound();
 			}
-			team.updateTrack(track);
+			team.updateTrack(newTrack);
+			updatedTrack = newTrack.getSubCodeName();
+			hasChanges = true;
 		}
 
 		//모집 포지션 수정
 		if (request.positions() != null) {
 			List<Recruitment> recruitments = toRecruitments(request.positions(), team);
 			team.updatePositions(recruitments);
+			updatePositions = request.positions();
+			hasChanges = true;
+		}
+
+		if (hasChanges) {
+			TeamInfoUpdateDto updateDto = TeamInfoUpdateDto.builder()
+				.teamId(teamId)
+				.track(updatedTrack != null ? updatedTrack : team.getTrack().getSubCodeName())
+				.description(updateDescription != null ? updateDescription : team.getDescription())
+				.afterNeedByPosition(updatePositions != null ? updatePositions :
+					team.getRecruitments().stream()
+						.map(r -> r.getPosition().getSubCodeName())
+						.collect(Collectors.toList()))
+				.build();
+
+			//이벤트 발행
+			eventPublisher.publishEvent(updateDto);
 		}
 	}
 
@@ -193,11 +228,20 @@ public class TeamService {
 		//전공/비전공 업데이트
 		//팀 전공/비전공 수정
 		if (Boolean.TRUE.equals(student.getMajorYn())) {
-			targetTeam.decrementMajorCount();
+			targetTeam.incrementMajorCount();
 		} else {
-			targetTeam.decrementNonMajorCount();
+			targetTeam.incrementNonMajorCount();
 		}
 		teamRepository.save(targetTeam);
+
+		//멤버 정보 생성 및 이벤트 발행
+		MemberSummary memberSummary = createMemberSummary(student);
+		TeamMemberChangedDto memberChangedDto = TeamMemberChangedDto.builder()
+			.teamId(teamId)
+			.action(MemberChageAction.JOINED)
+			.member(memberSummary)
+			.build();
+		eventPublisher.publishEvent(memberChangedDto);
 
 		if (currentTeamId != null) {
 			log.info("교육생 {}이 팀 {}에서 팀 {}으로 이동했습니다.", studentId, currentTeamId, teamId);
@@ -239,6 +283,9 @@ public class TeamService {
 
 		//소스 팀 멤버를 타켓 팀으로 이동
 		for (Student member : sourceMembers) {
+			//멤버 정보 미리 생성
+			MemberSummary memberSummary = createMemberSummary(member);
+
 			member.setTeamId(targetTeamId);
 			studentRepository.save(member);
 
@@ -248,6 +295,14 @@ public class TeamService {
 			} else {
 				targetTeam.incrementNonMajorCount();
 			}
+
+			// 각 멤버별 합류 이벤트 발행
+			TeamMemberChangedDto memberChangedDto = TeamMemberChangedDto.builder()
+				.teamId(targetTeamId)
+				.action(MemberChageAction.JOINED)
+				.member(memberSummary)
+				.build();
+			eventPublisher.publishEvent(memberChangedDto);
 		}
 
 		//소스 팀 삭제
@@ -310,7 +365,19 @@ public class TeamService {
 		List<Student> membersBeforeLeave = studentRepository.findAllByTeamId(teamId);
 		boolean willBeEmptyTeam = membersBeforeLeave.size() <= 1;
 
+		//멤버 정보 나가기 전에 생성
+		MemberSummary memberSummary = createMemberSummary(student);
+
+		//팀에서 나가버렷~~
 		removeStudentFromTeam(teamId, studentId, true);
+
+		//팀 나가기 이벤트 발행
+		TeamMemberChangedDto memberChangedDto = TeamMemberChangedDto.builder()
+			.teamId(teamId)
+			.action(MemberChageAction.LEFT)
+			.member(memberSummary)
+			.build();
+		eventPublisher.publishEvent(memberChangedDto);
 
 		return LeaveTeamResponseDto.builder()
 			.message(willBeEmptyTeam ? "팀에서 나갔습니다. 팀이 삭제되었습니다." : "팀에서 나갔습니다.")
@@ -595,6 +662,36 @@ public class TeamService {
 	public TeamSimpleResponseDto createTeamSimpleResponseDto(Long teamId, String teamName, String trackCodeName,
 		int majorCount, int nonMajorCout) {
 		return new TeamSimpleResponseDto(teamId, teamName, trackCodeName, majorCount, nonMajorCout);
+	}
+
+	private MemberSummary createMemberSummary(Student student) {
+		try {
+			StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(student.getStudentId())
+				.orElse(null);
+
+			String majorType = Boolean.TRUE.equals(student.getMajorYn()) ? "전공" : "비전공";
+			String progileImageUrl = (studentInfo != null && studentInfo.getProfile() != null) ?
+				studentInfo.getProfile().getProfileImageUrl() : "";
+			String position = (studentInfo != null && studentInfo.getPositionCode() != null) ?
+				studentInfo.getPositionCode().getSubCodeName() : "";
+
+			return MemberSummary.builder()
+				.id(student.getStudentId())
+				.name(student.getName())
+				.profileImageUrl(progileImageUrl)
+				.majorType(majorType)
+				.position(position)
+				.build();
+		} catch (Exception e) {
+			return MemberSummary.builder()
+				.id(student.getStudentId())
+				.name(student.getName())
+				.profileImageUrl("")
+				.majorType(Boolean.TRUE.equals(student.getMajorYn()) ? "전공" : "비전공")
+				.position("")
+				.build();
+		}
+
 	}
 
 }
