@@ -1,5 +1,6 @@
 package com.sonfind.chelsea.service;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +14,10 @@ import com.sonfind.chelsea.domain.chat.ChatRoomMember;
 import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 import com.sonfind.chelsea.domain.teams.Team;
+import com.sonfind.chelsea.dto.chat.ChatMessageResponseDto;
 import com.sonfind.chelsea.dto.chat.ChatRoomListResponseDto;
 import com.sonfind.chelsea.dto.chat.ChatRoomListResponseDto.DirectChatRoomInfoDto;
+import com.sonfind.chelsea.repository.ChatMessageRepository;
 import com.sonfind.chelsea.repository.ChatRoomRepository;
 import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
@@ -30,6 +33,7 @@ public class ChatRoomService {
 	private final StudentInfoRepository studentInfoRepository;
 	private final TeamRepository teamRepository;
 	private final ChatRoomRepository chatRoomRepository;
+	private final ChatMessageRepository chatMessageRepository;
 
 	@Transactional
 	public Long createTeamChatRoom(Long teamId) {
@@ -142,5 +146,25 @@ public class ChatRoomService {
 			.orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
 
 		return chatRoom.getId();
+	}
+
+	public List<ChatMessageResponseDto> getMessages(Long studentId, Long roomId) {
+		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+			.orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+
+		Student student = studentRepository.findByStudentId(studentId)
+			.orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
+
+		ChatRoomMember chatRoomMember = chatRoom.getChatRoomMembers().stream()
+			.filter(member -> member.getStudent().equals(student))
+			.findFirst()
+			.orElseThrow(() -> new IllegalArgumentException("사용자는 이 채팅방의 멤버가 아닙니다."));
+
+		LocalDateTime joinedAt = chatRoomMember.getUpdated_at();
+		return chatMessageRepository.findByRoomIdAndPublishedAtAfterOrderByPublishedAtAsc(roomId, joinedAt)
+			.stream()
+			.map(ChatMessageResponseDto::of)
+			.toList();
+
 	}
 }

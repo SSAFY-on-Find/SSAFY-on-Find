@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -47,8 +48,10 @@ public class TeamService {
 	private final StudentRepository studentRepository;
 	private final StudentInfoRepository studentInfoRepository;
 
+	private final SubCodeService subCodeService;
 	private final StudentService studentService;
 	private final FavoriteService favoriteService;
+	private final StudentFavoriteRepository studentFavoriteRepository;
 
 	//팀 생성
 	@Transactional
@@ -440,6 +443,17 @@ public class TeamService {
 			.build();
 	}
 
+	//교육생 프사 조회
+	private String getStudentProfileImage(Student student) {
+		try {
+			return studentInfoRepository.findByStudent_StudentId(student.getStudentId())
+				.map(studentInfo -> studentInfo.getProfile().getProfileImageUrl())
+				.orElse(null);
+		} catch (Exception e) {
+			return "";
+		}
+	}
+
 	//팀 이름 숫자만 파싱
 	private int parseTeamNumber(String teamName) {
 		try {
@@ -510,7 +524,8 @@ public class TeamService {
 				.orElse(null);
 
 			String major = Boolean.TRUE.equals(student.getMajorYn()) ? "전공" : "비전공";
-			String profileImageUrl = (studentInfo != null) ? studentInfo.getProfileImageUrl() : "";
+			String profileImageUrl = (studentInfo != null && studentInfo.getProfile() != null) ?
+				studentInfo.getProfile().getProfileImageUrl() : "";
 
 			SubCodeResponseDto position = null;
 			if (studentInfo != null && studentInfo.getPositionCode() != null) {

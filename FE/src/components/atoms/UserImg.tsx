@@ -1,8 +1,11 @@
+import { Camera } from "lucide-react"
 interface IUserImg {
-  name: string
+  name: string | undefined
   size: "xs" | "s" | "m" | "l" | "xl"
   hasTeam?: boolean
   showTeamBadge: boolean
+  isEdit?: boolean
+  url?: string
 }
 
 const sizeMap = {
@@ -21,15 +24,14 @@ const badgeSizeMap = {
   xl: "w-[32px] h-[32px] -right-[2px] -bottom-[2px]",
 }
 
-function UserImg({ name, size, hasTeam = false, showTeamBadge }: IUserImg) {
+function UserImg({ name, size, hasTeam = false, showTeamBadge, isEdit = false, url = "" }: IUserImg) {
   const sizeClass = sizeMap[size] || sizeMap.m
   const badgeClass = badgeSizeMap[size] || badgeSizeMap.m
 
   return (
-    // <div className={`${sizeClass} aspect-square border border-line rounded-full overflow-hidden`}>
     <div className={`relative ${sizeClass} border-line aspect-square flex-shrink-0 rounded-full border`}>
       <img
-        src={`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${name}`}
+        src={url === "" ? `https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${name}` : url}
         className="h-full w-full rounded-full object-cover"
         alt={`${name} 프로필 이미지`}
       />
@@ -38,6 +40,7 @@ function UserImg({ name, size, hasTeam = false, showTeamBadge }: IUserImg) {
           className={`absolute ${badgeClass} rounded-full ${hasTeam ? "bg-main" : "border-main border-2 bg-white"} `}
         />
       )}
+      {isEdit && <Camera className={`absolute ${badgeClass} text-main cursor-pointer`} strokeWidth={1.3} />}
     </div>
   )
 }

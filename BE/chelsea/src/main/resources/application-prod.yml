@@ -34,3 +34,10 @@ logging:
 
 upload:
   dir: /app/uploads/
+
+
+custom:
+  service:
+    url: "https://i13a704.p.ssafy.io"
+
+

@@ -9,4 +9,10 @@ export const favoriteApi = {
     const response = await api.post<IApiResponse<ITeamFavorite[]>>(FAVORITE_BASE_URL + "/toggle", { teamId })
     return response.data
   },
+  studentToggle: async (targetStudentId: number): Promise<IApiResponse<{ isFavorite: boolean }>> => {
+    const response = await api.post<IApiResponse<{ isFavorite: boolean }>>(FAVORITE_BASE_URL + "/students/toggle", {
+      targetStudentId,
+    })
+    return response.data
+  },
 }

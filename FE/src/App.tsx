@@ -1,24 +1,35 @@
+import { useEffect } from "react"
 import { Route, Routes, useLocation } from "react-router-dom"
 import { ToastContainer } from "react-toastify"
 
 import { Header, SideBar } from "@/layout"
+import CreateProfile from "@/pages/CreateProfilePage"
 import Dashboard from "@/pages/DashboardPage"
+import EditProfile from "@/pages/EditProfilePage"
 import Login from "@/pages/LoginPage"
 import MyProfile from "@/pages/MyProfilePage"
 import MyTeam from "@/pages/MyTeamPage"
-import CreateProfile from "@/pages/ProfileCreatePage"
+import StudentDetail from "@/pages/StudentDetailPage"
 import StudentList from "@/pages/StudentListPage"
 import TeamCreatePage from "@/pages/TeamCreatePage"
 import TeamList from "@/pages/TeamListPage"
 import { RoutePolicy } from "@/router"
+import { useUserStore } from "@/stores/userStore"
 
 import ComponentTestPage from "./components/ComponentTestPage"
+import AI from "./pages/AITestPage"
+import TeamEditPage from "./pages/TeamUpdatePage"
 
 import "@/index.css"
 
 function App() {
   const location = useLocation()
   const hideLayout = location.pathname === "/login"
+  // const initializeAuth = useUserStore((state) => state.initializeAuth)
+
+  // useEffect(() => {
+  //   initializeAuth()
+  // }, [initializeAuth])
 
   return (
     <RoutePolicy>
@@ -26,17 +37,21 @@ function App() {
         {!hideLayout && <Header />}
         <div className={!hideLayout ? "mt-[64px]" : ""}>
           {!hideLayout && <SideBar />}
-          <main className={!hideLayout ? "border-main ml-[230px] border" : ""}>
+          <main className={!hideLayout ? "ml-[260px]" : ""}>
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/login" element={<Login />} />
               <Route path="/myteam" element={<MyTeam />} />
               <Route path="/teamlist" element={<TeamList />} />
               <Route path="/create-team" element={<TeamCreatePage />} />
+              <Route path="/edit-team" element={<TeamEditPage />} />
               <Route path="/studentlist" element={<StudentList />} />
+              <Route path="/studentlist/:studentId" element={<StudentDetail />} />
               <Route path="/myprofile" element={<MyProfile />} />
               <Route path="/create-profile" element={<CreateProfile />} />
+              <Route path="/edit-profile" element={<EditProfile />} />
               <Route path="/component-test" element={<ComponentTestPage />} />
+              <Route path="/ai" element={<AI />} />
             </Routes>
           </main>
         </div>

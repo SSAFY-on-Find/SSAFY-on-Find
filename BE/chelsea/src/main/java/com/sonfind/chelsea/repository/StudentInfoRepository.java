@@ -20,9 +20,9 @@ public interface StudentInfoRepository extends JpaRepository<StudentInfo, Long> 
 	Optional<StudentInfo> findByStudent_StudentId(Long studentId);
 
 	List<StudentInfo> findAllByStudentIn(List<Student> students);
+
 	@Query(value = """
 			SELECT 
-				sc_track.sub_code_name AS track_name,
 				sc_pos.sub_code_name AS position_name,
 				CASE 
 					WHEN s.major_yn = TRUE THEN '전공'
@@ -31,12 +31,11 @@ public interface StudentInfoRepository extends JpaRepository<StudentInfo, Long> 
 				COUNT(si.id) AS student_count
 			FROM student_info si
 			LEFT JOIN student s ON si.student_id = s.student_id
-			LEFT JOIN sub_code sc_track ON si.track_code = sc_track.sub_code
 			LEFT JOIN sub_code sc_pos ON si.position_code = sc_pos.sub_code
 			GROUP BY
-					track_name,position_name, major_type
+					position_name, major_type
 			ORDER BY 
-					track_name, position_name,major_type, student_count;
+					position_name DESC ,major_type, student_count;
 		""", nativeQuery = true)
-	List<Object[]> getTrackPositionMajorRatio();
+	List<Object[]> getPositionMajorRatio();
 }

@@ -8,11 +8,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoGetDetailResponseDto;
 import com.sonfind.chelsea.service.StudentInfoService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/studentInfos")
+@RequestMapping("/api/v1/studentInfos")
 public class StudentInfoController {
 
 	private final StudentInfoService studentInfoService;
@@ -39,9 +41,12 @@ public class StudentInfoController {
 	})
 	@GetMapping("/{studentId}")
 	public ResponseEntity<Map<String, Object>> getStudentInfo(
-		@PathVariable Long studentId) {
+		@PathVariable("studentId") Long targetStudentId,
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long loginStudentId) {
 
-		StudentInfoGetDetailResponseDto studentInfo = studentInfoService.getDetailStudentInfo(studentId);
+		StudentInfoGetDetailResponseDto studentInfo = studentInfoService.getOtherDetailStudentInfo(loginStudentId,
+			targetStudentId);
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");

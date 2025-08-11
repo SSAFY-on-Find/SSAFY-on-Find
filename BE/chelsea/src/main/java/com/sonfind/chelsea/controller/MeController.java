@@ -37,7 +37,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/me")
+@RequestMapping("api/v1/me")
 @Tag(name = "me", description = "사용자 자기소개 관련 api")
 public class MeController {
 
@@ -66,6 +66,7 @@ public class MeController {
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
+		body.put("data", null);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(body);
 	}
@@ -83,7 +84,7 @@ public class MeController {
 		@SessionAttribute("loginUser") Long studentId
 	) {
 
-		StudentInfoGetDetailResponseDto studentInfo = studentInfoService.getDetailStudentInfo(studentId);
+		StudentInfoGetDetailResponseDto studentInfo = studentInfoService.getMeDetailStudentInfo(studentId);
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
@@ -107,7 +108,7 @@ public class MeController {
 
 		StudentInfoGetSummaryResponseDto studentInfo = studentInfoService.getSummaryStudentInfo(studentId);
 
-		Map<String, Object> body = new HashMap();
+		Map<String, Object> body = new HashMap<>();
 
 		body.put("status", "SUCCESS");
 		body.put("data", studentInfo);
@@ -137,6 +138,7 @@ public class MeController {
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
+		body.put("data", null);
 
 		return ResponseEntity.ok().body(body);
 	}

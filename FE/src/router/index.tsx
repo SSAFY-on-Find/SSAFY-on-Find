@@ -6,6 +6,10 @@ export function RoutePolicy({ children }: { children: React.ReactNode }) {
   const { user } = useUserStore()
   const location = useLocation()
 
+  // if (isLoading) {
+  //   return <div>로딩 중...</div>
+  // }
+
   // 1. 로그인 안했으면 로그인 페이지로 강제 이동
   if (!user && location.pathname !== "/login") {
     return <Navigate to="/login" replace />
