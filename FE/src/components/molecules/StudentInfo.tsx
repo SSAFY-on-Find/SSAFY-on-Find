@@ -33,7 +33,7 @@ function StudentInfo({
 
   return (
     <div
-      className={`border-line flex w-full flex-row items-center justify-center rounded-lg border bg-white ${variant === "dashboard" ? "gap-10 px-15 py-5" : "gap-20 p-10"}`}
+      className={`border-line flex w-full flex-row items-center justify-center rounded-lg border bg-white ${variant === "dashboard" ? "gap-10 px-15 py-7" : "gap-20 p-10"}`}
     >
       <div className="flex flex-col items-center justify-center gap-1">
         <div className="relative">

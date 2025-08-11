@@ -8,7 +8,7 @@ import { positionColor } from "@/utils/positionColor"
 
 type Props = { api: PositionRow[] }
 
-const ROW_H = 72
+const ROW_H = 65
 
 function pickMajorNon(arr: IPositionRatioNode[]) {
   const isTeam = arr.find((d) => d.name === "isTeam")?.count ?? 0

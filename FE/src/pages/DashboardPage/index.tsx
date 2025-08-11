@@ -22,7 +22,7 @@ export default function DashboardPage() {
     <div className="bg-background flex min-h-screen flex-col gap-5 px-15 py-10">
       {/* 대시보드 */}
       <div className="text-text flex flex-row gap-3">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col justify-between gap-3">
           <StudentInfo
             name={summary?.student.name ?? ""}
             studentId={String(summary?.student.studentId)}
