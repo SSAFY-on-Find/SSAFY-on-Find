@@ -26,13 +26,13 @@ import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoGetSummaryRespons
 import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
 import com.sonfind.chelsea.global.domain.SubCode;
+import com.sonfind.chelsea.global.error.AppException;
 import com.sonfind.chelsea.repository.StudentFavoriteRepository;
 import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
 import com.sonfind.chelsea.repository.TeamRepository;
 import com.sonfind.chelsea.util.StringListConverter;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -55,7 +55,7 @@ public class StudentInfoService {
 		MultipartFile portfolio) {
 
 		if (studentInfoRepository.existsByStudent_StudentId(studentId)) {
-			throw new IllegalStateException("이미 자기소개서를 작성했습니다.");
+			throw AppException.studentInfoAlreadyExists();
 		}
 
 		try {
@@ -65,7 +65,7 @@ public class StudentInfoService {
 
 			studentInfoRepository.save(studentInfo);
 		} catch (IOException e) {
-			throw new IllegalStateException("파일 저장 처리 중 오류가 발생했습니다." + e);
+			throw AppException.fileUploadError();
 		}
 
 	}
@@ -87,7 +87,8 @@ public class StudentInfoService {
 	@Transactional(readOnly = true)
 	public StudentInfoGetSummaryResponseDto getSummaryStudentInfo(Long studentId) {
 
-		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId).orElseThrow(null);
+		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId)
+			.orElseThrow(AppException::studentInfoNotFound);
 		Student student = studentInfo.getStudent();
 		SubCode positionCode = studentInfo.getPositionCode();
 		SubCode trackCode = studentInfo.getTrackCode();
@@ -125,7 +126,7 @@ public class StudentInfoService {
 		MultipartFile portfolio) {
 
 		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId)
-			.orElseThrow(() -> new EntityNotFoundException("해당 학생의 자기소개를 찾을 수 없습니다."));
+			.orElseThrow(AppException::studentInfoNotFound);
 
 		try {
 			//새로운 프로필 이미지 입력 시 변경
@@ -148,7 +149,7 @@ public class StudentInfoService {
 			List<SubCode> subCodes = subCodeRepository.findAllBySubCodeIn(requiredCodes);
 			studentInfo.update(requestDto, subCodes);
 		} catch (IOException e) {
-			throw new IllegalStateException("파일 수정 처리 중 오류 발생했습니다.", e);
+			throw AppException.fileUploadError();
 		}
 	}
 
@@ -161,11 +162,7 @@ public class StudentInfoService {
 	@Transactional(readOnly = true)
 	public StudentInfoForNotificationResponseDto findByStudentId(Long studentId) {
 		StudentInfo findStuInfo = studentInfoRepository.findByStudent_StudentId(studentId)
-			.orElse(null);
-
-		if (findStuInfo == null) {
-			throw new IllegalArgumentException("해당 학생의 정보가 없습니다. studentId: " + studentId);
-		}
+			.orElseThrow(AppException::studentInfoNotFound);
 
 		return StudentInfoForNotificationResponseDto.builder()
 			.studentId(studentId)
@@ -263,7 +260,7 @@ public class StudentInfoService {
 		Long studentId) {
 
 		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId)
-			.orElseThrow(() -> new EntityNotFoundException("해당 학생의 자기소개를 찾을 수 없습니다."));
+			.orElseThrow(AppException::studentInfoNotFound);
 
 		Student student = studentInfo.getStudent();
 		SubCode positionCode = studentInfo.getPositionCode();
