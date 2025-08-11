@@ -87,7 +87,6 @@ public class NotificationService {
 	 * @param statusId
 	 */
 	public void acceptInvitation(Long studentId, String statusId) throws BadRequestException {
-
 		notificationCommandService.acceptInvitation(studentId, statusId);
 	}
 
