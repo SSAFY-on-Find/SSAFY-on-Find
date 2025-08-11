@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { UserPlus } from "lucide-react"
 
-import { createTeamChatRoom, getTeamChatRoomId } from "@/apis/chatRoom"
+import { createTeamChatRoom, getChatMessages, getTeamChatRoomId } from "@/apis/chatRoom"
 import { teamApi } from "@/apis/teamApi"
 import { TeamDetail } from "@/components/molecules"
 import { useTeamNotifications } from "@/hooks/useTeamNotifications"
@@ -54,6 +54,12 @@ export default function MyTeamPage() {
     retry: false,
   })
 
+  const { data: initialMessages, isLoading: isMessagesLoading } = useQuery({
+    queryKey: ["chatMessages", chatRoomId],
+    queryFn: () => getChatMessages(chatRoomId!),
+    enabled: !!chatRoomId, // chatRoomId가 확정된 후에만 실행
+  })
+
   const {
     notifications: applicants,
     isLoading: isLoadingApplicants,
@@ -74,7 +80,8 @@ export default function MyTeamPage() {
     if (isError && teamId && !isCreating) createRoom(teamId)
   }, [isError, teamId, createRoom, isCreating])
 
-  const isLoading = isFetchingRoomId || isCreating || isMyTeamLoading
+  // [수정] 전체 로딩 상태에 isMessagesLoading 추가
+  const isLoading = isFetchingRoomId || isCreating || isMyTeamLoading || isMessagesLoading
 
   return (
     <div className="bg-background min-h-screen p-8">
@@ -117,7 +124,12 @@ export default function MyTeamPage() {
             </div>
           )}
           {chatRoomId && studentId && teamMembers && (
-            <TeamChat roomId={chatRoomId} studentId={Number(studentId)} members={teamMembers} />
+            <TeamChat
+              roomId={chatRoomId}
+              studentId={Number(studentId)}
+              members={teamMembers}
+              initialMessages={initialMessages}
+            />
           )}
         </div>
       </div>
