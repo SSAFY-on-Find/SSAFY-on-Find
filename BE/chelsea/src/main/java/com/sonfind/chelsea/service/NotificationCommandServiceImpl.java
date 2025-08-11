@@ -3,8 +3,10 @@ package com.sonfind.chelsea.service;
 import com.sonfind.chelsea.domain.notification.NotificationDocument;
 import com.sonfind.chelsea.domain.notification.NotificationStatusDocument;
 import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
+import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
 import com.sonfind.chelsea.dto.notification.NotificationTypeInfo;
 import com.sonfind.chelsea.global.event.InvitationRequestEvent;
+import com.sonfind.chelsea.global.event.InvitationResponseEvent;
 import com.sonfind.chelsea.repository.NotificationRepository;
 import com.sonfind.chelsea.repository.NotificationStatusRepository;
 import com.sonfind.chelsea.service.validator.NotificationValidator;
@@ -16,12 +18,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.redis.connection.stream.MapRecord;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -35,6 +41,16 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 	private final ApplicationEventPublisher eventPublisher;
 	private final NotificationStatusService statusService;
 	private final NotificationDocumentService documentService;
+	private final StringRedisTemplate stringRedisTemplate;
+	private final TeamService teamService;
+	private final NotificationQueryService notificationQueryService;
+
+	// 알림 발송 이벤트를 발행할지 여부를 설정하는 프로퍼티
+	@Value("${notification.dispatch.publishSpringEvent:false}")
+	private boolean publishSpringEvent;
+
+	@Value("${notification.dispatch.publishSpringEventForResponse:false}")
+	private boolean publishSpringEventForResponse;
 
 	@Override
 	public void sendNotification(Long studentId, NotificationRequestDto dto) throws BadRequestException {
@@ -74,6 +90,22 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 
 		log.info("알림 상태가 저장되었습니다: {}, {}", savedNotification.getId(), info.type());
 
+		// Redis Stream에 알림 정보 추가
+		stringRedisTemplate.opsForStream().add(
+				MapRecord.create(
+						"notification_stream", Map.of(
+								"notificationId", savedNotification.getId().toHexString(),
+								"eventType", info.type().name(),
+								"pubId", String.valueOf(savedNotification.getPublisherId()),
+								"pubType", savedNotification.getPublisherType().name(),
+								"subId", String.valueOf(savedNotification.getSubscriberId()),
+								"subType", savedNotification.getSubscriberType().name(),
+								"ts", String.valueOf(savedNotification.getUpdatedAt().getTime()),
+								"phase", "REQUEST"
+						)
+				)
+		);
+
 		// 알림 발송 이벤트를 발행
 		InvitationRequestEvent event = InvitationRequestEvent.of(
 				this,
@@ -85,17 +117,28 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				savedNotification.getUpdatedAt(),
 				savedNotification.getType()
 		);
-		eventPublisher.publishEvent(event);
+
+		// publishSpringEvent 프로퍼티에 따라 이벤트를 발행하거나 로그로 남김
+		if (publishSpringEvent) {
+			eventPublisher.publishEvent(event);
+		} else {
+			log.info("발행된 이벤트: {}", event);
+		}
 	}
 
 	@Override
 	public void acceptInvitation(Long studentId, String statusId) throws BadRequestException {
 		ObjectId ststusObjId = new ObjectId(statusId);
+
 		Date now = getCurrentDate();
 
 		// 1) 내 상태 조회·검증
 		NotificationStatusDocument me = statusRepo.findById(ststusObjId)
 				.orElseThrow(() -> new BadRequestException("잘못된 알림입니다."));
+		ObjectId notificationId = me.getNotificationId();
+		NotificationResponseDto findNotification = notificationQueryService.getNotificationInfo(notificationId);
+
+		teamService.addStudentToTeam(findNotification.subscriberId(), findNotification.publisherId());
 
 		if (me.getRole() != RecipientRole.SUBSCRIBER ||
 				!me.getTargetId().equals(studentId)) {
@@ -108,7 +151,6 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 		statusRepo.save(me);
 
 		// 3) 동일 notificationId를 가진 모든 상태 조회
-		ObjectId notificationId = me.getNotificationId();
 		List<NotificationStatusDocument> allStatuses =
 				statusRepo.findByNotificationId(notificationId);
 
@@ -125,15 +167,32 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 		NotificationDocument doc = notificationRepo.findById(notificationId)
 				.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
 
-		// subscriber → publisher
-		eventPublisher.publishEvent(new InvitationRequestEvent(
-				this,
-				notificationId,
-				doc.getPublisherId(), doc.getPublisherType(),
-				doc.getSubscriberId(), doc.getSubscriberType(),
-				now,
-				doc.getType()
-		));
+		// Stream publish for RESPONSE
+		stringRedisTemplate.opsForStream().add(
+				MapRecord.create(
+						"notification_stream", Map.of(
+								"phase", "RESPONSE",
+								"notificationId", notificationId.toHexString(),
+								"pubId", String.valueOf(doc.getPublisherId()),
+								"pubType", doc.getPublisherType().name(),
+								"subId", String.valueOf(doc.getSubscriberId()),
+								"subType", doc.getSubscriberType().name(),
+								"status", NotificationStatus.ACCEPTED.name(),
+								"ts", String.valueOf(now.getTime())
+						)
+				)
+		);
+
+		if (publishSpringEventForResponse) {
+			eventPublisher.publishEvent(InvitationResponseEvent.of(
+					this,
+					notificationId,
+					doc.getPublisherId(), doc.getPublisherType(),
+					doc.getSubscriberId(), doc.getSubscriberType(),
+					NotificationStatus.ACCEPTED,
+					now
+			));
+		}
 
 		log.info("초대/지원이 수락되었습니다: notificationId={}, statusId={}", notificationId, statusId);
 	}
@@ -174,15 +233,32 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 		NotificationDocument doc = notificationRepo.findById(notificationId)
 				.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
 
-		// subscriber → publisher
-		eventPublisher.publishEvent(new InvitationRequestEvent(
-				this,
-				notificationId,
-				doc.getPublisherId(), doc.getPublisherType(),
-				doc.getSubscriberId(), doc.getSubscriberType(),
-				now,
-				doc.getType()
-		));
+		// Stream publish for RESPONSE
+		stringRedisTemplate.opsForStream().add(
+				MapRecord.create(
+						"notification_stream", Map.of(
+								"phase", "RESPONSE",
+								"notificationId", notificationId.toHexString(),
+								"pubId", String.valueOf(doc.getPublisherId()),
+								"pubType", doc.getPublisherType().name(),
+								"subId", String.valueOf(doc.getSubscriberId()),
+								"subType", doc.getSubscriberType().name(),
+								"status", NotificationStatus.REJECTED.name(),
+								"ts", String.valueOf(now.getTime())
+						)
+				)
+		);
+
+		if (publishSpringEventForResponse) {
+			eventPublisher.publishEvent(InvitationResponseEvent.of(
+					this,
+					notificationId,
+					doc.getPublisherId(), doc.getPublisherType(),
+					doc.getSubscriberId(), doc.getSubscriberType(),
+					NotificationStatus.REJECTED,
+					now
+			));
+		}
 
 		log.info("초대/지원이 거절되었습니다: notificationId={}, statusId={}", notificationId, statusId);
 	}
@@ -222,15 +298,32 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 		NotificationDocument doc = notificationRepo.findById(notificationId)
 				.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
 
-		// publisher → subscriber
-		eventPublisher.publishEvent(new InvitationRequestEvent(
-				this,
-				notificationId,
-				doc.getPublisherId(), doc.getPublisherType(),
-				doc.getSubscriberId(), doc.getSubscriberType(),
-				now,
-				doc.getType()
-		));
+		// Stream publish for RESPONSE
+		stringRedisTemplate.opsForStream().add(
+				MapRecord.create(
+						"notification_stream", Map.of(
+								"phase", "RESPONSE",
+								"notificationId", notificationId.toHexString(),
+								"pubId", String.valueOf(doc.getPublisherId()),
+								"pubType", doc.getPublisherType().name(),
+								"subId", String.valueOf(doc.getSubscriberId()),
+								"subType", doc.getSubscriberType().name(),
+								"status", NotificationStatus.CANCELED.name(),
+								"ts", String.valueOf(now.getTime())
+						)
+				)
+		);
+
+		if (publishSpringEventForResponse) {
+			eventPublisher.publishEvent(InvitationResponseEvent.of(
+					this,
+					notificationId,
+					doc.getPublisherId(), doc.getPublisherType(),
+					doc.getSubscriberId(), doc.getSubscriberType(),
+					NotificationStatus.CANCELED,
+					now
+			));
+		}
 
 		log.info("알림이 취소되었습니다: notificationId={}, statusId={}", notificationId, statusId);
 	}
