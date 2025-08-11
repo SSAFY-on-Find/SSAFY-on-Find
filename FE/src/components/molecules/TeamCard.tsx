@@ -5,7 +5,7 @@ import type { ITeamCard } from "@/types/team"
 import { Button, MainTag, PositionTag, UserImg, WhiteTag } from "../atoms"
 
 interface ITeamCardElement extends ITeamCard {
-  userTeamId?: number
+  userTeamId?: number | null
 }
 
 function TeamCard({

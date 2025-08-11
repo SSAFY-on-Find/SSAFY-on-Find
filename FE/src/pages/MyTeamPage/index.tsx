@@ -16,14 +16,10 @@ import TeamChat from "./organisms/TeamChat"
 export default function MyTeamPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const user = useUserStore((state) => state.user)
-
+  const teamId = useUserStore((state) => state.user?.teamId)
+  const studentId = useUserStore((state) => state.user?.studentId)
   const [chatRoomId, setChatRoomId] = useState<number | null>(null)
 
-  const teamId = user?.teamId
-  const studentId = user?.studentId
-
-  // --- 기존 팀 정보 및 채팅방 관련 로직 (수정 없음) ---
   const { data: myTeamData, isLoading: isMyTeamLoading } = useQuery<IMyTeam>({
     queryKey: ["myTeam"],
     queryFn: () => teamApi.getMyTeam().then((res) => res.data),
@@ -58,17 +54,17 @@ export default function MyTeamPage() {
     retry: false,
   })
 
-  // --- 👇 합류 신청 조회 로직 ---
   const {
     notifications: applicants,
     isLoading: isLoadingApplicants,
     error: applicantsError,
   } = useTeamNotifications(teamId!, "receive")
 
-  // --- 기존 useEffect 로직 (수정 없음) ---
   useEffect(() => {
-    if (user && user.teamId === null) navigate("/create-team")
-  }, [user, navigate])
+    if (!teamId) {
+      navigate("/create-team")
+    }
+  }, [teamId, navigate])
 
   useEffect(() => {
     if (isSuccess && fetchedRoomId) setChatRoomId(fetchedRoomId)
@@ -87,7 +83,6 @@ export default function MyTeamPage() {
           <div className="border-line flex rounded-xl border-1 bg-white pb-6">
             {myTeamData?.teamInfo && <TeamDetail {...myTeamData?.teamInfo} varient="myteam" />}
           </div>
-          {/* --- 👇 대기 목록 UI 렌더링 --- */}
           <div className="border-line flex flex-col gap-4 rounded-xl border-1 bg-white p-6">
             <div>
               <div className="flex items-center gap-[15px]">
@@ -99,17 +94,14 @@ export default function MyTeamPage() {
               </p>
             </div>
 
-            {/* 로딩 및 에러 상태 처리 */}
             {isLoadingApplicants && <div>대기 목록을 불러오는 중...</div>}
             {applicantsError && <div className="text-red-500">대기 목록을 불러오는 데 실패했습니다.</div>}
 
             {!isLoadingApplicants && !applicantsError && (
               <>
                 {applicants && applicants.length > 0 ? (
-                  // ✅ applicants 배열에 내용이 있을 경우, 목록을 렌더링합니다.
                   applicants.map((applicant) => <ApplicantCard key={applicant.statusId} applicant={applicant} />)
                 ) : (
-                  // ✅ applicants 배열이 비어있을 경우, 이 문구가 표시됩니다.
                   <p className="text-center text-gray-500">합류 신청자가 없습니다.</p>
                 )}
               </>
@@ -118,7 +110,6 @@ export default function MyTeamPage() {
         </div>
 
         <div className="border-line flex h-[600px] w-[430px] flex-col rounded-lg border-1 bg-white">
-          {/* --- 기존 채팅 UI (수정 없음) --- */}
           {isLoading && <div className="flex h-full items-center justify-center">채팅 정보를 불러오는 중...</div>}
           {isError && !isCreating && !chatRoomId && (
             <div className="flex h-full items-center justify-center text-red-500">
