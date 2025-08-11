@@ -25,3 +25,5 @@ server:
   tomcat:
     max-swallow-size: -1
 
+springdoc:
+  override-with-generic-response: false

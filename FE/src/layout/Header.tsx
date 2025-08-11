@@ -49,14 +49,19 @@ function Header() {
     <>
       <header className="fixed top-0 left-0 z-50 flex h-[64px] w-full items-center justify-center gap-3 bg-white px-5 py-4 shadow-xs">
         <div
-          className="text-main flex h-full w-[230px] cursor-pointer items-center justify-start gap-2"
+          className="text-main flex h-full w-[260px] cursor-pointer items-center justify-start gap-2"
           onClick={() => navigate("/")}
         >
           <Search />
           <h1 className="text-l font-bold">SSAFY On Find</h1>
         </div>
         <div className="flex h-full flex-1 items-center justify-between">
-          <h1 className="text-text text-xl font-bold">서울 {user?.className}</h1>
+          <h1 className="text-text text-xl font-bold">
+            서울 {user?.className}{" "}
+            <span className="text-subtext pl-2 text-base font-medium">
+              {user?.name} ({user?.studentId})
+            </span>
+          </h1>
           <div className="flex h-full items-center justify-center gap-3">
             <DeadlineNotification />
             <AlarmBox onClick={handleAlarmClick} />

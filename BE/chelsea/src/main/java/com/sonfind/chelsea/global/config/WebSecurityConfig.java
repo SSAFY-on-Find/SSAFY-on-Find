@@ -9,6 +9,9 @@ import org.springframework.security.config.annotation.web.configurers.SessionMan
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import com.sonfind.chelsea.global.error.RestAccessDeniedHandler;
+import com.sonfind.chelsea.global.error.RestAuthenticationEntryPoint;
+
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -22,6 +25,9 @@ public class WebSecurityConfig {
 		httpSecurity
 			.csrf(AbstractHttpConfigurer::disable)
 			.cors(cors -> cors.configurationSource(corsConfigurationSource))
+			.exceptionHandling(e -> e
+				.authenticationEntryPoint(new RestAuthenticationEntryPoint())
+				.accessDeniedHandler(new RestAccessDeniedHandler()))
 			.sessionManagement(session -> session.sessionFixation(
 					SessionManagementConfigurer.SessionFixationConfigurer::changeSessionId)
 				.maximumSessions(1)

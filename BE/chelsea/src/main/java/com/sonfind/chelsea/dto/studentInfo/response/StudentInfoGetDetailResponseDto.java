@@ -2,7 +2,7 @@ package com.sonfind.chelsea.dto.studentInfo.response;
 
 import java.util.List;
 
-import com.sonfind.chelsea.domain.studentInfo.UploadedFile;
+import com.sonfind.chelsea.domain.studentInfo.Portfolio;
 import com.sonfind.chelsea.dto.student.response.StudentResponseDto;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
@@ -22,7 +22,7 @@ public record StudentInfoGetDetailResponseDto(
 	List<String> strength,
 	String description,
 	String profileImageUrl,
-	UploadedFile portfolio,
+	Portfolio portfolio,
 	Boolean isFavorite,
 
 	TeamSimpleResponseDto teamInfo

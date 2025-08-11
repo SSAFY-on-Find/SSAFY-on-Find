@@ -11,9 +11,9 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class UploadedFile {
+public class Profile {
 
 	private String savedFileName;
-	private String originalFileName;
+	private String profileImageUrl;
 
 }
