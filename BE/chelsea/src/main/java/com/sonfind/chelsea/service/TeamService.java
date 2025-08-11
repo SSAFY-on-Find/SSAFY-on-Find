@@ -45,6 +45,7 @@ public class TeamService {
 
 	//이벤트 발행기
 	private final ApplicationEventPublisher eventPublisher;
+	private final DashBoardCommandService dashBoardCommandService;
 
 	//팀 생성
 	@Transactional
@@ -178,7 +179,7 @@ public class TeamService {
 
 	//팀에 학생 추가
 	@Transactional
-	public TeamMemberChangedDto addStudentToTeam(Long teamId, Long studentId) {
+	public void addStudentToTeam(Long teamId, Long studentId) {
 		//들어가고 싶은 팀
 		Team targetTeam = teamRepository.findTeamByTeamId(teamId)
 				.orElseThrow(AppException::teamNotFound);
@@ -224,19 +225,13 @@ public class TeamService {
 
 		//멤버 정보 생성 및 이벤트 발행
 		MemberSummary memberSummary = createMemberSummary(student);
-		TeamMemberChangedDto memberChangedDto = TeamMemberChangedDto.builder()
-				.teamId(teamId)
-				.action(MemberChageAction.JOINED)
-				.member(memberSummary)
-				.build();
+		dashBoardCommandService.publishTeamMemberChangedEvent(teamId, MemberChageAction.JOINED, memberSummary);
 
 		if (currentTeamId != null) {
 			log.info("교육생 {}이 팀 {}에서 팀 {}으로 이동했습니다.", studentId, currentTeamId, teamId);
 		} else {
 			log.info("교육생 {}이 팀 {}에 합류했습니다.", studentId, teamId);
 		}
-
-		return memberChangedDto;
 	}
 
 	//두 팀 합치기
@@ -361,12 +356,7 @@ public class TeamService {
 		removeStudentFromTeam(teamId, studentId, true);
 
 		//팀 나가기 이벤트 발행
-		TeamMemberChangedDto memberChangedDto = TeamMemberChangedDto.builder()
-				.teamId(teamId)
-				.action(MemberChageAction.LEFT)
-				.member(memberSummary)
-				.build();
-		eventPublisher.publishEvent(memberChangedDto);
+		dashBoardCommandService.publishTeamMemberChangedEvent(teamId, MemberChageAction.LEFT, memberSummary);
 
 		return LeaveTeamResponseDto.builder()
 				.message(willBeEmptyTeam ? "팀에서 나갔습니다. 팀이 삭제되었습니다." : "팀에서 나갔습니다.")

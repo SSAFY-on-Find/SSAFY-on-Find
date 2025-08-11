@@ -2,7 +2,6 @@ package com.sonfind.chelsea.service;
 
 import com.sonfind.chelsea.domain.notification.NotificationDocument;
 import com.sonfind.chelsea.domain.notification.NotificationStatusDocument;
-import com.sonfind.chelsea.dto.dashboard.TeamMemberChangedDto;
 import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
 import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
 import com.sonfind.chelsea.dto.notification.NotificationTypeInfo;
@@ -145,8 +144,8 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 			throw new BadRequestException("알림 수락 권한이 없습니다.");
 		}
 
-		// 2) 팀에 학생 추가
-		TeamMemberChangedDto teamMemberChangedDto = teamService.addStudentToTeam(findNotification.subscriberId(), findNotification.publisherId());
+		// 2) 팀에 학생 추가 및 팀원 변경 이벤트 발행(팀 목록 혹은 팀 상세보기 갱신용)
+		teamService.addStudentToTeam(findNotification.subscriberId(), findNotification.publisherId());
 
 		// 3) 내 상태만 먼저 변경
 		me.setStatus(NotificationStatus.ACCEPTED);
@@ -196,9 +195,6 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 					now
 			));
 		}
-
-		// 팀원 변경 이벤트 발행(팀 목록 혹은 팀 상세보기 갱신용)
-		eventPublisher.publishEvent(teamMemberChangedDto);
 
 		// 팀 빌딩 진행률 업데이트(대시보드 갱신)
 		dashBoardCommandService.publishTeamBuildingProgressEvent();
