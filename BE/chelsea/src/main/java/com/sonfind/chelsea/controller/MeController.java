@@ -165,7 +165,7 @@ public class MeController {
 	}
 
 	@ApiGetOperation(summary = "로그인 확인")
-	@GetMapping("/loginCheck")
+	@GetMapping("/auth")
 	public ResponseEntity<Map<String, Object>> getLoginCheck(
 		@Parameter(hidden = true)
 		@SessionAttribute("loginUser") Long studentId
