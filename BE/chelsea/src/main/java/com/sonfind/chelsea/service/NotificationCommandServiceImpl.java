@@ -2,6 +2,7 @@ package com.sonfind.chelsea.service;
 
 import com.sonfind.chelsea.domain.notification.NotificationDocument;
 import com.sonfind.chelsea.domain.notification.NotificationStatusDocument;
+import com.sonfind.chelsea.dto.dashboard.TeamMemberChangedDto;
 import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
 import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
 import com.sonfind.chelsea.dto.notification.NotificationTypeInfo;
@@ -44,6 +45,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 	private final StringRedisTemplate stringRedisTemplate;
 	private final TeamService teamService;
 	private final NotificationQueryService notificationQueryService;
+	private final DashBoardCommandService dashBoardCommandService;
 
 	// 알림 발송 이벤트를 발행할지 여부를 설정하는 프로퍼티
 	@Value("${notification.dispatch.publishSpringEvent:false}")
@@ -138,23 +140,24 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 		ObjectId notificationId = me.getNotificationId();
 		NotificationResponseDto findNotification = notificationQueryService.getNotificationInfo(notificationId);
 
-		teamService.addStudentToTeam(findNotification.subscriberId(), findNotification.publisherId());
-
 		if (me.getRole() != RecipientRole.SUBSCRIBER ||
 				!me.getTargetId().equals(studentId)) {
 			throw new BadRequestException("알림 수락 권한이 없습니다.");
 		}
 
-		// 2) 내 상태만 먼저 변경
+		// 2) 팀에 학생 추가
+		TeamMemberChangedDto teamMemberChangedDto = teamService.addStudentToTeam(findNotification.subscriberId(), findNotification.publisherId());
+
+		// 3) 내 상태만 먼저 변경
 		me.setStatus(NotificationStatus.ACCEPTED);
 		me.setUpdatedAt(now);
 		statusRepo.save(me);
 
-		// 3) 동일 notificationId를 가진 모든 상태 조회
+		// 4) 동일 notificationId를 가진 모든 상태 조회
 		List<NotificationStatusDocument> allStatuses =
 				statusRepo.findByNotificationId(notificationId);
 
-		// 4) 다른 상태들도 일괄 변경
+		// 5) 다른 상태들도 일괄 변경
 		allStatuses.stream()
 				.filter(s -> !s.getId().equals(ststusObjId))
 				.forEach(s -> {
@@ -163,7 +166,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				});
 		statusRepo.saveAll(allStatuses);
 
-		// 5) SSE 이벤트 발행
+		// 6) SSE 이벤트 발행
 		NotificationDocument doc = notificationRepo.findById(notificationId)
 				.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
 
@@ -193,6 +196,12 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 					now
 			));
 		}
+
+		// 팀원 변경 이벤트 발행(팀 목록 혹은 팀 상세보기 갱신용)
+		eventPublisher.publishEvent(teamMemberChangedDto);
+
+		// 팀 빌딩 진행률 업데이트(대시보드 갱신)
+		dashBoardCommandService.publishTeamBuildingProgressEvent();
 
 		log.info("초대/지원이 수락되었습니다: notificationId={}, statusId={}", notificationId, statusId);
 	}
