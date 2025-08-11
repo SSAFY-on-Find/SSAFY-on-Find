@@ -8,21 +8,21 @@ import { useChatStore } from "@/stores/chatStore"
 import type { ChatMessage } from "@/types/chat/chat"
 import { formatMessageTime } from "@/utils"
 
-interface TeamMember {
+interface ChatMember {
   studentId: number
   name: string
   profileImageUrl?: string
 }
 
-interface TeamChatProps {
+interface ChatMemberProps {
   roomId: number
   studentId: number
-  members: TeamMember[]
+  members: ChatMember[]
   initialMessages?: ChatMessage[]
 }
 
-const TeamChat: React.FC<TeamChatProps> = ({ roomId, studentId, members, initialMessages }) => {
-  const { connect, disconnect, sendMessage, error } = useChat({ roomId, studentId, chatType: "team" })
+const DM: React.FC<ChatMemberProps> = ({ roomId, studentId, members, initialMessages }) => {
+  const { connect, disconnect, sendMessage, error } = useChat({ roomId, studentId, chatType: "direct" })
   const { messages, isConnected, clearMessages, setMessages } = useChatStore()
   const [newMessage, setNewMessage] = useState("")
   const chatWindowRef = useRef<HTMLDivElement>(null)
@@ -65,19 +65,15 @@ const TeamChat: React.FC<TeamChatProps> = ({ roomId, studentId, members, initial
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex items-center justify-between p-4">
-        <h1 className="text-xl font-bold">팀 채팅</h1>
-      </header>
-
       {error && <div className="bg-red-100 p-2 text-center text-red-600">{error}</div>}
 
-      <main ref={chatWindowRef} className="flex-1 overflow-y-auto bg-white p-4">
+      <main ref={chatWindowRef} className="min-h-0 flex-1 overflow-y-auto bg-white p-4">
         <div className="flex flex-col gap-4">
           {messages.map((msg) => {
-            const sender = members.find((member) => member.studentId === msg.studentId)
-            const senderName = sender ? sender.name : `사용자 ${msg.studentId}`
-            const senderProfile = sender ? sender.profileImageUrl : ``
-
+            const sender = members[1]
+            if (!sender) return null
+            const senderName = sender.name
+            const senderProfile = sender.profileImageUrl
             return (
               <MessageBox
                 key={`${msg.studentId}-${msg.publishedAt}`}
@@ -118,4 +114,4 @@ const TeamChat: React.FC<TeamChatProps> = ({ roomId, studentId, members, initial
   )
 }
 
-export default TeamChat
+export default DM

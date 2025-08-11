@@ -114,8 +114,8 @@ export default function MyTeamPage() {
 
   return (
     <div className="bg-background min-h-screen px-15 py-10">
-      <div className="flex justify-between">
-        <div className="flex w-[650px] flex-col gap-8">
+      <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
+        <div className="flex w-full flex-col gap-8 lg:flex-1">
           <div className="border-line flex rounded-xl border-1 bg-white pb-6">
             {myTeamData?.teamInfo && (
               <TeamDetail {...myTeamData?.teamInfo} varient="myteam" onLeaveTeam={handleLeaveTeam} />
@@ -147,7 +147,7 @@ export default function MyTeamPage() {
           </div>
         </div>
 
-        <div className="border-line flex h-[600px] w-[430px] flex-col rounded-lg border-1 bg-white">
+        <div className="border-line flex h-[400px] w-full flex-col rounded-lg border-1 bg-white md:h-[500px] lg:h-[600px] lg:w-[430px] lg:flex-shrink-0">
           {isLoading && <div className="flex h-full items-center justify-center">채팅 정보를 불러오는 중...</div>}
           {isError && !isCreating && !chatRoomId && (
             <div className="flex h-full items-center justify-center text-red-500">
