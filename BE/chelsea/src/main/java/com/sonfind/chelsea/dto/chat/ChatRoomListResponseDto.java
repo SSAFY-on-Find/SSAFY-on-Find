@@ -9,7 +9,6 @@ import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 public record ChatRoomListResponseDto(
 	List<DirectChatRoomInfoDto> chatRooms
 ) {
-
 	public record DirectChatRoomInfoDto(
 		Long chatRoomId,
 		String targetUsername,
