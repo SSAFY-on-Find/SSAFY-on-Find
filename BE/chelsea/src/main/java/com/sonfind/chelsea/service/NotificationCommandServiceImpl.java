@@ -3,8 +3,10 @@ package com.sonfind.chelsea.service;
 import com.sonfind.chelsea.domain.notification.NotificationDocument;
 import com.sonfind.chelsea.domain.notification.NotificationStatusDocument;
 import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
+import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
 import com.sonfind.chelsea.dto.notification.NotificationTypeInfo;
 import com.sonfind.chelsea.global.event.InvitationRequestEvent;
+import com.sonfind.chelsea.global.event.InvitationResponseEvent;
 import com.sonfind.chelsea.repository.NotificationRepository;
 import com.sonfind.chelsea.repository.NotificationStatusRepository;
 import com.sonfind.chelsea.service.validator.NotificationValidator;
@@ -14,7 +16,6 @@ import com.sonfind.chelsea.util.NotificationTypeConverter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import com.sonfind.chelsea.global.event.InvitationResponseEvent;
 import org.apache.coyote.BadRequestException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,6 +42,8 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 	private final NotificationStatusService statusService;
 	private final NotificationDocumentService documentService;
 	private final StringRedisTemplate stringRedisTemplate;
+	private final TeamService teamService;
+	private final NotificationQueryService notificationQueryService;
 
 	// 알림 발송 이벤트를 발행할지 여부를 설정하는 프로퍼티
 	@Value("${notification.dispatch.publishSpringEvent:false}")
@@ -126,11 +129,16 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 	@Override
 	public void acceptInvitation(Long studentId, String statusId) throws BadRequestException {
 		ObjectId ststusObjId = new ObjectId(statusId);
+
 		Date now = getCurrentDate();
 
 		// 1) 내 상태 조회·검증
 		NotificationStatusDocument me = statusRepo.findById(ststusObjId)
 				.orElseThrow(() -> new BadRequestException("잘못된 알림입니다."));
+		ObjectId notificationId = me.getNotificationId();
+		NotificationResponseDto findNotification = notificationQueryService.getNotificationInfo(notificationId);
+
+		teamService.addStudentToTeam(findNotification.subscriberId(), findNotification.publisherId());
 
 		if (me.getRole() != RecipientRole.SUBSCRIBER ||
 				!me.getTargetId().equals(studentId)) {
@@ -143,7 +151,6 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 		statusRepo.save(me);
 
 		// 3) 동일 notificationId를 가진 모든 상태 조회
-		ObjectId notificationId = me.getNotificationId();
 		List<NotificationStatusDocument> allStatuses =
 				statusRepo.findByNotificationId(notificationId);
 
