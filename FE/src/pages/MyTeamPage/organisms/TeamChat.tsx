@@ -22,7 +22,7 @@ interface TeamChatProps {
 }
 
 const TeamChat: React.FC<TeamChatProps> = ({ roomId, studentId, members, initialMessages }) => {
-  const { connect, disconnect, sendMessage, error } = useChat(roomId)
+  const { connect, disconnect, sendMessage, error } = useChat(roomId, studentId)
   const { messages, isConnected, clearMessages, setMessages } = useChatStore()
   const [newMessage, setNewMessage] = useState("")
   const chatWindowRef = useRef<HTMLDivElement>(null)

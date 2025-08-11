@@ -2,18 +2,20 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { Client, type IMessage, type StompSubscription } from "@stomp/stompjs"
 
 import { useChatStore } from "@/stores/chatStore"
+import { useUserStore } from "@/stores/userStore"
 import type { ChatMessage } from "@/types/chat/chat"
 
 // .env 파일에서 웹소켓 URL을 가져오고, 없을 경우 기본값을 사용합니다.
 const WEBSOCKET_URL = import.meta.env.VITE_APP_BASE_URL + "/ws-stomp" || "ws://localhost:8080/api/v1/ws-stomp"
 
-export const useChat = (roomId: number | null) => {
+export const useChat = (roomId: number | null, studentId: number | null) => {
   // Stomp 클라이언트와 구독 객체를 ref로 관리하여 리렌더링 시에도 유지되도록 합니다.
   const stompClientRef = useRef<Client | null>(null)
   const subscriptionRef = useRef<StompSubscription | null>(null)
 
   const { addMessage, setConnected, clearMessages } = useChatStore()
   const [error, setError] = useState<string | null>(null)
+  const myStudentId = useUserStore().user?.studentId
 
   // roomId가 변경되거나 훅이 처음 마운트될 때 클라이언트를 설정하고 정리합니다.
   useEffect(() => {
@@ -23,6 +25,11 @@ export const useChat = (roomId: number | null) => {
     // 새 roomId에 대한 새 클라이언트 인스턴스를 생성합니다.
     const client = new Client({
       brokerURL: WEBSOCKET_URL,
+      connectHeaders: {
+        studentId: String(myStudentId),
+        roomId: String(roomId),
+      },
+
       // 연결 성공 시 콜백
       onConnect: () => {
         setConnected(true)
@@ -67,7 +74,7 @@ export const useChat = (roomId: number | null) => {
       subscriptionRef.current = null
     }
     // roomId가 변경될 때마다 이 useEffect는 다시 실행되어 새 연결을 설정합니다.
-  }, [roomId, addMessage, setConnected])
+  }, [roomId, studentId, addMessage, setConnected])
 
   /**
    * @description 설정된 WebSocket 서버에 연결을 활성화합니다.

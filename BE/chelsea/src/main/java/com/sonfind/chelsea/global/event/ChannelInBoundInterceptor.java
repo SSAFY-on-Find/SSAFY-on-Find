@@ -27,6 +27,7 @@ public class ChannelInBoundInterceptor implements ChannelInterceptor {
 		log.info("destination: {}", accessor.getDestination());
 		log.info("roomId: {}", accessor.getFirstNativeHeader("roomId"));
 		log.info("message: {}", accessor.getMessage());
+		log.info("accessor: {}", accessor);
 
 		handleMessage(accessor.getCommand(), accessor);
 
