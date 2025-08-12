@@ -1,5 +1,5 @@
 import { toast } from "react-toastify"
-import { useMutation, type UseMutationOptions, useQuery } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 
 import { aiApi } from "@/apis/aiApi"
 import { dashboardApi } from "@/apis/dashboardApi"

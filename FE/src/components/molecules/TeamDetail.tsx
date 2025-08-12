@@ -73,7 +73,11 @@ function TeamDetail({
                 <p className="text-text mb-[10px] text-sm font-semibold">전공</p>
                 <div className="flex">
                   {majorMembers.map((ele, idx) => (
-                    <div key={idx} className="flex flex-col items-center px-[10px]">
+                    <div
+                      key={idx}
+                      className="hover:bg-main/10 flex flex-col items-center rounded-md p-1 px-[10px] hover:cursor-pointer"
+                      onClick={() => navigate(`/studentlist/${ele.studentId}`)}
+                    >
                       <UserImg name={ele.name} size={"m"} showTeamBadge={false} url={ele.profileImageUrl} />
                       <p className="mt-2 mb-[5px] text-sm">{ele.name}</p>
                       {ele.position && <PositionTag positionName={ele.position.subcodeName} />}
@@ -99,7 +103,10 @@ function TeamDetail({
                 <p className="text-text mb-[10px] text-sm font-semibold">비전공</p>
                 <div className="flex">
                   {nonMajorMembers.map((ele, idx) => (
-                    <div key={idx} className="flex flex-col items-center px-[10px]">
+                    <div
+                      key={idx}
+                      className="hover:bg-main/10 flex flex-col items-center rounded-md p-1 px-[10px] hover:cursor-pointer"
+                    >
                       <UserImg name={ele.name} size={"m"} showTeamBadge={false} url={ele.profileImageUrl} />
                       <p className="mt-2 mb-[5px] text-sm">{ele.name}</p>
                       {ele.position && <PositionTag positionName={ele.position.subcodeName} />}

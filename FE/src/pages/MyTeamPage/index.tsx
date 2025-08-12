@@ -7,8 +7,9 @@ import { createTeamChatRoom, getChatMessages, getTeamChatRoomId, leaveChatRoom }
 import { teamApi } from "@/apis/teamApi"
 import { Button } from "@/components/atoms"
 import { TeamDetail } from "@/components/molecules"
+import { StudentSearchModal } from "@/components/templates"
 import Loading from "@/components/templates/Loading"
-import { useAuth } from "@/hooks/useStudent"
+import { useAuth, useStudentList } from "@/hooks/useStudent"
 import { useLeaveTeam } from "@/hooks/useTeam"
 import { useTeamNotifications } from "@/hooks/useTeamNotifications"
 import type { IMyTeam, ITeamMember } from "@/types/team"
@@ -24,12 +25,14 @@ export default function MyTeamPage() {
   const studentId = authData?.studentId
   const [chatRoomId, setChatRoomId] = useState<number | null>(null)
   const { mutate: leaveTeam } = useLeaveTeam()
-
+  const [studentSearchModal, setStudentSearchModal] = useState(false)
+  const { data: students, isLoading: isStudentListLoading } = useStudentList()
   const { data: myTeamData, isLoading: isMyTeamLoading } = useQuery<IMyTeam>({
     queryKey: ["myTeam"],
     queryFn: () => teamApi.getMyTeam().then((res) => res.data),
     enabled: !!teamId,
   })
+  const studentsExceptMe = students?.filter((s) => s.student.studentId !== Number(authData?.studentId))
 
   const teamMembers: ITeamMember[] | undefined = myTeamData?.teamInfo.members?.map((user) => ({
     studentId: user.studentId,
@@ -61,6 +64,9 @@ export default function MyTeamPage() {
     onError: () => console.error("채팅방 생성에 실패했습니다."),
   })
 
+  const handleInviteStudent = (targetStudentId: number) => {
+    // 새로운 학생을 우리 팀으로 초대하는 로직이 들어가야합니다!
+  }
   const {
     data: fetchedRoomId,
     isFetching: isFetchingRoomId,
@@ -123,9 +129,20 @@ export default function MyTeamPage() {
                     Icon={UserPlus}
                     variant="outline"
                     text="팀원 초대"
-                    onClick={() => navigate("/create-team")}
+                    onClick={() => setStudentSearchModal(true)}
                   />
                 </div>
+                {!isStudentListLoading && studentsExceptMe && (
+                  <StudentSearchModal
+                    isOpen={studentSearchModal}
+                    onClose={() => setStudentSearchModal(false)}
+                    students={studentsExceptMe}
+                    onStudentClick={(studentId) => {
+                      handleInviteStudent(Number(studentId))
+                      setStudentSearchModal(false)
+                    }}
+                  />
+                )}
               </div>
               <p className="text-subtext text-sm text-pretty">
                 팀 합류를 신청한 교육생들입니다. 신중하게 검토 후 결정해주세요.
