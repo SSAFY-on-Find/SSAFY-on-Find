@@ -11,6 +11,7 @@ import { ConfirmModal } from "@/components/templates"
 import Loading from "@/components/templates/Loading"
 import { useGetProfile } from "@/hooks/useProfile"
 import { useStudentLogout } from "@/hooks/useStudent"
+import { sseManager } from "@/libs/sseManager"
 import { useUserStore } from "@/stores/userStore"
 import type { ISubcode } from "@/types/common"
 
@@ -69,14 +70,14 @@ export default function MyProfile() {
 
   const handleConfirmLogout = async () => {
     try {
-      await logoutMutation.mutateAsync()
-      await qc.cancelQueries()
-      qc.clear()
-      qc.setQueryData(["user-auth"], null)
-      resetUser()
+      sseManager.close() // 1) 스트림 먼저 종료
+      await logoutMutation.mutateAsync() // 2) 서버 세션 종료
+      await qc.cancelQueries() // 3) 진행중 쿼리 취소
+      qc.clear() // 4) 캐시 초기화
+      resetUser() // 5) 클라이언트 상태 초기화
       navigate("/login", { replace: true })
-    } catch (err) {
-      toast((err as Error)?.message ?? "로그아웃 중 오류가 발생했습니다.")
+    } catch (e) {
+      toast("로그아웃 중 오류가 발생했습니다.")
     } finally {
       setLogoutOpen(false)
     }
