@@ -33,10 +33,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/teams")
+@Slf4j
 public class TeamController {
 
 	private final TeamService teamService;
@@ -174,26 +176,6 @@ public class TeamController {
 		return ResponseEntity.ok().body(body);
 	}
 
-	//팀 합치기 api 테스트용
-	// @PostMapping("/merge")
-	// public ResponseEntity<Map<String, Object>> mergeTeams(
-	// 	@RequestBody @Valid MergeTeamsRequestDto request,
-	// 	@Parameter(hidden = true)
-	// 	@SessionAttribute("loginUser") Long studentId) {
-	//
-	// 	teamService.mergeTeams(request.sourceTeamId(), request.targetTeamId());
-	//
-	// 	Map<String, Object> body = new HashMap<>();
-	// 	body.put("status", "SUCCESS");
-	// 	body.put("message", "팀이 성공적으로 합쳐졌습니다.");
-	// 	body.put("data", Map.of(
-	// 		"sourceTeamId", request.sourceTeamId(),
-	// 		"targetTeamId", request.targetTeamId()
-	// 	));
-	//
-	// 	return ResponseEntity.ok().body(body);
-	// }
-
 	//타 팀 상세조회
 	@GetMapping("/{teamId}")
 	@Operation(summary = "팀 상세조회", description = "특정 팀의 상세 정보를 조회합니다.")
@@ -291,4 +273,45 @@ public class TeamController {
 
 		return ResponseEntity.ok().body(body);
 	}
+
+	@GetMapping("/performance/optimized")
+	@Operation(summary = "팀 목록 조회 - DTO 프로젝션 방식", description = "DTO 프로젝션을 사용한 최적화된 방식으로 팀 목록을 조회합니다.")
+	public ResponseEntity<Map<String, Object>> getAllTeamsOptimized(
+		@Parameter(hidden = true) @SessionAttribute("loginUser") Long studentId) {
+
+		long startTime = System.currentTimeMillis();
+		List<TeamListResponseDto> teams = teamService.getAllTeamsOptimized(studentId);
+		long endTime = System.currentTimeMillis();
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", teams);
+		body.put("executionTime", endTime - startTime);
+		body.put("method", "dto-projection");
+		body.put("queryOptimization", true);
+
+		log.info("DTO 프로젝션 방식 실행시간: {}ms, 데이터 수: {}개", endTime - startTime, teams.size());
+		return ResponseEntity.ok().body(body);
+	}
+
+	@GetMapping("/performance/fetch-join")
+	@Operation(summary = "팀 목록 조회 - Fetch Join 방식", description = "Fetch Join을 사용한 최적화된 방식으로 팀 목록을 조회합니다.")
+	public ResponseEntity<Map<String, Object>> getAllTeamsFetchJoin(
+		@Parameter(hidden = true) @SessionAttribute("loginUser") Long studentId) {
+
+		long startTime = System.currentTimeMillis();
+		List<TeamListResponseDto> teams = teamService.getAllTeamsFetchJoin(studentId);
+		long endTime = System.currentTimeMillis();
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", teams);
+		body.put("executionTime", endTime - startTime);
+		body.put("method", "fetch-join");
+		body.put("queryOptimization", true);
+
+		log.info("Fetch Join 방식 실행시간: {}ms, 데이터 수: {}개", endTime - startTime, teams.size());
+		return ResponseEntity.ok().body(body);
+	}
+
 }

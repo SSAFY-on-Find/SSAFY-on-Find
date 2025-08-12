@@ -2,6 +2,7 @@ package com.sonfind.chelsea.service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -24,10 +25,13 @@ import com.sonfind.chelsea.dto.teams.MyTeamResponseDto;
 import com.sonfind.chelsea.dto.teams.RecruitmentDto;
 import com.sonfind.chelsea.dto.teams.TeamCreatePageDto;
 import com.sonfind.chelsea.dto.teams.TeamListResponseDto;
+import com.sonfind.chelsea.dto.teams.TeamMemberDto;
 import com.sonfind.chelsea.dto.teams.TeamMemberResponseDto;
+import com.sonfind.chelsea.dto.teams.TeamRecruitmentDto;
 import com.sonfind.chelsea.dto.teams.TeamResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamRuleResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
+import com.sonfind.chelsea.dto.teams.TeamWithMembersDto;
 import com.sonfind.chelsea.dto.teams.UpdateTeamRequestDto;
 import com.sonfind.chelsea.global.domain.SubCode;
 import com.sonfind.chelsea.global.error.AppException;
@@ -36,6 +40,7 @@ import com.sonfind.chelsea.global.error.ErrorCode;
 import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
+import com.sonfind.chelsea.repository.TeamFavoriteRepository;
 import com.sonfind.chelsea.repository.TeamRepository;
 import com.sonfind.chelsea.types.MemberChageAction;
 
@@ -51,6 +56,7 @@ public class TeamService {
 	private final SubCodeRepository subCodeRepository;
 	private final StudentRepository studentRepository;
 	private final StudentInfoRepository studentInfoRepository;
+	private final TeamFavoriteRepository teamFavoriteRepository;
 
 	private final StudentService studentService;
 	private final FavoriteService favoriteService;
@@ -508,6 +514,142 @@ public class TeamService {
 	}
 
 	//쿼리 최적화 1: DTO 프로젝션 사용 (repo의 3,4번 쿼리)
+	@Transactional(readOnly = true)
+	public List<TeamListResponseDto> getAllTeamsOptimized(Long currentStudentId) {
+		// 1. 팀 기본 정보 조회
+		List<TeamWithMembersDto> teams = teamRepository.findAllTeamSummaries();
+		List<Long> teamIds = teams.stream().map(TeamWithMembersDto::teamId).toList();
+
+		// 2. 팀별 멤버 정보 한 번에 조회
+		List<TeamMemberDto> members = teamRepository.findTeamMembersByTeamIds(teamIds);
+		Map<Long, List<TeamMemberDto>> membersByTeam = members.stream()
+			.collect(Collectors.groupingBy(TeamMemberDto::teamId));
+
+		// 3. 팀별 모집공고 정보 한 번에 조회 (추가됨!)
+		List<TeamRecruitmentDto> recruitments = teamRepository.findRecruitmentsByTeamIds(teamIds);
+		Map<Long, List<TeamRecruitmentDto>> recruitmentsByTeam = recruitments.stream()
+			.collect(Collectors.groupingBy(TeamRecruitmentDto::teamId));
+
+		// 4. 즐겨찾기 정보 한 번에 조회
+		Map<Long, Boolean> favoritesByTeam = getFavoritesByTeams(currentStudentId, teamIds);
+
+		// 5. DTO 조합
+		return teams.stream()
+			.map(team -> TeamListResponseDto.builder()
+				.teamId(team.teamId())
+				.teamName(team.name())
+				.description(team.description())
+				.track(new SubCodeResponseDto(team.trackCode(), team.trackName()))
+				.recruitments(convertToRecruitmentDtos(recruitmentsByTeam.get(team.teamId()))) // 추가됨!
+				.members(convertToMemberDtos(membersByTeam.get(team.teamId())))
+				.isRecruitingComplete(isRecruitingComplete(team, membersByTeam.get(team.teamId())))
+				.isFavorite(favoritesByTeam.getOrDefault(team.teamId(), false))
+				.build())
+			.sorted(
+				Comparator.comparing(TeamListResponseDto::isRecruitingComplete)
+					.thenComparing(dto -> parseTeamNumber(dto.teamName()))
+			)
+			.toList();
+	}
+
+	//최적화된 방식 2: fetch join
+	@Transactional(readOnly = true)
+	public List<TeamListResponseDto> getAllTeamsFetchJoin(Long currentStudentId) {
+		// 1. Fetch Join으로 팀과 모집공고 정보 조회
+		List<Team> teams = teamRepository.findAllTeamsWithRecruitments();
+		List<Long> teamIds = teams.stream().map(Team::getTeamId).toList();
+
+		// 2. 멤버 정보는 별도 조회 (StudentInfo가 복잡하므로)
+		List<TeamMemberDto> members = teamRepository.findTeamMembersByTeamIds(teamIds);
+		Map<Long, List<TeamMemberDto>> membersByTeam = members.stream()
+			.collect(Collectors.groupingBy(TeamMemberDto::teamId));
+
+		// 3. 즐겨찾기 정보 조회
+		Map<Long, Boolean> favoritesByTeam = getFavoritesByTeams(currentStudentId, teamIds);
+
+		return teams.stream()
+			.map(team -> convertToDto(team, membersByTeam.get(team.getTeamId()),
+				favoritesByTeam.getOrDefault(team.getTeamId(), false)))
+			.sorted(
+				Comparator.comparing(TeamListResponseDto::isRecruitingComplete)
+					.thenComparing(dto -> parseTeamNumber(dto.teamName()))
+			)
+			.toList();
+	}
+
+	//fetch join용 메서드
+	// 3. convertToDto 메서드 수정 (Team 엔티티용)
+	private TeamListResponseDto convertToDto(Team team, List<TeamMemberDto> members, boolean isFavorite) {
+		return TeamListResponseDto.builder()
+			.teamId(team.getTeamId())
+			.teamName(team.getName())
+			.description(team.getDescription())
+			.track(new SubCodeResponseDto(team.getTrack().getSubCode(), team.getTrack().getSubCodeName()))
+			.recruitments(team.getRecruitments().stream()
+				.map(r -> new RecruitmentDto(r.getPosition().getSubCode(), r.getPosition().getSubCodeName()))
+				.toList())
+			.members(convertToMemberDtos(members))
+			.isRecruitingComplete(isRecruitingComplete(team, members)) // Team 버전 사용
+			.isFavorite(isFavorite)
+			.build();
+	}
+
+	//밑에 4개는 쿼리 최적화를 위해 만든 메서드
+	private Map<Long, Boolean> getFavoritesByTeams(Long studentId, List<Long> teamIds) {
+		if (studentId == null)
+			return Map.of();
+
+		try {
+			return teamFavoriteRepository.findFavoritesByStudentAndTeams(studentId, teamIds)
+				.stream()
+				.collect(Collectors.toMap(
+					tf -> tf.getTeam().getTeamId(),
+					tf -> tf.getIsFavorite() != null && tf.getIsFavorite()
+				));
+		} catch (Exception e) {
+			return Map.of();
+		}
+	}
+
+	private boolean isRecruitingComplete(TeamWithMembersDto team, List<TeamMemberDto> members) {
+		if (members == null)
+			return false;
+		int currentMemberCount = members.size();
+		int targetMemberCount = team.majorCount() + team.nonMajorCount();
+		return currentMemberCount >= targetMemberCount;
+	}
+
+	// Team 엔티티용 오버로딩 메서드 추가
+	private boolean isRecruitingComplete(Team team, List<TeamMemberDto> members) {
+		if (members == null)
+			return false;
+		int currentMemberCount = members.size();
+		// 기존 로직처럼 6명 기준으로 하거나, 팀의 목표 인원수로 할 수 있음
+		return currentMemberCount >= 6; // 또는 team.getMajorCount() + team.getNonMajorCount()
+	}
+
+	private List<RecruitmentDto> convertToRecruitmentDtos(List<TeamRecruitmentDto> recruitments) {
+		if (recruitments == null)
+			return List.of();
+		return recruitments.stream()
+			.map(r -> new RecruitmentDto(r.positionCode(), r.positionName()))
+			.toList();
+	}
+
+	private List<TeamMemberResponseDto> convertToMemberDtos(List<TeamMemberDto> members) {
+		if (members == null)
+			return List.of();
+
+		return members.stream()
+			.map(m -> TeamMemberResponseDto.builder()
+				.studentId(m.studentId())
+				.name(m.name())
+				.major(m.majorYn() != null && m.majorYn() ? "전공" : "비전공")
+				.profileImageUrl(m.profileImageUrl())
+				.position(new SubCodeResponseDto(m.positionCode(), m.positionName()))
+				.build())
+			.toList();
+	}
 
 	//쿼리 최적화 2: Fetch Join 사용(repo의 1,2번 쿼리)
 
