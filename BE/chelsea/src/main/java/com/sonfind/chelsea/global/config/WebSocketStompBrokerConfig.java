@@ -17,7 +17,6 @@ public class WebSocketStompBrokerConfig implements WebSocketMessageBrokerConfigu
 	 * 메시지 발행 prefix
 	 * /pub
 	 */
-
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
 		registry.enableSimpleBroker("/topic", "/queue");

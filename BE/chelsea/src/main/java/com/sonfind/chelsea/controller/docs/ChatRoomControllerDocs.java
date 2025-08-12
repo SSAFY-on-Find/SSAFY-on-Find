@@ -15,7 +15,7 @@ public interface ChatRoomControllerDocs {
 	ResponseEntity<Map<String, Object>> createTeamChatRoom(@Parameter(hidden = true) Long studentId, Long teamId);
 
 	@Operation(summary = "팀 채팅방에서 나가기", description = "팀에서 나갈 때, roomId을 이용하여 팀 내 채팅방에서 나갈 수 있습니다.")
-	ResponseEntity<Map<String, Object>> exitTeamChatRoom(@Parameter(hidden = true) Long studentId, Long roomId);
+	ResponseEntity<Map<String, Object>> leaveTeamChatRoom(@Parameter(hidden = true) Long studentId, Long roomId);
 
 	@Operation(summary = "팀 채팅방에 입장하기", description = "팀에 초대되었을 때, roomId을 이용하여 팀의 채팅방에 들어갈 수 있습니다.")
 	ResponseEntity<Map<String, Object>> enterTeamChatRoom(@Parameter(hidden = true) Long studentId, Long roomId);
@@ -32,5 +32,8 @@ public interface ChatRoomControllerDocs {
 
 	@Operation(summary = "채팅 내역 보기", description = "자신이 속한 채팅방의 전체 텍스트 내용을 볼 수 있습니다.")
 	ResponseEntity<Map<String, Object>> getChatRoomMessages(@Parameter(hidden = true) Long studentId, Long roomId);
+
+	@Operation(summary = "채팅방 마지막 읽은 시각 갱신")
+	ResponseEntity<Map<String, Object>> updateLastReadAt(@Parameter(hidden = true) Long studentId, Long roomId);
 }
 
