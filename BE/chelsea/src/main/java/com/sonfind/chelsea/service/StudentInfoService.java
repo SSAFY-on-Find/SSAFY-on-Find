@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -262,14 +263,18 @@ public class StudentInfoService {
 		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId)
 			.orElseThrow(AppException::studentInfoNotFound);
 
-		Student student = studentInfo.getStudent();
+		Student student = Optional.ofNullable(studentInfo.getStudent()).orElseThrow(AppException::studentNotFound);
+
 		SubCode positionCode = studentInfo.getPositionCode();
 		SubCode trackCode = studentInfo.getTrackCode();
-		SubCode mbtiCode = studentInfo.getMbtiCode();
 		SubCode goalCode = studentInfo.getGoalCode();
+
+		SubCodeResponseDto mbtiCodeResponse = Optional.ofNullable(studentInfo.getMbtiCode())
+			.map(sc -> new SubCodeResponseDto(sc.getSubCode(), sc.getSubCodeName()))
+			.orElse(null);
+
 		Team team = teamRepository.findTeamByTeamId(student.getTeamId()).orElse(null);
 		TeamSimpleResponseDto teamResponse = null;
-		SubCodeResponseDto mbtiCodeResponse = null;
 
 		//기술 스택처리
 		List<String> techStackCodes = StringListConverter.stringToList(studentInfo.getTechStack());
@@ -289,14 +294,9 @@ public class StudentInfoService {
 				.build();
 		}
 
-		if (mbtiCode != null) {
-			mbtiCodeResponse = SubCodeResponseDto.builder().subcode(mbtiCode.getSubCode()).subcodeName(
-				mbtiCode.getSubCodeName()).build();
-		}
-
 		return StudentInfoGetDetailResponseDto.builder()
 			.student(StudentResponseDto.builder().studentId(studentId).name(student.getName())
-				.major(student.getMajorYn() ? "전공" : "비전공").build())
+				.major(Boolean.TRUE.equals(student.getMajorYn()) ? "전공" : "비전공").build())
 			.position(SubCodeResponseDto.builder().subcode(positionCode.getSubCode()).subcodeName(
 				positionCode.getSubCodeName()).build())
 			.track(SubCodeResponseDto.builder().subcode(trackCode.getSubCode()).subcodeName(

@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -77,7 +76,7 @@ public class FileService {
 	}
 
 	//파일 유효성 검사(크기 + 형식)
-	private void validateFile(MultipartFile file, FileType fileType) throws FileUploadException {
+	private void validateFile(MultipartFile file, FileType fileType) {
 		if (file.getSize() > fileType.getMaxSize()) {
 			throw AppException.fileSizeExceeded();
 			//"파일 크기가 너무 큽니다. 최대 " + (fileType.getMaxSize() / 1024 / 1024) + "MB까지 업로드 할 수 있습니다."
@@ -138,7 +137,7 @@ public class FileService {
 		try {
 			Files.deleteIfExists(filePath);
 		} catch (IOException e) {
-			throw AppException.fileNotFound();
+			throw AppException.fileDeleteError();
 		}
 	}
 

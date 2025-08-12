@@ -140,7 +140,7 @@ public class StudentService {
 	}
 
 	private static String getIsMajor(Boolean major) {
-		return major ? "전공" : "비전공";
+		return Boolean.TRUE.equals(major) ? "전공" : "비전공";
 	}
 
 	public List<Student> findAllByTeamId(Long teamId) {
