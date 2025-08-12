@@ -47,6 +47,8 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 			+ "GROUP BY major_type", nativeQuery = true)
 	List<Object[]> getTeamRatio();
 
+  List<Long> findIdsByTeamId(Long teamId);
+
 	List<Student> findAllByTeamIdIn(List<Long> teamIds);
 
 }

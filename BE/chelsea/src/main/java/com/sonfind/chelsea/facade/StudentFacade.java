@@ -59,4 +59,8 @@ public class StudentFacade {
 		}
 		return false; // 학생이 팀의 멤버가 아닌 경우 false 반환
 	}
+
+  public List<Long> findStudentIdList(Long teamId) {
+    return studentService.getStudentIdList(teamId);
+  }
 }

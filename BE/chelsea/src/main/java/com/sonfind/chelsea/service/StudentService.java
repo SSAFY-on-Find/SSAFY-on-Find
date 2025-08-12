@@ -139,6 +139,10 @@ public class StudentService {
 			.build();
 	}
 
+  public List<Long> getStudentIdList(Long teamId) {
+    return studentRepository.findIdsByTeamId(teamId);
+  }
+
 	private static String getIsMajor(Boolean major) {
 		return Boolean.TRUE.equals(major) ? "전공" : "비전공";
 	}

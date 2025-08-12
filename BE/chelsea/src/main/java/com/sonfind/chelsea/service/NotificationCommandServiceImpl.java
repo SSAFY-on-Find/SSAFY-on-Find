@@ -67,15 +67,19 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 
 		switch (info.type()) {
 			case APPLICATION, INVITATION, MERGE -> {
-				// 발신자(팀 or 개인) → createStatus 내부에서 deriveTargetIds로 팀원 브로드캐스트도 처리
-				NotificationStatusDocument pub = createStatus(savedNotification, now, RecipientRole.PUBLISHER);
-				// 수신자(팀 or 개인)
-				NotificationStatusDocument sub = createStatus(savedNotification, now, RecipientRole.SUBSCRIBER);
+        // 발신자 상태들
+        List<NotificationStatusDocument> pubList = createStatuses(savedNotification, now, RecipientRole.PUBLISHER);
+        List<NotificationStatusDocument> savedPubList = statusRepo.saveAll(pubList);
 
-				statusRepo.save(pub);
-				savedNotification.setGroupId(pub.getId());
-				savedNotification = notificationRepo.save(savedNotification);
-				statusRepo.save(sub);
+        // groupId 세팅: 발신자 상태 중 첫 번째 id 사용(추후 별도 키 필요시 변경 가능)
+        if (!savedPubList.isEmpty()) {
+          savedNotification.setGroupId(savedPubList.get(0).getId());
+          savedNotification = notificationRepo.save(savedNotification);
+        }
+
+        // 수신자 상태들
+        List<NotificationStatusDocument> subList = createStatuses(savedNotification, now, RecipientRole.SUBSCRIBER);
+        statusRepo.saveAll(subList);
 			}
 			default -> throw new AppException(ErrorCode.NOTIFICATION_TYPE_NOT_SUPPORTED);
 		}
@@ -278,29 +282,40 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 	 * @param role:  RecipientRole - 알림 발신자 또는 수신자의 역할 (PUBLISHER 또는 SUBSCRIBER)
 	 * @return NotificationStatusDocument -알림 상태 문서 객체
 	 */
-	private NotificationStatusDocument createStatus(
-			NotificationDocument notif,
-			Date now,
-			RecipientRole role
-	) {
-		long targetId = (role == RecipientRole.PUBLISHER)
-				? notif.getPublisherId()
-				: notif.getSubscriberId();
+  private List<NotificationStatusDocument> createStatuses(
+          NotificationDocument notif,
+          Date now,
+          RecipientRole role
+  ) {
+    List<Long> targetStudentIds = deriveTargetStudentIds(notif, role);
 
-		return NotificationStatusDocument.builder()
-				.notificationId(notif.getId())
-				.targetId(targetId)
-				.targetType(role == RecipientRole.PUBLISHER
-						? notif.getPublisherType()
-						: notif.getSubscriberType())
-				.role(role)
-				.status(NotificationStatus.PENDING)
-				.isRead(role == RecipientRole.PUBLISHER)
-				.readAt(role == RecipientRole.PUBLISHER ? now : null)
-				.createdAt(now)
-				.updatedAt(now)
-				.build();
-	}
+    boolean readByDefault = (role == RecipientRole.PUBLISHER); // 발신자는 즉시 읽음 처리 유지
+
+    return targetStudentIds.stream()
+            .map(studentId -> NotificationStatusDocument.builder()
+                    .notificationId(notif.getId())
+                    .targetId(studentId)
+                    .targetType(NotificationDomainType.STUDENT)
+                    .role(role)
+                    .status(NotificationStatus.PENDING)
+                    .isRead(readByDefault)
+                    .readAt(readByDefault ? now : null)
+                    .createdAt(now)
+                    .updatedAt(now)
+                    .build())
+            .toList();
+  }
+
+  private List<Long> deriveTargetStudentIds(NotificationDocument notif, RecipientRole role) {
+    boolean isPublisher = (role == RecipientRole.PUBLISHER);
+    NotificationDomainType type = isPublisher ? notif.getPublisherType() : notif.getSubscriberType();
+    Long id = isPublisher ? notif.getPublisherId() : notif.getSubscriberId();
+
+    return switch (type) {
+      case STUDENT -> List.of(id);
+      case TEAM -> studentFacade.findStudentIdList(id);
+    };
+  }
 
 	/**
 	 * 알림을 저장하기 전에, 가장 최근에 업데이트된 알림을 찾음
