@@ -32,7 +32,7 @@ export function useInvte(myTeamId?: number | null) {
       subId: targetTeamId,
       subType: "TEAM",
       pubId: myMateId,
-      pubType: "MATE",
+      pubType: "STUDENT",
       type: "APPLICATION",
     })
   }
