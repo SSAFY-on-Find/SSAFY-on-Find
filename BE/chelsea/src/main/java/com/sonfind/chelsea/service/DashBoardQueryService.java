@@ -1,12 +1,14 @@
 package com.sonfind.chelsea.service;
 
-import com.sonfind.chelsea.dto.dashboard.TeamProgressDto;
-import com.sonfind.chelsea.dto.dashboard.TeamRatioDto;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import com.sonfind.chelsea.dto.dashboard.TeamProgressDto;
+import com.sonfind.chelsea.dto.dashboard.TeamRatioDto;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -18,11 +20,10 @@ public class DashBoardQueryService {
 	/**
 	 * 희망 트랙별 통계 정보를 조회합니다.
 	 */
-//	public Map<String, TrackPositionMajorRatioResponseDto> computeForTrackPositionMajorRatio() {
-//		log.info("희망 트랙별 통계 정보를 조회합니다.");
-////		return studentService.getTrackPositionMajorRatio();
-//	}
-
+	//	public Map<String, TrackPositionMajorRatioResponseDto> computeForTrackPositionMajorRatio() {
+	//		log.info("희망 트랙별 통계 정보를 조회합니다.");
+	////		return studentService.getTrackPositionMajorRatio();
+	//	}
 
 	/**
 	 * 전체 팀빌딩 진행률을 계산합니다.
@@ -34,22 +35,20 @@ public class DashBoardQueryService {
 		log.info("전체 팀빌딩 진행률을 계산합니다.");
 		Map<String, TeamRatioDto> teamRatio = studentService.getTeamRatio();
 
-		String nonMajor = "비전공";
-		String major = "전공";
+		String nonMajor = "nonMajor";
+		String major = "major";
 
-		int totalStudentCount = teamRatio.values().stream()
-				.mapToInt(TeamRatioDto::totalStudentCount)
-				.sum();
+		int totalStudentCount = teamRatio.get("all").totalStudentCount();
 
 		int progressRate = (teamRatio.get(major).teamMemberCount() +
-				teamRatio.get(nonMajor).teamMemberCount()) * 100 / totalStudentCount;
+			teamRatio.get(nonMajor).teamMemberCount()) * 100 / totalStudentCount;
 
 		return TeamProgressDto.builder()
-				.progressRate(progressRate)
-				.totalNonMajorCount(teamRatio.get(nonMajor).totalStudentCount())
-				.teamMemberNonMajorCount(teamRatio.get(nonMajor).teamMemberCount())
-				.totalMajorCount(teamRatio.get(major).totalStudentCount())
-				.teamMemberMajorCount(teamRatio.get(major).teamMemberCount())
-				.build();
+			.progressRate(progressRate)
+			.totalNonMajorCount(teamRatio.get(nonMajor).totalStudentCount())
+			.teamMemberNonMajorCount(teamRatio.get(nonMajor).teamMemberCount())
+			.totalMajorCount(teamRatio.get(major).totalStudentCount())
+			.teamMemberMajorCount(teamRatio.get(major).teamMemberCount())
+			.build();
 	}
 }
