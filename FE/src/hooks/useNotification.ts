@@ -15,3 +15,18 @@ export const useNotification = (type: string) =>
     gcTime: 10 * 60_000,
     refetchOnWindowFocus: false,
   })
+
+export const useTeamNotification = (teamId: number | null | undefined, type: string) =>
+  useQuery<INotification[]>({
+    queryKey: ["team-notification", teamId, type],
+    queryFn: async () => {
+      if (typeof teamId !== "number") return []
+      const res = await notificationApi.getTeamNotifications({ teamId, type })
+      if (res.status !== "SUCCESS") throw new Error("팀 알림 목록 조회 실패")
+      return res.data.notification
+    },
+    enabled: typeof teamId === "number" && !!type,
+    staleTime: 60_000,
+    gcTime: 10 * 60_000,
+    refetchOnWindowFocus: false,
+  })

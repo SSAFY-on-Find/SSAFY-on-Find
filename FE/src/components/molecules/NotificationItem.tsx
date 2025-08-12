@@ -26,7 +26,7 @@ function getStatusColor(status: string) {
       return "bg-main/5 text-main border-line"
     case "REJECTED":
       return "bg-error/5 text-error border-line"
-    case "CANCELLED":
+    case "CANCELED":
       return "bg-line/5 text-subtext border-line"
     default:
       return "bg-line/5 text-subtext border-line"
