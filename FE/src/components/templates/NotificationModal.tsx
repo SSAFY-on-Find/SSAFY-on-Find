@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react"
 
 import { Segmented } from "@/components/atoms"
 import { NotificationItem } from "@/components/molecules"
+import { Loading } from "@/components/templates"
+import { useInviteAccept, useInviteCancel, useInviteReject } from "@/hooks/useInvite"
 import { useNotification } from "@/hooks/useNotification"
 import type { INotificationStatus } from "@/types/notification"
 
@@ -24,14 +26,21 @@ export default function NotificationModal({ isOpen, onClose, returnFocusRef }: N
     [data]
   )
 
-  const handleAcceptInvitation = (statusId: string) => {
-    /* mutate 후 refetch */
+  const { cancelInvitation, isPending: isCanceling } = useInviteCancel(type)
+  const { acceptInvitation, isPending: isAccepting } = useInviteAccept(type)
+  const { rejectInvitation, isPending: isRejecting } = useInviteReject(type)
+
+  const handleAcceptInvitation = (notificationId: string) => {
+    if (!notificationId) return
+    acceptInvitation(notificationId)
   }
-  const handleRejectInvitation = (statusId: string) => {
-    /* mutate 후 refetch */
+  const handleRejectInvitation = (notificationId: string) => {
+    if (!notificationId) return
+    rejectInvitation(notificationId)
   }
-  const handleCancelInvitation = (statusId: string) => {
-    /* mutate 후 refetch */
+  const handleCancelInvitation = (notificationId: string) => {
+    if (!notificationId) return
+    cancelInvitation(notificationId)
   }
 
   useEffect(() => {
@@ -77,7 +86,7 @@ export default function NotificationModal({ isOpen, onClose, returnFocusRef }: N
 
       <div className="h-[calc(100vh-120px)] overflow-y-auto">
         {isLoading ? (
-          <div className="text-subtext p-8 text-center">불러오는 중…</div>
+          <Loading />
         ) : isError ? (
           <div className="text-error p-8 text-center">알림을 불러오지 못했습니다.</div>
         ) : statusList.length === 0 ? (

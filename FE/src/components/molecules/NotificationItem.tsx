@@ -6,7 +6,7 @@ import type { INotificationStatus } from "@/types/notification"
 function formatDate(dateString?: string) {
   if (!dateString) return ""
 
-  const date = new Date(dateString) // ISO 형식이라면 안전하게 파싱됨
+  const date = new Date(dateString)
   if (isNaN(date.getTime())) return dateString
 
   return date.toLocaleString("ko-KR", {
@@ -74,8 +74,6 @@ export default function NotificationItem({
 }) {
   const isInvitation = data.role === "PUBLISHER"
   const isPending = data.status === "PENDING"
-  const statusId =
-    typeof data.statusId === "string" ? data.statusId : String(data.statusId?.timestamp ?? crypto.randomUUID())
 
   return (
     <div className="transform rounded-lg border border-gray-200 bg-white p-4 transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-md">
@@ -106,14 +104,32 @@ export default function NotificationItem({
       {/* 액션 버튼 */}
       {tab === "left" && isInvitation && isPending && (
         <div className="mt-3 flex space-x-2 pt-2">
-          <Button text="거절" variant="text" size="s" isIcon={false} onClick={() => onReject?.(statusId)} />
-          <Button text="수락" variant="primary" size="s" isIcon={false} onClick={() => onAccept?.(statusId)} />
+          <Button
+            text="거절"
+            variant="text"
+            size="s"
+            isIcon={false}
+            onClick={() => onReject?.(data.notificationId.date)}
+          />
+          <Button
+            text="수락"
+            variant="primary"
+            size="s"
+            isIcon={false}
+            onClick={() => onAccept?.(data.notificationId.date)}
+          />
         </div>
       )}
 
       {tab === "right" && isInvitation && isPending && (
         <div className="mt-3 flex space-x-2 pt-2">
-          <Button text="취소" variant="text" size="s" isIcon={false} onClick={() => onCancel?.(statusId)} />
+          <Button
+            text="취소"
+            variant="text"
+            size="s"
+            isIcon={false}
+            onClick={() => onCancel?.(data.notificationId.date)}
+          />
         </div>
       )}
     </div>
