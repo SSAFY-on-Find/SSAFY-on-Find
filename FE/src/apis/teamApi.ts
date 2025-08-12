@@ -8,6 +8,7 @@ import type {
   ITeamCreateWarmup,
   ITeamDetails,
 } from "@/types/team"
+import { sortTeamsByFavorite } from "@/utils"
 
 import api from "./index"
 
@@ -15,6 +16,7 @@ const TEAM_BASE_URL = "/teams"
 export const teamApi = {
   getTeams: async (): Promise<IApiResponse<ITeamCard[]>> => {
     const response = await api.get<IApiResponse<ITeamCard[]>>(TEAM_BASE_URL)
+    sortTeamsByFavorite(response.data.data)
     return response.data
   },
   getMyTeam: async (): Promise<IApiResponse<IMyTeam>> => {
