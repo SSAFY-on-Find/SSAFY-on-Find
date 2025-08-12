@@ -265,52 +265,15 @@ public class TeamController {
 	})
 	public ResponseEntity<Map<String, Object>> getAllTeams(@Parameter(hidden = true)
 	@SessionAttribute("loginUser") Long studentId) {
-		List<TeamListResponseDto> teamListResponse = teamService.getAllTeams(studentId);
+		//기존 전체 목록 조회
+		// List<TeamListResponseDto> teamListResponse = teamService.getAllTeams(studentId);
+
+		List<TeamListResponseDto> teamListResponse = teamService.getAllTeamsFetchJoin(studentId);
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
 		body.put("data", teamListResponse);
 
-		return ResponseEntity.ok().body(body);
-	}
-
-	@GetMapping("/performance/optimized")
-	@Operation(summary = "팀 목록 조회 - DTO 프로젝션 방식", description = "DTO 프로젝션을 사용한 최적화된 방식으로 팀 목록을 조회합니다.")
-	public ResponseEntity<Map<String, Object>> getAllTeamsOptimized(
-		@Parameter(hidden = true) @SessionAttribute("loginUser") Long studentId) {
-
-		long startTime = System.currentTimeMillis();
-		List<TeamListResponseDto> teams = teamService.getAllTeamsOptimized(studentId);
-		long endTime = System.currentTimeMillis();
-
-		Map<String, Object> body = new HashMap<>();
-		body.put("status", "SUCCESS");
-		body.put("data", teams);
-		body.put("executionTime", endTime - startTime);
-		body.put("method", "dto-projection");
-		body.put("queryOptimization", true);
-
-		log.info("DTO 프로젝션 방식 실행시간: {}ms, 데이터 수: {}개", endTime - startTime, teams.size());
-		return ResponseEntity.ok().body(body);
-	}
-
-	@GetMapping("/performance/fetch-join")
-	@Operation(summary = "팀 목록 조회 - Fetch Join 방식", description = "Fetch Join을 사용한 최적화된 방식으로 팀 목록을 조회합니다.")
-	public ResponseEntity<Map<String, Object>> getAllTeamsFetchJoin(
-		@Parameter(hidden = true) @SessionAttribute("loginUser") Long studentId) {
-
-		long startTime = System.currentTimeMillis();
-		List<TeamListResponseDto> teams = teamService.getAllTeamsFetchJoin(studentId);
-		long endTime = System.currentTimeMillis();
-
-		Map<String, Object> body = new HashMap<>();
-		body.put("status", "SUCCESS");
-		body.put("data", teams);
-		body.put("executionTime", endTime - startTime);
-		body.put("method", "fetch-join");
-		body.put("queryOptimization", true);
-
-		log.info("Fetch Join 방식 실행시간: {}ms, 데이터 수: {}개", endTime - startTime, teams.size());
 		return ResponseEntity.ok().body(body);
 	}
 
