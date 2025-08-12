@@ -16,6 +16,7 @@ import com.sonfind.chelsea.domain.studentInfo.Portfolio;
 import com.sonfind.chelsea.domain.studentInfo.Profile;
 import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 import com.sonfind.chelsea.domain.teams.Team;
+import com.sonfind.chelsea.dto.dashboard.PositionChangeRequestDto;
 import com.sonfind.chelsea.dto.dashboard.PositionMajorRatioResponseDto;
 import com.sonfind.chelsea.dto.dashboard.RatioResponseDto;
 import com.sonfind.chelsea.dto.student.response.StudentResponseDto;
@@ -47,6 +48,7 @@ public class StudentInfoService {
 
 	private final StudentService studentService;
 	private final FileService fileService;
+	private final DashBoardCommandService dashBoardCommandService;
 
 	/**
 	 * 자기소개 생성 함수
@@ -65,6 +67,9 @@ public class StudentInfoService {
 			StudentInfo studentInfo = saveStudentInfo(studentId, requestDto, uploadProfile, uploadPortfolio);
 
 			studentInfoRepository.save(studentInfo);
+			dashBoardCommandService.publishStudentInfoUpdateEvent(
+				getEventDto(null, studentInfo.getPositionCode(), studentInfo.getStudent()));
+
 		} catch (IOException e) {
 			throw AppException.fileUploadError();
 		}
@@ -148,7 +153,12 @@ public class StudentInfoService {
 			List<String> requiredCodes = List.of(requestDto.track(), requestDto.position(), requestDto.goal(),
 				requestDto.mbti());
 			List<SubCode> subCodes = subCodeRepository.findAllBySubCodeIn(requiredCodes);
+
+			SubCode prePosition = studentInfo.getPositionCode();
 			studentInfo.update(requestDto, subCodes);
+			dashBoardCommandService.publishStudentInfoUpdateEvent(
+				getEventDto(prePosition, studentInfo.getPositionCode(), studentInfo.getStudent()));
+
 		} catch (IOException e) {
 			throw AppException.fileUploadError();
 		}
@@ -221,7 +231,7 @@ public class StudentInfoService {
 	private StudentInfo saveStudentInfo(Long studentId, StudentInfoCreateRequestDto requestDto, Profile profile,
 		Portfolio portfolio) {
 
-		Student Student = studentService.findByStudentId(studentId);
+		Student student = studentService.findByStudentId(studentId);
 
 		String techStackString = StringListConverter.listToString(requestDto.techStack());
 		String strengthString = StringListConverter.listToString(requestDto.strength());
@@ -232,7 +242,7 @@ public class StudentInfoService {
 		SubCode mbtiCode = getSubCodeByValue(requestDto.mbti());
 
 		return StudentInfo.builder()
-			.student(Student)
+			.student(student)
 			.techStack(techStackString)
 			.strength(strengthString)
 			.description(requestDto.description())
@@ -317,6 +327,14 @@ public class StudentInfoService {
 			return profile.getProfileImageUrl();
 		}
 		return "";
+	}
+
+	private PositionChangeRequestDto getEventDto(SubCode prePosition, SubCode curPosition, Student student) {
+		return PositionChangeRequestDto.builder()
+			.prePosition(Optional.ofNullable(prePosition).map(SubCode::getSubCodeName).orElse(""))
+			.curPosition(curPosition.getSubCodeName())
+			.isTeam(student.getTeamId() != null)
+			.build();
 	}
 
 }

@@ -26,7 +26,7 @@ public class NotificationContentService {
 			return "%s에 팀 합치기 제안".formatted(ctx.subscriber().displayName());
 		}
 
-		return "%s의 팀 합치기 제안".formatted(ctx.publisher());
+		return "%s의 팀 합치기 제안".formatted(ctx.publisher().displayName());
 	}
 
 	private String buildInvitationTitle(RecipientRole role, NotificationContext ctx) {

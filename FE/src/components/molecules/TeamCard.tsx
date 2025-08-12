@@ -1,8 +1,10 @@
+import { useNavigate } from "react-router-dom"
 import { Heart } from "lucide-react"
 
+import { Button, MainTag, PositionTag, UserImg, WhiteTag } from "@/components/atoms"
+import { useInvte } from "@/hooks/useInvite"
+import { useUserStore } from "@/stores/userStore"
 import type { ITeamCard } from "@/types/team"
-
-import { Button, MainTag, PositionTag, UserImg, WhiteTag } from "../atoms"
 
 interface ITeamCardElement extends ITeamCard {
   userTeamId?: number | null
@@ -22,6 +24,10 @@ function TeamCard({
   variant = "default",
   userTeamId,
 }: ITeamCardElement) {
+  const { applyAsMate, mergeTeams } = useInvte(userTeamId ?? null)
+  const myMateId = useUserStore((s) => s.user?.studentId)
+  const navigate = useNavigate()
+
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     onClickFavorite()
@@ -32,16 +38,43 @@ function TeamCard({
 
   const renderButtons = () => {
     if (userTeamId === null) {
-      return <Button size={"s"} isIcon={false} text="지원하기" variant={btnRecruit} onClick={() => {}} />
+      return (
+        <Button
+          size={"m"}
+          isIcon={false}
+          text="지원하기"
+          variant={btnRecruit}
+          onClick={() => myMateId && applyAsMate(teamId, Number(myMateId))}
+        />
+      )
     } else if (userTeamId !== teamId) {
       return (
         <>
-          <Button size={"m"} isIcon={false} text="지원하기" variant={btnRecruit} onClick={() => {}} />
-          <Button size={"m"} isIcon={false} text="팀 합치기" variant={btnMerge} onClick={() => {}} />
+          <Button
+            size={"m"}
+            isIcon={false}
+            text="지원하기"
+            onClick={() => myMateId && applyAsMate(teamId, Number(myMateId))}
+          />
+          <Button
+            size={"m"}
+            isIcon={false}
+            text="팀 합치기"
+            variant="outline"
+            onClick={() => userTeamId && mergeTeams(teamId, Number(userTeamId))}
+          />
         </>
       )
     }
-    return <Button size={"m"} isIcon={false} text="내 팀 바로가기" variant={btnRecruit} onClick={() => {}} />
+    return (
+      <Button
+        size={"m"}
+        isIcon={false}
+        text="내 팀 바로가기"
+        variant={btnRecruit}
+        onClick={() => navigate("/myteam")}
+      />
+    )
   }
 
   // 카드 스타일
