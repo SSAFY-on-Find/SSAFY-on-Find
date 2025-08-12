@@ -23,12 +23,11 @@ public record ChatRoomListResponseDto(
 		LocalDateTime lastChatAt
 	) {
 		public static DirectChatRoomInfoDto of(ChatRoom chatRoom, Student opponent, StudentInfo opponentInfo,
-			boolean isRead) {
+			boolean isRead, LocalDateTime lastChatAt) {
 			String major = opponent.getMajorYn() ? "전공" : "비전공";
 			String profileImageUrl =
 				opponentInfo.getProfile() == null ? "" : opponentInfo.getProfile().getProfileImageUrl();
 			boolean hasTeam = opponent.getTeamId() != null;
-			LocalDateTime lastChatAt = chatRoom.getUpdated_at();
 
 			SubCodeResponseDto positionDto = new SubCodeResponseDto(
 				opponentInfo.getPositionCode().getSubCode(),

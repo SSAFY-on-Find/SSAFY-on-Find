@@ -122,14 +122,16 @@ public class ChatRoomService {
 					chatRoom.getId());
 
 				boolean isRead = true;
+				LocalDateTime lastChatAt = LocalDateTime.MIN;
 				if (lastMessageOpt.isPresent()) {
 					ChatMessage lastMessage = lastMessageOpt.get();
 					LocalDateTime myReadAt = myMember.getReadAt();
 					if (myReadAt == null || lastMessage.getPublishedAt().isAfter(myReadAt)) {
 						isRead = false;
 					}
+					lastChatAt = lastMessage.getPublishedAt();
 				}
-				return DirectChatRoomInfoDto.of(chatRoom, opponent, opponentInfo, isRead);
+				return DirectChatRoomInfoDto.of(chatRoom, opponent, opponentInfo, isRead, lastChatAt);
 			})
 			.filter(Objects::nonNull)
 			.sorted(Comparator.comparing(DirectChatRoomInfoDto::lastChatAt,
