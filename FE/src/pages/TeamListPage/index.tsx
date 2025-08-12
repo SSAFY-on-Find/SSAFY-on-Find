@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom"
+import { UserPlus } from "lucide-react"
 
 import { Button } from "@/components/atoms"
 import { TeamCard } from "@/components/molecules"
@@ -32,7 +33,16 @@ export default function TeamListPage() {
           {userTeamId ? (
             <></>
           ) : (
-            <Button size={"m"} isIcon={false} text="팀생성" onClick={() => navigate("/create-team")} />
+            <div className="w-30">
+              <Button
+                size={"m"}
+                isIcon={true}
+                Icon={UserPlus}
+                variant="outline"
+                text="팀생성"
+                onClick={() => navigate("/create-team")}
+              />
+            </div>
           )}
         </div>
       </div>

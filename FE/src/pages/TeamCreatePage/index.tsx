@@ -1,7 +1,9 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 
 import { Button, CheckTag, Dropdown, InputBox } from "@/components/atoms"
+import { useAuth } from "@/hooks/useStudent"
 import { useCreateTeam, useTeamWarmup } from "@/hooks/useTeam"
 import type { ITeamCreate } from "@/types/team"
 
@@ -9,14 +11,21 @@ import TeamCreateSkeleton from "./organisms/TeamCreateSkeleton"
 
 export default function TeamCreatePage() {
   const createTeamMutation = useCreateTeam()
+  const navigate = useNavigate()
   const { data: teamWarmup, isLoading: isTeamWarmupLoading } = useTeamWarmup()
+  const { data: authData } = useAuth()
+  const teamId = authData?.teamId
 
   const [createTeamData, setCreateTeamData] = useState<ITeamCreate>({
     description: "",
     track: "",
     positions: [],
   })
-
+  useEffect(() => {
+    if (teamId) {
+      navigate("/myteam")
+    }
+  }, [teamId, navigate])
   const [selectedTrackCode, setSelectedTrackCode] = useState<string>("")
   const [selectedTrackCodeName, setSelectedTrackCodeName] = useState<string>("")
   const [selectedPositions, setSelectedPositions] = useState<string[]>([])

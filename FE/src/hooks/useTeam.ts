@@ -89,14 +89,14 @@ export const useCreateTeam = () => {
     },
     onSuccess: (data) => {
       const successData = data as ITeamCreateResponse
-      toast.success("팀 생성 성공")
       queryClient.invalidateQueries({ queryKey: ["myTeam"] })
+      queryClient.invalidateQueries({ queryKey: ["user-auth"] })
       queryClient.invalidateQueries({ queryKey: ["teams"] })
       if (successData && successData.teamId) {
         updateUserTeamId(successData.teamId)
       }
-
       navigate("/myteam")
+      toast.success("팀 생성 성공")
     },
     onError: (error) => {
       toast.error("팀 생성 실패!")
@@ -165,6 +165,7 @@ export const useLeaveTeam = () => {
       toast.success(response.data.message || "팀에서 성공적으로 탈퇴했습니다.")
       queryClient.setQueryData(["myTeam"], null)
       queryClient.invalidateQueries({ queryKey: ["myTeam"] })
+      queryClient.invalidateQueries({ queryKey: ["user-auth"] })
       queryClient.invalidateQueries({ queryKey: ["teams"] })
       updateUserTeamId(null)
       navigate("/teamlist")

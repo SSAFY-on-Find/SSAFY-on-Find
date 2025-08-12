@@ -18,6 +18,7 @@ import TeamList from "@/pages/TeamListPage"
 import { useUserStore } from "@/stores/userStore"
 
 import ChatView from "./components/templates/ChatView"
+import NoTeamPage from "./pages/NoTeamPage"
 import TeamEditPage from "./pages/TeamUpdatePage"
 import { useChatViewStore } from "./stores/useChatViewStore"
 import ScrollToTop from "./utils/ScrollToTop"
@@ -91,6 +92,7 @@ function App() {
             <Route path="/myteam" element={<MyTeam />} />
             <Route path="/teamlist" element={<TeamList />} />
             <Route path="/create-team" element={<TeamCreatePage />} />
+            <Route path="/no-team" element={<NoTeamPage />} />
             <Route path="/edit-team" element={<TeamEditPage />} />
             <Route path="/studentlist" element={<StudentList />} />
             <Route path="/studentlist/:studentId" element={<StudentDetail />} />

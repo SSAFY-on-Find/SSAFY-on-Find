@@ -5,9 +5,11 @@ import { UserPlus } from "lucide-react"
 
 import { createTeamChatRoom, getChatMessages, getTeamChatRoomId, leaveChatRoom } from "@/apis/chatRoom"
 import { teamApi } from "@/apis/teamApi"
+import { Button } from "@/components/atoms"
 import { TeamDetail } from "@/components/molecules"
 import Loading from "@/components/templates/Loading"
 import { useAuth } from "@/hooks/useStudent"
+import { useLeaveTeam } from "@/hooks/useTeam"
 import { useTeamNotifications } from "@/hooks/useTeamNotifications"
 import type { IMyTeam, ITeamMember } from "@/types/team"
 
@@ -17,10 +19,11 @@ import TeamChat from "./organisms/TeamChat"
 export default function MyTeamPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { data: authData, isLoading: isAuthLoading } = useAuth()
+  const { data: authData } = useAuth()
   const teamId = authData?.teamId
   const studentId = authData?.studentId
   const [chatRoomId, setChatRoomId] = useState<number | null>(null)
+  const { mutate: leaveTeam } = useLeaveTeam()
 
   const { data: myTeamData, isLoading: isMyTeamLoading } = useQuery<IMyTeam>({
     queryKey: ["myTeam"],
@@ -44,22 +47,7 @@ export default function MyTeamPage() {
       console.error("채팅방 나가기 실패:", error)
     },
   })
-  const { mutate: leaveTeam } = useMutation({
-    mutationFn: () => teamApi.leaveTeam(), // teamApi에 leaveTeam 함수가 있다고 가정
-    onSuccess: () => {
-      // 1. 팀 탈퇴 성공 시, 채팅방 나가기 실행
-      if (chatRoomId) {
-        leaveRoom(chatRoomId)
-      }
-      queryClient.invalidateQueries({ queryKey: ["myTeam"] })
-      alert("팀에서 성공적으로 탈퇴했습니다.")
-      navigate("/") // 메인 페이지 등으로 이동
-    },
-    onError: (error) => {
-      alert("팀 탈퇴에 실패했습니다.")
-      console.error(error)
-    },
-  })
+
   const handleLeaveTeam = () => {
     if (window.confirm("정말로 팀에서 탈퇴하시겠습니까?")) {
       leaveTeam()
@@ -100,7 +88,7 @@ export default function MyTeamPage() {
   useEffect(() => {
     // 로딩 상태도 함께 확인
     if (!teamId && !isMyTeamLoading) {
-      navigate("/create-team")
+      navigate("/no-team")
     }
   }, [teamId, navigate, isMyTeamLoading])
 
@@ -128,7 +116,16 @@ export default function MyTeamPage() {
             <div>
               <div className="flex items-center gap-[15px]">
                 <h3 className="text-text text-2xl font-bold">대기목록</h3>
-                <UserPlus />
+                <div className="w-30">
+                  <Button
+                    size={"s"}
+                    isIcon={true}
+                    Icon={UserPlus}
+                    variant="outline"
+                    text="팀원 초대"
+                    onClick={() => navigate("/create-team")}
+                  />
+                </div>
               </div>
               <p className="text-subtext text-sm text-pretty">
                 팀 합류를 신청한 교육생들입니다. 신중하게 검토 후 결정해주세요.
