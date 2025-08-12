@@ -11,7 +11,6 @@ import {
   useSummaryInfo,
   useTeamRatio,
 } from "@/hooks/useDashboard"
-import { useAiRecommendStore } from "@/stores/aiRecommendStore"
 import { useUserStore } from "@/stores/userStore"
 
 import DashboardCard from "./organisms/DashboardCard"
@@ -25,22 +24,10 @@ export default function DashboardPage() {
   const { data: teamRatio, isLoading: isTeamRatioLoading, error: teamRatioError } = useTeamRatio()
   const { data: positionRatio, isLoading: isPositionRatioLoading, error: positionRatioError } = usePositionRatio()
   const { data: recommendTeam, isLoading: isRecommendTeamLoading, error: recommendTeamError } = useRecommendTeam()
-  const { recommendations, setRecommendations } = useAiRecommendStore()
-  const aiRecommend = useAIRecommendations({
-    onSuccess: (data) => {
-      setRecommendations(data)
-    },
-  })
+  const { data: aiRecommend, isLoading, refetch } = useAIRecommendations(studentId ? Number(studentId) : undefined)
 
-  useEffect(() => {
-    if (studentId && !recommendations && aiRecommend.isIdle) {
-      aiRecommend.mutate(Number(studentId))
-    }
-  }, [studentId, recommendations, aiRecommend])
   const handleRefreshAiRecommend = () => {
-    if (studentId) {
-      aiRecommend.mutate(Number(studentId))
-    }
+    refetch()
   }
   if (isSummaryLoading || isTeamRatioLoading || isPositionRatioLoading || isRecommendTeamLoading)
     return <Loading fullScreen text="정보를 불러오는 중..." />
@@ -89,21 +76,21 @@ export default function DashboardPage() {
             <h3 className="text-text text-lg font-bold">AI 추천 개인 궁합도 😊</h3>
             <button
               onClick={handleRefreshAiRecommend}
-              disabled={aiRecommend.isPending}
+              disabled={isLoading}
               className="hover:bg-main/20 rounded-full p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               title="새로고침"
             >
-              <RotateCw size={16} className={aiRecommend.isPending ? "animate-spin" : ""} />
+              <RotateCw size={16} className={isLoading ? "animate-spin" : ""} />
             </button>
           </div>
-          {aiRecommend.isPending && (
+          {isLoading && (
             <div className="text-subtext mt-15 text-center">
               <Loading text="AI가 최적의 팀원을 분석 중입니다..." bg="bg-white" />
             </div>
           )}
-          {!aiRecommend.isPending && recommendations && (
+          {!isLoading && aiRecommend && (
             <div className="mt-3 flex flex-col gap-2">
-              {aiRecommend?.data?.map((rec, index) => (
+              {aiRecommend?.map((rec, index) => (
                 <div key={rec.studentId}>
                   <Tooltip content={rec.reason} side="top" className="block w-full">
                     <div className="hover:bg-main/10 flex items-center justify-between rounded-lg p-2 transition-colors">
@@ -115,6 +102,7 @@ export default function DashboardPage() {
                           <span className="text-text font-semibold">{rec.name}</span>
                           <div className="mt-1 flex items-center gap-2 sm:mt-0">
                             {rec.majorYn ? <MajorTag tagContent="전공" /> : <MajorTag tagContent="비전공" />}
+                            {rec.position && <PositionTag positionName={rec.position} />}
                             <NormalTag tagContent={`${rec.goal} 우선`} />
                           </div>
                         </div>

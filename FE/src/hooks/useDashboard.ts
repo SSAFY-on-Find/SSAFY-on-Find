@@ -72,10 +72,22 @@ export const useRecommendTeam = () => {
   })
 }
 
-export const useAIRecommendations = (
-  options?: UseMutationOptions<IAiRecommend[], Error, number> // 옵션을 받을 수 있도록 추가
-) =>
-  useMutation<IAiRecommend[], Error, number>({
-    mutationFn: (studentId) => aiApi.getRecommendations(studentId),
-    ...options, // 외부에서 주입된 옵션을 여기에 병합
+export const useAIRecommendations = (studentId: number | undefined) => {
+  return useQuery<IAiRecommend[], Error>({
+    // 1. queryKey: 이 쿼리의 고유 식별자입니다. studentId마다 캐시가 따로 관리됩니다.
+    queryKey: ["aiRecommendations", studentId],
+
+    // 2. queryFn: 실제 데이터 fetching 함수입니다.
+    queryFn: () => aiApi.getRecommendations(studentId!),
+
+    // 3. enabled: studentId가 있을 때만 쿼리가 실행되도록 합니다.
+    enabled: !!studentId,
+
+    // 4. staleTime: 데이터를 얼마 동안 'fresh'한 상태로 간주할지 설정합니다.
+    // Infinity로 설정하면 한 번 가져온 데이터는 수동으로 무효화(invalidate)하기 전까지 다시 가져오지 않습니다.
+    staleTime: Infinity,
+
+    // 5. gcTime(cacheTime): 캐시에서 데이터가 얼마나 오래 머무를지 설정합니다. 60분!
+    gcTime: 1000 * 60 * 60,
   })
+}
