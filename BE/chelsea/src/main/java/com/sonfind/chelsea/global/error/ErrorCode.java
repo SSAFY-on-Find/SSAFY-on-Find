@@ -44,6 +44,7 @@ public enum ErrorCode {
 	FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "파일 크기가 너무 큽니다."),
 	FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다."),
 	UNSUPPORTED_FILE_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 파일 형식입니다."),
+	FILE_DELETE_ERROR(HttpStatus.BAD_REQUEST, "파일을 삭제하는데 실패했습니다."),
 
 	// 좋아요 관련
 	SELF_FAVORITE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "본인을 좋아요할 수 없습니다."),

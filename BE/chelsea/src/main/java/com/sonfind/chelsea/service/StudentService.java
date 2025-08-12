@@ -17,10 +17,10 @@ import com.sonfind.chelsea.dto.student.response.StudentListResponseDto;
 import com.sonfind.chelsea.dto.student.response.StudentResponseDto;
 import com.sonfind.chelsea.dto.student.response.StudentSignInResponseDto;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
+import com.sonfind.chelsea.global.error.AppException;
 import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -62,20 +62,19 @@ public class StudentService {
 	public Student findByStudentId(long studentId) {
 
 		Optional<Student> authOptional = studentRepository.findByStudentId(studentId);
-		Student student = null;
 
-		if (authOptional.isPresent()) {
-			student = authOptional.get();
+		if (authOptional.isEmpty()) {
+			throw AppException.studentNotFound();
 		}
 
-		return student;
+		return authOptional.get();
 	}
 
 	public StudentResponseDto findByStudentIdForSse(long studentId) {
 		Optional<Student> authOptional = studentRepository.findByStudentId(studentId);
 
-		if (!authOptional.isPresent()) {
-			throw new IllegalArgumentException("존재하지 않는 학생입니다.");
+		if (authOptional.isEmpty()) {
+			throw AppException.studentNotFound();
 		}
 		Student student = authOptional.get();
 
@@ -124,7 +123,7 @@ public class StudentService {
 	public StudentSignInResponseDto getLoginCheck(long studentId) {
 
 		Student student = studentRepository.findByStudentId(studentId)
-			.orElseThrow(EntityNotFoundException::new);
+			.orElseThrow(AppException::studentNotFound);
 
 		String className = student.getClassCode().getSubCodeName();
 
@@ -141,7 +140,7 @@ public class StudentService {
 	}
 
 	private static String getIsMajor(Boolean major) {
-		return major ? "전공" : "비전공";
+		return Boolean.TRUE.equals(major) ? "전공" : "비전공";
 	}
 
 	public List<Student> findAllByTeamId(Long teamId) {

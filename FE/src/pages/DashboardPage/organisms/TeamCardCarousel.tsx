@@ -67,7 +67,7 @@ export default function TeamCardCarousel({ items }: { items: TeamItem[] }) {
         >
           {items.map((item) => (
             <div key={item.teamId} className="shrink-0">
-              <TeamCard {...item} />
+              <TeamCard {...item} variant="main" />
             </div>
           ))}
         </div>

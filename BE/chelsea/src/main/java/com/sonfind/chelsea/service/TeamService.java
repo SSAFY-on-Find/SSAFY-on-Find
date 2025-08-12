@@ -16,7 +16,6 @@ import com.sonfind.chelsea.domain.teams.Recruitment;
 import com.sonfind.chelsea.domain.teams.Team;
 import com.sonfind.chelsea.dto.dashboard.MemberSummary;
 import com.sonfind.chelsea.dto.dashboard.TeamInfoUpdateDto;
-import com.sonfind.chelsea.dto.dashboard.TeamMemberChangedDto;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 import com.sonfind.chelsea.dto.teams.CreateTeamRequestDto;
 import com.sonfind.chelsea.dto.teams.LeaveTeamResponseDto;
@@ -33,6 +32,7 @@ import com.sonfind.chelsea.global.domain.SubCode;
 import com.sonfind.chelsea.global.error.AppException;
 import com.sonfind.chelsea.global.error.BusinessException;
 import com.sonfind.chelsea.global.error.ErrorCode;
+import com.sonfind.chelsea.repository.RecruitmentRepository;
 import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
@@ -51,12 +51,14 @@ public class TeamService {
 	private final SubCodeRepository subCodeRepository;
 	private final StudentRepository studentRepository;
 	private final StudentInfoRepository studentInfoRepository;
+	private final RecruitmentRepository recruitmentRepository;
 
 	private final StudentService studentService;
 	private final FavoriteService favoriteService;
 
 	//이벤트 발행기
 	private final ApplicationEventPublisher eventPublisher;
+	private final DashBoardCommandService dashBoardCommandService;
 
 	//팀 생성
 	@Transactional
@@ -267,14 +269,9 @@ public class TeamService {
 		}
 		teamRepository.save(targetTeam);
 
-		//멤버 정보 생성 및 이벤트 발행
+		//멤버 정보 생성 및 이벤트 발행(팀 목록에서의 갱신 및 대시보드)
 		MemberSummary memberSummary = createMemberSummary(student);
-		TeamMemberChangedDto memberChangedDto = TeamMemberChangedDto.builder()
-			.teamId(teamId)
-			.action(MemberChageAction.JOINED)
-			.member(memberSummary)
-			.build();
-		eventPublisher.publishEvent(memberChangedDto);
+		teamMemberChangeEventPublisher(teamId, MemberChageAction.JOINED, memberSummary);
 
 		if (currentTeamId != null) {
 			log.info("교육생 {}이 팀 {}에서 팀 {}으로 이동했습니다.", studentId, currentTeamId, teamId);
@@ -330,12 +327,7 @@ public class TeamService {
 			}
 
 			// 각 멤버별 합류 이벤트 발행
-			TeamMemberChangedDto memberChangedDto = TeamMemberChangedDto.builder()
-				.teamId(targetTeamId)
-				.action(MemberChageAction.JOINED)
-				.member(memberSummary)
-				.build();
-			eventPublisher.publishEvent(memberChangedDto);
+			teamMemberChangeEventPublisher(targetTeamId, MemberChageAction.JOINED, memberSummary);
 		}
 
 		//소스 팀 삭제
@@ -404,13 +396,8 @@ public class TeamService {
 		//팀에서 나가버렷~~
 		removeStudentFromTeam(teamId, studentId, true);
 
-		//팀 나가기 이벤트 발행
-		TeamMemberChangedDto memberChangedDto = TeamMemberChangedDto.builder()
-			.teamId(teamId)
-			.action(MemberChageAction.LEFT)
-			.member(memberSummary)
-			.build();
-		eventPublisher.publishEvent(memberChangedDto);
+		//팀 나가기 이벤트 발행(팀 목록에서의 갱신 및 대시보드)
+		teamMemberChangeEventPublisher(teamId, MemberChageAction.LEFT, memberSummary);
 
 		return LeaveTeamResponseDto.builder()
 			.message(willBeEmptyTeam ? "팀에서 나갔습니다. 팀이 삭제되었습니다." : "팀에서 나갔습니다.")
@@ -497,6 +484,62 @@ public class TeamService {
 	public List<TeamListResponseDto> getAllTeams(Long studentId) {
 		List<Team> teams = teamRepository.findByIsDeletedIsFalseOrderByTeamIdAsc();
 
+		return teams.stream()
+			.map(team -> convertToTeamListResponse(team, studentId))
+			.sorted(
+				Comparator.comparing(TeamListResponseDto::isRecruitingComplete)
+					.thenComparing(dto -> parseTeamNumber(dto.teamName()))
+			)
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * 대시보드 용 팀 추천 함수
+	 * */
+	public List<TeamListResponseDto> getRecommendTeamList(Long studentId) {
+
+		if (teamRepository.findAll().isEmpty()) {
+			return List.of(TeamListResponseDto.builder().teamId(0L).build());
+		}
+
+		Student student = studentService.findByStudentId(studentId);
+		Long teamId = student.getTeamId();
+		//내가 팀에 소속되어 있지 않은 경우
+		List<TeamListResponseDto> result = null;
+		SubCode trackCode = null;
+		List<SubCode> positionCodes = null;
+		int teamMemberCount = 0;
+		List<Long> teamMember = null;
+
+		if (teamId == null) {
+			StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId)
+				.orElseThrow(AppException::studentInfoNotFound);
+			trackCode = studentInfo.getTrackCode();
+			positionCodes = List.of(studentInfo.getPositionCode());
+			teamMemberCount = 1;
+			teamMember = List.of(studentId);
+		} else {    //내가 팀에 소속된 경우
+			Team team = teamRepository.findTeamByTeamId(teamId).orElseThrow(AppException::teamNotFound);
+			teamMemberCount = team.getMajorCount() + team.getNonMajorCount();
+			teamMember = studentRepository.findAllByTeamId(teamId)
+				.stream()
+				.map(Student::getTeamId)
+				.collect(Collectors.toList());
+			trackCode = team.getTrack();
+			positionCodes = recruitmentRepository.findPositionByTeamId(teamId);
+		}
+
+		List<Long> candidateTeamId = teamRepository.findCandidateTeams(trackCode, positionCodes,
+			teamMemberCount);
+		List<Team> teamInfo = teamRepository.findRecommend(teamMember, candidateTeamId, teamId, teamMemberCount);
+		result = teamInfo.stream()
+			.map(team -> convertToTeamListResponse(team, studentId))
+			.collect(Collectors.toList());
+
+		return result;
+	}
+
+	private List<TeamListResponseDto> getTeamList(List<Team> teams, Long studentId) {
 		return teams.stream()
 			.map(team -> convertToTeamListResponse(team, studentId))
 			.sorted(
@@ -670,6 +713,7 @@ public class TeamService {
 	/**
 	 * 팀 ID로 팀의 간단한 정보를 조회합니다.(팀 초대, 및 합치기에 사용)
 	 * 존재하지 않는 팀이면 404 에러 발생
+	 *
 	 * @param teamId
 	 * @return TeamSimpleResponseDto
 	 * @throws ResponseStatusException
@@ -725,6 +769,13 @@ public class TeamService {
 				.build();
 		}
 
+	}
+
+	private void teamMemberChangeEventPublisher(Long teamId, MemberChageAction action, MemberSummary memberSummary) {
+		// 팀 빌딩 진행률 업데이트(대시보드 갱신)
+		dashBoardCommandService.publishTeamBuildingProgressEvent();
+		// 팀원 변경 이벤트 발행
+		dashBoardCommandService.publishTeamMemberChangedEvent(teamId, action, memberSummary);
 	}
 
 }

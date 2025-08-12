@@ -30,9 +30,9 @@ public interface StudentInfoRepository extends JpaRepository<StudentInfo, Long> 
 				END AS team_type,
 				COUNT(si.id) AS student_count
 			FROM student_info si
-			INNER JOIN student s ON si.student_id = s.student_id
+			INNER JOIN students s ON si.student_id = s.student_id
 			LEFT JOIN sub_code sc_pos ON si.position_code = sc_pos.sub_code
-			LEFT JOIN team t ON s.team_id = t.team_id
+			LEFT JOIN teams t ON s.team_id = t.team_id
 			GROUP BY
 					position_name, team_type
 			ORDER BY 

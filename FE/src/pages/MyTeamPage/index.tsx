@@ -6,6 +6,7 @@ import { UserPlus } from "lucide-react"
 import { createTeamChatRoom, getChatMessages, getTeamChatRoomId, leaveChatRoom } from "@/apis/chatRoom"
 import { teamApi } from "@/apis/teamApi"
 import { TeamDetail } from "@/components/molecules"
+import Loading from "@/components/templates/Loading"
 import { useTeamNotifications } from "@/hooks/useTeamNotifications"
 import { useUserStore } from "@/stores/userStore"
 import type { IMyTeam, ITeamMember } from "@/types/team"
@@ -132,7 +133,7 @@ export default function MyTeamPage() {
               </p>
             </div>
 
-            {isLoadingApplicants && <div>대기 목록을 불러오는 중...</div>}
+            {isLoadingApplicants && <Loading text="대기 목록을 불러오는 중" />}
             {applicantsError && <div className="text-red-500">대기 목록을 불러오는 데 실패했습니다.</div>}
 
             {!isLoadingApplicants && !applicantsError && (

@@ -1,64 +1,72 @@
-// components/charts/PositionFunnel.tsx
 import { useEffect, useMemo, useState } from "react"
 import { ResponsiveFunnel } from "@nivo/funnel"
 import { ResponsiveWaffle } from "@nivo/waffle"
 
 import { PositionTag } from "@/components/atoms"
+import type { IPositionRatioNode, PositionRow, TeamName } from "@/types/dashboard"
+import { positionColor } from "@/utils/positionColor"
 
-type MajorKind = "전공" | "비전공"
-type MajorItem = { name: MajorKind; count: number }
-type PositionRow = { position: string; totalCount: number; majorType: MajorItem[] }
-export type PositionApi = { status: "SUCCESS"; data: PositionRow[] }
+type Props = { api: PositionRow[] }
 
-const ROW_H = 72
+const ROW_H = 65
 
-function pickMajorNon(arr: MajorItem[]) {
-  const m = arr.find((d) => d.name === "전공")?.count ?? 0
-  const n = arr.find((d) => d.name === "비전공")?.count ?? 0
-  return { m, n }
+function pickMajorNon(arr: IPositionRatioNode[]) {
+  const isTeam = arr.find((d) => d.name === "isTeam")?.count ?? 0
+  const notTeam = arr.find((d) => d.name === "notTeam")?.count ?? 0
+  return { isTeam, notTeam }
+}
+
+// HEX lighten 유틸
+function lighten(hex: string, amt = 0) {
+  const c = hex.replace("#", "")
+  const num = parseInt(c, 16)
+  const r = Math.min(255, ((num >> 16) & 0xff) + Math.round((255 * amt) / 100))
+  const g = Math.min(255, ((num >> 8) & 0xff) + Math.round((255 * amt) / 100))
+  const b = Math.min(255, (num & 0xff) + Math.round((255 * amt) / 100))
+  return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`
 }
 
 /** 전공/비전공 Waffle (2x10=20칸) - 지연 후 채우기 */
 function MajorWaffle({
-  m,
-  n,
+  isTeam,
+  notTeam,
+  teamColor = "var(--color-main)",
   delay = 250,
   cells = 20,
   rows = 2,
   columns = 10,
 }: {
-  m: number
-  n: number
-  /** 채움 시작 지연(ms) */
+  isTeam: number
+  notTeam: number
+  teamColor?: string
   delay?: number
   cells?: number
   rows?: number
   columns?: number
 }) {
-  type WaffleDatum = { id: MajorKind; label: string; value: number }
-  const total = Math.max(1, m + n)
-  const targetMajor = Math.round((m / total) * cells)
-  const targetNon = cells - targetMajor
+  type WaffleDatum = { id: TeamName; label: string; value: number }
+  const total = Math.max(1, isTeam + notTeam)
+  const targetYes = Math.round((isTeam / total) * cells)
+  const targetNo = cells - targetYes
 
   const [data, setData] = useState<WaffleDatum[]>([
-    { id: "전공", label: "전공", value: 0 },
-    { id: "비전공", label: "비전공", value: 0 },
+    { id: "isTeam", label: "팀 O", value: 0 },
+    { id: "notTeam", label: "팀 X", value: 0 },
   ])
 
   useEffect(() => {
-    // 값이 바뀔 때마다 0칸 → delay 후 목표칸으로 (애니메이션 트리거)
     setData([
-      { id: "전공", label: "전공", value: 0 },
-      { id: "비전공", label: "비전공", value: 0 },
+      { id: "isTeam", label: "팀 O", value: 0 },
+      { id: "notTeam", label: "팀 X", value: 0 },
     ])
     const t = setTimeout(() => {
       setData([
-        { id: "전공", label: "전공", value: targetMajor },
-        { id: "비전공", label: "비전공", value: targetNon },
+        { id: "isTeam", label: "팀 O", value: targetYes },
+        { id: "notTeam", label: "팀 X", value: targetNo },
       ])
     }, delay)
     return () => clearTimeout(t)
-  }, [targetMajor, targetNon, delay])
+  }, [targetYes, targetNo, delay])
 
   return (
     <div className="h-12 w-28">
@@ -67,17 +75,17 @@ function MajorWaffle({
         total={cells}
         rows={rows}
         columns={columns}
-        colors={(d) => (d.id === "비전공" ? "#6C5CE7" : "#E6E6E6")}
+        colors={(d) => (d.id === "isTeam" ? teamColor : "var(--color-line)")}
         margin={{ top: 2, right: 2, bottom: 2, left: 2 }}
         padding={1}
         borderRadius={2}
         borderWidth={0}
-        fillDirection="left"
+        fillDirection="right"
         isInteractive
         animate
         motionConfig="gentle"
         legends={[]}
-        valueFormat={(v) => `${Math.round(Number(v))}칸`}
+        valueFormat={(v) => `${Math.round((Number(v) / cells) * 100)}%`}
         theme={{
           tooltip: {
             container: { minWidth: 120, whiteSpace: "nowrap", wordBreak: "keep-all" },
@@ -88,21 +96,20 @@ function MajorWaffle({
   )
 }
 
-export default function PositionFunnel({ api }: { api: PositionApi }) {
+export default function PositionFunnel({ api }: Props) {
   // 인기 순 정렬
-  const rows = useMemo(() => [...api.data].sort((a, b) => b.totalCount - a.totalCount), [api.data])
+  const sorted = useMemo(() => [...api].sort((a, b) => b.totalCount - a.totalCount), [api])
 
-  type FunnelDatum = { id: string; value: number; label: string }
+  type FunnelDatum = { id: string; value: number; label: string; color?: string }
   const targetFunnelData: FunnelDatum[] = useMemo(
-    () => rows.map((r) => ({ id: r.position, value: r.totalCount, label: r.position })),
-    [rows]
+    () => sorted.map((r) => ({ id: String(r.position), value: r.totalCount, label: String(r.position) })),
+    [sorted]
   )
-  const chartHeight = Math.max(1, rows.length) * ROW_H
+  const chartHeight = Math.max(1, sorted.length) * ROW_H
 
-  // ✅ 초기 애니메이션: 0 → 실제값
+  // 초기 애니메이션: 0 → 실제값
   const [mounted, setMounted] = useState(false)
   const [funnelData, setFunnelData] = useState<FunnelDatum[]>(() => targetFunnelData.map((d) => ({ ...d, value: 0 })))
-
   useEffect(() => {
     setMounted(false)
     setFunnelData(targetFunnelData.map((d) => ({ ...d, value: 0 })))
@@ -113,15 +120,29 @@ export default function PositionFunnel({ api }: { api: PositionApi }) {
     return () => cancelAnimationFrame(raf)
   }, [targetFunnelData])
 
+  const base = "#6C5CE7"
+  const palette = useMemo(() => {
+    const n = Math.max(1, targetFunnelData.length)
+    const start = 25
+    const end = 65
+    const denom = Math.max(1, n - 1)
+    return Array.from({ length: n }, (_, i) => lighten(base, start + ((end - start) * i) / denom))
+  }, [targetFunnelData.length])
+
+  const funnelDataWithColor = useMemo(
+    () => funnelData.map((d, i) => ({ ...d, color: palette[i] })),
+    [funnelData, palette]
+  )
+
   return (
     <div className="flex gap-6 px-5">
       {/* 왼쪽: 포지션 인기 Funnel */}
       <div style={{ height: chartHeight }} className="relative min-w-0 flex-1">
         <ResponsiveFunnel<FunnelDatum>
-          data={funnelData}
-          margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
+          data={funnelDataWithColor}
+          margin={{ top: 8, right: 30, bottom: 8, left: 30 }}
           valueFormat={(v) => `${v}명`}
-          colors={{ scheme: "purple_blue" }}
+          colors={{ datum: "color" }}
           shapeBlending={0.6}
           direction="vertical"
           enableLabel
@@ -148,8 +169,8 @@ export default function PositionFunnel({ api }: { api: PositionApi }) {
         className="flex flex-col gap-4 transition-opacity duration-500"
         style={{ height: chartHeight, opacity: mounted ? 1 : 0 }}
       >
-        {rows.map((r, i) => {
-          const { m, n } = pickMajorNon(r.majorType)
+        {api.map((r, i) => {
+          const { isTeam, notTeam } = pickMajorNon(r.teamType)
           return (
             <div
               key={r.position}
@@ -161,7 +182,12 @@ export default function PositionFunnel({ api }: { api: PositionApi }) {
               {/* <div className="w-16 truncate text-center text-sm text-subtext">{r.position}</div> */}
               <PositionTag positionName={r.position} />
               {/* 👇 페이드가 거의 끝난 뒤(500ms) + 순차 80ms 간격으로 채우기 시작 */}
-              <MajorWaffle m={m} n={n} delay={500 + i * 80} />
+              <MajorWaffle
+                isTeam={isTeam}
+                notTeam={notTeam}
+                delay={500 + i * 80}
+                teamColor={positionColor(r.position)}
+              />
             </div>
           )
         })}
