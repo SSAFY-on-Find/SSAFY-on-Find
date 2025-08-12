@@ -23,29 +23,35 @@ interface ChatMemberProps {
 
 const DM: React.FC<ChatMemberProps> = ({ roomId, studentId, members, initialMessages }) => {
   const { connect, disconnect, sendMessage, error } = useChat({ roomId, studentId, chatType: "direct" })
-  const { messages, isConnected, clearMessages, setMessages } = useChatStore()
+
+  // ❗️ 수정: 스토어에서 현재 roomId에 해당하는 메시지만 가져옵니다.
+  const messages = useChatStore((state) => state.messagesByRoom[String(roomId)] || [])
+  const { isConnected, clearMessages, setMessages } = useChatStore()
+
   const [newMessage, setNewMessage] = useState("")
   const chatWindowRef = useRef<HTMLDivElement>(null)
 
-  //  1: 웹소켓 연결/해제 관리. roomId가 바뀔 때만 실행됩니다.
+  // 1. 웹소켓 연결/해제 관리
   useEffect(() => {
     if (roomId) {
       connect()
     }
     return () => {
       disconnect()
-      clearMessages()
+      // ❗️ 수정: 컴포넌트가 사라질 때, 현재 방의 메시지만 삭제합니다.
+      clearMessages(String(roomId))
     }
   }, [roomId, connect, disconnect, clearMessages])
 
-  //  2: 이전 메시지 초기화. initialMessages가 처음 들어왔을 때 실행됩니다.
+  // 2. 이전 메시지 초기화
   useEffect(() => {
     if (initialMessages) {
-      setMessages(initialMessages)
+      // ❗️ 수정: 현재 방에 대한 메시지를 설정합니다.
+      setMessages(String(roomId), initialMessages)
     }
-  }, [initialMessages, setMessages])
+  }, [initialMessages, setMessages, roomId])
 
-  //  3: 메시지 목록이 변경되면 스크롤을 맨 아래로 이동
+  // 3. 새 메시지 수신 시 스크롤 이동
   useEffect(() => {
     if (chatWindowRef.current) {
       chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight
@@ -70,7 +76,7 @@ const DM: React.FC<ChatMemberProps> = ({ roomId, studentId, members, initialMess
       <main ref={chatWindowRef} className="min-h-0 flex-1 overflow-y-auto bg-white p-4">
         <div className="flex flex-col gap-4">
           {messages.map((msg) => {
-            const sender = members[1]
+            const sender = members.find((member) => member.studentId === msg.studentId) || members[1]
             if (!sender) return null
             const senderName = sender.name
             const senderProfile = sender.profileImageUrl

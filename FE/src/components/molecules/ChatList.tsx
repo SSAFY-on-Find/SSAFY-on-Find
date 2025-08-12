@@ -8,7 +8,6 @@ interface ChatListProps {
 }
 
 function ChatList({ rooms, onRoomClick }: ChatListProps) {
-  rooms.map((ele) => console.log(ele))
   return (
     <div className="flex w-full flex-col items-start gap-1 px-2 py-3 whitespace-nowrap">
       {rooms &&

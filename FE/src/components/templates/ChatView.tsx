@@ -28,7 +28,7 @@ function ChatView() {
   }
 
   const currentChatRoom = chatRooms.find((room) => room.chatRoomId === activeRoomId)
-
+  console.log("chatRooms", chatRooms)
   if (!currentChatRoom) {
     closeChat()
     return null
@@ -41,14 +41,14 @@ function ChatView() {
       profileImageUrl: undefined,
     },
     {
-      studentId: currentChatRoom.targetStudentId,
+      studentId: currentChatRoom.targetUserId,
       name: currentChatRoom.targetUsername,
       profileImageUrl: currentChatRoom.targetProfileImageUrl,
     },
   ]
 
   return (
-    <aside className="border-line shadow- absolute top-30 left-[260px] z-10 flex h-[650px] w-[400px] flex-col overflow-hidden rounded-xl border-1 bg-white shadow-lg">
+    <aside className="border-line fixed top-20 left-[270px] z-10 flex h-[550px] w-[350px] flex-col overflow-hidden rounded-xl border-1 bg-white shadow-md">
       <header className="border-line flex items-center justify-between border-b p-4">
         <div className="flex gap-4">
           <UserImg

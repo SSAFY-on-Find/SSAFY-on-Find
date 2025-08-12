@@ -34,10 +34,12 @@ export interface DirectChatRoomRequest {
 
 export interface IChatRoomInfo {
   chatRoomId: number
-  targetStudentId: number
+  hasTeam: boolean
+  isRead: boolean
+  lastChatAt: string
+  targetUserId: number
   targetUsername: string
   targetProfileImageUrl: string
   major: string
   position: ISubcode
-  hasTeam: boolean
 }
