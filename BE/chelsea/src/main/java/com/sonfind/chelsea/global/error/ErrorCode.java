@@ -37,6 +37,7 @@ public enum ErrorCode {
 	CHATROOM_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방 멤버를 찾을 수 없습니다."),
 	CHATROOM_MEMBER_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 채팅방에 존재하는 멤버입니다."),
 	SELF_CHAT_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "자기 자신과는 채팅방을 만들 수 없습니다."),
+	CHATROOM_NOT_ONE_TO_ONE(HttpStatus.BAD_REQUEST, "1:1 채팅방이 아니거나 멤버가 2명이 아닙니다."),
 
 	// 파일 관련
 	FILE_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "파일 업로드 중 오류가 발생했습니다."),

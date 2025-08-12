@@ -1,5 +1,7 @@
 package com.sonfind.chelsea.service;
 
+import static com.sonfind.chelsea.global.error.ErrorCode.*;
+
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Comparator;
@@ -21,6 +23,7 @@ import com.sonfind.chelsea.domain.teams.Team;
 import com.sonfind.chelsea.dto.chat.ChatMessageResponseDto;
 import com.sonfind.chelsea.dto.chat.ChatRoomListResponseDto;
 import com.sonfind.chelsea.dto.chat.ChatRoomListResponseDto.DirectChatRoomInfoDto;
+import com.sonfind.chelsea.global.error.AppException;
 import com.sonfind.chelsea.repository.ChatMessageRepository;
 import com.sonfind.chelsea.repository.ChatRoomMemberRepository;
 import com.sonfind.chelsea.repository.ChatRoomRepository;
@@ -44,10 +47,10 @@ public class ChatRoomService {
 	@Transactional
 	public Long createTeamChatRoom(Long teamId) {
 		Team team = teamRepository.findById(teamId)
-			.orElseThrow(() -> new IllegalArgumentException("팀을 찾을 수 없습니다."));
+			.orElseThrow(() -> new AppException(TEAM_NOT_FOUND));
 
 		if (chatRoomRepository.existsByTeam(team)) {
-			throw new IllegalStateException("이미 해당 팀의 채팅방이 존재합니다.");
+			throw new AppException(CHATROOM_ALREADY_EXISTS);
 		}
 
 		ChatRoom chatRoom = ChatRoom.createTeamChatRoom(team);
@@ -64,17 +67,17 @@ public class ChatRoomService {
 	@Transactional
 	public Long createDirectChatRoom(Long studentId, Long targetStudentId) {
 		if (studentId.equals(targetStudentId)) {
-			throw new IllegalArgumentException("자기 자신과는 채팅방을 만들 수 없습니다.");
+			throw new AppException(SELF_CHAT_NOT_ALLOWED);
 		}
 
 		Student student = studentRepository.findById(studentId)
-			.orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
+			.orElseThrow(() -> new AppException(STUDENT_NOT_FOUND));
 		Student targetStudent = studentRepository.findById(targetStudentId)
-			.orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
+			.orElseThrow(() -> new AppException(STUDENT_NOT_FOUND));
 
 		boolean isPresent = chatRoomRepository.findDirectChatRoomBy(student, targetStudent).isPresent();
 		if (isPresent) {
-			throw new IllegalStateException("이미 존재하는 채팅방입니다.");
+			throw new AppException(CHATROOM_ALREADY_EXISTS);
 		}
 
 		ChatRoom chatRoom = ChatRoom.createDirectChatRoom();
@@ -87,7 +90,7 @@ public class ChatRoomService {
 
 	public ChatRoomListResponseDto getDirectChatRooms(Long studentId) {
 		Student student = studentRepository.findById(studentId)
-			.orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
+			.orElseThrow(() -> new AppException(STUDENT_NOT_FOUND));
 
 		List<ChatRoom> directChatRooms = chatRoomRepository.findDirectChatRoomsWithMembersBy(student);
 		if (directChatRooms.isEmpty()) {
@@ -144,15 +147,15 @@ public class ChatRoomService {
 	@Transactional
 	public void leaveStudent(Long studentId, Long roomId) {
 		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-			.orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+			.orElseThrow(() -> new AppException(CHATROOM_NOT_FOUND));
 
 		Student student = studentRepository.findByStudentId(studentId)
-			.orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
+			.orElseThrow(() -> new AppException(STUDENT_NOT_FOUND));
 
 		ChatRoomMember memberToRemove = chatRoom.getChatRoomMembers().stream()
 			.filter(m -> m.getStudent().equals(student))
 			.findFirst()
-			.orElseThrow(() -> new IllegalStateException("팀 채팅에 존재하지 않는 학생입니다."));
+			.orElseThrow(() -> new AppException(CHATROOM_MEMBER_NOT_FOUND));
 
 		chatRoom.removeChatRoomMember(memberToRemove);
 	}
@@ -160,13 +163,13 @@ public class ChatRoomService {
 	@Transactional
 	public void enterStudent(Long studentId, Long roomId) {
 		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-			.orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+			.orElseThrow(() -> new AppException(CHATROOM_NOT_FOUND));
 
 		Student student = studentRepository.findByStudentId(studentId)
-			.orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
+			.orElseThrow(() -> new AppException(STUDENT_NOT_FOUND));
 
 		if (chatRoom.hasStudent(student)) {
-			throw new IllegalStateException("이미 팀 채팅에 존재하는 학생입니다.");
+			throw new AppException(CHATROOM_ALREADY_EXISTS);
 		}
 
 		chatRoom.addChatRoomMember(new ChatRoomMember(chatRoom, student));
@@ -174,25 +177,25 @@ public class ChatRoomService {
 
 	public Long findRoomByTeam(Long teamId) {
 		Team team = teamRepository.findById(teamId)
-			.orElseThrow(() -> new IllegalArgumentException("팀을 찾을 수 없습니다."));
+			.orElseThrow(() -> new AppException(TEAM_NOT_FOUND));
 
 		ChatRoom chatRoom = chatRoomRepository.findByTeam(team)
-			.orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+			.orElseThrow(() -> new AppException(CHATROOM_NOT_FOUND));
 
 		return chatRoom.getId();
 	}
 
 	public List<ChatMessageResponseDto> getMessages(Long studentId, Long roomId) {
 		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-			.orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+			.orElseThrow(() -> new AppException(CHATROOM_NOT_FOUND));
 
 		Student student = studentRepository.findByStudentId(studentId)
-			.orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
+			.orElseThrow(() -> new AppException(STUDENT_NOT_FOUND));
 
 		ChatRoomMember chatRoomMember = chatRoom.getChatRoomMembers().stream()
 			.filter(member -> member.getStudent().equals(student))
 			.findFirst()
-			.orElseThrow(() -> new IllegalArgumentException("사용자는 이 채팅방의 멤버가 아닙니다."));
+			.orElseThrow(() -> new AppException(CHATROOM_MEMBER_NOT_FOUND));
 
 		LocalDateTime joinedAt = chatRoomMember.getCreated_at();
 		return chatMessageRepository.findByRoomIdAndPublishedAtAfterOrderByPublishedAtAsc(roomId, joinedAt)
@@ -205,13 +208,13 @@ public class ChatRoomService {
 	@Transactional
 	public void updateLastReadAt(Long studentId, Long roomId) {
 		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-			.orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+			.orElseThrow(() -> new AppException(CHATROOM_NOT_FOUND));
 
 		Student student = studentRepository.findByStudentId(studentId)
-			.orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
+			.orElseThrow(() -> new AppException(STUDENT_NOT_FOUND));
 
 		ChatRoomMember chatRoomMember = chatRoomMemberRepository.findByChatRoomAndStudent(chatRoom, student)
-			.orElseThrow(() -> new IllegalArgumentException("채팅방에 학생이 존재하지 않습니다."));
+			.orElseThrow(() -> new AppException(CHATROOM_MEMBER_NOT_FOUND));
 
 		chatRoomMember.changeReadAt(LocalDateTime.now());
 	}
