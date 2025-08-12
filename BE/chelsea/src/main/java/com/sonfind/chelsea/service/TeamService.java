@@ -539,16 +539,6 @@ public class TeamService {
 		return result;
 	}
 
-	private List<TeamListResponseDto> getTeamList(List<Team> teams, Long studentId) {
-		return teams.stream()
-			.map(team -> convertToTeamListResponse(team, studentId))
-			.sorted(
-				Comparator.comparing(TeamListResponseDto::isRecruitingComplete)
-					.thenComparing(dto -> parseTeamNumber(dto.teamName()))
-			)
-			.collect(Collectors.toList());
-	}
-
 	//team2teamlistresponseDto
 	private TeamListResponseDto convertToTeamListResponse(Team team, Long studentId) {
 		List<Student> teamMembers = studentRepository.findAllByTeamId(team.getTeamId());
@@ -734,11 +724,6 @@ public class TeamService {
 			.majorCount(team.getMajorCount())
 			.nonMajorCount(team.getNonMajorCount())
 			.build();
-	}
-
-	public TeamSimpleResponseDto createTeamSimpleResponseDto(Long teamId, String teamName, String trackCodeName,
-		int majorCount, int nonMajorCout) {
-		return new TeamSimpleResponseDto(teamId, teamName, trackCodeName, majorCount, nonMajorCout);
 	}
 
 	private MemberSummary createMemberSummary(Student student) {
