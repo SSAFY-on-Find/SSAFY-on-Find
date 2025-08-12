@@ -57,10 +57,17 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 
 		// 알림 발신자와 수신자의 정보를 NotificationParticipant 객체로 생성
 		NotificationDocument findNotificationLog = findLatestNotification(dto);
-		// 해당 알림 중 PENDING 상태의 알림이 있는지 확인
-		hasPendingStatus(findNotificationLog.getId());
+		if (findNotificationLog == null) {
 
+		} else {
+			// 해당 알림 중 PENDING 상태의 알림이 있는지 확인
+			hasPendingStatus(findNotificationLog.getId());
+		}
+
+
+		log.info("알림 발신자 정보: {}, {}", info.pubType(), info.subType());
 		NotificationDocument temp = documentService.buildBaseDocument(dto, info);
+		log.info("알림 문서 생성: {}", temp);
 
 		NotificationDocument savedNotification = notificationRepo.save(documentService.fillContent(temp));
 		log.info("알림이 저장되었습니다: {}", savedNotification.getId());
@@ -317,10 +324,6 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				dto.subId(),
 				dto.subType()
 		);
-
-		if (lastUpdatedLog == null) {
-			throw new AppException(ErrorCode.NOTIFICATION_NOT_FOUND);
-		}
 
 		return lastUpdatedLog;
 	}
