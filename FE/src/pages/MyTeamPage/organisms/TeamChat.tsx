@@ -38,7 +38,6 @@ const TeamChat: React.FC<TeamChatProps> = ({ roomId, studentId, members, initial
     }
     return () => {
       disconnect()
-      // ❗️ 수정: 컴포넌트가 사라질 때, 현재 방의 메시지만 삭제합니다.
       clearMessages(String(roomId))
     }
   }, [roomId, connect, disconnect, clearMessages])
@@ -46,7 +45,6 @@ const TeamChat: React.FC<TeamChatProps> = ({ roomId, studentId, members, initial
   // 2. 이전 메시지 초기화
   useEffect(() => {
     if (initialMessages) {
-      // ❗️ 수정: 현재 방에 대한 메시지를 설정합니다.
       setMessages(String(roomId), initialMessages)
     }
   }, [initialMessages, setMessages, roomId])

@@ -26,7 +26,7 @@ const DM: React.FC<ChatMemberProps> = ({ roomId, studentId, members, initialMess
 
   // ❗️ 수정: 스토어에서 현재 roomId에 해당하는 메시지만 가져옵니다.
   const messages = useChatStore((state) => state.messagesByRoom[String(roomId)] || [])
-  const { isConnected, clearMessages, setMessages } = useChatStore()
+  const { setMessages } = useChatStore()
 
   const [newMessage, setNewMessage] = useState("")
   const chatWindowRef = useRef<HTMLDivElement>(null)
@@ -38,10 +38,8 @@ const DM: React.FC<ChatMemberProps> = ({ roomId, studentId, members, initialMess
     }
     return () => {
       disconnect()
-      // ❗️ 수정: 컴포넌트가 사라질 때, 현재 방의 메시지만 삭제합니다.
-      clearMessages(String(roomId))
     }
-  }, [roomId, connect, disconnect, clearMessages])
+  }, [roomId, connect, disconnect])
 
   // 2. 이전 메시지 초기화
   useEffect(() => {
@@ -59,7 +57,7 @@ const DM: React.FC<ChatMemberProps> = ({ roomId, studentId, members, initialMess
   }, [messages])
 
   const handleSendMessage = () => {
-    if (newMessage.trim() && isConnected) {
+    if (newMessage.trim()) {
       sendMessage({
         roomId: roomId,
         studentId: studentId,
@@ -102,7 +100,6 @@ const DM: React.FC<ChatMemberProps> = ({ roomId, studentId, members, initialMess
               size={"s"}
               placeholder={"메시지를 입력하세요..."}
               onChange={setNewMessage}
-              isDisabled={!isConnected}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.nativeEvent.isComposing) {
                   e.preventDefault()

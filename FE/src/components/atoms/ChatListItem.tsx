@@ -8,9 +8,10 @@ interface ChatListItemProps {
 }
 
 function ChatListItem({ roomInfo, onClick }: ChatListItemProps) {
+  const unReadBG = roomInfo.isRead ? "" : "bg-main" // isRead 정상 작동시 사용하기
   return (
     <div
-      className="hover:bg-main/10 flex w-full cursor-pointer items-center justify-start gap-2 rounded-md px-1 py-1"
+      className={`hover:bg-main/10 flex w-full cursor-pointer items-center justify-start gap-2 rounded-md px-1 py-1`}
       onClick={onClick}
     >
       <UserImg

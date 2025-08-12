@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Client, type IMessage, type StompSubscription } from "@stomp/stompjs"
 
+import { updateLastReadAt } from "@/apis/chatRoom"
 import { useChatStore } from "@/stores/chatStore"
 import type { ChatMessage } from "@/types/chat/chat"
 import type { IChatOptions } from "@/types/chat/IChatOption"
@@ -12,7 +13,7 @@ export const useChat = ({ roomId, studentId, chatType }: IChatOptions) => {
   const subscriptionRef = useRef<StompSubscription | null>(null)
 
   // ❗️ 수정: clearMessages는 이제 컴포넌트에서 직접 호출하므로 여기서 제거합니다.
-  const { addMessage, setConnected } = useChatStore()
+  const { addMessage, setConnected, clearMessages } = useChatStore()
   const [error, setError] = useState<string | null>(null)
   const subscribePath = chatType === "team" ? `/topic/chatroom/${roomId}` : `/queue/chatroom/${roomId}`
   const publishPath = chatType === "team" ? "/pub/team/message" : "/pub/direct/message"
@@ -62,22 +63,21 @@ export const useChat = ({ roomId, studentId, chatType }: IChatOptions) => {
       stompClientRef.current = null
       subscriptionRef.current = null
     }
-    // ❗️ 수정: 의존성 배열에서 clearMessages를 제거합니다.
   }, [roomId, studentId, addMessage, setConnected, subscribePath])
 
   const connect = useCallback(() => {
     if (!stompClientRef.current || stompClientRef.current.active) {
       return
     }
-    // ❗️ 수정: clearMessages 호출을 제거합니다. 메시지 초기화는 컴포넌트가 담당합니다.
     stompClientRef.current.activate()
   }, [])
 
   const disconnect = useCallback(() => {
-    if (stompClientRef.current?.active) {
+    if (stompClientRef.current?.active && roomId) {
+      updateLastReadAt(roomId)
       stompClientRef.current.deactivate()
     }
-  }, [])
+  }, [roomId, clearMessages])
 
   const sendMessage = useCallback(
     (message: Omit<ChatMessage, "publishedAt">) => {
