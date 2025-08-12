@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { toast } from "react-toastify"
 
 import { Button, CheckTag, Dropdown, InputBox } from "@/components/atoms"
 import { useCreateTeam, useTeamWarmup } from "@/hooks/useTeam"
@@ -59,15 +60,11 @@ export default function TeamCreatePage() {
 
   const handleCreateTeam = () => {
     if (!createTeamData.description.trim()) {
-      alert("팀 소개를 입력해주세요")
+      toast.error("팀 소개를 입력해주세요")
       return
     }
     if (!createTeamData.track) {
-      alert("프로젝트 트랙을 선택해주세요")
-      return
-    }
-    if (createTeamData.positions.length === 0) {
-      alert("모집 포지션을 하나 이상 선택해주세요")
+      toast.error("프로젝트 트랙을 선택해주세요")
       return
     }
 
@@ -77,7 +74,6 @@ export default function TeamCreatePage() {
     return <TeamCreateSkeleton />
   }
 
-  // 기존 return 문 앞에 추가
   return (
     <div className="bg-background min-h-screen px-15 py-10">
       <div className="p-6">

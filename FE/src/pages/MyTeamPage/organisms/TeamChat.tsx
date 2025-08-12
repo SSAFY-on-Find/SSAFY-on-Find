@@ -21,17 +21,21 @@ interface TeamChatProps {
   initialMessages?: ChatMessage[]
 }
 
+// ✅ 빈 배열을 컴포넌트 외부에 상수로 선언하여 항상 동일한 참조를 갖도록 합니다.
+const EMPTY_MESSAGES: ChatMessage[] = []
+
 const TeamChat: React.FC<TeamChatProps> = ({ roomId, studentId, members, initialMessages }) => {
   const { connect, disconnect, sendMessage, error } = useChat({ roomId, studentId, chatType: "team" })
 
-  // ❗️ 수정: 스토어에서 현재 roomId에 해당하는 메시지만 가져옵니다.
-  const messages = useChatStore((state) => state.messagesByRoom[String(roomId)] || [])
-  const { isConnected, clearMessages, setMessages } = useChatStore()
+  // ✅ 스토어에서 메시지 배열을 선택합니다.
+  // 해당 방의 메시지가 없으면(undefined), 위에서 선언한 EMPTY_MESSAGES를 사용합니다.
+  // 이렇게 하면 새로운 배열이 생성되지 않아 무한 루프가 발생하지 않습니다.
+  const messages = useChatStore((state) => state.messagesByRoom[String(roomId)] || EMPTY_MESSAGES)
 
+  const { isConnected, clearMessages, setMessages } = useChatStore()
   const [newMessage, setNewMessage] = useState("")
   const chatWindowRef = useRef<HTMLDivElement>(null)
 
-  // 1. 웹소켓 연결/해제 관리
   useEffect(() => {
     if (roomId) {
       connect()
@@ -42,14 +46,13 @@ const TeamChat: React.FC<TeamChatProps> = ({ roomId, studentId, members, initial
     }
   }, [roomId, connect, disconnect, clearMessages])
 
-  // 2. 이전 메시지 초기화
   useEffect(() => {
+    // initialMessages가 변경될 때만 메시지를 설정하도록 합니다.
     if (initialMessages) {
       setMessages(String(roomId), initialMessages)
     }
   }, [initialMessages, setMessages, roomId])
 
-  // 3. 새 메시지 수신 시 스크롤 이동
   useEffect(() => {
     if (chatWindowRef.current) {
       chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight
@@ -84,7 +87,7 @@ const TeamChat: React.FC<TeamChatProps> = ({ roomId, studentId, members, initial
 
             return (
               <MessageBox
-                key={`${msg.studentId}-${msg.publishedAt}`}
+                key={`${msg.studentId}-${msg.publishedAt}`} // 고유한 key를 위해 publishedAt 사용
                 who={msg.studentId === studentId ? "me" : "other"}
                 content={msg.content}
                 name={senderName}

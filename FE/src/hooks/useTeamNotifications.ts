@@ -9,7 +9,7 @@ export const useTeamNotifications = (teamId: number, type: string) => {
     if (teamId) {
       fetchTeamNotifications({ teamId, type })
     }
-  }, [teamId, type, fetchTeamNotifications])
+  }, [teamId, type])
 
   return { notifications, unReadCount, isLoading, error, refetch: fetchTeamNotifications }
 }

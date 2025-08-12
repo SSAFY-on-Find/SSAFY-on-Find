@@ -61,7 +61,7 @@ function TeamDetail({
       <div className="px-8">
         <p className="text-text mb-[10px] text-sm font-semibold">모집중인 포지션</p>
         <div className="flex gap-[10px]">
-          {positions && positions.map((pos) => <PositionTag positionName={pos.positionName} />)}
+          {positions && positions.map((pos, idx) => <PositionTag key={idx} positionName={pos.positionName} />)}
         </div>
         <p className="text-text mt-[30px] mb-[15px] text-sm font-semibold">현재팀원 ({teamCount} / 6)</p>
         <div className="flex">
@@ -72,8 +72,8 @@ function TeamDetail({
               <>
                 <p className="text-text mb-[10px] text-sm font-semibold">전공</p>
                 <div className="flex">
-                  {majorMembers.map((ele) => (
-                    <div className="flex flex-col items-center px-[10px]">
+                  {majorMembers.map((ele, idx) => (
+                    <div key={idx} className="flex flex-col items-center px-[10px]">
                       <UserImg name={ele.name} size={"m"} showTeamBadge={false} url={ele.profileImageUrl} />
                       <p className="mt-2 mb-[5px] text-sm">{ele.name}</p>
                       {ele.position && <PositionTag positionName={ele.position.subcodeName} />}
@@ -98,8 +98,8 @@ function TeamDetail({
               <>
                 <p className="text-text mb-[10px] text-sm font-semibold">비전공</p>
                 <div className="flex">
-                  {nonMajorMembers.map((ele) => (
-                    <div className="flex flex-col items-center px-[10px]">
+                  {nonMajorMembers.map((ele, idx) => (
+                    <div key={idx} className="flex flex-col items-center px-[10px]">
                       <UserImg name={ele.name} size={"m"} showTeamBadge={false} url={ele.profileImageUrl} />
                       <p className="mt-2 mb-[5px] text-sm">{ele.name}</p>
                       {ele.position && <PositionTag positionName={ele.position.subcodeName} />}

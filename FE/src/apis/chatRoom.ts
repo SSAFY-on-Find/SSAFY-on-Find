@@ -21,7 +21,6 @@ export const createDirectChatRoom = async (data: DirectChatRoomRequest): Promise
 
 export const getMyDirectChatRooms = async () => {
   const response = await api.get("/chat-rooms/individual/me")
-  console.log("chat-rooms response", response)
   return response.data.data
 }
 export const leaveChatRoom = async (roomId: number): Promise<void> => {

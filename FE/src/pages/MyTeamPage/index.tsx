@@ -7,8 +7,8 @@ import { createTeamChatRoom, getChatMessages, getTeamChatRoomId, leaveChatRoom }
 import { teamApi } from "@/apis/teamApi"
 import { TeamDetail } from "@/components/molecules"
 import Loading from "@/components/templates/Loading"
+import { useAuth } from "@/hooks/useStudent"
 import { useTeamNotifications } from "@/hooks/useTeamNotifications"
-import { useUserStore } from "@/stores/userStore"
 import type { IMyTeam, ITeamMember } from "@/types/team"
 
 import ApplicantCard from "./organisms/ApplicantCard"
@@ -17,8 +17,9 @@ import TeamChat from "./organisms/TeamChat"
 export default function MyTeamPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const teamId = useUserStore((state) => state.user?.teamId)
-  const studentId = useUserStore((state) => state.user?.studentId)
+  const { data: authData, isLoading: isAuthLoading } = useAuth()
+  const teamId = authData?.teamId
+  const studentId = authData?.studentId
   const [chatRoomId, setChatRoomId] = useState<number | null>(null)
 
   const { data: myTeamData, isLoading: isMyTeamLoading } = useQuery<IMyTeam>({
@@ -97,10 +98,11 @@ export default function MyTeamPage() {
   } = useTeamNotifications(teamId!, "receive")
 
   useEffect(() => {
-    if (!teamId) {
+    // 로딩 상태도 함께 확인
+    if (!teamId && !isMyTeamLoading) {
       navigate("/create-team")
     }
-  }, [teamId, navigate])
+  }, [teamId, navigate, isMyTeamLoading])
 
   useEffect(() => {
     if (isSuccess && fetchedRoomId) setChatRoomId(fetchedRoomId)
