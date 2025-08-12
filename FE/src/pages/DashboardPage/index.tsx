@@ -1,4 +1,5 @@
 import { useEffect } from "react"
+import { RotateCw } from "lucide-react"
 
 import { MajorTag, NormalTag, PositionTag, Tooltip, UserImg } from "@/components/atoms"
 import { StudentInfo } from "@/components/molecules"
@@ -10,6 +11,7 @@ import {
   useSummaryInfo,
   useTeamRatio,
 } from "@/hooks/useDashboard"
+import { useAiRecommendStore } from "@/stores/aiRecommendStore"
 import { useUserStore } from "@/stores/userStore"
 
 import DashboardCard from "./organisms/DashboardCard"
@@ -23,13 +25,23 @@ export default function DashboardPage() {
   const { data: teamRatio, isLoading: isTeamRatioLoading, error: teamRatioError } = useTeamRatio()
   const { data: positionRatio, isLoading: isPositionRatioLoading, error: positionRatioError } = usePositionRatio()
   const { data: recommendTeam, isLoading: isRecommendTeamLoading, error: recommendTeamError } = useRecommendTeam()
-
-  const aiRecommend = useAIRecommendations()
+  const { recommendations, setRecommendations } = useAiRecommendStore()
+  const aiRecommend = useAIRecommendations({
+    onSuccess: (data) => {
+      setRecommendations(data)
+    },
+  })
 
   useEffect(() => {
-    if (studentId && aiRecommend.isIdle) aiRecommend.mutate(Number(studentId))
-  }, [studentId])
-
+    if (studentId && !recommendations && aiRecommend.isIdle) {
+      aiRecommend.mutate(Number(studentId))
+    }
+  }, [studentId, recommendations, aiRecommend])
+  const handleRefreshAiRecommend = () => {
+    if (studentId) {
+      aiRecommend.mutate(Number(studentId))
+    }
+  }
   if (isSummaryLoading || isTeamRatioLoading || isPositionRatioLoading || isRecommendTeamLoading)
     return <Loading fullScreen text="정보를 불러오는 중..." />
   if (summaryError) return <div>프로필 요약 정보를 불러올 수 없습니다.</div>
@@ -72,13 +84,24 @@ export default function DashboardPage() {
             )
           ) : null}
         </DashboardCard>
-        <DashboardCard title={"AI 추천 개인 궁합도 😊"}>
+        <DashboardCard title={""}>
+          <div className="flex items-center justify-between">
+            <h3 className="text-text text-lg font-bold">AI 추천 개인 궁합도 😊</h3>
+            <button
+              onClick={handleRefreshAiRecommend}
+              disabled={aiRecommend.isPending}
+              className="hover:bg-main/20 rounded-full p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              title="새로고침"
+            >
+              <RotateCw size={16} className={aiRecommend.isPending ? "animate-spin" : ""} />
+            </button>
+          </div>
           {aiRecommend.isPending && (
             <div className="text-subtext mt-15 text-center">
               <Loading text="AI가 최적의 팀원을 분석 중입니다..." bg="bg-white" />
             </div>
           )}
-          {aiRecommend.isSuccess && (
+          {!aiRecommend.isPending && recommendations && (
             <div className="mt-3 flex flex-col gap-2">
               {aiRecommend?.data?.map((rec, index) => (
                 <div key={rec.studentId}>

@@ -1,5 +1,5 @@
 import { toast } from "react-toastify"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, type UseMutationOptions, useQuery } from "@tanstack/react-query"
 
 import { aiApi } from "@/apis/aiApi"
 import { dashboardApi } from "@/apis/dashboardApi"
@@ -72,7 +72,10 @@ export const useRecommendTeam = () => {
   })
 }
 
-export const useAIRecommendations = () =>
+export const useAIRecommendations = (
+  options?: UseMutationOptions<IAiRecommend[], Error, number> // 옵션을 받을 수 있도록 추가
+) =>
   useMutation<IAiRecommend[], Error, number>({
     mutationFn: (studentId) => aiApi.getRecommendations(studentId),
+    ...options, // 외부에서 주입된 옵션을 여기에 병합
   })
