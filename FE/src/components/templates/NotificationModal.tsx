@@ -166,8 +166,17 @@ export default function NotificationModal({ isOpen, onClose, returnFocusRef }: N
     return () => {
       document.removeEventListener("keydown", handleKeydown)
       returnFocusRef?.current?.focus?.()
+      document.body.style.overflow = "" // 항상 원래 상태로
     }
   }, [isOpen, onClose, returnFocusRef])
+
+  // 배경 스크롤 제어
+  const lockScroll = () => {
+    document.body.style.overflow = "hidden"
+  }
+  const unlockScroll = () => {
+    document.body.style.overflow = ""
+  }
 
   return (
     <>
@@ -178,6 +187,8 @@ export default function NotificationModal({ isOpen, onClose, returnFocusRef }: N
         aria-label="알림함"
         ref={containerRef}
         tabIndex={-1} // 포커스 받을 수 있게
+        onMouseEnter={lockScroll}
+        onMouseLeave={unlockScroll}
         className={`fixed top-[64px] right-0 z-50 h-[calc(100%-64px)] w-96 transform bg-white p-2 shadow-2xl transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
