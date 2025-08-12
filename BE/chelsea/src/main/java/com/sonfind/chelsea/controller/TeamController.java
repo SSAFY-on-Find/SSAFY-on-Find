@@ -33,10 +33,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/teams")
+@Slf4j
 public class TeamController {
 
 	private final TeamService teamService;
@@ -174,26 +176,6 @@ public class TeamController {
 		return ResponseEntity.ok().body(body);
 	}
 
-	//팀 합치기 api 테스트용
-	// @PostMapping("/merge")
-	// public ResponseEntity<Map<String, Object>> mergeTeams(
-	// 	@RequestBody @Valid MergeTeamsRequestDto request,
-	// 	@Parameter(hidden = true)
-	// 	@SessionAttribute("loginUser") Long studentId) {
-	//
-	// 	teamService.mergeTeams(request.sourceTeamId(), request.targetTeamId());
-	//
-	// 	Map<String, Object> body = new HashMap<>();
-	// 	body.put("status", "SUCCESS");
-	// 	body.put("message", "팀이 성공적으로 합쳐졌습니다.");
-	// 	body.put("data", Map.of(
-	// 		"sourceTeamId", request.sourceTeamId(),
-	// 		"targetTeamId", request.targetTeamId()
-	// 	));
-	//
-	// 	return ResponseEntity.ok().body(body);
-	// }
-
 	//타 팀 상세조회
 	@GetMapping("/{teamId}")
 	@Operation(summary = "팀 상세조회", description = "특정 팀의 상세 정보를 조회합니다.")
@@ -283,7 +265,10 @@ public class TeamController {
 	})
 	public ResponseEntity<Map<String, Object>> getAllTeams(@Parameter(hidden = true)
 	@SessionAttribute("loginUser") Long studentId) {
-		List<TeamListResponseDto> teamListResponse = teamService.getAllTeams(studentId);
+		//기존 전체 목록 조회
+		// List<TeamListResponseDto> teamListResponse = teamService.getAllTeams(studentId);
+
+		List<TeamListResponseDto> teamListResponse = teamService.getAllTeamsFetchJoin(studentId);
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
@@ -291,4 +276,5 @@ public class TeamController {
 
 		return ResponseEntity.ok().body(body);
 	}
+
 }

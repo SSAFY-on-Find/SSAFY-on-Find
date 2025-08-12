@@ -7,6 +7,7 @@ interface UserState {
   setUser: (user: IStudentSignin) => void
   resetUser: () => void
   updateUserTeamId: (teamId?: number | null) => void
+  markProfileCreated: () => void
 }
 
 export const useUserStore = create<UserState>((set) => ({
@@ -17,4 +18,5 @@ export const useUserStore = create<UserState>((set) => ({
     set((state) => ({
       user: state.user ? { ...state.user, teamId: teamId } : null,
     })),
+  markProfileCreated: () => set((s) => (s.user ? { user: { ...s.user, isCreatedStudentInfo: true } } : s)),
 }))

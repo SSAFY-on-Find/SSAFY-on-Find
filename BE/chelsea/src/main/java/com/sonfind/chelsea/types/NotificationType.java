@@ -1,5 +1,7 @@
 package com.sonfind.chelsea.types;
 
+import com.sonfind.chelsea.global.error.AppException;
+import com.sonfind.chelsea.global.error.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +20,6 @@ public enum NotificationType {
 				return notificationType;
 			}
 		}
-		throw new IllegalArgumentException("Invalid notification type: " + value);
+		throw new AppException(ErrorCode.NOTIFICATION_TYPE_NOT_SUPPORTED);
 	}
 }

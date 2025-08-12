@@ -1,1 +1,3 @@
-export type { IGetTeamNotificationsParams, INotification, INotificationStatusResponseDto } from "./INotification"
+export type { IGetTeamNotificationsParams } from "./INotiResponse"
+export type { INotification } from "./INotiResponse"
+export type { INotificationStatusResponseDto } from "./INotiResponse"
