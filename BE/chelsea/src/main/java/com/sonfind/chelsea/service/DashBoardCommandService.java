@@ -1,14 +1,17 @@
 package com.sonfind.chelsea.service;
 
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+
 import com.sonfind.chelsea.dto.dashboard.MemberSummary;
+import com.sonfind.chelsea.dto.dashboard.PositionChangeRequestDto;
 import com.sonfind.chelsea.dto.dashboard.TeamMemberChangedDto;
 import com.sonfind.chelsea.dto.dashboard.TeamProgressDto;
 import com.sonfind.chelsea.types.MemberChageAction;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
@@ -31,17 +34,17 @@ public class DashBoardCommandService {
 	public void publishTeamMemberChangedEvent(Long teamId, MemberChageAction action, MemberSummary summary) {
 		log.info("팀원 변경 이벤트 발행");
 		TeamMemberChangedDto memberChangedDto = TeamMemberChangedDto.builder()
-				.teamId(teamId)
-				.action(action)
-				.member(summary)
-				.build();
+			.teamId(teamId)
+			.action(action)
+			.member(summary)
+			.build();
 		// 팀 목록 혹은 팀 상세보기 갱신용 이벤트 발행
 		eventPublisher.publishEvent(memberChangedDto);
 	}
 
 	// 교육생 정보 생성/업데이트 시 이벤트를 발행하는 메소드
-	public void publishStudentInfoUpdateEvent() {
+	public void publishStudentInfoUpdateEvent(PositionChangeRequestDto eventDto) {
 		log.info("교육생 정보 업데이트 이벤트 발행");
-		eventPublisher.publishEvent("StudentInfoUpdated");
+		eventPublisher.publishEvent(eventDto);
 	}
 }
