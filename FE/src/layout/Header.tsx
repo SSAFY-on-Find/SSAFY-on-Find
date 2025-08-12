@@ -1,6 +1,6 @@
-import { useState } from "react"
+import { forwardRef, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Mailbox, Search } from "lucide-react"
+import { Inbox, Search } from "lucide-react"
 
 import { NotificationModal } from "@/components/templates"
 import { useUserStore } from "@/stores/userStore"
@@ -18,31 +18,26 @@ interface AlarmBoxProps {
   onClick: () => void
 }
 
-function AlarmBox({ onClick }: AlarmBoxProps) {
-  return (
-    <div
-      className="bg-main flex aspect-square h-[120%] cursor-pointer items-center justify-center rounded-full shadow-2xl transition-opacity hover:opacity-90"
-      style={{
-        boxShadow: "0 5px 15px -3px rgba(0, 0, 0, 0.10), 0 4px 6px -4px rgba(0, 0, 0, 0.10)",
-      }}
-      onClick={onClick}
-    >
-      <Mailbox className="h-5 w-5 text-white" />
-    </div>
-  )
-}
+const AlarmBox = forwardRef<HTMLButtonElement, AlarmBoxProps>(({ onClick }, ref) => (
+  <button
+    ref={ref}
+    type="button"
+    className="bg-main focus:ring-main/50 flex aspect-square h-[120%] cursor-pointer items-center justify-center rounded-full shadow-2xl transition-opacity hover:opacity-90 focus:ring-2 focus:outline-none"
+    onClick={onClick}
+    aria-label="알림함 열기"
+  >
+    <Inbox className="h-5 w-5 text-white" />
+  </button>
+))
 
 function Header() {
   const navigate = useNavigate()
   const user = useUserStore((state) => state.user)
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
+  const triggerRef = useRef<HTMLButtonElement | null>(null)
 
   const handleAlarmClick = () => {
-    setIsNotificationOpen(true)
-  }
-
-  const handleCloseNotification = () => {
-    setIsNotificationOpen(false)
+    setIsNotificationOpen((prev) => !prev)
   }
 
   return (
@@ -68,7 +63,11 @@ function Header() {
           </div>
         </div>
       </header>
-      <NotificationModal isOpen={isNotificationOpen} onClose={handleCloseNotification} />
+      <NotificationModal
+        isOpen={isNotificationOpen}
+        onClose={() => setIsNotificationOpen(false)}
+        returnFocusRef={triggerRef}
+      />
     </>
   )
 }
