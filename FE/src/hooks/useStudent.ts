@@ -22,6 +22,25 @@ export const useStudentLogin = () => {
   })
 }
 
+export const useStudentLogout = () => {
+  return useMutation({
+    mutationFn: async () => {
+      try {
+        const response = await studentApi.logout()
+        if (response.status !== "SUCCESS") {
+          throw new Error("로그아웃에 실패하였습니다.")
+        }
+        return response.data
+      } catch (error) {
+        if (error instanceof Error) {
+          throw new Error(error.message)
+        }
+        throw new Error("로그아웃 중 오류가 발생했습니다.")
+      }
+    },
+  })
+}
+
 export const useAuth = () => {
   return useQuery({
     queryKey: ["user-auth"],

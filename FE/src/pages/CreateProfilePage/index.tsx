@@ -6,6 +6,7 @@ import { CirclePlus, Eye, Search, X } from "lucide-react"
 
 import { Button, CheckTag, InputBox, Segmented, UserImg } from "@/components/atoms"
 import { FormCard, FormCheckTag, FormDropdown, FormInput } from "@/components/molecules"
+import Loading from "@/components/templates/Loading"
 import { useProfileCodes } from "@/hooks/useProfile"
 import { useCreateProfile } from "@/hooks/useProfile"
 import { useProfileStore } from "@/stores/profileStore"
@@ -130,7 +131,7 @@ export default function ProfileCreatePage() {
     setCodes({ mbti: null })
   }
 
-  if (isCodesLoading) return <div>로딩 중...</div>
+  if (isCodesLoading) return <Loading />
   if (codesError || !codes) return <div>코드 리스트를 불러올 수 없습니다.</div>
 
   return (
