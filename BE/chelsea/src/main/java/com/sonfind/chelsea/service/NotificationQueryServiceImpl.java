@@ -103,8 +103,8 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 				.map(status -> {
 					NotificationDocument doc = docMap.get(status.getNotificationId());
 					return NotificationStatusResponseDto.builder()
-							.statusId(status.getId())
-							.notificationId(doc.getId())
+							.statusId(status.getId().toHexString())
+							.notificationId(doc.getId().toHexString())
 							.targetId(status.getTargetId())
 							.targetType(status.getTargetType())
 							.role(status.getRole())
@@ -165,8 +165,8 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 				.map(status -> {
 					NotificationDocument doc = docMap.get(status.getNotificationId());
 					return NotificationStatusResponseDto.builder()
-							.statusId(status.getId())
-							.notificationId(doc.getId())
+							.statusId(status.getId().toHexString())
+							.notificationId(doc.getId().toHexString())
 							.targetId(status.getTargetId())
 							.targetType(status.getTargetType())
 							.role(status.getRole())
