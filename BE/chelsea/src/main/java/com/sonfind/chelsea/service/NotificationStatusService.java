@@ -11,15 +11,15 @@ public interface NotificationStatusService {
 	/**
 	 * 수신자의 ACCEPT 동작
 	 */
-	void acceptInvitation(Long studentId, String statusId);
+	void acceptInvitation(Long studentId, String notificationId);
 
 	/**
 	 * 발신자의 REJECT 동작
 	 */
-	void rejectInvitation(Long studentId, String statusId);
+	void rejectInvitation(Long studentId, String notificationId);
 
 	/**
 	 * 발신자의 CANCEL 동작
 	 */
-	void cancelInvitation(Long studentId, String statusId);
+	void cancelInvitation(Long studentId, String notificationId);
 }
