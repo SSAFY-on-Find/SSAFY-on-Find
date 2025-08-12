@@ -1,7 +1,8 @@
 import { Button } from "@/components/atoms"
+import { TeamDetail } from "@/components/molecules"
+import { useInvte } from "@/hooks/useInvite"
+import { useUserStore } from "@/stores/userStore"
 import type { ITeamDetails } from "@/types/team"
-
-import { TeamDetail } from "../molecules"
 
 import Modal from "./Modal"
 
@@ -14,14 +15,37 @@ interface ITeamDetailModal {
 }
 
 function TeamDetailModal({ teamId, isOpen, onClose, teamData, userTeamId }: ITeamDetailModal) {
+  const { applyAsMate, mergeTeams } = useInvte(userTeamId ?? null)
+  const myMateId = useUserStore((s) => s.user?.studentId)
+
   const renderButtons = () => {
     if (userTeamId === null) {
-      return <Button size={"m"} isIcon={false} text="지원하기" variant="primary" onClick={function (): void {}} />
+      return (
+        <Button
+          size={"m"}
+          isIcon={false}
+          text="지원하기"
+          variant="primary"
+          onClick={() => myMateId && applyAsMate(teamId, Number(myMateId))}
+        />
+      )
     } else if (userTeamId !== teamId) {
       return (
         <>
-          <Button size={"m"} isIcon={false} text="지원하기" variant="primary" onClick={function (): void {}} />
-          <Button size={"m"} isIcon={false} text="팀 합치기 제안" variant="outline" onClick={function (): void {}} />
+          <Button
+            size={"m"}
+            isIcon={false}
+            text="지원하기"
+            variant="primary"
+            onClick={() => myMateId && applyAsMate(teamId, Number(myMateId))}
+          />
+          <Button
+            size={"m"}
+            isIcon={false}
+            text="팀 합치기"
+            variant="outline"
+            onClick={() => userTeamId && mergeTeams(teamId, Number(userTeamId))}
+          />
         </>
       )
     }
