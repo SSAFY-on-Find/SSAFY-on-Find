@@ -31,7 +31,7 @@ public class NotificationContentService {
 
 	private String buildInvitationTitle(RecipientRole role, NotificationContext ctx) {
 		if (role == RecipientRole.PUBLISHER) {
-			return "%s님에게 초대".formatted(ctx.subscriber().displayName());
+			return "%s님을 초대".formatted(ctx.subscriber().displayName());
 		}
 
 		return "%s의 초대".formatted(ctx.publisher().displayName());
@@ -42,7 +42,7 @@ public class NotificationContentService {
 			return "%s에 지원".formatted(ctx.subscriber().displayName());
 		}
 
-		return "%s의 지원".formatted(ctx.publisher().displayName());
+		return "%s님의 지원".formatted(ctx.publisher().displayName());
 	}
 
 	public String buildMessage(NotificationDocument notif, RecipientRole role, NotificationContext ctx) {
@@ -95,11 +95,11 @@ public class NotificationContentService {
 
 	private String buildApplicationMessage(NotificationContext ctx) {
 		return "%s(%s, %s)님이 %s(%s)에 지원했습니다.".formatted(
-				ctx.subscriber().displayName(),
-				ctx.subscriber().majorYn(),
-				ctx.subscriber().position(),
 				ctx.publisher().displayName(),
-				ctx.publisher().track()
+				ctx.publisher().majorYn(),
+				ctx.publisher().position(),
+				ctx.subscriber().displayName(),
+				ctx.subscriber().track()
 		);
 	}
 
