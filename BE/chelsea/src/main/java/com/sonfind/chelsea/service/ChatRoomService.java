@@ -2,13 +2,17 @@ package com.sonfind.chelsea.service;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sonfind.chelsea.domain.chat.ChatMessage;
 import com.sonfind.chelsea.domain.chat.ChatRoom;
 import com.sonfind.chelsea.domain.chat.ChatRoomMember;
 import com.sonfind.chelsea.domain.student.Student;
@@ -18,6 +22,7 @@ import com.sonfind.chelsea.dto.chat.ChatMessageResponseDto;
 import com.sonfind.chelsea.dto.chat.ChatRoomListResponseDto;
 import com.sonfind.chelsea.dto.chat.ChatRoomListResponseDto.DirectChatRoomInfoDto;
 import com.sonfind.chelsea.repository.ChatMessageRepository;
+import com.sonfind.chelsea.repository.ChatRoomMemberRepository;
 import com.sonfind.chelsea.repository.ChatRoomRepository;
 import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.StudentRepository;
@@ -34,6 +39,7 @@ public class ChatRoomService {
 	private final TeamRepository teamRepository;
 	private final ChatRoomRepository chatRoomRepository;
 	private final ChatMessageRepository chatMessageRepository;
+	private final ChatRoomMemberRepository chatRoomMemberRepository;
 
 	@Transactional
 	public Long createTeamChatRoom(Long teamId) {
@@ -96,12 +102,38 @@ public class ChatRoomService {
 		Map<Long, StudentInfo> opponentInfoMap = opponentInfos.stream()
 			.collect(Collectors.toMap(info -> info.getStudent().getStudentId(), info -> info));
 
+		List<ChatRoomMember> myMemberships = chatRoomMemberRepository.findByStudentAndChatRoomIn(student,
+			directChatRooms);
+
+		Map<Long, ChatRoomMember> chatRoomMemberMap = myMemberships.stream()
+			.collect(Collectors.toMap(member -> member.getChatRoom().getId(), member -> member));
+
 		List<DirectChatRoomInfoDto> directChatRoomInfoDtos = directChatRooms.stream()
 			.map(chatRoom -> {
 				Student opponent = chatRoom.getOpponent(student);
 				StudentInfo opponentInfo = opponentInfoMap.get(opponent.getStudentId());
-				return DirectChatRoomInfoDto.of(chatRoom.getId(), opponent, opponentInfo);
+				ChatRoomMember myMember = chatRoomMemberMap.get(chatRoom.getId());
+
+				if (opponentInfo == null || myMember == null) {
+					return null;
+				}
+
+				Optional<ChatMessage> lastMessageOpt = chatMessageRepository.findTopByRoomIdOrderByPublishedAtDesc(
+					chatRoom.getId());
+
+				boolean isRead = true;
+				if (lastMessageOpt.isPresent()) {
+					ChatMessage lastMessage = lastMessageOpt.get();
+					LocalDateTime myReadAt = myMember.getReadAt();
+					if (myReadAt == null || lastMessage.getPublishedAt().isAfter(myReadAt)) {
+						isRead = false;
+					}
+				}
+				return DirectChatRoomInfoDto.of(chatRoom, opponent, opponentInfo, isRead);
 			})
+			.filter(Objects::nonNull)
+			.sorted(Comparator.comparing(DirectChatRoomInfoDto::lastChatAt,
+				Comparator.nullsLast(Comparator.reverseOrder())))
 			.toList();
 
 		return new ChatRoomListResponseDto(directChatRoomInfoDtos);
@@ -160,11 +192,25 @@ public class ChatRoomService {
 			.findFirst()
 			.orElseThrow(() -> new IllegalArgumentException("사용자는 이 채팅방의 멤버가 아닙니다."));
 
-		LocalDateTime joinedAt = chatRoomMember.getUpdated_at();
+		LocalDateTime joinedAt = chatRoomMember.getCreated_at();
 		return chatMessageRepository.findByRoomIdAndPublishedAtAfterOrderByPublishedAtAsc(roomId, joinedAt)
 			.stream()
 			.map(ChatMessageResponseDto::of)
 			.toList();
 
+	}
+
+	@Transactional
+	public void updateLastReadAt(Long studentId, Long roomId) {
+		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+			.orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+
+		Student student = studentRepository.findByStudentId(studentId)
+			.orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
+
+		ChatRoomMember chatRoomMember = chatRoomMemberRepository.findByChatRoomAndStudent(chatRoom, student)
+			.orElseThrow(() -> new IllegalArgumentException("채팅방에 학생이 존재하지 않습니다."));
+
+		chatRoomMember.changeReadAt(LocalDateTime.now());
 	}
 }

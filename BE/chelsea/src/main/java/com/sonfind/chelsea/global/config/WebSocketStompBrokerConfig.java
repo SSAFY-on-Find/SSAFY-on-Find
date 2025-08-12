@@ -1,21 +1,14 @@
 package com.sonfind.chelsea.global.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-import com.sonfind.chelsea.global.event.ChannelInBoundInterceptor;
-
-import lombok.RequiredArgsConstructor;
-
 @Configuration
 @EnableWebSocketMessageBroker
-@RequiredArgsConstructor
 public class WebSocketStompBrokerConfig implements WebSocketMessageBrokerConfigurer {
-	private final ChannelInBoundInterceptor interceptor;
 	/**
 	 * 구독 prefix
 	 * /topic : 팀 내 채팅을 받을 접두어
@@ -24,12 +17,6 @@ public class WebSocketStompBrokerConfig implements WebSocketMessageBrokerConfigu
 	 * 메시지 발행 prefix
 	 * /pub
 	 */
-	@Override
-	public void configureClientInboundChannel(ChannelRegistration registration) {
-		// 4. 직접 만든 StompAuthChannelInterceptor를 등록
-		registration.interceptors(interceptor);
-	}
-
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
 		registry.enableSimpleBroker("/topic", "/queue");

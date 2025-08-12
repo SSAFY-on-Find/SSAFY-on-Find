@@ -1,7 +1,9 @@
 package com.sonfind.chelsea.dto.chat;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import com.sonfind.chelsea.domain.chat.ChatRoom;
 import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.domain.studentInfo.StudentInfo;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
@@ -16,20 +18,26 @@ public record ChatRoomListResponseDto(
 		String targetProfileImageUrl,
 		String major,
 		SubCodeResponseDto position,
-		boolean hasTeam
+		boolean hasTeam,
+		boolean isRead,
+		LocalDateTime lastChatAt
 	) {
-		public static DirectChatRoomInfoDto of(Long chatRoomId, Student opponent, StudentInfo opponentInfo) {
+		public static DirectChatRoomInfoDto of(ChatRoom chatRoom, Student opponent, StudentInfo opponentInfo,
+			boolean isRead) {
 			String major = opponent.getMajorYn() ? "전공" : "비전공";
 			String profileImageUrl =
 				opponentInfo.getProfile() == null ? "" : opponentInfo.getProfile().getProfileImageUrl();
 			boolean hasTeam = opponent.getTeamId() != null;
+			LocalDateTime lastChatAt = chatRoom.getUpdated_at();
 
 			SubCodeResponseDto positionDto = new SubCodeResponseDto(
 				opponentInfo.getPositionCode().getSubCode(),
 				opponentInfo.getPositionCode().getSubCodeName()
 			);
-			return new DirectChatRoomInfoDto(chatRoomId, opponent.getStudentId(), opponent.getName(), profileImageUrl, major, positionDto,
-				hasTeam);
+			return new DirectChatRoomInfoDto(chatRoom.getId(), opponent.getStudentId(), opponent.getName(),
+				profileImageUrl,
+				major, positionDto,
+				hasTeam, isRead, lastChatAt);
 		}
 	}
 }
