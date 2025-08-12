@@ -1,9 +1,22 @@
 import { Mail, User, Users } from "lucide-react"
 
 import { Button } from "@/components/atoms"
-import type { INotification, INotificationStatus } from "@/types/notification"
+import type { INotificationStatus } from "@/types/notification"
 
-type Tab = "left" | "right"
+function formatDate(dateString?: string) {
+  if (!dateString) return ""
+
+  const date = new Date(dateString) // ISO 형식이라면 안전하게 파싱됨
+  if (isNaN(date.getTime())) return dateString
+
+  return date.toLocaleString("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
 
 function getStatusColor(status: string) {
   switch (status) {
@@ -84,8 +97,9 @@ export default function NotificationItem({
         </div>
 
         <div className="mt-1 min-w-0">
-          <p className="text-text mb-2 text-sm">{data.subNotificationMessage}</p>
-          <p className="text-subtext text-xs">{data.updatedAt}</p>
+          {/* <p className="text-text mb-2 text-sm">{data.subNotificationMessage}</p> */}
+          <p className="text-text mb-2 text-sm">{`${data.publisherId} -> ${data.subscriberId}`}</p>
+          <p className="text-subtext text-xs">{formatDate(data.notificationId.date)}</p>
         </div>
       </div>
 
