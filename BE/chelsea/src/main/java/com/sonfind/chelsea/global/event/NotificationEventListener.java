@@ -14,8 +14,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.List;
+
+import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 
 /**
  * 알림 이벤트 리스너
@@ -36,6 +39,7 @@ public class NotificationEventListener {
 	 * 이벤트 타입에 따라 발신자와 수신자에게 알림을 전송합니다.
 	 */
 	@EventListener
+	@TransactionalEventListener(phase = AFTER_COMMIT)
 	public void onRequest(InvitationRequestEvent e) {
 
 		RequestPayloadFactory factory = requestPayloadFactories.stream()
@@ -62,6 +66,7 @@ public class NotificationEventListener {
 	}
 
 	@EventListener
+	@TransactionalEventListener(phase = AFTER_COMMIT)
 	public void onResponse(InvitationResponseEvent e) {
 
 		ResponsePayloadFactory factory = responsePayloadFactories.stream()
