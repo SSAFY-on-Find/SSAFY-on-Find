@@ -4,6 +4,8 @@ import com.sonfind.chelsea.domain.notification.NotificationStatusDocument;
 import com.sonfind.chelsea.dto.notification.NotificationAndNotificationStatusResponseDto;
 import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
 import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
+import com.sonfind.chelsea.global.error.AppException;
+import com.sonfind.chelsea.global.error.ErrorCode;
 import com.sonfind.chelsea.repository.NotificationStatusRepository;
 import com.sonfind.chelsea.types.NotificationStatus;
 import com.sonfind.chelsea.types.RecipientRole;
@@ -12,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.bson.types.ObjectId;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,12 +35,11 @@ public class NotificationService {
 	 *
 	 * @param dto: NotificationRequestDto
 	 */
-	public void sendNotification(Long studentId, NotificationRequestDto dto) throws BadRequestException {
+	public void sendNotification(Long studentId, NotificationRequestDto dto) {
 		notificationCommandService.sendNotification(studentId, dto);
 	}
 
-	public NotificationResponseDto getNotificationInfo(ObjectId notificationId) throws
-			BadRequestException {
+	public NotificationResponseDto getNotificationInfo(ObjectId notificationId) {
 		return notificationQueryService.getNotificationInfo(notificationId);
 	}
 
@@ -51,8 +51,7 @@ public class NotificationService {
 	 * @param type
 	 * @return
 	 */
-	public List<NotificationAndNotificationStatusResponseDto> getMyNotifications(Long studentId, String type) throws
-			BadRequestException {
+	public List<NotificationAndNotificationStatusResponseDto> getMyNotifications(Long studentId, String type) {
 		return notificationQueryService.getMyNotifications(studentId, type);
 	}
 
@@ -63,9 +62,7 @@ public class NotificationService {
 	 * @param type
 	 * @return
 	 */
-	public List<NotificationAndNotificationStatusResponseDto> getTeamNotifications(Long studentId, Long teamId,
-	                                                                               String type) throws
-			BadRequestException {
+	public List<NotificationAndNotificationStatusResponseDto> getTeamNotifications(Long studentId, Long teamId, String type) {
 		return notificationQueryService.getTeamNotifications(studentId, teamId, type);
 	}
 
@@ -86,7 +83,7 @@ public class NotificationService {
 	 * @param studentId
 	 * @param statusId
 	 */
-	public void acceptInvitation(Long studentId, String statusId) throws BadRequestException {
+	public void acceptInvitation(Long studentId, String statusId) {
 		notificationCommandService.acceptInvitation(studentId, statusId);
 	}
 
@@ -97,7 +94,7 @@ public class NotificationService {
 	 * @param studentId
 	 * @param statusId
 	 */
-	public void rejectInvitation(Long studentId, String statusId) throws BadRequestException {
+	public void rejectInvitation(Long studentId, String statusId) {
 		notificationCommandService.rejectInvitation(studentId, statusId);
 	}
 
@@ -108,7 +105,7 @@ public class NotificationService {
 	 * @param studentId
 	 * @param statusId
 	 */
-	public void cancelInvitation(Long studentId, String statusId) throws BadRequestException {
+	public void cancelInvitation(Long studentId, String statusId) {
 		notificationCommandService.cancelInvitation(studentId, statusId);
 	}
 
@@ -122,16 +119,14 @@ public class NotificationService {
 	 * @return NotificationStatusDocument
 	 * @throws BadRequestException 알림 상태가 존재하지 않는 경우
 	 */
-	public NotificationStatusDocument getNotificationStatus(ObjectId notificationId, Long studentId, RecipientRole role,
-	                                                        NotificationStatus status
-	) throws BadRequestException {
+	public NotificationStatusDocument getNotificationStatus(ObjectId notificationId, Long studentId, RecipientRole role, NotificationStatus status) {
 		NotificationStatusDocument findStatus = statusRepo.findByNotificationIdAndTargetIdAndRoleAndStatus(
 				notificationId, studentId, role, status
 		);
 
 		if (findStatus == null) {
 			log.info("알림 상태가 존재하지 않습니다: {}, {}, {}", notificationId, studentId, role);
-			throw new BadRequestException("HttpStatus: " + HttpStatus.BAD_REQUEST + " | 알림 상태가 존재하지 않습니다.");
+			throw new AppException(ErrorCode.NOTIFICATION_NOT_FOUND);
 		}
 
 		log.info("알림 상태 조회 성공: {}, {}, {}", notificationId, studentId, role);

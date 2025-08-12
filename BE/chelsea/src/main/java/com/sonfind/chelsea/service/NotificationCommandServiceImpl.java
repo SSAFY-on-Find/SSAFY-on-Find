@@ -7,6 +7,8 @@ import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
 import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
 import com.sonfind.chelsea.dto.notification.NotificationTypeInfo;
 import com.sonfind.chelsea.facade.StudentFacade;
+import com.sonfind.chelsea.global.error.AppException;
+import com.sonfind.chelsea.global.error.ErrorCode;
 import com.sonfind.chelsea.global.event.InvitationRequestEvent;
 import com.sonfind.chelsea.global.event.InvitationResponseEvent;
 import com.sonfind.chelsea.repository.NotificationRepository;
@@ -22,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.bson.types.ObjectId;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -44,7 +45,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 	private final StudentFacade studentFacade;
 
 	@Override
-	public void sendNotification(Long studentId, NotificationRequestDto dto) throws BadRequestException {
+	public void sendNotification(Long studentId, NotificationRequestDto dto) {
 		// 발신자 권한 검증
 		notificationValidator.validatePublisher(studentId, dto);
 
@@ -76,7 +77,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				savedNotification = notificationRepo.save(savedNotification);
 				statusRepo.save(sub);
 			}
-			default -> throw new IllegalArgumentException("지원하지 않는 NotificationType: " + info.type());
+			default -> throw new AppException(ErrorCode.NOTIFICATION_TYPE_NOT_SUPPORTED);
 		}
 
 		log.info("알림 상태가 저장되었습니다: {}, {}", savedNotification.getId(), info.type());
@@ -97,7 +98,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 	}
 
 	@Override
-	public void acceptInvitation(Long studentId, String notificationId) throws BadRequestException {
+	public void acceptInvitation(Long studentId, String notificationId) {
 		ObjectId objId = new ObjectId(notificationId);
 
 		Date now = getCurrentDate();
@@ -133,23 +134,23 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 
 		// 6) SSE 이벤트 발행
 		NotificationDocument doc = notificationRepo.findById(objId)
-				.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
+				.orElseThrow(() -> new AppException(ErrorCode.NOTIFICATION_NOT_FOUND));
 
 
 		eventPublisher.publishEvent(InvitationResponseEvent.of(
-					this,
-					objId,
-					doc.getPublisherId(), doc.getPublisherType(),
-					doc.getSubscriberId(), doc.getSubscriberType(),
-					NotificationStatus.ACCEPTED,
-					now
+				this,
+				objId,
+				doc.getPublisherId(), doc.getPublisherType(),
+				doc.getSubscriberId(), doc.getSubscriberType(),
+				NotificationStatus.ACCEPTED,
+				now
 		));
 
 		log.info("초대/지원이 수락되었습니다: notificationId={}", objId);
 	}
 
 	@Override
-	public void rejectInvitation(Long studentId, String notificationId) throws BadRequestException {
+	public void rejectInvitation(Long studentId, String notificationId) {
 		ObjectId objId = new ObjectId(notificationId);
 		Date now = getCurrentDate();
 
@@ -178,23 +179,23 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 
 		// 5) SSE 이벤트 발행
 		NotificationDocument doc = notificationRepo.findById(objId)
-				.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
+				.orElseThrow(() -> new AppException(ErrorCode.NOTIFICATION_NOT_FOUND));
 
 
 		eventPublisher.publishEvent(InvitationResponseEvent.of(
-					this,
-					objId,
-					doc.getPublisherId(), doc.getPublisherType(),
-					doc.getSubscriberId(), doc.getSubscriberType(),
-					NotificationStatus.REJECTED,
-					now
+				this,
+				objId,
+				doc.getPublisherId(), doc.getPublisherType(),
+				doc.getSubscriberId(), doc.getSubscriberType(),
+				NotificationStatus.REJECTED,
+				now
 		));
 
 		log.info("초대/지원이 거절되었습니다: notificationId={}", objId);
 	}
 
 	@Override
-	public void cancelInvitation(Long studentId, String notificationId) throws BadRequestException {
+	public void cancelInvitation(Long studentId, String notificationId) {
 		ObjectId objId = new ObjectId(notificationId);
 		Date now = getCurrentDate();
 
@@ -222,25 +223,25 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 
 		// 5) SSE 이벤트 발행
 		NotificationDocument doc = notificationRepo.findById(objId)
-				.orElseThrow(() -> new BadRequestException("알림 조회 실패"));
+				.orElseThrow(() -> new AppException(ErrorCode.NOTIFICATION_NOT_FOUND));
 
 
 		eventPublisher.publishEvent(InvitationResponseEvent.of(
-					this,
-					objId,
-					doc.getPublisherId(), doc.getPublisherType(),
-					doc.getSubscriberId(), doc.getSubscriberType(),
-					NotificationStatus.CANCELED,
-					now
+				this,
+				objId,
+				doc.getPublisherId(), doc.getPublisherType(),
+				doc.getSubscriberId(), doc.getSubscriberType(),
+				NotificationStatus.CANCELED,
+				now
 		));
 
 		log.info("알림이 취소되었습니다: notificationId={}", notificationId);
 	}
 
-	private static void checkNotificationStatusDocumentNotNull(Long studentId, String notificationId, NotificationStatusDocument me) throws BadRequestException {
+	private static void checkNotificationStatusDocumentNotNull(Long studentId, String notificationId, NotificationStatusDocument me) {
 		if (me == null) {
 			log.info("잘못된 알림입니다: notificationId={}, studentId={}", notificationId, studentId);
-			throw new BadRequestException("잘못된 알림입니다.");
+			throw new AppException(ErrorCode.NOTIFICATION_NOT_FOUND);
 		}
 	}
 
@@ -308,7 +309,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 	 * @return NotificationDocument
 	 * @throws BadRequestException
 	 */
-	private NotificationDocument findLatestNotification(NotificationRequestDto dto) throws BadRequestException {
+	private NotificationDocument findLatestNotification(NotificationRequestDto dto) {
 		// 가장 최근에 업데이트된 알림을 찾음
 		NotificationDocument lastUpdatedLog = notificationRepo.findLatest(
 				dto.pubId(),
@@ -318,7 +319,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 		);
 
 		if (lastUpdatedLog == null) {
-			throw new BadRequestException("HttpStatus: " + HttpStatus.BAD_REQUEST + " | 알림을 찾을 수 없습니다.");
+			throw new AppException(ErrorCode.NOTIFICATION_NOT_FOUND);
 		}
 
 		return lastUpdatedLog;
@@ -333,12 +334,12 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 	 * @return boolean
 	 * @throws BadRequestException
 	 */
-	private void hasPendingStatus(ObjectId notificationId) throws BadRequestException {
+	private void hasPendingStatus(ObjectId notificationId) {
 		Boolean hasPending = statusRepo.existsByNotificationIdAndStatus(notificationId,
 				NotificationStatus.PENDING);
 		if (hasPending) {
 			log.info("완료 처리되지 않은 알림이 이미 존재하며, 상태가 PENDING입니다. 알림을 저장하지 않습니다.");
-			throw new BadRequestException("HttpStatus: " + HttpStatus.BAD_REQUEST + " | 알림이 이미 존재하며, 상태가 PENDING입니다.");
+			throw new AppException(ErrorCode.NOTIFICATION_PENDING_EXISTS);
 		}
 	}
 

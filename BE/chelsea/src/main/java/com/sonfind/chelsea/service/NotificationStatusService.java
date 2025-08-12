@@ -1,7 +1,5 @@
 package com.sonfind.chelsea.service;
 
-import org.apache.coyote.BadRequestException;
-
 import com.sonfind.chelsea.domain.notification.NotificationDocument;
 
 public interface NotificationStatusService {
@@ -13,15 +11,15 @@ public interface NotificationStatusService {
 	/**
 	 * 수신자의 ACCEPT 동작
 	 */
-	void acceptInvitation(Long studentId, String statusId) throws BadRequestException;
+	void acceptInvitation(Long studentId, String statusId);
 
 	/**
 	 * 발신자의 REJECT 동작
 	 */
-	void rejectInvitation(Long studentId, String statusId) throws BadRequestException;
+	void rejectInvitation(Long studentId, String statusId);
 
 	/**
 	 * 발신자의 CANCEL 동작
 	 */
-	void cancelInvitation(Long studentId, String statusId) throws BadRequestException;
+	void cancelInvitation(Long studentId, String statusId);
 }
