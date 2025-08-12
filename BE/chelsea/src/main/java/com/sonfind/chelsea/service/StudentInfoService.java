@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -26,13 +27,13 @@ import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoGetSummaryRespons
 import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
 import com.sonfind.chelsea.global.domain.SubCode;
+import com.sonfind.chelsea.global.error.AppException;
 import com.sonfind.chelsea.repository.StudentFavoriteRepository;
 import com.sonfind.chelsea.repository.StudentInfoRepository;
 import com.sonfind.chelsea.repository.SubCodeRepository;
 import com.sonfind.chelsea.repository.TeamRepository;
 import com.sonfind.chelsea.util.StringListConverter;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -55,7 +56,7 @@ public class StudentInfoService {
 		MultipartFile portfolio) {
 
 		if (studentInfoRepository.existsByStudent_StudentId(studentId)) {
-			throw new IllegalStateException("이미 자기소개서를 작성했습니다.");
+			throw AppException.studentInfoAlreadyExists();
 		}
 
 		try {
@@ -65,7 +66,7 @@ public class StudentInfoService {
 
 			studentInfoRepository.save(studentInfo);
 		} catch (IOException e) {
-			throw new IllegalStateException("파일 저장 처리 중 오류가 발생했습니다." + e);
+			throw AppException.fileUploadError();
 		}
 
 	}
@@ -87,7 +88,8 @@ public class StudentInfoService {
 	@Transactional(readOnly = true)
 	public StudentInfoGetSummaryResponseDto getSummaryStudentInfo(Long studentId) {
 
-		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId).orElseThrow(null);
+		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId)
+			.orElseThrow(AppException::studentInfoNotFound);
 		Student student = studentInfo.getStudent();
 		SubCode positionCode = studentInfo.getPositionCode();
 		SubCode trackCode = studentInfo.getTrackCode();
@@ -125,7 +127,7 @@ public class StudentInfoService {
 		MultipartFile portfolio) {
 
 		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId)
-			.orElseThrow(() -> new EntityNotFoundException("해당 학생의 자기소개를 찾을 수 없습니다."));
+			.orElseThrow(AppException::studentInfoNotFound);
 
 		try {
 			//새로운 프로필 이미지 입력 시 변경
@@ -148,7 +150,7 @@ public class StudentInfoService {
 			List<SubCode> subCodes = subCodeRepository.findAllBySubCodeIn(requiredCodes);
 			studentInfo.update(requestDto, subCodes);
 		} catch (IOException e) {
-			throw new IllegalStateException("파일 수정 처리 중 오류 발생했습니다.", e);
+			throw AppException.fileUploadError();
 		}
 	}
 
@@ -161,11 +163,7 @@ public class StudentInfoService {
 	@Transactional(readOnly = true)
 	public StudentInfoForNotificationResponseDto findByStudentId(Long studentId) {
 		StudentInfo findStuInfo = studentInfoRepository.findByStudent_StudentId(studentId)
-			.orElse(null);
-
-		if (findStuInfo == null) {
-			throw new IllegalArgumentException("해당 학생의 정보가 없습니다. studentId: " + studentId);
-		}
+			.orElseThrow(AppException::studentInfoNotFound);
 
 		return StudentInfoForNotificationResponseDto.builder()
 			.studentId(studentId)
@@ -263,16 +261,20 @@ public class StudentInfoService {
 		Long studentId) {
 
 		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId)
-			.orElseThrow(() -> new EntityNotFoundException("해당 학생의 자기소개를 찾을 수 없습니다."));
+			.orElseThrow(AppException::studentInfoNotFound);
 
-		Student student = studentInfo.getStudent();
+		Student student = Optional.ofNullable(studentInfo.getStudent()).orElseThrow(AppException::studentNotFound);
+
 		SubCode positionCode = studentInfo.getPositionCode();
 		SubCode trackCode = studentInfo.getTrackCode();
-		SubCode mbtiCode = studentInfo.getMbtiCode();
 		SubCode goalCode = studentInfo.getGoalCode();
+
+		SubCodeResponseDto mbtiCodeResponse = Optional.ofNullable(studentInfo.getMbtiCode())
+			.map(sc -> new SubCodeResponseDto(sc.getSubCode(), sc.getSubCodeName()))
+			.orElse(null);
+
 		Team team = teamRepository.findTeamByTeamId(student.getTeamId()).orElse(null);
 		TeamSimpleResponseDto teamResponse = null;
-		SubCodeResponseDto mbtiCodeResponse = null;
 
 		//기술 스택처리
 		List<String> techStackCodes = StringListConverter.stringToList(studentInfo.getTechStack());
@@ -292,14 +294,9 @@ public class StudentInfoService {
 				.build();
 		}
 
-		if (mbtiCode != null) {
-			mbtiCodeResponse = SubCodeResponseDto.builder().subcode(mbtiCode.getSubCode()).subcodeName(
-				mbtiCode.getSubCodeName()).build();
-		}
-
 		return StudentInfoGetDetailResponseDto.builder()
 			.student(StudentResponseDto.builder().studentId(studentId).name(student.getName())
-				.major(student.getMajorYn() ? "전공" : "비전공").build())
+				.major(Boolean.TRUE.equals(student.getMajorYn()) ? "전공" : "비전공").build())
 			.position(SubCodeResponseDto.builder().subcode(positionCode.getSubCode()).subcodeName(
 				positionCode.getSubCodeName()).build())
 			.track(SubCodeResponseDto.builder().subcode(trackCode.getSubCode()).subcodeName(

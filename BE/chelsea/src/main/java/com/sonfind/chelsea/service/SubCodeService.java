@@ -38,11 +38,8 @@ public class SubCodeService {
 
 	private List<SubCodeResponseDto> getSubCodeResponseByMainCode(List<SubCode> subCodes, String mainCode) {
 		return subCodes.stream()
-			.filter(subCode -> subCode.getMainCode().getMainCode().equals(mainCode))
+			.filter(subCode -> subCode.getMainCode() != null && mainCode.equals(subCode.getMainCode().getMainCode()))
 			.map(subCode -> new SubCodeResponseDto(subCode.getSubCode(), subCode.getSubCodeName())).toList();
 	}
 
-	public SubCodeResponseDto createSubCodeResponse(String code, String codeName) {
-		return new SubCodeResponseDto(code, codeName);
-	}
 }
