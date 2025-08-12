@@ -45,7 +45,7 @@ public class StudentInfo extends BaseEntity {
 	@JoinColumn(name = "student_id", referencedColumnName = "student_id")
 	Student student;
 
-	@Column(nullable = false)
+	@Column(nullable = false, columnDefinition = "TEXT")
 	private String techStack;
 
 	private String strength;
