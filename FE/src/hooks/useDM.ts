@@ -1,3 +1,4 @@
+import { toast } from "react-toastify"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { createDirectChatRoom, getMyDirectChatRooms } from "@/apis/chatRoom"
@@ -23,6 +24,7 @@ export const useCreateDirectChatRoom = () => {
       queryClient.invalidateQueries({ queryKey: ["myDirectChatRooms"] })
     },
     onError: (error) => {
+      toast.error("1:1 채팅방 생성에 실패했습니다. 다시시도해 주세요")
       console.error("1:1 채팅방 생성에 실패했습니다.", error)
     },
   })

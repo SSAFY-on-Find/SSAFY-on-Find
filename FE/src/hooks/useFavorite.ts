@@ -5,7 +5,6 @@ import { useQueryClient } from "@tanstack/react-query"
 import { favoriteApi } from "@/apis/favoriteApi"
 import type { IStudentCard, IStudentInfo } from "@/types/student"
 import type { ITeamCard } from "@/types/team"
-import { sortTeamsByFavorite } from "@/utils"
 
 export const useTeamFavoriteToggle = () => {
   const [loadingTeams, setLoadingTeams] = useState<Set<number>>(new Set())

@@ -1,3 +1,4 @@
+import { toast } from "react-toastify"
 import { useMutation, useQuery } from "@tanstack/react-query"
 
 import { aiApi } from "@/apis/aiApi"
@@ -10,6 +11,7 @@ export const useSummaryInfo = () => {
     queryFn: async () => {
       const response = await dashboardApi.getMySummary()
       if (response.status !== "SUCCESS") {
+        toast.error("프로필 요약 정보 조회에 실패했습니다.")
         throw new Error("프로필 요약 정보 조회에 실패했습니다.")
       }
       return response.data
@@ -24,6 +26,7 @@ export const useTeamRatio = () => {
     queryFn: async () => {
       const response = await dashboardApi.getTeamRatio()
       if (response.status !== "SUCCESS") {
+        toast.error("팀빌딩 현황 조회에 실패했습니다.")
         throw new Error("팀빌딩 현황 조회에 실패했습니다.")
       }
       return response.data
@@ -38,6 +41,7 @@ export const usePositionRatio = () => {
     queryFn: async () => {
       const response = await dashboardApi.getPositionRatio()
       if (response.status !== "SUCCESS") {
+        toast.error("포지션별 팀 빌딩 현황 조회에 실패했습니다.")
         throw new Error("포지션별 팀 빌딩 현황 조회에 실패했습니다.")
       }
       // Record -> Row[]
@@ -58,6 +62,7 @@ export const useRecommendTeam = () => {
     queryFn: async () => {
       const response = await dashboardApi.getRecommendTeam()
       if (response.status !== "SUCCESS") {
+        toast.error("추천 팀 목록 조회에 실패했습니다.")
         throw new Error("추천 팀 목록 조회에 실패했습니다.")
       }
       const d = response.data

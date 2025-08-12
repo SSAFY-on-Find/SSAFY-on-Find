@@ -16,7 +16,9 @@ const TEAM_BASE_URL = "/teams"
 export const teamApi = {
   getTeams: async (): Promise<IApiResponse<ITeamCard[]>> => {
     const response = await api.get<IApiResponse<ITeamCard[]>>(TEAM_BASE_URL)
-    sortTeamsByFavorite(response.data.data)
+    if (response.data.status === "SUCCESS") {
+      sortTeamsByFavorite(response.data.data as ITeamCard[])
+    }
     return response.data
   },
   getMyTeam: async (): Promise<IApiResponse<IMyTeam>> => {
