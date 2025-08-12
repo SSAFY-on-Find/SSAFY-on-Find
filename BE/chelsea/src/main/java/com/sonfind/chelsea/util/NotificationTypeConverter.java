@@ -6,10 +6,12 @@ import com.sonfind.chelsea.global.error.AppException;
 import com.sonfind.chelsea.global.error.ErrorCode;
 import com.sonfind.chelsea.types.NotificationDomainType;
 import com.sonfind.chelsea.types.NotificationType;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 
+@Slf4j
 @Component
 public class NotificationTypeConverter {
 
@@ -28,7 +30,9 @@ public class NotificationTypeConverter {
 					.subType(subDomain)
 					.build();
 		} catch (Exception e) {
+			log.error(e.getMessage() + "converter에서 알림 타입 변환 중 오류 발생: {}", dto.type());
 			throw new AppException(ErrorCode.NOTIFICATION_TYPE_NOT_SUPPORTED);
+
 		}
 	}
 }

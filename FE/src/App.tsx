@@ -20,6 +20,7 @@ import { useUserStore } from "@/stores/userStore"
 import ChatView from "./components/templates/ChatView"
 import TeamEditPage from "./pages/TeamUpdatePage"
 import { useChatViewStore } from "./stores/useChatViewStore"
+import ScrollToTop from "./utils/ScrollToTop"
 
 import "@/index.css"
 
@@ -80,6 +81,7 @@ function App() {
   // 5) 로그인 O + 프로필 작성 완료: 전체 앱 라우트
   return (
     <>
+      <ScrollToTop />
       {!hideLayout && <Header />}
       <div className={!hideLayout ? "mt-[64px]" : ""}>
         {!hideLayout && <SideBar />}
