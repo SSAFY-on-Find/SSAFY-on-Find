@@ -1,7 +1,5 @@
 package com.sonfind.chelsea.factory;
 
-import org.apache.coyote.BadRequestException;
-
 import com.sonfind.chelsea.dto.notification.NotificationDto;
 import com.sonfind.chelsea.global.event.InvitationRequestEvent;
 import com.sonfind.chelsea.types.NotificationType;
@@ -15,10 +13,9 @@ public interface RequestPayloadFactory {
 
 	// 발신자용 Payload
 	NotificationDto<?> createPublisherPayload(
-		InvitationRequestEvent e) throws BadRequestException;
+			InvitationRequestEvent e);
 
 	// 수신자용 Payload
 	NotificationDto<?> createSubscriberPayload(
-		InvitationRequestEvent e) throws
-		BadRequestException;
+			InvitationRequestEvent e);
 }

@@ -11,7 +11,6 @@ import com.sonfind.chelsea.global.error.ErrorCode;
 import com.sonfind.chelsea.service.SseService;
 import com.sonfind.chelsea.types.NotificationDomainType;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +34,7 @@ public class NotificationEventListener {
 	 * 이벤트 타입에 따라 발신자와 수신자에게 알림을 전송합니다.
 	 */
 	@EventListener
-	public void onRequest(InvitationRequestEvent e) throws BadRequestException {
+	public void onRequest(InvitationRequestEvent e) {
 
 		RequestPayloadFactory factory = requestPayloadFactories.stream()
 				.filter(f -> f.supportType() == e.getType())
@@ -60,7 +59,7 @@ public class NotificationEventListener {
 	}
 
 	@EventListener
-	public void onResponse(InvitationResponseEvent e) throws BadRequestException {
+	public void onResponse(InvitationResponseEvent e) {
 
 		ResponsePayloadFactory factory = responsePayloadFactories.stream()
 				.filter(f -> f.supportStatus(e) == e.getStatus())
