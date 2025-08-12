@@ -6,13 +6,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.sonfind.chelsea.domain.studentInfo.Portfolio;
 import com.sonfind.chelsea.domain.studentInfo.Profile;
+import com.sonfind.chelsea.global.error.AppException;
 import com.sonfind.chelsea.types.FileType;
 
 import lombok.extern.slf4j.Slf4j;
@@ -76,16 +76,15 @@ public class FileService {
 	}
 
 	//파일 유효성 검사(크기 + 형식)
-	private void validateFile(MultipartFile file, FileType fileType) throws FileUploadException {
+	private void validateFile(MultipartFile file, FileType fileType) {
 		if (file.getSize() > fileType.getMaxSize()) {
-			throw new FileUploadException(
-				"파일 크기가 너무 큽니다. 최대 " + (fileType.getMaxSize() / 1024 / 1024) + "MB까지 업로드 할 수 있습니다."
-			);
+			throw AppException.fileSizeExceeded();
+			//"파일 크기가 너무 큽니다. 최대 " + (fileType.getMaxSize() / 1024 / 1024) + "MB까지 업로드 할 수 있습니다."
 		}
 
 		String extension = getExtension(file.getOriginalFilename());
 		if (!fileType.getAllowedExtensions().contains(extension)) {
-			throw new FileUploadException("지원하지 않는 파일 형식입니다. ");
+			throw AppException.unsupportedFileType();
 		}
 	}
 
@@ -134,12 +133,11 @@ public class FileService {
 	}
 
 	//파일 삭제
-	private boolean deleteFile(Path filePath) {
+	private void deleteFile(Path filePath) {
 		try {
-			return Files.deleteIfExists(filePath);
+			Files.deleteIfExists(filePath);
 		} catch (IOException e) {
-			log.error("파일 삭제 실패: {}", filePath, e);
-			return false;
+			throw AppException.fileDeleteError();
 		}
 	}
 
