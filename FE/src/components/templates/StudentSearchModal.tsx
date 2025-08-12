@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react"
 import { Send } from "lucide-react"
 
+import type { IStudentCard } from "@/types/student"
+
 import { MajorTag, PositionTag, SearchBar, UserImg } from "../atoms"
 
 import Modal from "./Modal"
 interface IStudentSearchModal {
   isOpen: boolean
   onClose: () => void
-  students: IChatUser[]
+  students: IStudentCard[]
   onStudentClick: (userId: string) => void
 }
 interface IChatUser {
@@ -49,7 +51,7 @@ function StudentSearchModal({ isOpen, onClose, students, onStudentClick }: IStud
     }
   }, [isOpen])
 
-  const filteredStudents = students.filter((ele) => ele.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredStudents = students.filter((ele) => ele.student.name.toLowerCase().includes(searchQuery.toLowerCase()))
   const handleSearch = (query: string) => {
     setSearchQuery(query)
   }
@@ -63,13 +65,13 @@ function StudentSearchModal({ isOpen, onClose, students, onStudentClick }: IStud
         <div className="flex max-h-[370px] flex-col gap-3 overflow-y-auto px-[15px] pt-[10px]">
           {filteredStudents.map((ele) => (
             <StudentListItem
-              key={ele.id}
-              id={ele.id}
-              name={ele.name}
-              major={ele.major}
-              position={ele.position}
-              hasTeam={ele.hasTeam}
-              onClick={() => onStudentClick(ele.id)}
+              key={ele.student.studentId}
+              id={String(ele.student.studentId)}
+              name={ele.student.name}
+              major={ele.student.major}
+              position={ele.position.subcodeName}
+              hasTeam={ele.teamName ? true : false}
+              onClick={() => onStudentClick(String(ele.student.studentId))}
             />
           ))}
         </div>

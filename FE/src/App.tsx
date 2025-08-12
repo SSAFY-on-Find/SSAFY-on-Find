@@ -15,8 +15,11 @@ import StudentDetail from "@/pages/StudentDetailPage"
 import StudentList from "@/pages/StudentListPage"
 import TeamCreatePage from "@/pages/TeamCreatePage"
 import TeamList from "@/pages/TeamListPage"
-import TeamEditPage from "@/pages/TeamUpdatePage"
 import { useUserStore } from "@/stores/userStore"
+
+import ChatView from "./components/templates/ChatView"
+import TeamEditPage from "./pages/TeamUpdatePage"
+import { useChatViewStore } from "./stores/useChatViewStore"
 
 import "@/index.css"
 
@@ -28,6 +31,8 @@ function App() {
   const { data: authUser, isLoading, isError } = useAuth()
   const setUser = useUserStore((s) => s.setUser)
   const resetUser = useUserStore((s) => s.resetUser)
+  // 사이드바와 1대1 채팅을 위한 라우트
+  const { activeRoomId, activeRoomType } = useChatViewStore()
   useEffect(() => {
     if (authUser) setUser(authUser)
     if (isError) resetUser()
@@ -93,6 +98,7 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
+        {activeRoomId && activeRoomType === "direct" && <ChatView />}
       </div>
       <ToastContainer position="bottom-right" autoClose={3000} theme="light" />
     </>

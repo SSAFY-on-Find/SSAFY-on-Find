@@ -66,7 +66,7 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 	}
 
 	@PostMapping("/rooms/{roomId}/leave")
-	public ResponseEntity<Map<String, Object>> exitTeamChatRoom(
+	public ResponseEntity<Map<String, Object>> leaveTeamChatRoom(
 		@SessionAttribute("loginUser") Long studentId,
 		@PathVariable Long roomId
 	) {
@@ -112,6 +112,18 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 		Map<String, Object> body = new HashMap<>();
 		body.put("status", "SUCCESS");
 		body.put("data", messages);
+		return ResponseEntity.ok().body(body);
+	}
+
+	@PostMapping("/{roomId}/last-read")
+	public ResponseEntity<Map<String, Object>> updateLastReadAt(
+		@SessionAttribute("loginUser") Long studentId,
+		@PathVariable Long roomId
+	) {
+		chatRoomService.updateLastReadAt(studentId, roomId);
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", null);
 		return ResponseEntity.ok().body(body);
 	}
 }
