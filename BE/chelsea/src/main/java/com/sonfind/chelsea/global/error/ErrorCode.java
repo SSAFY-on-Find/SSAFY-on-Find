@@ -10,6 +10,7 @@ public enum ErrorCode {
 	AUTH_REQUIRED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
 	CONFLICT(HttpStatus.CONFLICT, "충돌이 발생했습니다."),
 	INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),
+	NOT_SUPPORTED_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 타입입니다."),
 
 	// 학생 관련
 	STUDENT_NOT_FOUND(HttpStatus.NOT_FOUND, "교육생을 찾을 수 없습니다."),
@@ -54,7 +55,9 @@ public enum ErrorCode {
 	NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다."),
 	NOTIFICATION_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "알림 처리 권한이 없습니다."),
 	NOTIFICATION_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "이미 처리된 알림입니다."),
-	NOTIFICATION_PENDING_EXISTS(HttpStatus.BAD_REQUEST, "처리되지 않은 알림이 이미 존재합니다.");
+	NOTIFICATION_PENDING_EXISTS(HttpStatus.BAD_REQUEST, "처리되지 않은 알림이 이미 존재합니다."),
+	NOTIFICATION_TYPE_NOT_SUPPORTED(HttpStatus.BAD_REQUEST, "지원하지 않는 알림 유형입니다.");
+
 
 	public final HttpStatus status;
 	public final String message;

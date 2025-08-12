@@ -1,22 +1,23 @@
 package com.sonfind.chelsea.service;
 
-import org.springframework.stereotype.Service;
-
 import com.sonfind.chelsea.domain.notification.NotificationDocument;
 import com.sonfind.chelsea.dto.notification.NotificationContext;
+import com.sonfind.chelsea.global.error.AppException;
+import com.sonfind.chelsea.global.error.ErrorCode;
 import com.sonfind.chelsea.types.RecipientRole;
+import org.springframework.stereotype.Service;
 
 @Service
 public class NotificationContentService {
 
 	public String buildTitle(NotificationDocument notif, RecipientRole role,
-		NotificationContext ctx) {
+	                         NotificationContext ctx) {
 
 		return switch (notif.getType()) {
 			case APPLICATION -> buildApplicationTitle(role, ctx);
 			case INVITATION -> buildInvitationTitle(role, ctx);
 			case MERGE -> buildMergeTitle(role, ctx);
-			default -> throw new IllegalArgumentException("Unsupported notification type: " + notif.getType());
+			default -> throw new AppException(ErrorCode.NOTIFICATION_TYPE_NOT_SUPPORTED);
 		};
 	}
 
@@ -55,50 +56,50 @@ public class NotificationContentService {
 	private String buildMergeMessage(RecipientRole role, NotificationContext ctx) {
 		if (role == RecipientRole.PUBLISHER) {
 			return "%s(%s, %s)님을 %s(%s)에 초대했습니다.".formatted(
-				ctx.subscriber().name(),
-				ctx.subscriber().isMajor(),
-				ctx.subscriber().position(),
-				ctx.publisher().name(),
-				ctx.publisher().track()
+					ctx.subscriber().name(),
+					ctx.subscriber().isMajor(),
+					ctx.subscriber().position(),
+					ctx.publisher().name(),
+					ctx.publisher().track()
 			);
 		}
 
 		return "%s(%s)에서 %s(%s, %s)님을 초대했습니다.".formatted(
-			ctx.publisher().name(),
-			ctx.publisher().track(),
-			ctx.subscriber().name(),
-			ctx.subscriber().isMajor(),
-			ctx.subscriber().position()
+				ctx.publisher().name(),
+				ctx.publisher().track(),
+				ctx.subscriber().name(),
+				ctx.subscriber().isMajor(),
+				ctx.subscriber().position()
 		);
 	}
 
 	private String buildInvitationMessage(RecipientRole role, NotificationContext ctx) {
 		if (role == RecipientRole.PUBLISHER) {
 			return "%s(%s, %s)님을 %s(%s)에 초대했습니다.".formatted(
-				ctx.subscriber().name(),
-				ctx.subscriber().isMajor(),
-				ctx.subscriber().position(),
-				ctx.publisher().name(),
-				ctx.publisher().track()
+					ctx.subscriber().name(),
+					ctx.subscriber().isMajor(),
+					ctx.subscriber().position(),
+					ctx.publisher().name(),
+					ctx.publisher().track()
 			);
 		}
 
 		return "%s(%s)에서 %s(%s, %s)님을 초대했습니다.".formatted(
-			ctx.publisher().name(),
-			ctx.publisher().track(),
-			ctx.subscriber().name(),
-			ctx.subscriber().isMajor(),
-			ctx.subscriber().position()
+				ctx.publisher().name(),
+				ctx.publisher().track(),
+				ctx.subscriber().name(),
+				ctx.subscriber().isMajor(),
+				ctx.subscriber().position()
 		);
 	}
 
 	private String buildApplicationMessage(NotificationContext ctx) {
 		return "%s(%s, %s)님이 %s(%s)에 지원했습니다.".formatted(
-			ctx.subscriber().name(),
-			ctx.subscriber().isMajor(),
-			ctx.subscriber().position(),
-			ctx.publisher().name(),
-			ctx.publisher().track()
+				ctx.subscriber().name(),
+				ctx.subscriber().isMajor(),
+				ctx.subscriber().position(),
+				ctx.publisher().name(),
+				ctx.publisher().track()
 		);
 	}
 
