@@ -1,13 +1,14 @@
 package com.sonfind.chelsea.dto.teams;
 
+import com.sonfind.chelsea.dto.notification.ContextInfo;
 import lombok.Builder;
 
 @Builder
 public record TeamSimpleResponseDto(
-	Long teamId,
-	String name,
-	String track,
-	int majorCount,
-	int nonMajorCount
-) {
+		Long teamId,
+		String name,
+		String track,
+		int majorCount,
+		int nonMajorCount
+) implements ContextInfo {
 }

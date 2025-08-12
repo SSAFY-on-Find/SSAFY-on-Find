@@ -4,8 +4,10 @@ import com.sonfind.chelsea.facade.StudentFacade;
 import com.sonfind.chelsea.global.manager.SseEmitterManager;
 import com.sonfind.chelsea.types.NotificationDomainType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SseService {
@@ -16,6 +18,7 @@ public class SseService {
 	// 개인용
 	public void sendNotification(Long userId, Object payload) {
 		emitterManager.sendTo(userId, payload);
+		log.info("SSE로 사용자 {}에게 알림을 전송했습니다.", userId);
 	}
 
 	// 팀용
@@ -40,6 +43,7 @@ public class SseService {
 		} else {
 			sendNotification(id, payload);
 		}
+
 	}
 
 }

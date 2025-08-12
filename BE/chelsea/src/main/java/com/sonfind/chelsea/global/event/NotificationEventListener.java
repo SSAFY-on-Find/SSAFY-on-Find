@@ -11,6 +11,7 @@ import com.sonfind.chelsea.global.error.ErrorCode;
 import com.sonfind.chelsea.service.SseService;
 import com.sonfind.chelsea.types.NotificationDomainType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ import java.util.List;
  * NotificationEvent를 수신하여 알림을 발송하는 역할을 합니다.
  * 이벤트 타입에 따라 발신자와 수신자에게 알림을 전송합니다.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class NotificationEventListener {
@@ -49,6 +51,7 @@ public class NotificationEventListener {
 
 		switch (e.getType()) {
 			case APPLICATION, INVITATION, MERGE -> {
+				log.info("알림 발송함~");
 				sendBoth(pubData, pubPayload, subData, subPayload);
 			}
 			default -> {
@@ -90,6 +93,7 @@ public class NotificationEventListener {
 
 	private void sendBoth(HasPublisher pubData, NotificationDto<?> pubPayload, HasSubscriber subData,
 	                      NotificationDto<?> subPayload) {
+		log.info("ㄱㄱ");
 		sseService.dispatch(
 				pubData.publisher().id(),
 				pubData.publisher().type(),

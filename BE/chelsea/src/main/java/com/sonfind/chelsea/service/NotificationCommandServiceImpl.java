@@ -307,7 +307,6 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 	 *
 	 * @param dto
 	 * @return NotificationDocument
-	 * @throws BadRequestException
 	 */
 	private NotificationDocument findLatestNotification(NotificationRequestDto dto) {
 		// 가장 최근에 업데이트된 알림을 찾음
@@ -317,10 +316,6 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				dto.subId(),
 				dto.subType()
 		);
-
-		if (lastUpdatedLog == null) {
-			throw new AppException(ErrorCode.NOTIFICATION_NOT_FOUND);
-		}
 
 		return lastUpdatedLog;
 	}
