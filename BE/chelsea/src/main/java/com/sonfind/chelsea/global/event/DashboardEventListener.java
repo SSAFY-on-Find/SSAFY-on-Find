@@ -1,5 +1,6 @@
 package com.sonfind.chelsea.global.event;
 
+import com.sonfind.chelsea.dto.dashboard.TeamMemberChangedDto;
 import com.sonfind.chelsea.dto.dashboard.TeamProgressDto;
 import com.sonfind.chelsea.service.SseService;
 import lombok.RequiredArgsConstructor;
@@ -33,17 +34,25 @@ public class DashboardEventListener {
 		sseService.broadcastToAll("TeamProgress", payload);
 	}
 
-//	/**
-//	 * 팀 업데이트 대시보드 이벤트 리스너
-//	 * 이 이벤트는 팀의 업데이트 상태를 처리합니다.
-//	 * - 팀 소개 변경
-//	 * - 팀 트랙 변경
-//	 * - 팀원 추가/삭제
-//	 */
-//	@EventListener
-//	public void onTeamUpdateStatusDashboardEvent() {
-//
-//	}
+	/**
+	 * 팀 대시보드 이벤트 리스너
+	 * 이 이벤트는 팀원 변경 사항을 처리합니다.
+	 * - 팀원 추가
+	 * - 팀원 삭제
+	 *
+	 * @param e
+	 */
+	@EventListener
+	public void onJoinAndLeaveTeamDashboardEvent(TeamMemberChangedDto e) {
+		Map<String, Object> payload = Map.of(
+				"type", "TEAM_MEMBER_CHANGED",
+				"ts", Instant.now().toEpochMilli(),
+				"data", e
+		);
+
+		sseService.broadcastToAll("TeamMemberChanged", payload);
+	}
+
 //
 //	/**
 //	 * 학생의 희망 포지션 대시보드 이벤트 리스너

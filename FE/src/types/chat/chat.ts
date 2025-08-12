@@ -1,5 +1,7 @@
 // src/types/chat.ts
 
+import type { ISubcode } from "../common"
+
 /**
  * @description 채팅 메시지 타입
  * @property {number} roomId - 채팅방 ID
@@ -28,4 +30,16 @@ export interface ChatRoom {
  */
 export interface DirectChatRoomRequest {
   targetStudentId: number
+}
+
+export interface IChatRoomInfo {
+  chatRoomId: number
+  hasTeam: boolean
+  isRead: boolean
+  lastChatAt: string
+  targetUserId: number
+  targetUsername: string
+  targetProfileImageUrl: string
+  major: string
+  position: ISubcode
 }

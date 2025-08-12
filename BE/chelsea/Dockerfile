@@ -8,6 +8,8 @@ FROM openjdk:21-slim
 
 WORKDIR /app
 
+ENV TZ=Asia/Seoul
+
 COPY --from=builder /app/app.jar .
 
 EXPOSE 8080

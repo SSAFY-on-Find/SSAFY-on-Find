@@ -6,7 +6,7 @@ public class AppException extends BusinessException {
 	public AppException(ErrorCode errorCode) {
 		super(errorCode);
 	}
-	
+
 	// 학생 관련
 	public static AppException studentNotFound() {
 		return new AppException(ErrorCode.STUDENT_NOT_FOUND);
@@ -128,5 +128,9 @@ public class AppException extends BusinessException {
 
 	public static AppException notificationPendingExists() {
 		return new AppException(ErrorCode.NOTIFICATION_PENDING_EXISTS);
+	}
+
+	public static AppException fileDeleteError() {
+		return new AppException(ErrorCode.FILE_DELETE_ERROR);
 	}
 }

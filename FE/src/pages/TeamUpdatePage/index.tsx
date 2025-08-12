@@ -94,7 +94,7 @@ export default function TeamEditPage() {
   }
 
   return (
-    <div className="bg-background min-h-screen p-8">
+    <div className="bg-background min-h-screen px-15 py-10">
       <div className="p-6">
         <h1 className="text-text mb-[10px] text-2xl font-semibold">팀 정보 수정</h1>
         <div className="text-subtext text-sm font-normal">

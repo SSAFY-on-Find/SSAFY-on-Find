@@ -4,32 +4,32 @@ import { ChevronDown, ChevronUp, Info, Plus } from "lucide-react"
 import { Tooltip } from "@/components/atoms"
 import { ChatList, Nav } from "@/components/molecules"
 import { StudentSearchModal } from "@/components/templates"
-
-// 교육생 검색 모달 테스트용 MockData 입니다
-const students = [
-  { id: "std001", name: "김싸피", major: "비전공", position: "임베디드", hasTeam: true },
-  { id: "std002", name: "이싸", major: "전공", position: "풀스텍", hasTeam: false },
-  { id: "std003", name: "박싸피", major: "비전공", position: "백엔드", hasTeam: true },
-  { id: "std004", name: "조싸피", major: "전공", position: "모바일", hasTeam: true },
-  { id: "std005", name: "이싸피", major: "비전공", position: "임베디드", hasTeam: false },
-  { id: "std006", name: "김박싸피", major: "비전공", position: "임베디드", hasTeam: true },
-  { id: "std007", name: "이싸", major: "전공", position: "풀스텍", hasTeam: false },
-  { id: "std008", name: "박싸피", major: "비전공", position: "백엔드", hasTeam: true },
-  { id: "std009", name: "조싸피", major: "전공", position: "모바일", hasTeam: true },
-  { id: "std010", name: "이싸피", major: "비전공", position: "임베디드", hasTeam: false },
-  { id: "std011", name: "김싸피", major: "비전공", position: "임베디드", hasTeam: true },
-  { id: "std012", name: "이싸", major: "전공", position: "풀스텍", hasTeam: false },
-  { id: "std013", name: "박싸피", major: "비전공", position: "백엔드", hasTeam: true },
-  { id: "std014", name: "조싸피", major: "전공", position: "모바일", hasTeam: true },
-  { id: "std015", name: "이싸피", major: "비전공", position: "임베디드", hasTeam: false },
-]
+import { useCreateDirectChatRoom, useMyDirectChatRooms } from "@/hooks/useDM"
+import { useStudentList } from "@/hooks/useStudent"
+import { useChatViewStore } from "@/stores/useChatViewStore"
 
 function SideBar() {
   const [open, setOpen] = useState(true)
   const [studentSearchModal, setStudentSearchModal] = useState(false)
 
-  const handleChatWithUser = (userId: string) => {
-    console.log(userId, "과 채팅하기") // 1대1 채팅 로직 넣기
+  const { data: chatRooms, isLoading: isChatListLoading } = useMyDirectChatRooms()
+  const { data: students, isLoading: isStudentListLoading } = useStudentList()
+
+  const openChat = useChatViewStore((state) => state.openChat)
+  const { mutate: createChat } = useCreateDirectChatRoom()
+
+  const handleStartNewChat = (targetStudentId: number) => {
+    createChat(
+      { targetStudentId },
+      {
+        onSuccess: (roomId) => {
+          openChat({ roomId, roomType: "direct" })
+        },
+        onError: (error) => {
+          console.log("1대1채팅방 생성 에러 : ", error)
+        },
+      }
+    )
   }
 
   return (
@@ -65,18 +65,31 @@ function SideBar() {
               onClick={() => setStudentSearchModal(true)}
             />
           </div>
-          <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto transition-all">{open && <ChatList />}</div>
+
+          <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto transition-all">
+            {open && (
+              <>
+                {isChatListLoading && <div className="p-4 text-center text-sm">채팅 목록을 불러오는 중...</div>}
+                {chatRooms && (
+                  <ChatList rooms={chatRooms} onRoomClick={(roomId) => openChat({ roomId, roomType: "direct" })} />
+                )}
+              </>
+            )}
+          </div>
         </div>
       </aside>
-      <StudentSearchModal
-        isOpen={studentSearchModal}
-        onClose={() => setStudentSearchModal(false)}
-        students={students}
-        onStudentClick={(userId) => {
-          handleChatWithUser(userId)
-          setStudentSearchModal(false)
-        }}
-      />
+
+      {!isStudentListLoading && students && (
+        <StudentSearchModal
+          isOpen={studentSearchModal}
+          onClose={() => setStudentSearchModal(false)}
+          students={students}
+          onStudentClick={(studentId) => {
+            handleStartNewChat(Number(studentId))
+            setStudentSearchModal(false)
+          }}
+        />
+      )}
     </>
   )
 }

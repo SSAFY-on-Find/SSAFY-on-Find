@@ -1,0 +1,8 @@
+export type { IAiRecommend } from "./IAiRecommend"
+export type { IPositionRatio } from "./IPositionRatio"
+export type { IPositionRatioNode } from "./IPositionRatio"
+export type { TeamName } from "./IPositionRatio"
+export type { PositionType } from "./IPositionRatio"
+export type { PositionRatioRecord } from "./IPositionRatio"
+export type { PositionRow } from "./IPositionRatio"
+export type { ITeamRatio } from "./ITeamRatio"

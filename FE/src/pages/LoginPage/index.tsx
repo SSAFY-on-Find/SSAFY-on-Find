@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
+import { useQueryClient } from "@tanstack/react-query"
 import { User } from "lucide-react"
 
 import { Button, InputBox } from "@/components/atoms"
 import { useStudentLogin } from "@/hooks/useStudent"
 import { useUserStore } from "@/stores/userStore"
+import type { IStudentSignin } from "@/types/student"
 
 export default function LoginPage() {
+  const qc = useQueryClient()
   const [inputBoxValue, setInputBoxValue] = useState("")
   const navigate = useNavigate()
   const { mutate: login, isPending, isError, error } = useStudentLogin()
@@ -16,6 +19,7 @@ export default function LoginPage() {
     login("1300001", {
       onSuccess: (user) => {
         setUser(user)
+        qc.setQueryData<IStudentSignin>(["user-auth"], user)
         navigate("/")
         toast.success("로그인에 성공했습니다.")
       },
@@ -33,6 +37,7 @@ export default function LoginPage() {
     login(studentId, {
       onSuccess: (user) => {
         setUser(user)
+        qc.setQueryData<IStudentSignin>(["user-auth"], user)
         navigate("/")
         toast.success("로그인에 성공했습니다.")
       },

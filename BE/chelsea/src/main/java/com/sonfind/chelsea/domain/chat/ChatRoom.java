@@ -1,6 +1,7 @@
 package com.sonfind.chelsea.domain.chat;
 
 import static com.sonfind.chelsea.domain.chat.ChatRoomType.*;
+import static com.sonfind.chelsea.global.error.ErrorCode.*;
 import static jakarta.persistence.EnumType.*;
 import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.*;
@@ -12,6 +13,7 @@ import java.util.Set;
 import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.domain.teams.Team;
 import com.sonfind.chelsea.global.domain.BaseEntity;
+import com.sonfind.chelsea.global.error.AppException;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -76,14 +78,14 @@ public class ChatRoom extends BaseEntity {
 
 	public Student getOpponent(Student student) {
 		if (this.type != ChatRoomType.ONE_TO_ONE || this.chatRoomMembers.size() != 2) {
-			throw new IllegalStateException("1:1 채팅방이 아니거나 멤버가 2명이 아닙니다.");
+			throw new AppException(CHATROOM_NOT_ONE_TO_ONE);
 		}
 
 		return this.chatRoomMembers.stream()
 			.map(ChatRoomMember::getStudent)
 			.filter(memberStudent -> !memberStudent.equals(student))
 			.findFirst()
-			.orElseThrow(() -> new IllegalStateException("채팅방에서 상대방을 찾을 수 없습니다."));
+			.orElseThrow(() -> new AppException(CHATROOM_MEMBER_NOT_FOUND));
 	}
 
 	public boolean hasStudent(Student student) {

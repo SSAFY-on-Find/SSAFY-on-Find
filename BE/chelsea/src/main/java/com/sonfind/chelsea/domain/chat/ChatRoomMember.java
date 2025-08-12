@@ -3,6 +3,8 @@ package com.sonfind.chelsea.domain.chat;
 import static jakarta.persistence.FetchType.*;
 import static lombok.AccessLevel.*;
 
+import java.time.LocalDateTime;
+
 import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.global.domain.BaseEntity;
 
@@ -35,12 +37,19 @@ public class ChatRoomMember extends BaseEntity {
 	@JoinColumn(name = "student_id", nullable = false)
 	private Student student;
 
+	private LocalDateTime readAt;
+
 	public ChatRoomMember(ChatRoom chatRoom, Student student) {
 		this.chatRoom = chatRoom;
 		this.student = student;
+		changeReadAt(LocalDateTime.now());
 	}
 
 	public void changeChatRoom(ChatRoom chatRoom) {
 		this.chatRoom = chatRoom;
+	}
+
+	public void changeReadAt(LocalDateTime now) {
+		this.readAt = now;
 	}
 }

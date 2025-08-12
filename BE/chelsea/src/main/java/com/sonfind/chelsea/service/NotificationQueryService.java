@@ -1,22 +1,19 @@
 package com.sonfind.chelsea.service;
 
-import java.util.List;
-
-import org.apache.coyote.BadRequestException;
-import org.bson.types.ObjectId;
-
 import com.sonfind.chelsea.dto.notification.NotificationAndNotificationStatusResponseDto;
 import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
+import org.bson.types.ObjectId;
+
+import java.util.List;
 
 public interface NotificationQueryService {
-	NotificationResponseDto getNotificationInfo(ObjectId notificationId)
-		throws BadRequestException;
+	NotificationResponseDto getNotificationInfo(ObjectId notificationId);
 
 	List<NotificationAndNotificationStatusResponseDto> getMyNotifications(
-		Long studentId, String type) throws BadRequestException;
+			Long studentId, String type);
 
 	List<NotificationAndNotificationStatusResponseDto> getTeamNotifications(
-		Long studentId, Long teamId, String type) throws BadRequestException;
+			Long studentId, Long teamId, String type);
 
 	int getCountOfNonReadNotifications(Long studentId);
 }

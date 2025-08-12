@@ -37,6 +37,7 @@ export const createDirectChatRoom = async (data: DirectChatRoomRequest): Promise
  */
 export const getMyDirectChatRooms = async () => {
   const response = await api.get("/chat-rooms/individual/me")
+  console.log("chat-rooms response", response)
   return response.data.data
 }
 /**
@@ -55,4 +56,10 @@ export const leaveChatRoom = async (roomId: number): Promise<void> => {
 export const getChatMessages = async (roomId: number): Promise<ChatMessage[]> => {
   const response = await api.get(`/chat-rooms/${roomId}/messages`)
   return response.data.data
+}
+
+export const updateLastReadAt = async (roomId: number): Promise<void> => {
+  console.log("lastread 호출 : ", roomId)
+
+  await api.post(`/chat-rooms/${roomId}/last-read`)
 }

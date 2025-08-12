@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +26,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -93,4 +96,29 @@ public class StudentController {
 		return ResponseEntity.ok().body(body);
 	}
 
+	@PostMapping("/sign-out")
+	public ResponseEntity<Map<String, Object>> signOut(HttpServletRequest httpServletRequest,
+		HttpServletResponse response) {
+
+		HttpSession session = httpServletRequest.getSession();
+		if (session != null) {
+			session.invalidate();
+		}
+
+		SecurityContextHolder.clearContext();
+
+		Cookie cookie = new Cookie("JSESSIONID", null); // 삭제할 쿠키의 이름을 동일하게 설정
+		cookie.setMaxAge(0);
+		cookie.setHttpOnly(true);
+		cookie.setPath("/");
+		response.addCookie(cookie);
+
+		Map<String, Object> body = new HashMap<>();
+
+		body.put("status", "SUCCESS");
+		body.put("data", null);
+
+		return ResponseEntity.ok().body(body);
+
+	}
 }

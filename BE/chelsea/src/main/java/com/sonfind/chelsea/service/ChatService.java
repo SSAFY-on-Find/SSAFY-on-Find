@@ -27,6 +27,7 @@ public class ChatService {
 			.build();
 
 		ChatMessage savedChatMessage = chatMessageRepository.save(chatMessage);
+
 		return ChatMessageResponseDto.of(savedChatMessage);
 	}
 }

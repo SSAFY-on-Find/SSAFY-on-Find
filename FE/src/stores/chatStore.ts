@@ -3,19 +3,41 @@ import { create } from "zustand"
 import type { ChatMessage } from "@/types/chat/chat"
 
 interface ChatState {
-  messages: ChatMessage[]
+  messagesByRoom: Record<string, ChatMessage[]>
   isConnected: boolean
-  addMessage: (message: ChatMessage) => void
+
+  addMessage: (roomId: string, message: ChatMessage) => void
   setConnected: (status: boolean) => void
-  clearMessages: () => void
-  setMessages: (messages: ChatMessage[]) => void
+  clearMessages: (roomId: string) => void
+  setMessages: (roomId: string, messages: ChatMessage[]) => void
 }
 
 export const useChatStore = create<ChatState>((set) => ({
-  messages: [],
+  messagesByRoom: {},
   isConnected: false,
-  addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
+
+  addMessage: (roomId, message) =>
+    set((state) => ({
+      messagesByRoom: {
+        ...state.messagesByRoom,
+        [roomId]: [...(state.messagesByRoom[roomId] || []), message],
+      },
+    })),
+
   setConnected: (status) => set({ isConnected: status }),
-  clearMessages: () => set({ messages: [] }),
-  setMessages: (messages) => set({ messages: messages }),
+
+  clearMessages: (roomId) =>
+    set((state) => {
+      const newMessagesByRoom = { ...state.messagesByRoom }
+      delete newMessagesByRoom[roomId]
+      return { messagesByRoom: newMessagesByRoom }
+    }),
+
+  setMessages: (roomId, messages) =>
+    set((state) => ({
+      messagesByRoom: {
+        ...state.messagesByRoom,
+        [roomId]: messages,
+      },
+    })),
 }))
