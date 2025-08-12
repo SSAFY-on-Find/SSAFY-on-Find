@@ -1,4 +1,4 @@
-export type EntityType = "MATE" | "TEAM"
+export type EntityType = "STUDENT" | "TEAM"
 export type RequestType = "APPLICATION" | "INVITATION" | "MERGE"
 
 export interface IInvitationRequest {

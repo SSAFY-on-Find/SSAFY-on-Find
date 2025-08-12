@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom"
+
 import { Button } from "@/components/atoms"
 import { TeamDetail } from "@/components/molecules"
 import { useInvte } from "@/hooks/useInvite"
@@ -17,6 +19,7 @@ interface ITeamDetailModal {
 function TeamDetailModal({ teamId, isOpen, onClose, teamData, userTeamId }: ITeamDetailModal) {
   const { applyAsMate, mergeTeams } = useInvte(userTeamId ?? null)
   const myMateId = useUserStore((s) => s.user?.studentId)
+  const navigate = useNavigate()
 
   const renderButtons = () => {
     if (userTeamId === null) {
@@ -49,7 +52,18 @@ function TeamDetailModal({ teamId, isOpen, onClose, teamData, userTeamId }: ITea
         </>
       )
     }
-    return null
+    return (
+      <Button
+        size={"m"}
+        isIcon={false}
+        text="내 팀 바로가기"
+        variant="primary"
+        onClick={() => {
+          navigate("/myteam")
+          onClose()
+        }}
+      />
+    )
   }
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={"m"}>

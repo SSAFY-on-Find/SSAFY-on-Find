@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import ReactMarkdown from "react-markdown"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
+import { useQueryClient } from "@tanstack/react-query"
 import { CirclePlus, Eye, Search, X } from "lucide-react"
 
 import { Button, CheckTag, InputBox, Segmented, UserImg } from "@/components/atoms"
@@ -11,6 +12,7 @@ import { useProfileCodes } from "@/hooks/useProfile"
 import { useCreateProfile } from "@/hooks/useProfile"
 import { useProfileStore } from "@/stores/profileStore"
 import { useUserStore } from "@/stores/userStore"
+import type { IStudentSignin } from "@/types/student"
 
 import "github-markdown-css/github-markdown-light.css"
 
@@ -48,14 +50,22 @@ export default function ProfileCreatePage() {
   const { mutate: createProfile, isSuccess, error: createError } = useCreateProfile()
   const profileStore = useProfileStore()
   const navigate = useNavigate()
+  const qc = useQueryClient()
+  const markProfileCreated = useUserStore((s) => s.markProfileCreated)
 
   useEffect(() => {
     if (isSuccess) {
+      // 1) React Query 캐시 갱신 (가드가 이 값을 봄)
+      qc.setQueryData<IStudentSignin>(["user-auth"], (prev) => (prev ? { ...prev, isCreatedStudentInfo: true } : prev))
+      // (서버 상태와 완전 동기화하고 싶으면 invalidate도 추가 가능)
+      // await qc.invalidateQueries({ queryKey: ["user-auth"] })
+
+      // 2) zustand도 갱신
+      markProfileCreated() // or useUserStore.setState(...) 방식 그대로
+
+      // 3) UX
       toast.success("자기소개가 성공적으로 저장되었습니다!")
-      useUserStore.setState((state) => ({
-        user: state.user ? { ...state.user, isCreatedStudentInfo: true } : state.user,
-      }))
-      navigate("/")
+      navigate("/") // 마지막에 이동
     }
   }, [isSuccess, navigate])
 

@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { Heart } from "lucide-react"
 
 import { Button, MainTag, PositionTag, UserImg, WhiteTag } from "@/components/atoms"
@@ -25,6 +26,7 @@ function TeamCard({
 }: ITeamCardElement) {
   const { applyAsMate, mergeTeams } = useInvte(userTeamId ?? null)
   const myMateId = useUserStore((s) => s.user?.studentId)
+  const navigate = useNavigate()
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -64,7 +66,15 @@ function TeamCard({
         </>
       )
     }
-    return <Button size={"m"} isIcon={false} text="내 팀 바로가기" variant={btnRecruit} onClick={() => {}} />
+    return (
+      <Button
+        size={"m"}
+        isIcon={false}
+        text="내 팀 바로가기"
+        variant={btnRecruit}
+        onClick={() => navigate("/myteam")}
+      />
+    )
   }
 
   // 카드 스타일
