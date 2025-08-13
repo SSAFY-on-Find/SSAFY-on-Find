@@ -120,7 +120,7 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 							.subNotificationMessage(doc.getSubNotificationMessage())
 							.build();
 				})
-				.toList();
+				.toList().reversed();
 
 		return Collections.singletonList(NotificationAndNotificationStatusForMyNotifResponseDto.builder()
 				.notificationStatusList(dtos)
