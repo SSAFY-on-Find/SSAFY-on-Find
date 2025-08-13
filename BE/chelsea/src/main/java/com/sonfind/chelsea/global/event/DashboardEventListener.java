@@ -42,7 +42,7 @@ public class DashboardEventListener {
 				.data(e)
 				.build();
 
-		sseService.broadcastToAll(event, payload);
+		sseService.broadcastToAll(TYPE.name(), payload);
 	}
 
 	@EventListener
@@ -56,7 +56,7 @@ public class DashboardEventListener {
 				.data(e)
 				.build();
 
-		sseService.broadcastToAll(event, payload);
+		sseService.broadcastToAll(TYPE.name(), payload);
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class DashboardEventListener {
 				.data(e)
 				.build();
 
-		sseService.broadcastToAll(event, payload);
+		sseService.broadcastToAll(TYPE.name(), payload);
 	}
 
 	/**
@@ -97,7 +97,7 @@ public class DashboardEventListener {
 				.data(e)
 				.build();
 
-		sseService.broadcastToAll(event, payload);
+		sseService.broadcastToAll(TYPE.name(), payload);
 	}
 
 	private Date getCurrentDate() {

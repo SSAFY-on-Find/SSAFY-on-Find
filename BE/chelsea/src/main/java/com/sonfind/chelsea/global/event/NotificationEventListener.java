@@ -9,6 +9,7 @@ import com.sonfind.chelsea.factory.ResponsePayloadFactory;
 import com.sonfind.chelsea.global.error.AppException;
 import com.sonfind.chelsea.global.error.ErrorCode;
 import com.sonfind.chelsea.service.SseService;
+import com.sonfind.chelsea.types.EventTargetType;
 import com.sonfind.chelsea.types.NotificationDomainType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ public class NotificationEventListener {
 	private final SseService sseService;
 	private final List<RequestPayloadFactory> requestPayloadFactories;
 	private final List<ResponsePayloadFactory> responsePayloadFactories;
+	private final String EVENT_TARGET = EventTargetType.NOTIFICATION.name();
 
 	/**
 	 * 알림 이벤트 리스너
@@ -56,7 +58,7 @@ public class NotificationEventListener {
 		switch (e.getType()) {
 			case APPLICATION, INVITATION, MERGE -> {
 				log.info("알림 발송함~");
-				sendBoth(pubData, pubPayload, subData, subPayload, e.getType().name());
+				sendBoth(pubData, pubPayload, subData, subPayload, EVENT_TARGET);
 			}
 			default -> {
 				// 지원, 초대, 병합 외의 타입은 처리하지 않음
@@ -87,7 +89,7 @@ public class NotificationEventListener {
 						data.subId(),
 						data.subType(),
 						payload,
-						e.getType().name()
+						EVENT_TARGET
 				);
 			}
 			default -> {
