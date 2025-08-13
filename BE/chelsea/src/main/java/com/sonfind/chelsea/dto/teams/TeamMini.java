@@ -5,8 +5,6 @@ public interface TeamMini {
 
 	String getName();
 
-	String getTrack();
-
 	Integer getMajorCount();
 
 	Integer getNonMajorCount();

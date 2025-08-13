@@ -53,12 +53,12 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 	@Query("""
 			    select s.studentId as studentId,
 			           s.name      as name,
-			           coalesce(trackFromInfo.subCodeName, classFromStudent.subCodeName) as track,
+			           coalesce(positionFromInfo.subCodeName, classFromStudent.subCodeName) as position,
 			           si.profile.profileImageUrl as profileImageUrl,
 			           s.majorYn  as majorYn
 			    from Student s
 			    left join StudentInfo si on si.student = s
-			    left join SubCode trackFromInfo on trackFromInfo = si.trackCode
+			    left join SubCode positionFromInfo on positionFromInfo = si.positionCode
 			    left join SubCode classFromStudent on classFromStudent = s.classCode
 			    where s.studentId in :ids
 			""")

@@ -110,7 +110,6 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
 	@Query("""
 			    select t.teamId as teamId,
 			           t.name as name,
-			           t.track.subCodeName as track,
 			           t.majorCount as majorCount,
 			           t.nonMajorCount as nonMajorCount
 			    from Team t

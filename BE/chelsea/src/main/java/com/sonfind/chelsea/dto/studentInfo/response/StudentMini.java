@@ -5,7 +5,7 @@ public interface StudentMini {
 
 	String getName();
 
-	String getTrack();
+	String getPosition();
 
 	String getProfileImageUrl();
 

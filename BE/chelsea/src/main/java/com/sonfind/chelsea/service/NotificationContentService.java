@@ -55,21 +55,19 @@ public class NotificationContentService {
 
 	private String buildMergeMessage(RecipientRole role, NotificationContext ctx) {
 		if (role == RecipientRole.PUBLISHER) {
-			return "%s(%s, %s)님을 %s(%s)에 초대했습니다.".formatted(
+			return "%s(%s)님을 %s(%s)에 초대했습니다.".formatted(
 					ctx.subscriber().displayName(),
-					ctx.subscriber().majorYn(),
-					ctx.subscriber().position(),
+					ctx.subscriber().track(),
 					ctx.publisher().displayName(),
 					ctx.publisher().track()
 			);
 		}
 
-		return "%s(%s)에서 %s(%s, %s)님을 초대했습니다.".formatted(
+		return "%s(%s)에서 %s(%s)님을 초대했습니다.".formatted(
 				ctx.publisher().displayName(),
 				ctx.publisher().track(),
 				ctx.subscriber().displayName(),
-				ctx.subscriber().majorYn(),
-				ctx.subscriber().position()
+				ctx.subscriber().track()
 		);
 	}
 
