@@ -307,7 +307,7 @@ export default function ProfileEditPage() {
                       <button
                         key={type}
                         onClick={() => handleToggle(idx, type)}
-                        className={`aspect-square rounded-full border-0 px-2 py-1 text-xs font-bold ${
+                        className={`aspect-square rounded-full border-0 px-2 py-1 text-xs font-bold transition-colors duration-300 ease-in-out ${
                           mbtiSelected[idx] === type ? "bg-main text-white" : "text-text"
                         }`}
                         style={{ minWidth: 28 }}

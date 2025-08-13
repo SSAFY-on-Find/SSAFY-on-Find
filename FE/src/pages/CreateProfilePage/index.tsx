@@ -57,11 +57,9 @@ export default function ProfileCreatePage() {
     if (isSuccess) {
       // 1) React Query 캐시 갱신 (가드가 이 값을 봄)
       qc.setQueryData<IStudentSignin>(["user-auth"], (prev) => (prev ? { ...prev, isCreatedStudentInfo: true } : prev))
-      // (서버 상태와 완전 동기화하고 싶으면 invalidate도 추가 가능)
-      // await qc.invalidateQueries({ queryKey: ["user-auth"] })
 
       // 2) zustand도 갱신
-      markProfileCreated() // or useUserStore.setState(...) 방식 그대로
+      markProfileCreated()
 
       // 3) UX
       toast.success("자기소개가 성공적으로 저장되었습니다!")
@@ -295,7 +293,7 @@ export default function ProfileCreatePage() {
                       <button
                         key={type}
                         onClick={() => handleToggle(idx, type)}
-                        className={`aspect-square rounded-full border-0 px-2 py-1 text-xs font-bold ${
+                        className={`aspect-square rounded-full border-0 px-2 py-1 text-xs font-bold transition-colors duration-300 ease-in-out ${
                           mbtiSelected[idx] === type ? "bg-main text-white" : "text-text"
                         }`}
                         style={{ minWidth: 28 }}
