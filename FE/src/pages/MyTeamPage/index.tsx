@@ -14,8 +14,6 @@ import { useInviteAccept, useInviteCancel, useInviteReject } from "@/hooks/useIn
 import { useTeamNotification } from "@/hooks/useNotification"
 import { useAuth, useStudentList } from "@/hooks/useStudent"
 import { useLeaveTeam } from "@/hooks/useTeam"
-import { useTeamNotifications } from "@/hooks/useTeamNotifications"
-import { useUserStore } from "@/stores/userStore"
 import type { INotification, INotificationStatus } from "@/types/notification"
 import type { IMyTeam, ITeamMember } from "@/types/team"
 
