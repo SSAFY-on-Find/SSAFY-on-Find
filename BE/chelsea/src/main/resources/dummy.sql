@@ -135,9 +135,9 @@ INSERT INTO teams (name, description, track_code, is_deleted, major_count, non_m
 VALUES
     ('팀 001', '웹 기술 기반 프로젝트 수행팀 A', 'TRK001', FALSE, 2, 1, NOW(), NOW()),
     ('팀 002', '웹 디자인 전문팀 A', 'TRK002', FALSE, 1, 1, NOW(), NOW()),
-    ('팀 003', 'AIoT 융합 프로젝트팀 A', 'TRK003', FALSE, 0, 2, NOW(), NOW()),
-    ('팀 004', '모바일 앱 개발팀 A', 'TRK004', FALSE, 2, 3, NOW(), NOW()),
-    ('팀 005', '웹 디자인 전문팀 B', 'TRK002', FALSE, 2, 2, NOW(), NOW());
+    ('팀 003', 'AIoT 융합 프로젝트팀 A', 'TRK003', FALSE, 2, 2, NOW(), NOW()),
+    ('팀 004', '모바일 앱 개발팀 A', 'TRK004', FALSE, 0, 2, NOW(), NOW()),
+    ('팀 005', '웹 디자인 전문팀 B', 'TRK002', FALSE, 2, 3, NOW(), NOW());
 
 -- == Recruit ==
 INSERT INTO recruitments (position_code, team_id, created_at, updated_at)
