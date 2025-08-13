@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom"
-import { Heart } from "lucide-react"
+import { Heart, MessageSquarePlus, Send } from "lucide-react"
 
 import { Button, CircleGrid, MainTag, MajorTag, NormalTag, PositionTag, UserImg } from "@/components/atoms"
 import { useStudentFavoriteToggle } from "@/hooks/useFavorite"
@@ -45,7 +45,11 @@ function StudentInfo({
     >
       <div
         className={`${variant === "dashboard" ? "hover:bg-main/10 duration-300 ease-in-out hover:cursor-pointer" : ""} flex flex-col items-center justify-center gap-1 rounded-xl p-5`}
-        onClick={() => navigate("/myprofile")}
+        onClick={() => {
+          if (variant === "dashboard") {
+            navigate("/myprofile")
+          }
+        }}
       >
         <div className="relative">
           <UserImg name={name} size={variant === "detail" ? "xl" : "l"} showTeamBadge={false} url={imgUrl} />

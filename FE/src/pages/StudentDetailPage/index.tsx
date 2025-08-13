@@ -1,14 +1,17 @@
 import { useMemo } from "react"
 import ReactMarkdown from "react-markdown"
 import { useNavigate, useParams } from "react-router-dom"
+import { Send } from "lucide-react"
 
 import { Button, MajorTag, NormalTag, PositionTag } from "@/components/atoms"
 import { StudentInfo } from "@/components/molecules"
 import { TeamDetailModal } from "@/components/templates"
 import Loading from "@/components/templates/Loading"
+import { useCreateDirectChatRoom } from "@/hooks/useDM"
 import { useStudentInfo } from "@/hooks/useStudent"
 import { useTeamDetails } from "@/hooks/useTeam"
 import { useTeamStore } from "@/stores/teamStore"
+import { useChatViewStore } from "@/stores/useChatViewStore"
 import { useUserStore } from "@/stores/userStore"
 import type { ISubcode } from "@/types/common"
 
@@ -22,6 +25,9 @@ export default function StudentDetailPage() {
   const { isDetailModalOpen, selectedTeamId, closeDetailModal } = useTeamStore()
   const { data: selectedTeamData } = useTeamDetails(selectedTeamId || 0)
   const userTeamId = useUserStore((state) => state.user?.teamId)
+  const openChat = useChatViewStore((state) => state.openChat)
+  const { mutate: createChat } = useCreateDirectChatRoom()
+
   const {
     student,
     position,
@@ -73,9 +79,34 @@ export default function StudentDetailPage() {
       </div>
     )
   }
+  const handleStartNewChat = (targetStudentId: number) => {
+    createChat(
+      { targetStudentId },
+      {
+        onSuccess: (roomId) => {
+          openChat({ roomId, roomType: "direct" })
+        },
+        onError: (error) => {
+          console.log("1대1채팅방 생성 에러 : ", error)
+        },
+      }
+    )
+  }
 
   return (
     <div className="bg-background flex min-h-screen flex-col gap-7 px-15 py-10">
+      <div className="flex flex-row gap-5">
+        <div className="w-30">
+          <Button
+            size={"m"}
+            isIcon={true}
+            Icon={Send}
+            variant="outline"
+            text="채팅하기"
+            onClick={() => handleStartNewChat(parsedId)}
+          />
+        </div>
+      </div>
       <div>
         <StudentInfo
           isFavorite={isFavorite}
