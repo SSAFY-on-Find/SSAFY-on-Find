@@ -5,12 +5,15 @@ import { UserPlus } from "lucide-react"
 
 import { createTeamChatRoom, getChatMessages, getTeamChatRoomId, leaveChatRoom } from "@/apis/chatRoom"
 import { teamApi } from "@/apis/teamApi"
+import { Button } from "@/components/atoms"
 import { Segmented } from "@/components/atoms"
 import { TeamDetail } from "@/components/molecules"
+import { StudentSearchModal } from "@/components/templates"
 import Loading from "@/components/templates/Loading"
 import { useInviteAccept, useInviteCancel, useInviteReject } from "@/hooks/useInvite"
 import { useTeamNotification } from "@/hooks/useNotification"
-import { useUserStore } from "@/stores/userStore"
+import { useAuth, useStudentList } from "@/hooks/useStudent"
+import { useLeaveTeam } from "@/hooks/useTeam"
 import type { INotification, INotificationStatus } from "@/types/notification"
 import type { IMyTeam, ITeamMember } from "@/types/team"
 
@@ -20,17 +23,22 @@ import TeamChat from "./organisms/TeamChat"
 export default function MyTeamPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const teamId = useUserStore((state) => state.user?.teamId)
-  const studentId = useUserStore((state) => state.user?.studentId)
+  const { data: authData } = useAuth()
+  const teamId = authData?.teamId
+  const studentId = authData?.studentId
   const [chatRoomId, setChatRoomId] = useState<number | null>(null)
   const [requestTab, setRequestTab] = useState<"left" | "right">("left")
   const requestType = requestTab === "left" ? "receive" : "send"
 
+  const { mutate: leaveTeam } = useLeaveTeam()
+  const [studentSearchModal, setStudentSearchModal] = useState(false)
+  const { data: students, isLoading: isStudentListLoading } = useStudentList()
   const { data: myTeamData, isLoading: isMyTeamLoading } = useQuery<IMyTeam>({
     queryKey: ["myTeam"],
     queryFn: () => teamApi.getMyTeam().then((res) => res.data),
     enabled: !!teamId,
   })
+  const studentsExceptMe = students?.filter((s) => s.student.studentId !== Number(authData?.studentId))
 
   const rawMembers = myTeamData?.teamInfo.members ?? []
   const teamMembers: ITeamMember[] = useMemo(
@@ -54,22 +62,7 @@ export default function MyTeamPage() {
       console.error("채팅방 나가기 실패:", error)
     },
   })
-  const { mutate: leaveTeam } = useMutation({
-    mutationFn: () => teamApi.leaveTeam(), // teamApi에 leaveTeam 함수가 있다고 가정
-    onSuccess: () => {
-      // 1. 팀 탈퇴 성공 시, 채팅방 나가기 실행
-      if (chatRoomId) {
-        leaveRoom(chatRoomId)
-      }
-      queryClient.invalidateQueries({ queryKey: ["myTeam"] })
-      alert("팀에서 성공적으로 탈퇴했습니다.")
-      navigate("/") // 메인 페이지 등으로 이동
-    },
-    onError: (error) => {
-      alert("팀 탈퇴에 실패했습니다.")
-      console.error(error)
-    },
-  })
+
   const handleLeaveTeam = () => {
     if (window.confirm("정말로 팀에서 탈퇴하시겠습니까?")) {
       leaveTeam()
@@ -83,6 +76,9 @@ export default function MyTeamPage() {
     onError: () => console.error("채팅방 생성에 실패했습니다."),
   })
 
+  const handleInviteStudent = (targetStudentId: number) => {
+    // 새로운 학생을 우리 팀으로 초대하는 로직이 들어가야합니다!
+  }
   const {
     data: fetchedRoomId,
     isFetching: isFetchingRoomId,
@@ -134,7 +130,12 @@ export default function MyTeamPage() {
   //     navigate("/create-team")
   //   }
   // }, [teamId, navigate])
-
+  useEffect(() => {
+    // 로딩 상태도 함께 확인
+    if (!teamId && !isMyTeamLoading) {
+      navigate("/no-team")
+    }
+  }, [teamId, navigate, isMyTeamLoading])
   // useEffect(() => {
   //   if (isSuccess && fetchedRoomId) setChatRoomId(fetchedRoomId)
   // }, [isSuccess, fetchedRoomId])
@@ -159,7 +160,27 @@ export default function MyTeamPage() {
             <div>
               <div className="flex items-center gap-[15px]">
                 <h3 className="text-text text-2xl font-bold">대기목록</h3>
-                <UserPlus />
+                <div className="w-30">
+                  <Button
+                    size={"s"}
+                    isIcon={true}
+                    Icon={UserPlus}
+                    variant="outline"
+                    text="팀원 초대"
+                    onClick={() => setStudentSearchModal(true)}
+                  />
+                </div>
+                {!isStudentListLoading && studentsExceptMe && (
+                  <StudentSearchModal
+                    isOpen={studentSearchModal}
+                    onClose={() => setStudentSearchModal(false)}
+                    students={studentsExceptMe}
+                    onStudentClick={(studentId) => {
+                      handleInviteStudent(Number(studentId))
+                      setStudentSearchModal(false)
+                    }}
+                  />
+                )}
               </div>
               <p className="text-subtext mt-2 text-sm text-pretty">
                 팀 합류를 신청한 교육생들입니다. 신중하게 검토 후 결정해주세요.

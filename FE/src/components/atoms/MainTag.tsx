@@ -11,7 +11,7 @@ function MainTag({ tagContent, fillBg = false, size = "sm" }: tagProps) {
   return (
     <>
       <div
-        className={`${colorApply} ${sizeApply} border-main inline-block rounded-full border-2 text-center whitespace-nowrap`}
+        className={`${colorApply} ${sizeApply} border-main inline-block rounded-full border-1 text-center whitespace-nowrap`}
       >
         {tagContent}
       </div>

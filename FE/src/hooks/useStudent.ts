@@ -1,3 +1,4 @@
+import { toast } from "react-toastify"
 import { useMutation, useQuery } from "@tanstack/react-query"
 
 import { authApi } from "@/apis/authApi"
@@ -9,6 +10,7 @@ export const useStudentLogin = () => {
       try {
         const response = await studentApi.login(studentId)
         if (response.status !== "SUCCESS") {
+          toast.error("로그인에 실패하였습니다. 다시 시도해 주세요")
           throw new Error("로그인에 실패하였습니다.")
         }
         return response.data
@@ -16,6 +18,7 @@ export const useStudentLogin = () => {
         if (error instanceof Error) {
           throw new Error(error.message)
         }
+        toast.error("로그인에 실패하였습니다. 다시 시도해 주세요")
         throw new Error("로그인 중 오류가 발생했습니다.")
       }
     },
@@ -28,6 +31,7 @@ export const useStudentLogout = () => {
       try {
         const response = await studentApi.logout()
         if (response.status !== "SUCCESS") {
+          toast.error("로그인에 실패하였습니다. 다시시도해 주세요")
           throw new Error("로그아웃에 실패하였습니다.")
         }
         return response.data
@@ -35,6 +39,7 @@ export const useStudentLogout = () => {
         if (error instanceof Error) {
           throw new Error(error.message)
         }
+        toast.error("로그인에 실패하였습니다. 다시시도해 주세요")
         throw new Error("로그아웃 중 오류가 발생했습니다.")
       }
     },
@@ -47,6 +52,7 @@ export const useAuth = () => {
     queryFn: async () => {
       const response = await authApi.getAuth()
       if (response.status !== "SUCCESS") {
+        toast.error("로그인에 실패하였습니다. 다시시도해 주세요")
         throw new Error("세션 인증에 실패했습니다.")
       }
       return response.data
@@ -63,6 +69,7 @@ export const useStudentInfo = (studentId: number) => {
     queryFn: async () => {
       const response = await studentInfoApi.getStudentInfo(studentId)
       if (response.status !== "SUCCESS") {
+        toast.error("학생 정보 조회에 실패했습니다. 다시시도해 주세요")
         throw new Error("학생 정보 조회에 실패했습니다.")
       }
       return response.data
@@ -80,6 +87,7 @@ export const useStudentList = () => {
     queryFn: async () => {
       const response = await studentApi.getStudentList()
       if (response.status !== "SUCCESS") {
+        toast.error("교육생 목록 조회에 실패했습니다. 다시시도해 주세요")
         throw new Error("교육생 목록 조회에 실패했습니다.")
       }
       return response.data.students
