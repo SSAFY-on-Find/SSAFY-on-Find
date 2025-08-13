@@ -1,6 +1,7 @@
 package com.sonfind.chelsea.repository;
 
 import com.sonfind.chelsea.domain.notification.NotificationStatusDocument;
+import com.sonfind.chelsea.dto.notification.StatusValue;
 import com.sonfind.chelsea.types.NotificationDomainType;
 import com.sonfind.chelsea.types.NotificationStatus;
 import com.sonfind.chelsea.types.RecipientRole;
@@ -26,5 +27,5 @@ public interface NotificationStatusRepository extends MongoRepository<Notificati
 	NotificationStatusDocument findByNotificationIdAndTargetIdAndRoleAndStatus(ObjectId notificationId,
 	                                                                           Long targetId, RecipientRole role, NotificationStatus status);
 
-	NotificationStatusDocument findTopByNotificationIdOrderByUpdatedAtDesc(ObjectId notificationId);
+	StatusValue findTopByNotificationIdOrderByUpdatedAtDesc(ObjectId notificationId);
 }

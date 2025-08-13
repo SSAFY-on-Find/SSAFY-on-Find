@@ -2,10 +2,7 @@ package com.sonfind.chelsea.service;
 
 import com.sonfind.chelsea.domain.notification.NotificationDocument;
 import com.sonfind.chelsea.domain.notification.NotificationStatusDocument;
-import com.sonfind.chelsea.dto.notification.NotificationAndNotificationStatusForMyNotifResponseDto;
-import com.sonfind.chelsea.dto.notification.NotificationAndNotificationStatusForMyTeamResponseDto;
-import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
-import com.sonfind.chelsea.dto.notification.NotificationStatusResponseDto;
+import com.sonfind.chelsea.dto.notification.*;
 import com.sonfind.chelsea.dto.studentInfo.response.StudentMini;
 import com.sonfind.chelsea.dto.teams.TeamMini;
 import com.sonfind.chelsea.facade.StudentFacade;
@@ -177,7 +174,7 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 			NotificationDomainType counterpartType = sent ? d.getSubscriberType() : d.getPublisherType();
 			Long counterpartId = sent ? d.getSubscriberId() : d.getPublisherId();
 			String notificationId = d.getId().toHexString();
-			NotificationStatusDocument statusDoc = statusRepository.findTopByNotificationIdOrderByUpdatedAtDesc(d.getId());
+			StatusValue statusVal = statusRepository.findTopByNotificationIdOrderByUpdatedAtDesc(d.getId());
 
 			if (counterpartType == NotificationDomainType.STUDENT) {
 				StudentMini s = studentMap.get(counterpartId);
@@ -187,7 +184,7 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 				}
 				return NotificationAndNotificationStatusForMyTeamResponseDto.builder()
 						.notificationId(notificationId)
-						.status(statusDoc.getStatus())
+						.status(statusVal.status())
 						.profileImageUrl(s != null ? s.getProfileImageUrl() : null)
 						.name(s != null ? s.getName() : null)
 						.isMajor(isMajor)
@@ -198,7 +195,7 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 				TeamMini t = teamMap.get(counterpartId);
 				return NotificationAndNotificationStatusForMyTeamResponseDto.builder()
 						.notificationId(notificationId)
-						.status(statusDoc.getStatus())
+						.status(statusVal.status())
 						.name(t != null ? t.getName() : null)
 						.majorCount(t != null && t.getMajorCount() != null ? t.getMajorCount() : null)
 						.nonMajorCount(t != null && t.getNonMajorCount() != null ? t.getNonMajorCount() : null)
