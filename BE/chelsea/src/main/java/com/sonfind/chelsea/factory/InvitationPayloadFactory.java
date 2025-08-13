@@ -72,9 +72,9 @@ public class InvitationPayloadFactory implements RequestPayloadFactory {
 		// 최종 응답 DTO
 		return NotificationDto.<InvitationPubData>builder()
 				.id(e.getNotificationId().toHexString())
-				.event(e.getClass().toString())
+				.event(e.getClass().getName())
 				.type(e.getType())         // INVITATION 으로
-				.time(e.getUpdatedAt().toString())
+				.time(e.getUpdatedAt())
 				.data(payload)
 				.build();
 	}
@@ -118,9 +118,9 @@ public class InvitationPayloadFactory implements RequestPayloadFactory {
 		// 최종 응답 DTO
 		return NotificationDto.<InvitationSubData>builder()
 				.id(e.getNotificationId().toHexString())
-				.event(e.getClass().toString())
+				.event(e.getClass().getName())
 				.type(e.getType())         // INVITATION 으로
-				.time(e.getUpdatedAt().toString())
+				.time(e.getUpdatedAt())
 				.data(payload)
 				.build();
 	}

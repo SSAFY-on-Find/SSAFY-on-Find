@@ -56,9 +56,9 @@ public class ApplicationPayloadFactory implements RequestPayloadFactory {
 		// 최종 응답 DTO
 		return NotificationDto.<ApplicationPubData>builder()
 				.id(e.getNotificationId().toHexString())
-				.event(e.getClass().toString())
+				.event(e.getClass().getName())
 				.type(e.getType())         // APPLICATION 으로
-				.time(e.getUpdatedAt().toString())
+				.time(e.getUpdatedAt())
 				.data(payload)
 				.build();
 	}
@@ -107,9 +107,9 @@ public class ApplicationPayloadFactory implements RequestPayloadFactory {
 		// 최종 응답 DTO
 		return NotificationDto.<ApplicationSubData>builder()
 				.id(e.getNotificationId().toHexString())
-				.event(e.getClass().toString())
+				.event(e.getClass().getName())
 				.type(e.getType())         // APPLICATION 으로
-				.time(e.getUpdatedAt().toString())
+				.time(e.getUpdatedAt())
 				.data(payload)
 				.build();
 	}

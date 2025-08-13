@@ -66,9 +66,9 @@ public class MergePayloadFactory implements RequestPayloadFactory {
 		// 최종 응답 DTO
 		return NotificationDto.<MergePubData>builder()
 				.id(e.getNotificationId().toHexString())
-				.event(e.getClass().toString())
+				.event(e.getClass().getName())
 				.type(e.getType())         // MERGE 으로
-				.time(e.getUpdatedAt().toString())
+				.time(e.getUpdatedAt())
 				.data(payload)
 				.build();
 	}
@@ -114,9 +114,9 @@ public class MergePayloadFactory implements RequestPayloadFactory {
 		// 최종 응답 DTO
 		return NotificationDto.<MergeSubData>builder()
 				.id(e.getNotificationId().toHexString())
-				.event(e.getClass().toString())
+				.event(e.getClass().getName())
 				.type(e.getType())         // MERGE 으로
-				.time(e.getUpdatedAt().toString())
+				.time(e.getUpdatedAt())
 				.data(payload)
 				.build();
 	}

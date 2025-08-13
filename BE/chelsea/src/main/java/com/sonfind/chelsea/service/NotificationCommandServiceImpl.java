@@ -17,6 +17,7 @@ import com.sonfind.chelsea.service.validator.NotificationValidator;
 import com.sonfind.chelsea.types.NotificationDomainType;
 import com.sonfind.chelsea.types.NotificationStatus;
 import com.sonfind.chelsea.types.RecipientRole;
+import com.sonfind.chelsea.util.DateUtil;
 import com.sonfind.chelsea.util.NotificationTypeConverter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -105,7 +106,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				savedNotification.getPublisherType(),
 				savedNotification.getSubscriberId(),
 				savedNotification.getSubscriberType(),
-				savedNotification.getUpdatedAt(),
+				DateUtil.formatKoShort(savedNotification.getUpdatedAt()),
 				savedNotification.getType()
 		);
 
