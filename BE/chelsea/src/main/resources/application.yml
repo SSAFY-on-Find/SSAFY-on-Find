@@ -17,6 +17,7 @@ spring:
       hibernate:
         default_batch_fetch_size: 100
         format_sql: true
+        generate_statistics: true
       max-file-size: 50MB
       max-request-size: 55MB
 

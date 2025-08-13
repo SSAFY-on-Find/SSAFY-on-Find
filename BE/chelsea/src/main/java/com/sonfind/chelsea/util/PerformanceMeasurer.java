@@ -4,68 +4,99 @@ import java.util.function.Supplier;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
 public class PerformanceMeasurer {
 
-	@Autowired
-	private EntityManagerFactory entityManagerFactory;
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	public PerformanceResult measureWithHibernateStats(String operationName, Supplier<Object> operation) {
-		// Hibernate 통계 초기화
-		SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
-		Statistics stats = sessionFactory.getStatistics();
-		stats.clear();
+		SessionFactory sessionFactory = null;
+		Statistics stats = null;
 
+		try {
+			// EntityManager를 통해 SessionFactory 가져오기
+			sessionFactory = entityManager.getEntityManagerFactory().unwrap(SessionFactory.class);
+			stats = sessionFactory.getStatistics();
+
+			// 통계 초기화
+			stats.clear();
+
+		} catch (Exception e) {
+			log.warn("Hibernate Statistics를 사용할 수 없습니다. 단순 시간 측정으로 진행: {}", e.getMessage());
+			return measureSimple(operationName, operation);
+		}
+
+		// 측정 시작
 		long startTime = System.currentTimeMillis();
-		long startQueryCount = stats.getQueryExecutionCount();
-		long startEntityLoadCount = stats.getEntityLoadCount();
+		long startQueries = stats.getQueryExecutionCount();
+		long startEntityLoads = stats.getEntityLoadCount();
+
+		log.info("=== {} 측정 시작 ===", operationName);
 
 		// 실제 작업 실행
 		Object result = operation.get();
 
+		// 측정 종료
 		long endTime = System.currentTimeMillis();
-		long totalTime = endTime - startTime;
-		long queryCount = stats.getQueryExecutionCount() - startQueryCount;
-		long entityLoadCount = stats.getEntityLoadCount() - startEntityLoadCount;
+		long endQueries = stats.getQueryExecutionCount();
+		long endEntityLoads = stats.getEntityLoadCount();
 
-		PerformanceResult performanceResult = new PerformanceResult(
-			operationName,
-			totalTime,
-			queryCount,
-			entityLoadCount,
-			result
-		);
+		long executionTime = endTime - startTime;
+		long queryCount = endQueries - startQueries;
+		long entityLoadCount = endEntityLoads - startEntityLoads;
 
-		log.info("=== {} 성능 측정 결과 ===", operationName);
-		log.info("실행시간: {}ms", totalTime);
-		log.info("쿼리 수: {}개", queryCount);
-		log.info("엔티티 로드 수: {}개", entityLoadCount);
-		log.info("================================");
+		log.info("=== {} 측정 완료 ===", operationName);
+		log.info("실행시간: {}ms", executionTime);
+		log.info("쿼리 실행 횟수: {}회", queryCount);
+		log.info("엔티티 로드 횟수: {}회", entityLoadCount);
+		log.info("추가 통계 - 캐시 히트: {}, 미스: {}", stats.getSecondLevelCacheHitCount(),
+			stats.getSecondLevelCacheMissCount());
 
-		return performanceResult;
+		return PerformanceResult.builder()
+			.operationName(operationName)
+			.executionTime(executionTime)
+			.queryCount(queryCount)
+			.entityLoadCount(entityLoadCount)
+			.cacheHitCount(stats.getSecondLevelCacheHitCount())
+			.cacheMissCount(stats.getSecondLevelCacheMissCount())
+			.build();
 	}
 
-	public static class PerformanceResult {
-		public final String operationName;
-		public final long executionTime;
-		public final long queryCount;
-		public final long entityLoadCount;
-		public final Object result;
+	public PerformanceResult measureSimple(String operationName, Supplier<Object> operation) {
+		log.info("=== {} 간단 측정 시작 ===", operationName);
 
-		public PerformanceResult(String operationName, long executionTime, long queryCount,
-			long entityLoadCount, Object result) {
-			this.operationName = operationName;
-			this.executionTime = executionTime;
-			this.queryCount = queryCount;
-			this.entityLoadCount = entityLoadCount;
-			this.result = result;
-		}
+		long startTime = System.currentTimeMillis();
+		Object result = operation.get();
+		long executionTime = System.currentTimeMillis() - startTime;
+
+		log.info("=== {} 간단 측정 완료 - {}ms ===", operationName, executionTime);
+
+		return PerformanceResult.builder()
+			.operationName(operationName)
+			.executionTime(executionTime)
+			.queryCount(-1) // 미측정 표시
+			.entityLoadCount(-1)
+			.build();
+	}
+
+	@lombok.Data
+	@lombok.Builder
+	@lombok.AllArgsConstructor
+	@lombok.NoArgsConstructor
+	public static class PerformanceResult {
+		private String operationName;
+		public long executionTime;
+		public long queryCount;
+		public long entityLoadCount;
+		private long cacheHitCount;
+		private long cacheMissCount;
 	}
 }

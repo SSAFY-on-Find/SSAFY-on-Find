@@ -277,4 +277,243 @@ public class TeamController {
 		return ResponseEntity.ok().body(body);
 	}
 
+	// TeamController.java에 추가할 메서드들
+
+	//팀 전체 목록 조회 - 기존 N+1 방식
+	@GetMapping("/n-plus-1")
+	@Operation(summary = "팀 목록 조회 - 기존 N+1 방식", description = "기존 방식으로 팀 목록을 조회합니다. (N+1 문제 발생)")
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "팀 목록 조회 성공",
+			content = @Content(
+				schema = @Schema(
+					implementation = TeamListResponseDto.class
+				)
+			)),
+		@ApiResponse(
+			responseCode = "404",
+			description = "팀이 존재하지 않습니다.",
+			content = @Content(
+				schema = @Schema(
+					type = "object",
+					example = "{\"status\": \"FAIL\", \"message\": \"팀이 존재하지 않습니다.\"}"
+				)))
+	})
+	public ResponseEntity<Map<String, Object>> getAllTeamsNPlusOne(
+		@Parameter(hidden = true) @SessionAttribute("loginUser") Long studentId) {
+
+		long startTime = System.currentTimeMillis();
+		List<TeamListResponseDto> teams = teamService.getAllTeams(studentId);
+		long endTime = System.currentTimeMillis();
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", teams);
+		body.put("executionTime", endTime - startTime);
+		body.put("method", "n-plus-1");
+		body.put("queryOptimization", false);
+		body.put("description", "기존 방식 - N+1 문제 발생 예상");
+
+		log.info("기존 N+1 방식 실행시간: {}ms, 데이터 수: {}개", endTime - startTime, teams.size());
+		return ResponseEntity.ok().body(body);
+	}
+
+	//팀 전체 목록 조회 - Fetch Join 방식
+	@GetMapping("/fetch-join")
+	@Operation(summary = "팀 목록 조회 - Fetch Join 방식", description = "Fetch Join을 사용한 최적화된 방식으로 팀 목록을 조회합니다.")
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "팀 목록 조회 성공",
+			content = @Content(
+				schema = @Schema(
+					implementation = TeamListResponseDto.class
+				)
+			)),
+		@ApiResponse(
+			responseCode = "404",
+			description = "팀이 존재하지 않습니다.",
+			content = @Content(
+				schema = @Schema(
+					type = "object",
+					example = "{\"status\": \"FAIL\", \"message\": \"팀이 존재하지 않습니다.\"}"
+				)))
+	})
+	public ResponseEntity<Map<String, Object>> getAllTeamsFetchJoin(
+		@Parameter(hidden = true) @SessionAttribute("loginUser") Long studentId) {
+
+		long startTime = System.currentTimeMillis();
+		List<TeamListResponseDto> teams = teamService.getAllTeamsFetchJoin(studentId);
+		long endTime = System.currentTimeMillis();
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", teams);
+		body.put("executionTime", endTime - startTime);
+		body.put("method", "fetch-join");
+		body.put("queryOptimization", true);
+		body.put("description", "Fetch Join 방식 - 연관 엔티티 한번에 조회");
+
+		log.info("Fetch Join 방식 실행시간: {}ms, 데이터 수: {}개", endTime - startTime, teams.size());
+		return ResponseEntity.ok().body(body);
+	}
+
+	//팀 전체 목록 조회 - DTO Projection 방식
+	@GetMapping("/dto-projection")
+	@Operation(summary = "팀 목록 조회 - DTO Projection 방식", description = "DTO Projection을 사용한 최적화된 방식으로 팀 목록을 조회합니다.")
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "팀 목록 조회 성공",
+			content = @Content(
+				schema = @Schema(
+					implementation = TeamListResponseDto.class
+				)
+			)),
+		@ApiResponse(
+			responseCode = "404",
+			description = "팀이 존재하지 않습니다.",
+			content = @Content(
+				schema = @Schema(
+					type = "object",
+					example = "{\"status\": \"FAIL\", \"message\": \"팀이 존재하지 않습니다.\"}"
+				)))
+	})
+	public ResponseEntity<Map<String, Object>> getAllTeamsDtoProjection(
+		@Parameter(hidden = true) @SessionAttribute("loginUser") Long studentId) {
+
+		long startTime = System.currentTimeMillis();
+		List<TeamListResponseDto> teams = teamService.getAllTeamsOptimized(studentId);
+		long endTime = System.currentTimeMillis();
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", teams);
+		body.put("executionTime", endTime - startTime);
+		body.put("method", "dto-projection");
+		body.put("queryOptimization", true);
+		body.put("description", "DTO Projection 방식 - 필요한 데이터만 조회");
+
+		log.info("DTO Projection 방식 실행시간: {}ms, 데이터 수: {}개", endTime - startTime, teams.size());
+		return ResponseEntity.ok().body(body);
+	}
+
+	//성능 비교 API
+	@GetMapping("/performance-comparison")
+	@Operation(summary = "3가지 방식 성능 비교", description = "N+1, Fetch Join, DTO Projection 방식의 성능을 비교합니다.")
+	public ResponseEntity<Map<String, Object>> performanceComparison(
+		@Parameter(hidden = true) @SessionAttribute("loginUser") Long studentId) {
+
+		log.info("=== 3가지 방식 성능 비교 시작 (studentId: {}) ===", studentId);
+
+		Map<String, Object> results = new HashMap<>();
+
+		// 1. N+1 방식
+		long nPlusOneStart = System.currentTimeMillis();
+		List<TeamListResponseDto> nPlusOneResult = teamService.getAllTeams(studentId);
+		long nPlusOneTime = System.currentTimeMillis() - nPlusOneStart;
+
+		results.put("nPlusOne", Map.of(
+			"method", "N+1 방식",
+			"executionTime", nPlusOneTime,
+			"dataCount", nPlusOneResult.size(),
+			"queryOptimization", false
+		));
+
+		log.info("N+1 방식: {}ms, 데이터 {}개", nPlusOneTime, nPlusOneResult.size());
+
+		// 잠시 대기
+		sleep(500);
+
+		// 2. Fetch Join 방식
+		long fetchJoinStart = System.currentTimeMillis();
+		List<TeamListResponseDto> fetchJoinResult = teamService.getAllTeamsFetchJoin(studentId);
+		long fetchJoinTime = System.currentTimeMillis() - fetchJoinStart;
+
+		double fetchJoinImprovement = calculateImprovement(nPlusOneTime, fetchJoinTime);
+
+		results.put("fetchJoin", Map.of(
+			"method", "Fetch Join 방식",
+			"executionTime", fetchJoinTime,
+			"dataCount", fetchJoinResult.size(),
+			"queryOptimization", true,
+			"improvement", String.format("%.1f%%", fetchJoinImprovement)
+		));
+
+		log.info("Fetch Join 방식: {}ms, 데이터 {}개, 개선율: {:.1f}%",
+			fetchJoinTime, fetchJoinResult.size(), fetchJoinImprovement);
+
+		// 잠시 대기
+		sleep(500);
+
+		// 3. DTO Projection 방식
+		long dtoProjectionStart = System.currentTimeMillis();
+		List<TeamListResponseDto> dtoProjectionResult = teamService.getAllTeamsOptimized(studentId);
+		long dtoProjectionTime = System.currentTimeMillis() - dtoProjectionStart;
+
+		double dtoProjectionImprovement = calculateImprovement(nPlusOneTime, dtoProjectionTime);
+
+		results.put("dtoProjection", Map.of(
+			"method", "DTO Projection 방식",
+			"executionTime", dtoProjectionTime,
+			"dataCount", dtoProjectionResult.size(),
+			"queryOptimization", true,
+			"improvement", String.format("%.1f%%", dtoProjectionImprovement)
+		));
+
+		log.info("DTO Projection 방식: {}ms, 데이터 {}개, 개선율: {:.1f}%",
+			dtoProjectionTime, dtoProjectionResult.size(), dtoProjectionImprovement);
+
+		// 종합 결과
+		String bestMethod = determineBestMethod(nPlusOneTime, fetchJoinTime, dtoProjectionTime);
+		double maxImprovement = Math.max(fetchJoinImprovement, dtoProjectionImprovement);
+
+		Map<String, Object> summary = Map.of(
+			"bestPerformer", bestMethod,
+			"maxImprovement", String.format("%.1f%%", maxImprovement),
+			"totalTestTime", nPlusOneTime + fetchJoinTime + dtoProjectionTime,
+			"recommendation", maxImprovement > 50 ? "최적화 효과가 매우 큽니다!" : "최적화 효과가 있습니다."
+		);
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("status", "SUCCESS");
+		body.put("data", results);
+		body.put("summary", summary);
+		body.put("testInfo", Map.of(
+			"studentId", studentId,
+			"timestamp", System.currentTimeMillis(),
+			"note", "각 측정 간 500ms 대기"
+		));
+
+		log.info("=== 성능 비교 완료 - 최고 성능: {}, 최대 개선율: {:.1f}% ===", bestMethod, maxImprovement);
+
+		return ResponseEntity.ok().body(body);
+	}
+
+	// 헬퍼 메서드들
+	private double calculateImprovement(long before, long after) {
+		if (before == 0)
+			return 0;
+		return ((double)(before - after) / before) * 100;
+	}
+
+	private String determineBestMethod(long nPlusOneTime, long fetchJoinTime, long dtoProjectionTime) {
+		if (dtoProjectionTime <= fetchJoinTime && dtoProjectionTime < nPlusOneTime) {
+			return "DTO Projection";
+		} else if (fetchJoinTime <= dtoProjectionTime && fetchJoinTime < nPlusOneTime) {
+			return "Fetch Join";
+		} else {
+			return "N+1 (예상치 못한 결과)";
+		}
+	}
+
+	private void sleep(long millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			log.warn("Thread interrupted during sleep");
+		}
+	}
 }
