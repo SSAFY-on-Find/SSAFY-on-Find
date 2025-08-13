@@ -113,8 +113,12 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 							.updatedAt(status.getUpdatedAt().toString())
 							.publisherId(doc.getPublisherId())
 							.publisherType(doc.getPublisherType())
+							.pubNotificationTitle(doc.getPubNotificationTitle())
+							.pubNotificationMessage(doc.getPubNotificationMessage())
 							.subscriberId(doc.getSubscriberId())
 							.subscriberType(doc.getSubscriberType())
+							.subNotificationTitle(doc.getSubNotificationTitle())
+							.subNotificationMessage(doc.getSubNotificationMessage())
 							.build();
 				})
 				.toList();
