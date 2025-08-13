@@ -12,6 +12,7 @@ import com.sonfind.chelsea.repository.NotificationRepository;
 import com.sonfind.chelsea.repository.NotificationStatusRepository;
 import com.sonfind.chelsea.types.NotificationDomainType;
 import com.sonfind.chelsea.types.RecipientRole;
+import com.sonfind.chelsea.util.DateUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -110,7 +111,7 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 							.role(status.getRole())
 							.status(status.getStatus())
 							.isRead(status.isRead())
-							.updatedAt(status.getUpdatedAt().toString())
+							.updatedAt(DateUtil.formatKoShort(status.getUpdatedAt()))
 							.publisherId(doc.getPublisherId())
 							.publisherType(doc.getPublisherType())
 							.pubNotificationTitle(doc.getPubNotificationTitle())
@@ -176,7 +177,7 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 							.role(status.getRole())
 							.status(status.getStatus())
 							.isRead(status.isRead())
-							.updatedAt(status.getUpdatedAt().toString())
+							.updatedAt(DateUtil.formatKoShort(status.getUpdatedAt()))
 							.publisherId(doc.getPublisherId())
 							.publisherType(doc.getPublisherType())
 							.subscriberId(doc.getSubscriberId())
