@@ -1,7 +1,8 @@
 package com.sonfind.chelsea.service;
 
 import com.sonfind.chelsea.domain.notification.NotificationStatusDocument;
-import com.sonfind.chelsea.dto.notification.NotificationAndNotificationStatusResponseDto;
+import com.sonfind.chelsea.dto.notification.NotificationAndNotificationStatusForMyNotifResponseDto;
+import com.sonfind.chelsea.dto.notification.NotificationAndNotificationStatusForMyTeamResponseDto;
 import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
 import com.sonfind.chelsea.dto.notification.NotificationResponseDto;
 import com.sonfind.chelsea.global.error.AppException;
@@ -51,7 +52,7 @@ public class NotificationService {
 	 * @param type
 	 * @return
 	 */
-	public List<NotificationAndNotificationStatusResponseDto> getMyNotifications(Long studentId, String type) {
+	public List<NotificationAndNotificationStatusForMyNotifResponseDto> getMyNotifications(Long studentId, String type) {
 		return notificationQueryService.getMyNotifications(studentId, type);
 	}
 
@@ -62,7 +63,7 @@ public class NotificationService {
 	 * @param type
 	 * @return
 	 */
-	public List<NotificationAndNotificationStatusResponseDto> getTeamNotifications(Long studentId, Long teamId, String type) {
+	public List<NotificationAndNotificationStatusForMyTeamResponseDto> getTeamNotifications(Long studentId, Long teamId, String type) {
 		return notificationQueryService.getTeamNotifications(studentId, teamId, type);
 	}
 
