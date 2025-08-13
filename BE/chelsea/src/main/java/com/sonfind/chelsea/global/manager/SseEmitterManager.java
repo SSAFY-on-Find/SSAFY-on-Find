@@ -65,13 +65,13 @@ public class SseEmitterManager {
 	 * @param subId 수신 대상 사용자 ID
 	 * @param data  전송할 페이로드 (JSON 직렬화 가능한 객체)
 	 */
-	public void sendTo(Long subId, Object data) {
+	public void sendTo(Long subId, String eventName, Object data) {
 		SseEmitter emitter = emittersMap.get(subId);
 		if (emitter != null) {
 			try {
 				// 이벤트 이름 "notification" 으로 데이터 전송
 				emitter.send(SseEmitter.event()
-						.name("notification")
+						.name(eventName)
 						.data(data));
 			} catch (Exception e) {
 				// 전송 실패 시 로그 기록 후 map에서 제거

@@ -26,12 +26,12 @@ public class InvitationResponsePayloadFactory implements ResponsePayloadFactory 
 				.pubType(e.getPubType())
 				.subId(e.getSubId())
 				.subType(e.getSubType())
-				.updatedAt(e.getUpdatedAt().toString())
+				.updatedAt(e.getUpdatedAt())
 				.build();
 
 		return NotificationDto.<InvitationNotificationResponseDto>builder()
 				.id(e.getNotificationId().toHexString())
-				.event(e.getType())
+				.event(e.getType().toString())
 				.type(TYPE)
 				.status(e.getStatus())
 				.time(e.getUpdatedAt())
