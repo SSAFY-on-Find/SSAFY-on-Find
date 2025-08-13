@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { UserPlus } from "lucide-react"
 
@@ -109,21 +110,31 @@ export default function MyTeamPage() {
     [teamRequests]
   )
 
-  const { acceptInvitation } = useInviteAccept(requestType)
-  const { rejectInvitation } = useInviteReject(requestType)
-  const { cancelInvitation } = useInviteCancel(requestType)
+  const type = requestTab === "left" ? "receive" : "send"
+  const { cancleInvitationAsync, isPending: isCanceling } = useInviteCancel(type)
+  const { acceptInvitationAsync, isPending: isAccepting } = useInviteAccept(type)
+  const { rejectInvitationAsync, isPending: isRejecting } = useInviteReject(type)
 
-  const handleAcceptInvitation = (notificationId: string) => {
-    if (!notificationId) return
-    acceptInvitation(notificationId)
+  const handleAcceptInvitation = async (id: string) => {
+    if (!id) return
+    await toast.promise(acceptInvitationAsync(id), {
+      success: "초대를 수락했습니다!",
+      error: { render: (e) => (e?.data as Error)?.message ?? "수락 중 오류가 발생했습니다." },
+    })
   }
-  const handleRejectInvitation = (notificationId: string) => {
-    if (!notificationId) return
-    rejectInvitation(notificationId)
+  const handleRejectInvitation = async (id: string) => {
+    if (!id) return
+    await toast.promise(rejectInvitationAsync(id), {
+      success: "초대를 거절했습니다!",
+      error: { render: (e) => (e?.data as Error)?.message ?? "거절 중 오류가 발생했습니다." },
+    })
   }
-  const handleCancelInvitation = (notificationId: string) => {
-    if (!notificationId) return
-    cancelInvitation(notificationId)
+  const handleCancelInvitation = async (id: string) => {
+    if (!id) return
+    await toast.promise(cancleInvitationAsync(id), {
+      success: "초대를 취소했습니다!",
+      error: { render: (e) => (e?.data as Error)?.message ?? "취소 중 오류가 발생했습니다." },
+    })
   }
 
   // useEffect(() => {
