@@ -5,7 +5,7 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
-public record NotificationAndNotificationStatusResponseDto(
+public record NotificationAndNotificationStatusForMyNotifResponseDto(
 	List<NotificationStatusResponseDto> notificationStatusList,
 	int unReadCount
 ) {

@@ -1,11 +1,13 @@
 package com.sonfind.chelsea.repository;
 
 import com.sonfind.chelsea.domain.notification.NotificationDocument;
-import com.sonfind.chelsea.types.RecipientRole;
+import com.sonfind.chelsea.types.NotificationDomainType;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface NotificationRepository extends MongoRepository<NotificationDocument, ObjectId> {
@@ -17,7 +19,7 @@ public interface NotificationRepository extends MongoRepository<NotificationDocu
 			+ "'subscriberType': ?3" + "}", sort = "{ 'updatedAt': -1 }")
 	NotificationDocument findLatest(Long publisherId, String publisherType, Long subscriberId, String subscriberType);
 
-	NotificationDocument findAllBySubscriberIdAndSubscriberType(Long subscriberId, RecipientRole role);
+	List<NotificationDocument> findAllBySubscriberIdAndSubscriberType(Long subscriberId, NotificationDomainType type);
 
-	NotificationDocument findAllByPublisherIdAndPublisherType(Long publisherId, RecipientRole role);
+	List<NotificationDocument> findAllByPublisherIdAndPublisherType(Long publisherId, NotificationDomainType type);
 }
