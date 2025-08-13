@@ -142,9 +142,7 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 		RecipientRole recipientRole = RecipientRole.valueOf(role.toUpperCase());
 		NotificationDomainType domain = NotificationDomainType.TEAM;
 
-		List<NotificationStatusDocument> findNotifications = statusRepository.findAllByTargetIdAndTargetTypeAndRole(
-				teamId,
-				domain, recipientRole);
+		List<NotificationStatusDocument> findNotifications = notificationRepository.find
 
 		if (findNotifications.isEmpty()) {
 			log.info("알림이 존재하지 않습니다. teamId: {}, role: {}", teamId, role);
