@@ -1,26 +1,27 @@
-export interface INotification {
-  notificationStatusList: INotificationStatusResponseDto[]
-  unReadCount: number
-}
-export interface INotificationStatusResponseDto {
-  statusId: string
-  notificationId: string
+export type Role = "PUBLISHER" | "SUBSCRIBER"
+export type TargetType = "TEAM" | "STUDENT"
+export type Status = "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELED"
+
+export interface INotificationStatus {
+  statusId: { timestamp: number; date: string }
+  notificationId: { timestamp: number; date: string }
   targetId: number
-  targetType: "team" | "student"
-  role: "publisher" | "subscriber"
-  status: "pending" | "accepted" | "rejected" | "canceled"
+  targetType: TargetType
+  role: Role
+  status: Status
   isRead: boolean
   updatedAt: string
   publisherId: number
-  publisherType: "team" | "student"
-  pubNotificationTitle: string
-  pubNotificationMessage: string
+  publisherType: TargetType
+  pubNotificationTitle: string | null
+  pubNotificationMessage: string | null
   subscriberId: number
-  subscriberType: "team" | "student"
-  subNotificationTitle: string
-  subNotificationMessage: string
+  subscriberType: TargetType
+  subNotificationTitle: string | null
+  subNotificationMessage: string | null
 }
-export interface IGetTeamNotificationsParams {
-  teamId: number
-  type: string
+
+export interface INotification {
+  notificationStatusList: INotificationStatus[]
+  unReadCount: number
 }
