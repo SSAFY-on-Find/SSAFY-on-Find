@@ -1,6 +1,7 @@
 package com.sonfind.chelsea.service;
 
 import com.sonfind.chelsea.domain.notification.NotificationDocument;
+import com.sonfind.chelsea.dto.notification.NotificationContext;
 import com.sonfind.chelsea.dto.notification.NotificationRequestDto;
 import com.sonfind.chelsea.dto.notification.NotificationTypeInfo;
 import com.sonfind.chelsea.facade.StudentFacade;
@@ -19,6 +20,7 @@ public class NotificationDocumentServiceImpl implements NotificationDocumentServ
 	private final StudentFacade studentFacade;
 	private final NotificationContentService contentService;
 	private final TeamService teamService;
+	private final NotificationContextResolver contextResolver;
 
 	@Override
 	public NotificationDocument buildBaseDocument(NotificationRequestDto dto, NotificationTypeInfo info) {
@@ -38,14 +40,16 @@ public class NotificationDocumentServiceImpl implements NotificationDocumentServ
 
 	@Override
 	public NotificationDocument fillContent(NotificationDocument base) {
+		// 1) 컨텍스트 준비 (publisher/subscriber 정보 조회)
+		NotificationContext ctx = contextResolver.resolve(base);
 
-		// 제목·메시지 생성
-		String pubTitle = contentService.buildTitle(base, RecipientRole.PUBLISHER);
-		String pubMsg = contentService.buildMessage(base, RecipientRole.PUBLISHER);
-		String subTitle = contentService.buildTitle(base, RecipientRole.SUBSCRIBER);
-		String subMsg = contentService.buildMessage(base, RecipientRole.SUBSCRIBER);
+		// 2) 제목·메시지 생성
+		String pubTitle = contentService.buildTitle(base, RecipientRole.PUBLISHER, ctx);
+		String pubMsg = contentService.buildMessage(base, RecipientRole.PUBLISHER, ctx);
+		String subTitle = contentService.buildTitle(base, RecipientRole.SUBSCRIBER, ctx);
+		String subMsg = contentService.buildMessage(base, RecipientRole.SUBSCRIBER, ctx);
 
-		//  새로운 빌더로 복사 + 콘텐츠 주입
+		// 3) 새로운 빌더로 복사 + 콘텐츠 주입
 		return NotificationDocument.builder()
 				.id(base.getId())                          // (만약 builder 가 id 지원하면)
 				.groupId(base.getGroupId())

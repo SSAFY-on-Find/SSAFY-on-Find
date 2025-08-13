@@ -1,12 +1,10 @@
 package com.sonfind.chelsea.dto.notification;
 
-import com.sonfind.chelsea.dto.student.response.StudentUnionForNotificationResponseDto;
-
 import lombok.Builder;
 
 @Builder
 public record NotificationContext(
-	StudentUnionForNotificationResponseDto publisher,
-	StudentUnionForNotificationResponseDto subscriber
+		ContextInfo publisher,
+		ContextInfo subscriber
 ) {
 }

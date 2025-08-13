@@ -103,8 +103,8 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 				.map(status -> {
 					NotificationDocument doc = docMap.get(status.getNotificationId());
 					return NotificationStatusResponseDto.builder()
-							.statusId(status.getId())
-							.notificationId(doc.getId())
+							.statusId(status.getId().toHexString())
+							.notificationId(doc.getId().toHexString())
 							.targetId(status.getTargetId())
 							.targetType(status.getTargetType())
 							.role(status.getRole())
@@ -113,8 +113,12 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 							.updatedAt(status.getUpdatedAt().toString())
 							.publisherId(doc.getPublisherId())
 							.publisherType(doc.getPublisherType())
+							.pubNotificationTitle(doc.getPubNotificationTitle())
+							.pubNotificationMessage(doc.getPubNotificationMessage())
 							.subscriberId(doc.getSubscriberId())
 							.subscriberType(doc.getSubscriberType())
+							.subNotificationTitle(doc.getSubNotificationTitle())
+							.subNotificationMessage(doc.getSubNotificationMessage())
 							.build();
 				})
 				.toList();
@@ -165,8 +169,8 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 				.map(status -> {
 					NotificationDocument doc = docMap.get(status.getNotificationId());
 					return NotificationStatusResponseDto.builder()
-							.statusId(status.getId())
-							.notificationId(doc.getId())
+							.statusId(status.getId().toHexString())
+							.notificationId(doc.getId().toHexString())
 							.targetId(status.getTargetId())
 							.targetType(status.getTargetType())
 							.role(status.getRole())

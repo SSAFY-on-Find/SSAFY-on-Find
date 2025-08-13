@@ -36,7 +36,7 @@ public class ApplicationPayloadFactory implements RequestPayloadFactory {
 		NotificationResponseDto findNotificationInfo = notificationService.getNotificationInfo(e.getNotificationId());
 
 		// 수신자 정보 조회
-		Student findSub = studentFacade.findByStudentId(e.getSubId());
+		TeamSimpleResponseDto findSubTeam = teamService.findSimpleTeamInfoByTeamId(e.getSubId());
 
 		// 발신자 정보
 		NotificationMsgDto pub = NotificationMsgDto.builder()
@@ -45,7 +45,7 @@ public class ApplicationPayloadFactory implements RequestPayloadFactory {
 				.type(e.getPubType())
 				.notificationTitle(findNotificationInfo.pubNotificationTitle())
 				.notificationMessage(findNotificationInfo.pubNotificationMessage())
-				.targetId(findSub.getStudentId())
+				.targetId(findSubTeam.teamId())
 				.build();
 
 		// 이벤트 페이로드
