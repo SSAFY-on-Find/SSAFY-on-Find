@@ -82,7 +82,13 @@ function StudentInfo({
       <div className="bg-line h-44 w-px" />
       {targetUserTeamId ? (
         <div
-          onClick={() => openDetailModal(targetUserTeamId)}
+          onClick={() => {
+            if (variant === "dashboard") {
+              navigate("/myteam")
+            } else {
+              openDetailModal(targetUserTeamId)
+            }
+          }}
           className={`itesm-center hover:bg-main/10 flex flex-col justify-center rounded-xl p-5 duration-300 ease-in-out hover:cursor-pointer ${variant === "dashboard" ? "gap-4" : "gap-6"}`}
         >
           <div className="flex flex-col gap-2">

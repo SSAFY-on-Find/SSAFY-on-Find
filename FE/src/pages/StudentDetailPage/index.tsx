@@ -114,6 +114,7 @@ export default function StudentDetailPage() {
           studentId={student?.studentId?.toString() ?? ""}
           imgUrl={profileImageUrl ?? ""}
           teamInfo={teamInfo}
+          variant="dashboard"
         />
       </div>
       <div className="border-line flex w-full flex-col gap-7 rounded-lg border bg-white p-10">
