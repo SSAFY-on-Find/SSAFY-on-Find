@@ -7,6 +7,7 @@ import com.sonfind.chelsea.dto.student.response.StudentListQueryDto;
 import com.sonfind.chelsea.dto.student.response.StudentListResponseDto;
 import com.sonfind.chelsea.dto.student.response.StudentResponseDto;
 import com.sonfind.chelsea.dto.student.response.StudentSignInResponseDto;
+import com.sonfind.chelsea.dto.studentInfo.response.StudentMini;
 import com.sonfind.chelsea.dto.subcode.SubCodeResponseDto;
 import com.sonfind.chelsea.global.error.AppException;
 import com.sonfind.chelsea.repository.StudentInfoRepository;
@@ -15,10 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -144,6 +143,14 @@ public class StudentService {
 	public List<Long> getStudentIdList(Long teamId) {
 		return studentRepository.findStudentIdsByTeamId(teamId);
 	}
+
+	@Transactional(readOnly = true)
+	public Map<Long, StudentMini> findStudentMiniMapByIds(Collection<Long> ids) {
+		if (ids == null || ids.isEmpty()) return Map.of();
+		return studentRepository.findStudentMiniByStudentIdIn(ids).stream()
+				.collect(Collectors.toMap(StudentMini::getStudentId, Function.identity()));
+	}
+
 
 	private static String getIsMajor(Boolean major) {
 		return Boolean.TRUE.equals(major) ? "전공" : "비전공";

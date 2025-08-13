@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 
 import { notificationApi } from "@/apis/notificationApi"
-import type { INotification } from "@/types/notification"
+import type { INotification, INotificationTeam } from "@/types/notification"
 
 export const useNotification = (type: string) =>
   useQuery<INotification[]>({
@@ -17,7 +17,7 @@ export const useNotification = (type: string) =>
   })
 
 export const useTeamNotification = (teamId: number | null | undefined, type: string) =>
-  useQuery<INotification[]>({
+  useQuery<INotificationTeam[]>({
     queryKey: ["team-notification", teamId, type],
     queryFn: async () => {
       if (typeof teamId !== "number") return []
