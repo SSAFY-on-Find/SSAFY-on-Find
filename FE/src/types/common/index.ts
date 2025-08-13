@@ -1,6 +1,5 @@
 export type { IApiResponse } from "./IApiResponse"
 export type { IErrorResponse } from "./IErrorResponse"
 export type { IFile } from "./IFile"
-export type { INotification, INotificationTab } from "./INotification"
 export type { IRecruitment } from "./IRecruitment"
 export type { ISubcode } from "./ISubcode"

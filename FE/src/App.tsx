@@ -4,6 +4,7 @@ import { ToastContainer } from "react-toastify"
 
 import Loading from "@/components/templates/Loading"
 import { useAuth } from "@/hooks/useStudent"
+import { useNotificationStream } from "@/hooks/useSubscribe"
 import { Header, SideBar } from "@/layout"
 import CreateProfile from "@/pages/CreateProfilePage"
 import Dashboard from "@/pages/DashboardPage"
@@ -39,6 +40,9 @@ function App() {
     if (authUser) setUser(authUser)
     if (isError) resetUser()
   }, [authUser, isError, setUser, resetUser])
+
+  const sseEnabled = !!authUser && authUser.isCreatedStudentInfo
+  useNotificationStream(sseEnabled)
 
   // 2) 로딩 화면
   if (isLoading) {

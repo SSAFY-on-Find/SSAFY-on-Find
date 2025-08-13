@@ -55,3 +55,69 @@ export function useInvte(myTeamId?: number | null) {
     error: mutation.error as Error | null,
   }
 }
+
+export function useInviteCancel(currentTab?: "receive" | "send") {
+  const qc = useQueryClient()
+
+  const { mutate, isPending, error } = useMutation({
+    mutationKey: ["invitation-cancel"],
+    mutationFn: async (notificationId: string) => {
+      const res = await inviteApi.cancel(notificationId)
+      if (res.status !== "SUCCESS") throw new Error("취소에 실패했습니다.")
+      return res.data
+    },
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["my-notification"], exact: false })
+      if (currentTab) {
+        await qc.invalidateQueries({ queryKey: ["my-notification", currentTab] })
+      }
+    },
+    onError: (e) => toast.error(e?.message ?? "취소 중 오류가 발생했습니다."),
+  })
+
+  return { cancelInvitation: mutate, isPending, error: error as Error | null }
+}
+
+export function useInviteAccept(currentTab?: "receive" | "send") {
+  const qc = useQueryClient()
+
+  const { mutate, isPending, error } = useMutation({
+    mutationKey: ["invitation-accept"],
+    mutationFn: async (notificationId: string) => {
+      const res = await inviteApi.accept(notificationId)
+      if (res.status !== "SUCCESS") throw new Error("수락에 실패했습니다.")
+      return res.data
+    },
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["my-notification"], exact: false })
+      if (currentTab) {
+        await qc.invalidateQueries({ queryKey: ["my-notification", currentTab] })
+      }
+    },
+    onError: (e) => toast.error(e?.message ?? "수락 중 오류가 발생했습니다."),
+  })
+
+  return { acceptInvitation: mutate, isPending, error: error as Error | null }
+}
+
+export function useInviteReject(currentTab?: "receive" | "send") {
+  const qc = useQueryClient()
+
+  const { mutate, isPending, error } = useMutation({
+    mutationKey: ["invitation-reject"],
+    mutationFn: async (notificationId: string) => {
+      const res = await inviteApi.reject(notificationId)
+      if (res.status !== "SUCCESS") throw new Error("거절에 실패했습니다.")
+      return res.data
+    },
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["my-notification"], exact: false })
+      if (currentTab) {
+        await qc.invalidateQueries({ queryKey: ["my-notification", currentTab] })
+      }
+    },
+    onError: (e) => toast.error(e?.message ?? "거절 중 오류가 발생했습니다."),
+  })
+
+  return { rejectInvitation: mutate, isPending, error: error as Error | null }
+}
