@@ -124,7 +124,6 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 
 		checkNotificationStatusDocumentNotNull(studentId, notificationId, me);
 
-
 		// 2) 알림 정보 조회
 		NotificationResponseDto findNotification = notificationQueryService.getNotificationInfo(objId);
 
@@ -144,6 +143,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				.filter(s -> !s.getId().equals(objId))
 				.forEach(s -> {
 					s.setStatus(NotificationStatus.ACCEPTED);
+					s.setRead(false);
 					s.setUpdatedAt(now);
 				});
 		statusRepo.saveAll(allStatuses);
@@ -158,6 +158,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				objId,
 				doc.getPublisherId(), doc.getPublisherType(),
 				doc.getSubscriberId(), doc.getSubscriberType(),
+				findNotification.type(),
 				NotificationStatus.ACCEPTED,
 				DateUtil.formatKoShort(now)
 		));
@@ -175,6 +176,8 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 
 		checkNotificationStatusDocumentNotNull(studentId, notificationId, me);
 
+		NotificationResponseDto findNotification = notificationQueryService.getNotificationInfo(objId);
+
 		// 2) 내 상태만 먼저 변경
 		me.setStatus(NotificationStatus.REJECTED);
 		me.setUpdatedAt(now);
@@ -189,6 +192,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				.filter(s -> !s.getId().equals(objId))
 				.forEach(s -> {
 					s.setStatus(NotificationStatus.REJECTED);
+					s.setRead(false);
 					s.setUpdatedAt(now);
 				});
 		statusRepo.saveAll(allStatuses);
@@ -203,6 +207,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				objId,
 				doc.getPublisherId(), doc.getPublisherType(),
 				doc.getSubscriberId(), doc.getSubscriberType(),
+				findNotification.type(),
 				NotificationStatus.REJECTED,
 				DateUtil.formatKoShort(now)
 		));
@@ -220,6 +225,8 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 
 		checkNotificationStatusDocumentNotNull(studentId, notificationId, me);
 
+		NotificationResponseDto findNotification = notificationQueryService.getNotificationInfo(objId);
+
 		// 2) 내 상태만 먼저 변경
 		me.setStatus(NotificationStatus.CANCELED);
 		statusRepo.save(me);
@@ -233,6 +240,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				.filter(s -> !s.getId().equals(objId))
 				.forEach(s -> {
 					s.setStatus(NotificationStatus.CANCELED);
+					s.setRead(false);
 					s.setUpdatedAt(now);
 				});
 		statusRepo.saveAll(allStatuses);
@@ -247,6 +255,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				objId,
 				doc.getPublisherId(), doc.getPublisherType(),
 				doc.getSubscriberId(), doc.getSubscriberType(),
+				findNotification.type(),
 				NotificationStatus.CANCELED,
 				DateUtil.formatKoShort(now)
 		));

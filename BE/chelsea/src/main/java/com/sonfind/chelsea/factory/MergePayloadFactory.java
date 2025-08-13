@@ -2,10 +2,10 @@ package com.sonfind.chelsea.factory;
 
 import com.sonfind.chelsea.dto.notification.*;
 import com.sonfind.chelsea.dto.teams.TeamSimpleResponseDto;
-import com.sonfind.chelsea.facade.StudentFacade;
 import com.sonfind.chelsea.global.event.InvitationRequestEvent;
 import com.sonfind.chelsea.service.NotificationService;
 import com.sonfind.chelsea.service.TeamService;
+import com.sonfind.chelsea.types.EventTargetType;
 import com.sonfind.chelsea.types.NotificationType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -14,9 +14,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MergePayloadFactory implements RequestPayloadFactory {
 
-	private final StudentFacade studentFacade;
 	private final NotificationService notificationService;
 	private final TeamService teamService;
+	private final EventTargetType TYPE = EventTargetType.NOTIFICATION;
 
 	@Override
 	public NotificationType supportType() {
@@ -66,8 +66,8 @@ public class MergePayloadFactory implements RequestPayloadFactory {
 		// 최종 응답 DTO
 		return NotificationDto.<MergePubData>builder()
 				.id(e.getNotificationId().toHexString())
-				.event(e.getClass().getSimpleName())
-				.type(e.getType())         // MERGE 으로
+				.event(e.getType().toString())
+				.type(TYPE)
 				.time(e.getUpdatedAt())
 				.data(payload)
 				.build();
@@ -114,8 +114,8 @@ public class MergePayloadFactory implements RequestPayloadFactory {
 		// 최종 응답 DTO
 		return NotificationDto.<MergeSubData>builder()
 				.id(e.getNotificationId().toHexString())
-				.event(e.getClass().getSimpleName())
-				.type(e.getType())         // MERGE 으로
+				.event(e.getType().toString())
+				.type(TYPE)
 				.time(e.getUpdatedAt())
 				.data(payload)
 				.build();

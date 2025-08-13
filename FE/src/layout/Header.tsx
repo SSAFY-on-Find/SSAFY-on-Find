@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { Inbox, Search } from "lucide-react"
 
 import { NotificationModal } from "@/components/templates"
+import { useNotificationStore } from "@/stores/notificationStore"
 import { useUserStore } from "@/stores/userStore"
 
 function DeadlineNotification() {
@@ -16,15 +17,22 @@ function DeadlineNotification() {
 
 interface AlarmBoxProps {
   onClick: () => void
+  isBlinking?: boolean
+  unread?: number
 }
 
-const AlarmBox = forwardRef<HTMLButtonElement, AlarmBoxProps>(({ onClick }, ref) => (
+const AlarmBox = forwardRef<HTMLButtonElement, AlarmBoxProps>(({ onClick, isBlinking = false, unread = 0 }, ref) => (
   <button
     ref={ref}
     type="button"
-    className="bg-main focus:ring-main/50 flex aspect-square h-[120%] cursor-pointer items-center justify-center rounded-full shadow-2xl transition-opacity hover:opacity-90 focus:ring-2 focus:outline-none"
     onClick={onClick}
     aria-label="알림함 열기"
+    className={[
+      "focus:ring-main/50 relative flex aspect-square h-[120%] cursor-pointer items-center justify-center rounded-full shadow-2xl transition-opacity focus:ring-2 focus:outline-none",
+      "bg-main hover:opacity-90",
+      // [added] 반짝임 (필요 시 pulse → ring 강조)
+      isBlinking ? "ring-main/40 animate-pulse ring-4" : "",
+    ].join(" ")}
   >
     <Inbox className="h-5 w-5 text-white" />
   </button>
@@ -35,9 +43,11 @@ function Header() {
   const user = useUserStore((state) => state.user)
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const triggerRef = useRef<HTMLButtonElement | null>(null)
+  const { unread, isBlinking, reset } = useNotificationStore()
 
   const handleAlarmClick = () => {
     setIsNotificationOpen((prev) => !prev)
+    if (!isNotificationOpen) reset()
   }
 
   return (
@@ -59,7 +69,7 @@ function Header() {
           </h1>
           <div className="flex h-full items-center justify-center gap-3">
             <DeadlineNotification />
-            <AlarmBox onClick={handleAlarmClick} />
+            <AlarmBox ref={triggerRef} onClick={handleAlarmClick} isBlinking={isBlinking} unread={unread} />
           </div>
         </div>
       </header>

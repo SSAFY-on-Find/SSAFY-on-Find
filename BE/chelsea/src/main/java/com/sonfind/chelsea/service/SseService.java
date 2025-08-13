@@ -16,15 +16,15 @@ public class SseService {
 	private final StudentFacade studentFacade;
 
 	// 개인용
-	public void sendNotification(Long userId, Object payload) {
-		emitterManager.sendTo(userId, payload);
+	public void sendNotification(Long userId, String eventName, Object payload) {
+		emitterManager.sendTo(userId, eventName, payload);
 		log.info("SSE로 사용자 {}에게 알림을 전송했습니다.", userId);
 	}
 
 	// 팀용
-	public void broadcastToTeam(Long teamId, Object payload) {
+	public void broadcastToTeam(Long teamId, String eventName, Object payload) {
 		studentFacade.findAllByTeamId(teamId)
-				.forEach(member -> emitterManager.sendTo(member.getStudentId(), payload));
+				.forEach(member -> emitterManager.sendTo(member.getStudentId(), eventName, payload));
 	}
 
 	// 모든 사용자에게 브로드캐스트(eg. 대시보드)
@@ -36,12 +36,13 @@ public class SseService {
 	public void dispatch(
 			Long id,
 			NotificationDomainType domainType,
+			String eventType,
 			Object payload
 	) {
 		if (domainType == NotificationDomainType.TEAM) {
-			broadcastToTeam(id, payload);
+			broadcastToTeam(id, eventType, payload);
 		} else {
-			sendNotification(id, payload);
+			sendNotification(id, eventType, payload);
 		}
 
 	}
