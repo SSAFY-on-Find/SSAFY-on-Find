@@ -98,7 +98,7 @@ function MajorWaffle({
 
 export default function PositionFunnel({ api }: Props) {
   // 인기 순 정렬
-  const sorted = useMemo(() => [...api].sort((a, b) => b.totalCount - a.totalCount), [api])
+  const sorted = useMemo(() => [...api].sort(), [api])
 
   type FunnelDatum = { id: string; value: number; label: string; color?: string }
   const targetFunnelData: FunnelDatum[] = useMemo(
@@ -123,8 +123,8 @@ export default function PositionFunnel({ api }: Props) {
   const base = "#6C5CE7"
   const palette = useMemo(() => {
     const n = Math.max(1, targetFunnelData.length)
-    const start = 25
-    const end = 65
+    const start = 30
+    const end = 55
     const denom = Math.max(1, n - 1)
     return Array.from({ length: n }, (_, i) => lighten(base, start + ((end - start) * i) / denom))
   }, [targetFunnelData.length])

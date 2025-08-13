@@ -17,8 +17,6 @@ export default function TeamListPage() {
   const { data: selectedTeamData } = useTeamDetails(selectedTeamId || 0)
   const { toggleFavorite } = useTeamFavoriteToggle()
   const userTeamId = useUserStore((state) => state.user?.teamId)
-  console.log("userTeamId", userTeamId)
-
   const navigate = useNavigate()
 
   if (isError) {

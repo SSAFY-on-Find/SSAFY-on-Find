@@ -68,10 +68,10 @@ public class DashboardController {
 		List<TeamListResponseDto> data = teamService.getRecommendTeamList(studentId);
 
 		body.put("status", "SUCCESS");
-		if (data.getFirst().teamId() == 0) {
-			body.put("data", Map.of("message", "생성된 팀이 없습니다."));
-		} else if (data.isEmpty()) {
+		if (data.isEmpty()) {
 			body.put("data", Map.of("message", "추천된 팀이 없습니다."));
+		} else if (data.getFirst().teamId() == 0) {
+			body.put("data", Map.of("message", "생성된 팀이 없습니다."));
 		} else {
 			body.put("data", data);
 		}

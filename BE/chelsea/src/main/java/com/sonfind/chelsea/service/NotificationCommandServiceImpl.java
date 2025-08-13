@@ -17,6 +17,7 @@ import com.sonfind.chelsea.service.validator.NotificationValidator;
 import com.sonfind.chelsea.types.NotificationDomainType;
 import com.sonfind.chelsea.types.NotificationStatus;
 import com.sonfind.chelsea.types.RecipientRole;
+import com.sonfind.chelsea.util.DateUtil;
 import com.sonfind.chelsea.util.NotificationTypeConverter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -105,7 +106,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				savedNotification.getPublisherType(),
 				savedNotification.getSubscriberId(),
 				savedNotification.getSubscriberType(),
-				savedNotification.getUpdatedAt(),
+				DateUtil.formatKoShort(savedNotification.getUpdatedAt()),
 				savedNotification.getType()
 		);
 
@@ -158,7 +159,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				doc.getPublisherId(), doc.getPublisherType(),
 				doc.getSubscriberId(), doc.getSubscriberType(),
 				NotificationStatus.ACCEPTED,
-				now
+				DateUtil.formatKoShort(now)
 		));
 
 		log.info("초대/지원이 수락되었습니다: notificationId={}", objId);
@@ -203,7 +204,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				doc.getPublisherId(), doc.getPublisherType(),
 				doc.getSubscriberId(), doc.getSubscriberType(),
 				NotificationStatus.REJECTED,
-				now
+				DateUtil.formatKoShort(now)
 		));
 
 		log.info("초대/지원이 거절되었습니다: notificationId={}", objId);
@@ -247,7 +248,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				doc.getPublisherId(), doc.getPublisherType(),
 				doc.getSubscriberId(), doc.getSubscriberType(),
 				NotificationStatus.CANCELED,
-				now
+				DateUtil.formatKoShort(now)
 		));
 
 		log.info("알림이 취소되었습니다: notificationId={}", notificationId);

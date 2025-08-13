@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { UserPlus } from "lucide-react"
 
@@ -99,40 +100,39 @@ export default function MyTeamPage() {
   })
 
   const {
-    data: teamRequests, // INotificationStatus[] | undefined
+    data: teamRequests,
     isLoading: isLoadingTeamRequests,
     error: teamRequestsError,
   } = useTeamNotification(typeof teamId === "number" ? teamId : null, requestType)
 
-  const teamStatusList: INotificationStatus[] = useMemo(
-    () => (teamRequests ?? []).flatMap((n: INotification) => n.notificationStatusList ?? []),
-    [teamRequests]
-  )
+  const type = requestTab === "left" ? "receive" : "send"
+  const { cancleInvitationAsync, isPending: isCanceling } = useInviteCancel(type)
+  const { acceptInvitationAsync, isPending: isAccepting } = useInviteAccept(type)
+  const { rejectInvitationAsync, isPending: isRejecting } = useInviteReject(type)
 
-  const { acceptInvitation } = useInviteAccept(requestType)
-  const { rejectInvitation } = useInviteReject(requestType)
-  const { cancelInvitation } = useInviteCancel(requestType)
+  const handleAcceptInvitation = async (id: string) => {
+    if (!id) return
+    await toast.promise(acceptInvitationAsync(id), {
+      success: "초대를 수락했습니다!",
+      error: { render: (e) => (e?.data as Error)?.message ?? "수락 중 오류가 발생했습니다." },
+    })
+  }
+  const handleRejectInvitation = async (id: string) => {
+    if (!id) return
+    await toast.promise(rejectInvitationAsync(id), {
+      success: "초대를 거절했습니다!",
+      error: { render: (e) => (e?.data as Error)?.message ?? "거절 중 오류가 발생했습니다." },
+    })
+  }
+  const handleCancelInvitation = async (id: string) => {
+    if (!id) return
+    await toast.promise(cancleInvitationAsync(id), {
+      success: "초대를 취소했습니다!",
+      error: { render: (e) => (e?.data as Error)?.message ?? "취소 중 오류가 발생했습니다." },
+    })
+  }
 
-  const handleAcceptInvitation = (notificationId: string) => {
-    if (!notificationId) return
-    acceptInvitation(notificationId)
-  }
-  const handleRejectInvitation = (notificationId: string) => {
-    if (!notificationId) return
-    rejectInvitation(notificationId)
-  }
-  const handleCancelInvitation = (notificationId: string) => {
-    if (!notificationId) return
-    cancelInvitation(notificationId)
-  }
-
-  // useEffect(() => {
-  //   if (!teamId) {
-  //     navigate("/create-team")
-  //   }
-  // }, [teamId, navigate])
   useEffect(() => {
-    // 로딩 상태도 함께 확인
     if (!teamId && !isMyTeamLoading) {
       navigate("/no-team")
     }
@@ -194,10 +194,10 @@ export default function MyTeamPage() {
 
             {!isLoadingTeamRequests && !teamRequestsError && (
               <>
-                {teamStatusList.length > 0 ? (
-                  teamStatusList.map((req) => (
+                {teamRequests && teamRequests.length > 0 ? (
+                  teamRequests.map((req) => (
                     <ApplicantCard
-                      key={String(req.statusId?.timestamp ?? Math.random())}
+                      key={String(req.notificationId)}
                       {...req}
                       tab={requestType}
                       onAccept={handleAcceptInvitation}

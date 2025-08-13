@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -177,6 +178,34 @@ public class MeController {
 
 		body.put("status", "SUCCESS");
 		body.put("data", student);
+
+		return ResponseEntity.ok().body(body);
+	}
+
+	@DeleteMapping("/profile")
+	public ResponseEntity<Map<String, Object>> deleteProfile(
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId
+	) {
+
+		studentInfoService.deleteProfile(studentId);
+		Map<String, Object> body = new HashMap<>();
+
+		body.put("status", "SUCCESS");
+
+		return ResponseEntity.ok().body(body);
+	}
+
+	@DeleteMapping("/portfolio")
+	public ResponseEntity<Map<String, Object>> deletePortfolio(
+		@Parameter(hidden = true)
+		@SessionAttribute("loginUser") Long studentId
+	) {
+
+		studentInfoService.deletePortfolio(studentId);
+		Map<String, Object> body = new HashMap<>();
+
+		body.put("status", "SUCCESS");
 
 		return ResponseEntity.ok().body(body);
 	}

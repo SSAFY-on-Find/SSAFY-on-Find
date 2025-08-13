@@ -1,9 +1,11 @@
 import { useNavigate } from "react-router-dom"
-import { Heart } from "lucide-react"
+import { Heart, MessageSquarePlus, Send } from "lucide-react"
 
 import { Button, CircleGrid, MainTag, MajorTag, NormalTag, PositionTag, UserImg } from "@/components/atoms"
 import { useStudentFavoriteToggle } from "@/hooks/useFavorite"
+import { useTeamStore } from "@/stores/teamStore"
 import type { ITeamInfo } from "@/types/team"
+
 interface IStudentInfo {
   name: string
   studentId: string
@@ -12,13 +14,14 @@ interface IStudentInfo {
   isMyProfile?: boolean
   isFavorite?: boolean
   variant?: "dashboard" | "detail"
+  position?: string
+  track?: string
+  major?: string
 }
-
 const fontMap = {
   detail: "text-text mt-2 text-2xl font-bold",
   dashboard: "text-text mt-2 text-xl font-semibold",
 }
-
 function StudentInfo({
   name,
   studentId,
@@ -27,15 +30,27 @@ function StudentInfo({
   isMyProfile = false,
   isFavorite = false,
   variant = "detail",
+  position,
+  track,
+  major,
 }: IStudentInfo) {
-  const { toggleFavorite, isLoading } = useStudentFavoriteToggle()
   const navigate = useNavigate()
+  const { toggleFavorite, isLoading } = useStudentFavoriteToggle()
+  const targetUserTeamId = teamInfo?.teamId
+  const { openDetailModal } = useTeamStore()
 
   return (
     <div
-      className={`border-line flex w-full flex-row items-center justify-center rounded-lg border bg-white ${variant === "dashboard" ? "gap-10 px-15 py-7" : "gap-20 p-10"}`}
+      className={`border-line flex w-full flex-row items-center justify-center rounded-lg border bg-white ${variant === "dashboard" ? "gap-10 px-10 py-7" : "gap-20 p-10"}`}
     >
-      <div className="flex flex-col items-center justify-center gap-1">
+      <div
+        className={`${variant === "dashboard" ? "hover:bg-main/10 duration-300 ease-in-out hover:cursor-pointer" : ""} flex flex-col items-center justify-center gap-1 rounded-xl p-5`}
+        onClick={() => {
+          if (variant === "dashboard") {
+            navigate("/myprofile")
+          }
+        }}
+      >
         <div className="relative">
           <UserImg name={name} size={variant === "detail" ? "xl" : "l"} showTeamBadge={false} url={imgUrl} />
           {!isMyProfile && (
@@ -54,15 +69,22 @@ function StudentInfo({
         {variant === "detail" && <div className="text-subtext text-sm font-normal">{studentId}</div>}
         {variant === "dashboard" && (
           <div className="mt-1 flex flex-row gap-1">
-            <MajorTag tagContent={"전공"} />
-            <PositionTag positionName={"임베디드"} />
-            <NormalTag tagContent={"웹기술"} />
+            {major && position && track && (
+              <>
+                <MajorTag tagContent={major} />
+                <PositionTag positionName={position} />
+                <NormalTag tagContent={track} />
+              </>
+            )}
           </div>
         )}
       </div>
       <div className="bg-line h-44 w-px" />
-      {teamInfo ? (
-        <div className={`itesm-center flex flex-col justify-center ${variant === "dashboard" ? "gap-4" : "gap-6"}`}>
+      {targetUserTeamId ? (
+        <div
+          onClick={() => openDetailModal(targetUserTeamId)}
+          className={`itesm-center hover:bg-main/10 flex flex-col justify-center rounded-xl p-5 duration-300 ease-in-out hover:cursor-pointer ${variant === "dashboard" ? "gap-4" : "gap-6"}`}
+        >
           <div className="flex flex-col gap-2">
             <MainTag tagContent={teamInfo.name} fillBg={true} size={variant === "dashboard" ? "sm" : "lg"} />
             <MainTag tagContent={teamInfo.track} size={variant === "dashboard" ? "sm" : "lg"} />
@@ -89,7 +111,7 @@ function StudentInfo({
                 navigate("/create-team")
               }}
             />
-          )}
+          )}{" "}
         </div>
       )}
     </div>

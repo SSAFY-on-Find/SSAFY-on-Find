@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { Mail, User, Users } from "lucide-react"
 
 import { Button } from "@/components/atoms"
@@ -38,11 +39,11 @@ function getStatusText(status: string) {
     case "PENDING":
       return "대기"
     case "ACCEPTED":
-      return "수락됨"
+      return "수락"
     case "REJECTED":
       return "거절"
-    case "CANCELLED":
-      return "취소됨"
+    case "CANCELED":
+      return "취소"
     default:
       return "대기"
   }
@@ -72,16 +73,27 @@ export default function NotificationItem({
   onReject: (statusId: string) => void
   onCancel: (statusId: string) => void
 }) {
+  const navigate = useNavigate()
   const isInvitation = data.role === "PUBLISHER"
   const isPending = data.status === "PENDING"
+
+  const goToMyTeamIfTeam = () => {
+    const goLeft = tab === "left" && data.subscriberType === "TEAM"
+    const goRight = tab === "right" && data.publisherType === "TEAM"
+    if (goLeft || goRight) {
+      navigate("/myteam")
+    }
+  }
 
   return (
     <div className="transform rounded-lg border border-gray-200 bg-white p-4 transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-md">
       <div className="flex flex-col items-start justify-between gap-2">
         <div className="flex w-full items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div>{getNotificationIcon(data.subscriberType)}</div>
-            <h3 className="text-text text-sm font-bold">{data.role === "PUBLISHER" ? "지원" : "초대"}</h3>
+          <div className="flex cursor-pointer items-center gap-3" onClick={goToMyTeamIfTeam}>
+            <div>{getNotificationIcon(tab === "left" ? data.subscriberType : data.publisherType)}</div>
+            <h3 className="text-text text-sm font-bold">
+              {tab === "left" ? data.pubNotificationTitle : data.subNotificationTitle}
+            </h3>
           </div>
           <div className="ml-3">
             <span
@@ -96,40 +108,30 @@ export default function NotificationItem({
 
         <div className="mt-1 min-w-0">
           {/* <p className="text-text mb-2 text-sm">{data.subNotificationMessage}</p> */}
-          <p className="text-text mb-2 text-sm">{`${data.publisherId} -> ${data.subscriberId}`}</p>
-          <p className="text-subtext text-xs">{formatDate(data.notificationId.date)}</p>
+          <p className="text-text mb-2 text-sm">
+            {tab === "left" ? data.pubNotificationMessage : data.subNotificationMessage}
+          </p>
+          <p className="text-subtext text-xs">{formatDate(data.updatedAt)}</p>
         </div>
       </div>
 
       {/* 액션 버튼 */}
       {tab === "left" && isInvitation && isPending && (
         <div className="mt-3 flex space-x-2 pt-2">
-          <Button
-            text="거절"
-            variant="text"
-            size="s"
-            isIcon={false}
-            onClick={() => onReject?.(data.notificationId.date)}
-          />
+          <Button text="거절" variant="text" size="s" isIcon={false} onClick={() => onReject?.(data.notificationId)} />
           <Button
             text="수락"
             variant="primary"
             size="s"
             isIcon={false}
-            onClick={() => onAccept?.(data.notificationId.date)}
+            onClick={() => onAccept?.(data.notificationId)}
           />
         </div>
       )}
 
       {tab === "right" && isInvitation && isPending && (
         <div className="mt-3 flex space-x-2 pt-2">
-          <Button
-            text="취소"
-            variant="text"
-            size="s"
-            isIcon={false}
-            onClick={() => onCancel?.(data.notificationId.date)}
-          />
+          <Button text="취소" variant="text" size="s" isIcon={false} onClick={() => onCancel?.(data.notificationId)} />
         </div>
       )}
     </div>
