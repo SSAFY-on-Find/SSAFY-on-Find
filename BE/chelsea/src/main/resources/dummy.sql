@@ -225,5 +225,5 @@ VALUES
     (1300046, '최유준', TRUE, NULL, 'CLS001', NOW(), NOW()),
     (1300047, '한서아', FALSE, NULL, 'CLS001', NOW(), NOW()),
     (1300048, '정은우', TRUE, NULL, 'CLS001', NOW(), NOW()),
-    (1300049, '강지안', FALSE, NULL, 'CLS001', NOW(), NOW()),
+    (1300049, '이지인', FALSE, NULL, 'CLS001', NOW(), NOW()),
     (1300050, '박채원', FALSE, NULL, 'CLS001', NOW(), NOW());
