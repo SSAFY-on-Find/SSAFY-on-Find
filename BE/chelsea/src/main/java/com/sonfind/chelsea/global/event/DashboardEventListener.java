@@ -33,7 +33,7 @@ public class DashboardEventListener {
 	public void onTeamBuildingRateDashboardEvent(TeamProgressDto e) {
 		Map<String, Object> payload = Map.of(
 				"type", "TEAM_PROGRESS_SNAPSHOT",
-				"ts", Instant.now().toEpochMilli(),
+				"time", Instant.now().toEpochMilli(),
 				"data", e
 		);
 
@@ -45,7 +45,7 @@ public class DashboardEventListener {
 	public void onTeamInfoUpdateDashboardEvent(TeamInfoUpdateDto e) {
 		Map<String, Object> payload = Map.of(
 				"type", "TEAM_INFO_SNAPSHOT",
-				"ts", Instant.now().toEpochMilli(),
+				"time", Instant.now().toEpochMilli(),
 				"data", e
 		);
 
@@ -65,7 +65,7 @@ public class DashboardEventListener {
 	public void onJoinAndLeaveTeamDashboardEvent(TeamMemberChangedDto e) {
 		Map<String, Object> payload = Map.of(
 				"type", "TEAM_MEMBER_CHANGED",
-				"ts", Instant.now().toEpochMilli(),
+				"time", Instant.now().toEpochMilli(),
 				"data", e
 		);
 
@@ -82,7 +82,7 @@ public class DashboardEventListener {
 	public void onClassStudentWishPositionDashboardEvent(PositionChangeRequestDto e) {
 		Map<String, Object> payload = Map.of(
 				"type", "",
-				"ts", Instant.now().toEpochMilli(),
+				"time", Instant.now().toEpochMilli(),
 				"data", e
 		);
 

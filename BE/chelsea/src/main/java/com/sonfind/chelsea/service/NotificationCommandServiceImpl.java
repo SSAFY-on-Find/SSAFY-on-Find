@@ -159,7 +159,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				doc.getPublisherId(), doc.getPublisherType(),
 				doc.getSubscriberId(), doc.getSubscriberType(),
 				NotificationStatus.ACCEPTED,
-				now
+				DateUtil.formatKoShort(now)
 		));
 
 		log.info("초대/지원이 수락되었습니다: notificationId={}", objId);
@@ -204,7 +204,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				doc.getPublisherId(), doc.getPublisherType(),
 				doc.getSubscriberId(), doc.getSubscriberType(),
 				NotificationStatus.REJECTED,
-				now
+				DateUtil.formatKoShort(now)
 		));
 
 		log.info("초대/지원이 거절되었습니다: notificationId={}", objId);
@@ -248,7 +248,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				doc.getPublisherId(), doc.getPublisherType(),
 				doc.getSubscriberId(), doc.getSubscriberType(),
 				NotificationStatus.CANCELED,
-				now
+				DateUtil.formatKoShort(now)
 		));
 
 		log.info("알림이 취소되었습니다: notificationId={}", notificationId);
