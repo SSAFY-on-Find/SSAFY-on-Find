@@ -1,6 +1,7 @@
 package com.sonfind.chelsea.global.event;
 
 import com.sonfind.chelsea.dto.dashboard.PositionChangeRequestDto;
+import com.sonfind.chelsea.dto.dashboard.TeamInfoUpdateDto;
 import com.sonfind.chelsea.dto.dashboard.TeamMemberChangedDto;
 import com.sonfind.chelsea.dto.dashboard.TeamProgressDto;
 import com.sonfind.chelsea.service.SseService;
@@ -37,6 +38,18 @@ public class DashboardEventListener {
 		);
 
 		sseService.broadcastToAll("TeamProgress", payload);
+	}
+
+	@EventListener
+	@TransactionalEventListener(phase = AFTER_COMMIT)
+	public void onTeamInfoUpdateDashboardEvent(TeamInfoUpdateDto e) {
+		Map<String, Object> payload = Map.of(
+				"type", "TEAM_INFO_SNAPSHOT",
+				"ts", Instant.now().toEpochMilli(),
+				"data", e
+		);
+
+		sseService.broadcastToAll("TeamUpdate", payload);
 	}
 
 	/**

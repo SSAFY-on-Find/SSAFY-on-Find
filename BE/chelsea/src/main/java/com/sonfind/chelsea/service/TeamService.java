@@ -203,7 +203,7 @@ public class TeamService {
 					.build();
 
 			//이벤트 발행
-			eventPublisher.publishEvent(updateDto);
+			dashBoardCommandService.publishTeamInfoUpdateEvent(updateDto);
 		}
 	}
 
