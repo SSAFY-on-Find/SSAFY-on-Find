@@ -121,7 +121,7 @@ export function useNotificationStream(enabled: boolean) {
       }
 
       // [added] 서버가 event: <커스텀이름>으로 보내는 경우 대비
-      es.addEventListener("notification", (e: MessageEvent) => {
+      es.addEventListener("NOTIFICATION", (e: MessageEvent) => {
         console.log("[SSE] notification:", e.data)
         handleRaw(e.data)
       })
