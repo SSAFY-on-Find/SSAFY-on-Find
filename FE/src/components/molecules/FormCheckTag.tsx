@@ -6,14 +6,15 @@ interface IFormCheckTag {
   list: ISubcode[]
   selected: ISubcode[]
   onToggle: (item: ISubcode) => void
+  hasError?: boolean
 }
 
-function FormCheckTag({ title, isNecessary = false, list, selected, onToggle }: IFormCheckTag) {
+function FormCheckTag({ title, isNecessary = false, list, selected, onToggle, hasError }: IFormCheckTag) {
   const selectedIds = selected.map((item) => item.subcode)
 
   return (
     <div className="flex flex-col gap-1">
-      <div className="text-text text-sm font-bold">
+      <div className={` ${hasError ? "text-error" : "text-text"} text-sm font-bold`}>
         {title}
         {isNecessary && <span className="text-error"> *</span>}
       </div>
