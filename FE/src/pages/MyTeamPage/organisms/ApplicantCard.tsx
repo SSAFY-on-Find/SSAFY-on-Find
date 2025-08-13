@@ -83,13 +83,7 @@ export default function ApplicantCard({
           isPending ? (
             <>
               <div className="w-15">
-                <Button
-                  text="거절"
-                  variant="text"
-                  size="s"
-                  isIcon={false}
-                  onClick={() => onReject?.(notificationId.date)}
-                />
+                <Button text="거절" variant="text" size="s" isIcon={false} onClick={() => onReject?.(notificationId)} />
               </div>
               <div className="w-15">
                 <Button
@@ -97,7 +91,7 @@ export default function ApplicantCard({
                   variant="primary"
                   size="s"
                   isIcon={false}
-                  onClick={() => onAccept?.(notificationId.date)}
+                  onClick={() => onAccept?.(notificationId)}
                 />
               </div>
             </>
@@ -106,7 +100,7 @@ export default function ApplicantCard({
           )
         ) : // tab === "send"
         isPending ? (
-          <Button text="취소" variant="text" size="s" isIcon={false} onClick={() => onCancel?.(notificationId.date)} />
+          <Button text="취소" variant="text" size="s" isIcon={false} onClick={() => onCancel?.(notificationId)} />
         ) : (
           <></>
         )}

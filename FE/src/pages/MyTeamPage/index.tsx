@@ -197,7 +197,7 @@ export default function MyTeamPage() {
                 {teamStatusList.length > 0 ? (
                   teamStatusList.map((req) => (
                     <ApplicantCard
-                      key={String(req.statusId?.timestamp ?? Math.random())}
+                      key={String(req.statusId)}
                       {...req}
                       tab={requestType}
                       onAccept={handleAcceptInvitation}
