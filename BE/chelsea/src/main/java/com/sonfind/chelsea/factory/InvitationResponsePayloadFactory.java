@@ -24,10 +24,10 @@ public class InvitationResponsePayloadFactory implements ResponsePayloadFactory 
 				.build();
 
 		return NotificationDto.<InvitationNotificationResponseDto>builder()
-				.id(e.getNotificationId())
-				.event(e.getClass().toString())
+				.id(e.getNotificationId().toHexString())
+				.event(e.getClass().getSimpleName())
 				.status(e.getStatus())
-				.time(e.getUpdatedAt().toString())
+				.time(e.getUpdatedAt())
 				.data(createResponse)
 				.build();
 	}
