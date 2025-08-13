@@ -61,11 +61,11 @@ function StudentCard({
         <div className="flex flex-row justify-center gap-2">
           {teamName && <MainTag tagContent={teamName} fillBg={true} />}
           <MajorTag tagContent={student.major} />
-          <PositionTag positionName={position.subcodeName} />
+          {position.subcodeName && <PositionTag positionName={position.subcodeName} />}
         </div>
         <div className="flex flex-row justify-center gap-2">
-          <NormalTag tagContent={track.subcodeName} />
-          <NormalTag tagContent={`${goal.subcodeName} 우선`} />
+          {track.subcodeName && <NormalTag tagContent={track.subcodeName} />}
+          {goal.subcodeName && <NormalTag tagContent={`${goal.subcodeName} 우선`} />}
         </div>
       </div>
     </div>
