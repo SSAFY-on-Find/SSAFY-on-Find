@@ -116,16 +116,14 @@ export default function DashboardPage() {
                         <span className="text-text w-8 text-lg font-bold">{index + 1}위</span>
                         <UserImg name={rec.name} url={rec.profileImageUrl ?? ""} size="m" showTeamBadge={false} />
                         <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                          <span className="text-text font-semibold">{rec.name}</span>
+                          <span className="text-text font-semibold text-nowrap">{rec.name}</span>
                           <div className="mt-1 flex items-center gap-2 sm:mt-0">
                             {rec.majorYn ? <MajorTag tagContent="전공" /> : <MajorTag tagContent="비전공" />}
                             {rec.position && <PositionTag positionName={rec.position} />}
-                            <NormalTag tagContent={`${rec.goal} 우선`} />
+                            {/* <NormalTag tagContent={`${rec.goal} 우선`} /> */}
                           </div>
                         </div>
                       </div>
-
-                      {/* Right Section */}
                       <span className="text-main text-lg font-bold">{rec.score}%</span>
                     </div>
                   </Tooltip>
