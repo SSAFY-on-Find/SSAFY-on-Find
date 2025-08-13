@@ -68,7 +68,7 @@ export default function NotificationModal({ isOpen, onClose, returnFocusRef }: N
       returnFocusRef?.current?.focus?.()
       document.body.style.overflow = ""
     }
-  }, [isOpen, onClose, returnFocusRef])
+  }, [isOpen, onClose, returnFocusRef, data, statusList, isLoading, isError])
 
   const lockScroll = () => {
     document.body.style.overflow = "hidden"

@@ -4,14 +4,16 @@ import com.sonfind.chelsea.dto.dashboard.PositionChangeRequestDto;
 import com.sonfind.chelsea.dto.dashboard.TeamInfoUpdateDto;
 import com.sonfind.chelsea.dto.dashboard.TeamMemberChangedDto;
 import com.sonfind.chelsea.dto.dashboard.TeamProgressDto;
+import com.sonfind.chelsea.dto.notification.NotificationDto;
 import com.sonfind.chelsea.service.SseService;
+import com.sonfind.chelsea.types.EventTargetType;
+import com.sonfind.chelsea.util.DateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import java.time.Instant;
-import java.util.Map;
+import java.util.Date;
 
 import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 
@@ -20,6 +22,7 @@ import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMI
 public class DashboardEventListener {
 
 	private final SseService sseService;
+	private final EventTargetType TYPE = EventTargetType.DASHBOARD;
 
 	/**
 	 * 팀 빌딩 비율 대시보드 이벤트 리스너
@@ -31,25 +34,29 @@ public class DashboardEventListener {
 	@EventListener
 	@TransactionalEventListener(phase = AFTER_COMMIT)
 	public void onTeamBuildingRateDashboardEvent(TeamProgressDto e) {
-		Map<String, Object> payload = Map.of(
-				"type", "TEAM_PROGRESS_SNAPSHOT",
-				"time", Instant.now().toEpochMilli(),
-				"data", e
-		);
+		String event = "TEAM_PROGRESS_SNAPSHOT";
+		NotificationDto<TeamProgressDto> payload = NotificationDto.<TeamProgressDto>builder()
+				.event(event)
+				.type(TYPE)
+				.time(DateUtil.formatKoShort(getCurrentDate()))
+				.data(e)
+				.build();
 
-		sseService.broadcastToAll("TeamProgress", payload);
+		sseService.broadcastToAll(TYPE.name(), payload);
 	}
 
 	@EventListener
 	@TransactionalEventListener(phase = AFTER_COMMIT)
 	public void onTeamInfoUpdateDashboardEvent(TeamInfoUpdateDto e) {
-		Map<String, Object> payload = Map.of(
-				"type", "TEAM_INFO_SNAPSHOT",
-				"time", Instant.now().toEpochMilli(),
-				"data", e
-		);
+		String event = "TEAM_INFO_SNAPSHOT";
+		NotificationDto<TeamInfoUpdateDto> payload = NotificationDto.<TeamInfoUpdateDto>builder()
+				.event(event)
+				.type(TYPE)
+				.time(DateUtil.formatKoShort(getCurrentDate()))
+				.data(e)
+				.build();
 
-		sseService.broadcastToAll("TeamUpdate", payload);
+		sseService.broadcastToAll(TYPE.name(), payload);
 	}
 
 	/**
@@ -63,13 +70,15 @@ public class DashboardEventListener {
 	@EventListener
 	@TransactionalEventListener(phase = AFTER_COMMIT)
 	public void onJoinAndLeaveTeamDashboardEvent(TeamMemberChangedDto e) {
-		Map<String, Object> payload = Map.of(
-				"type", "TEAM_MEMBER_CHANGED",
-				"time", Instant.now().toEpochMilli(),
-				"data", e
-		);
+		String event = "TEAM_MEMBER_SNAPSHOT";
+		NotificationDto<TeamMemberChangedDto> payload = NotificationDto.<TeamMemberChangedDto>builder()
+				.event(event)
+				.type(TYPE)
+				.time(DateUtil.formatKoShort(getCurrentDate()))
+				.data(e)
+				.build();
 
-		sseService.broadcastToAll("TeamMemberChanged", payload);
+		sseService.broadcastToAll(TYPE.name(), payload);
 	}
 
 	/**
@@ -80,12 +89,18 @@ public class DashboardEventListener {
 	@EventListener
 	@TransactionalEventListener(phase = AFTER_COMMIT)
 	public void onClassStudentWishPositionDashboardEvent(PositionChangeRequestDto e) {
-		Map<String, Object> payload = Map.of(
-				"type", "",
-				"time", Instant.now().toEpochMilli(),
-				"data", e
-		);
+		String event = "POSITION_CHANGE_SNAPSHOT";
+		NotificationDto<PositionChangeRequestDto> payload = NotificationDto.<PositionChangeRequestDto>builder()
+				.event(event)
+				.type(TYPE)
+				.time(DateUtil.formatKoShort(getCurrentDate()))
+				.data(e)
+				.build();
 
-		sseService.broadcastToAll("PositionChanged", payload);
+		sseService.broadcastToAll(TYPE.name(), payload);
+	}
+
+	private Date getCurrentDate() {
+		return new Date();
 	}
 }
