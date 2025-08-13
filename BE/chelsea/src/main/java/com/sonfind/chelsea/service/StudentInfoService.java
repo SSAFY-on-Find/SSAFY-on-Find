@@ -217,6 +217,34 @@ public class StudentInfoService {
 		return result;
 	}
 
+	/**
+	 * 프로필 삭제 처리 함수
+	 * */
+	@Transactional
+	public void deleteProfile(Long studentId) {
+		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId)
+			.orElseThrow(AppException::studentInfoNotFound);
+
+		if (studentInfo.getProfile() != null) {
+			fileService.deleteProfileImage(studentInfo.getProfile());
+			studentInfo.updateProfileImage(null);
+		}
+	}
+
+	/**
+	 * 포트폴리오 삭제 처리 함수
+	 * */
+	@Transactional
+	public void deletePortfolio(Long studentId) {
+		StudentInfo studentInfo = studentInfoRepository.findByStudent_StudentId(studentId)
+			.orElseThrow(AppException::studentInfoNotFound);
+
+		if (studentInfo.getPortfolio() != null) {
+			fileService.deletePortfolioFile(studentInfo.getPortfolio());
+			studentInfo.updatePortfolio(null);
+		}
+	}
+
 	public StudentInfoGetDetailResponseDto getOtherDetailStudentInfo(Long loginStudentId, Long targetStudentId) {
 		StudentInfoGetDetailResponseDto.StudentInfoGetDetailResponseDtoBuilder builder = buildDetailResponseDto(
 			targetStudentId);
