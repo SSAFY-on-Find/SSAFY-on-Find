@@ -25,7 +25,11 @@ function StudentCard({
     <div
       className="border-line flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border bg-white px-20 py-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg"
       onClick={() => {
-        navigate(`/studentlist/${student.studentId}`)
+        if (userId !== student.studentId) {
+          navigate(`/studentlist/${student.studentId}`)
+        } else {
+          navigate(`/myprofile`)
+        }
       }}
     >
       <div className="relative">
