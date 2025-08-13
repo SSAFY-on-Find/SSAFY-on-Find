@@ -201,7 +201,7 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 						.nonMajorCount(t != null && t.getNonMajorCount() != null ? t.getNonMajorCount() : null)
 						.build();
 			}
-		}).toList();
+		}).toList().reversed();
 	}
 
 	@Override
