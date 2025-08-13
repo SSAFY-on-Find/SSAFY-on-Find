@@ -183,10 +183,7 @@ export default function MyTeamPage() {
                     isOpen={studentSearchModal}
                     onClose={() => setStudentSearchModal(false)}
                     students={studentsExceptMe}
-                    onStudentClick={(studentId) => {
-                      handleInviteStudent(Number(studentId))
-                      setStudentSearchModal(false)
-                    }}
+                    myTeamId={Number(teamId)}
                   />
                 )}
               </div>

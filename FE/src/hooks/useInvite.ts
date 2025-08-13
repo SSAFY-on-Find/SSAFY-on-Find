@@ -32,7 +32,7 @@ export function useInvte(myTeamId?: number | null) {
 
   /** 개인이 팀에 지원 */
   const applyAsMate = (targetTeamId: number, myMateId: number) => {
-    mutation.mutate({
+    return mutation.mutateAsync({
       subId: targetTeamId,
       subType: "TEAM",
       pubId: myMateId,
@@ -43,7 +43,7 @@ export function useInvte(myTeamId?: number | null) {
 
   /** 내 팀이 다른 팀에 합치기 제안 */
   const mergeTeams = (targetTeamId: number, myTeamId: number) => {
-    mutation.mutate({
+    return mutation.mutateAsync({
       subId: targetTeamId,
       subType: "TEAM",
       pubId: myTeamId,
@@ -52,9 +52,21 @@ export function useInvte(myTeamId?: number | null) {
     })
   }
 
+  /** 내 팀이 개인에게 초대 요청 */
+  const invitation = (targetId: number, myTeamId: number) => {
+    return mutation.mutateAsync({
+      subId: targetId,
+      subType: "STUDENT",
+      pubId: myTeamId,
+      pubType: "TEAM",
+      type: "INVITATION",
+    })
+  }
+
   return {
     applyAsMate,
     mergeTeams,
+    invitation,
     isPending: mutation.isPending,
     error: mutation.error as Error | null,
   }
