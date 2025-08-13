@@ -104,13 +104,10 @@ VALUES ('FE_TECH001', 'TECH', 'React', 'React을(를) 나타내는 코드. (코�
        ('MO_TECH044', 'TECH', 'Flutter', 'Flutter을(를) 나타내는 코드. (코드: MO_TECH044)', true, NOW(), NOW()),
        ('MO_TECH045', 'TECH', 'React Native', 'React Native을(를) 나타내는 코드. (코드: MO_TECH045)', true, NOW(), NOW()),
        ('MO_TECH046', 'TECH', 'Ionic', 'Ionic을(를) 나타내는 코드. (코드: MO_TECH046)', true, NOW(), NOW()),
-       ('MO_TECH047', 'TECH', 'Android (Java/Kotlin)', 'Android (Java/Kotlin)을(를) 나타내는 코드. (코드: MO_TECH047)', true,
-        NOW(),
-        NOW()),
+       ('MO_TECH047', 'TECH', 'Android (Java/Kotlin)', 'Android (Java/Kotlin)을(를) 나타내는 코드. (코드: MO_TECH047)', true, NOW(),NOW()),
        ('LN_TECH048', 'TECH', 'Objective-C', 'Objective-C을(를) 나타내는 코드. (코드: LN_TECH048)', true, NOW(), NOW()),
        ('LN_TECH049', 'TECH', 'Swift', 'Swift을(를) 나타내는 코드. (코드: LN_TECH049)', true, NOW(), NOW()),
-       ('MO_TECH050', 'TECH', 'Kotlin Multiplatform Mobile (KMM)',
-        'Kotlin Multiplatform Mobile (KMM)을(를) 나타내는 코드. (코드: MO_TECH050)', true, NOW(), NOW()),
+       ('MO_TECH050', 'TECH', 'Kotlin Multiplatform Mobile (KMM)', 'Kotlin Multiplatform Mobile (KMM)을(를) 나타내는 코드. (코드: MO_TECH050)', true, NOW(), NOW()),
        ('MO_TECH051', 'TECH', 'Xamarin', 'Xamarin을(를) 나타내는 코드. (코드: MO_TECH051)', true, NOW(), NOW()),
        ('LN_TECH052', 'TECH', 'C', 'C을(를) 나타내는 코드. (코드: LN_TECH052)', true, NOW(), NOW()),
        ('LN_TECH053', 'TECH', 'C++', 'C++을(를) 나타내는 코드. (코드: LN_TECH053)', true, NOW(), NOW()),
@@ -130,30 +127,19 @@ VALUES ('FE_TECH001', 'TECH', 'React', 'React을(를) 나타내는 코드. (코�
        ('IN_TECH067', 'TECH', 'Kafka', 'Kafka을(를) 나타내는 코드. (코드: IN_TECH067)', true, NOW(), NOW()),
        ('IN_TECH068', 'TECH', 'OpenSearch', 'OpenSearch을(를) 나타내는 코드. (코드: IN_TECH068)', true, NOW(), NOW()),
        ('IN_TECH069', 'TECH', 'Elasticsearch', 'Elasticsearch을(를) 나타내는 코드. (코드: IN_TECH069)', true, NOW(), NOW()),
-       ('IN_TECH070', 'TECH', 'Rush (Monorepo tool)', 'Rush (Monorepo tool)을(를) 나타내는 코드. (코드: IN_TECH070)', true, NOW(),
-        NOW());
+       ('IN_TECH070', 'TECH', 'Rush (Monorepo tool)', 'Rush (Monorepo tool)을(를) 나타내는 코드. (코드: IN_TECH070)', true, NOW(),NOW());
 
--- ------------------------------------------------------------------
--- Sample data for Teams table (12 rows)
--- ------------------------------------------------------------------
+
+-- == Team ==
 INSERT INTO teams (name, description, track_code, is_deleted, major_count, non_major_count, created_at, updated_at)
 VALUES
--- 웹 기술 트랙
-('팀 001', '웹 기술 기반 프로젝트 수행팀 A', 'TRK001', FALSE, 2, 1, NOW(), NOW()),
+    ('팀 001', '웹 기술 기반 프로젝트 수행팀 A', 'TRK001', FALSE, 2, 1, NOW(), NOW()),
+    ('팀 002', '웹 디자인 전문팀 A', 'TRK002', FALSE, 1, 1, NOW(), NOW()),
+    ('팀 003', 'AIoT 융합 프로젝트팀 A', 'TRK003', FALSE, 0, 2, NOW(), NOW()),
+    ('팀 004', '모바일 앱 개발팀 A', 'TRK004', FALSE, 2, 3, NOW(), NOW()),
+    ('팀 005', '웹 디자인 전문팀 B', 'TRK002', FALSE, 2, 2, NOW(), NOW());
 
--- 웹 디자인 트랙
-('팀 002', '웹 디자인 전문팀 A', 'TRK002', FALSE, 1, 1, NOW(), NOW()),
-
--- AIoT 트랙
-('팀 003', 'AIoT 융합 프로젝트팀 A', 'TRK003', FALSE, 0, 2, NOW(), NOW()),
-
--- 모바일 트랙
-('팀 004', '모바일 앱 개발팀 A', 'TRK004', FALSE, 2, 3, NOW(), NOW()),
-('팀 005', '웹 디자인 전문팀 B', 'TRK002', FALSE, 2, 2, NOW(), NOW());
-
--- ------------------------------------------------------------------
--- Sample data for Recruitments table
--- ------------------------------------------------------------------
+-- == Recruit ==
 INSERT INTO recruitments (position_code, team_id, created_at, updated_at)
 VALUES
     -- 웹 기술 팀 001
@@ -174,88 +160,70 @@ VALUES
     ('POS006', 4, NOW(), NOW()), -- 모바일
     -- 웹 디자인 팀 005
     ('POS001', 5, NOW(), NOW()), -- 프론트
-    ('POS002', 5, NOW(), NOW());
--- 백엔드
+    ('POS002', 5, NOW(), NOW()); -- 백엔드
 
 
-/*--------------------------------------------------------
--- Student 테이블에 데이터 삽입
---------------------------------------------------------*/
+-- == Student ==
 INSERT IGNORE INTO students (student_id, name, major_yn, team_id, class_code, created_at, updated_at)
 VALUES
-    -- team 1 (4명)
+    -- team 1 (3명) 전공(2), 비전공(1)
     (1300001, '김서준', TRUE, 1, 'CLS001', NOW(), NOW()),
     (1300002, '이하윤', FALSE, 1, 'CLS001', NOW(), NOW()),
     (1300003, '박지호', TRUE, 1, 'CLS001', NOW(), NOW()),
-    (1300004, '최서아', FALSE, 1, 'CLS001', NOW(), NOW()),
 
-    -- team 2 (6명)
-    (1300007, '조유준', TRUE, 2, 'CLS001', NOW(), NOW()),
-    (1300008, '윤하은', FALSE, 2, 'CLS001', NOW(), NOW()),
-    (1300009, '장시우', TRUE, 2, 'CLS001', NOW(), NOW()),
-    (1300010, '임수아', FALSE, 2, 'CLS001', NOW(), NOW()),
-    (1300011, '한도윤', TRUE, 2, 'CLS001', NOW(), NOW()),
-    (1300012, '오채원', FALSE, 2, 'CLS001', NOW(), NOW()),
+    -- team 2 (2명) 전공(1), 비전공(1)
+    (1300004, '최서아', FALSE, 2, 'CLS001', NOW(), NOW()),
+    (1300005, '조유준', TRUE, 2, 'CLS001', NOW(), NOW()),
 
-    -- team 3 (6명)
-    (1300013, '서예준', TRUE, 3, 'CLS001', NOW(), NOW()),
-    (1300014, '신유나', FALSE, 3, 'CLS001', NOW(), NOW()),
-    (1300015, '권민준', TRUE, 3, 'CLS001', NOW(), NOW()),
-    (1300016, '황다은', FALSE, 3, 'CLS001', NOW(), NOW()),
-    (1300017, '안주원', TRUE, 3, 'CLS001', NOW(), NOW()),
-    (1300018, '송지우', FALSE, 3, 'CLS001', NOW(), NOW()),
+    -- team 3 (4명) 전공(2), 비전공(2)
+    (1300006, '윤하은', FALSE, 3, 'CLS001', NOW(), NOW()),
+    (1300007, '장시우', TRUE, 3, 'CLS001', NOW(), NOW()),
+    (1300008, '임수아', FALSE, 3, 'CLS001', NOW(), NOW()),
+    (1300009, '한도윤', TRUE, 3, 'CLS001', NOW(), NOW()),
 
-    -- team 4 (6명)
-    (1300019, '유하준', TRUE, 4, 'CLS001', NOW(), NOW()),
-    (1300020, '전서윤', FALSE, 4, 'CLS001', NOW(), NOW()),
-    (1300021, '정서아', TRUE, 4, 'CLS001', NOW(), NOW()),
-    (1300022, '강지안', FALSE, 4, 'CLS001', NOW(), NOW()),
-    (1300023, '최은우', TRUE, 4, 'CLS001', NOW(), NOW()),
-    (1300024, '김하윤', FALSE, 4, 'CLS001', NOW(), NOW()),
+    -- team 4 (2명) 전공(0), 비전공(2)
+    (1300010, '오채원', FALSE, 4, 'CLS001', NOW(), NOW()),
+    (1300011, '서예준', FALSE, 4, 'CLS001', NOW(), NOW()),
 
-    -- team 5 (6명)
-    (1300025, '이시우', TRUE, 5, 'CLS001', NOW(), NOW()),
-    (1300026, '박서준', FALSE, 5, 'CLS001', NOW(), NOW()),
-    (1300027, '조지호', TRUE, 5, 'CLS001', NOW(), NOW()),
-    (1300028, '윤수아', FALSE, 5, 'CLS001', NOW(), NOW()),
-    (1300029, '장유준', TRUE, 5, 'CLS001', NOW(), NOW()),
-    (1300030, '임채원', FALSE, 5, 'CLS001', NOW(), NOW()),
+    -- team 5 (5명) 전공(2), 비전공(3)
+    (1300012, '신유나', FALSE, 5, 'CLS001', NOW(), NOW()),
+    (1300013, '권민준', TRUE, 5, 'CLS001', NOW(), NOW()),
+    (1300014, '황다은', FALSE, 5, 'CLS001', NOW(), NOW()),
+    (1300015, '안주원', TRUE, 5, 'CLS001', NOW(), NOW()),
+    (1300016, '송지우', FALSE, 5, 'CLS001', NOW(), NOW()),
 
-    -- team 6 (6명)
-    (1300031, '한민준', TRUE, 6, 'CLS001', NOW(), NOW()),
-    (1300032, '오유나', FALSE, 6, 'CLS001', NOW(), NOW()),
-    (1300033, '서하준', TRUE, 6, 'CLS001', NOW(), NOW()),
-    (1300034, '신지우', FALSE, 6, 'CLS001', NOW(), NOW()),
-    (1300035, '권도윤', TRUE, 6, 'CLS001', NOW(), NOW()),
-    (1300036, '황서윤', FALSE, 6, 'CLS001', NOW(), NOW()),
-
-    -- team 7 (5명)
-    (1300037, '안예준', TRUE, 7, 'CLS001', NOW(), NOW()),
-    (1300038, '송다은', FALSE, 7, 'CLS001', NOW(), NOW()),
-    (1300039, '유주원', TRUE, 7, 'CLS001', NOW(), NOW()),
-    (1300040, '전하은', FALSE, 7, 'CLS001', NOW(), NOW()),
-    (1300041, '오지호', TRUE, 7, 'CLS001', NOW(), NOW()),
-
-    -- team 8 (4명)
-    (1300043, '임은우', TRUE, 8, 'CLS001', NOW(), NOW()),
-    (1300044, '장하윤', FALSE, 8, 'CLS001', NOW(), NOW()),
-    (1300045, '윤서준', TRUE, 8, 'CLS001', NOW(), NOW()),
-    (1300046, '조지안', FALSE, 8, 'CLS001', NOW(), NOW()),
-
-    -- team 9 (1명)
-    (1300047, '강시우', TRUE, 9, 'CLS001', NOW(), NOW()),
-
-    -- team 10 (1명)
-    (1300048, '정수아', FALSE, 10, 'CLS001', NOW(), NOW()),
-
-    -- team 11 (1명)
-    (1300049, '최유준', TRUE, 11, 'CLS001', NOW(), NOW()),
-    (1300042, '한서아', FALSE, NULL, 'CLS001', NOW(), NOW()),
-
-    -- team 12 (3명)
-    (1300005, '정은우', TRUE, 12, 'CLS001', NOW(), NOW()),
-    (1300006, '강지안', FALSE, NULL, 'CLS001', NOW(), NOW()),
+    -- team에 소속되지 않는 student(34명)
+    (1300017, '유하준', TRUE, NULL, 'CLS001', NOW(), NOW()),
+    (1300018, '전서윤', FALSE, NULL, 'CLS001', NOW(), NOW()),
+    (1300019, '정서아', TRUE, NULL, 'CLS001', NOW(), NOW()),
+    (1300020, '강지안', FALSE, NULL, 'CLS001', NOW(), NOW()),
+    (1300021, '최은우', TRUE, NULL, 'CLS001', NOW(), NOW()),
+    (1300022, '김하윤', FALSE, NULL, 'CLS001', NOW(), NOW()),
+    (1300023, '이시우', TRUE, NULL, 'CLS001', NOW(), NOW()),
+    (1300024, '박서준', FALSE, NULL, 'CLS001', NOW(), NOW()),
+    (1300025, '조지호', TRUE, NULL, 'CLS001', NOW(), NOW()),
+    (1300026, '윤수아', FALSE, NULL, 'CLS001', NOW(), NOW()),
+    (1300027, '장유준', TRUE, NULL, 'CLS001', NOW(), NOW()),
+    (1300028, '임채원', FALSE, NULL, 'CLS001', NOW(), NOW()),
+    (1300029, '한민준', TRUE, NULL, 'CLS001', NOW(), NOW()),
+    (1300030, '오유나', FALSE, NULL, 'CLS001', NOW(), NOW()),
+    (1300031, '서하준', TRUE, NULL, 'CLS001', NOW(), NOW()),
+    (1300032, '신지우', FALSE, NULL, 'CLS001', NOW(), NOW()),
+    (1300033, '권도윤', TRUE, NULL, 'CLS001', NOW(), NOW()),
+    (1300034, '황서윤', FALSE, NULL, 'CLS001', NOW(), NOW()),
+    (1300035, '안예준', TRUE, NULL, 'CLS001', NOW(), NOW()),
+    (1300036, '송다은', FALSE, NULL, 'CLS001', NOW(), NOW()),
+    (1300037, '유주원', TRUE, NULL, 'CLS001', NOW(), NOW()),
+    (1300038, '전하은', FALSE, NULL, 'CLS001', NOW(), NOW()),
+    (1300039, '오지호', TRUE, NULL, 'CLS001', NOW(), NOW()),
+    (1300040, '임은우', TRUE, NULL, 'CLS001', NOW(), NOW()),
+    (1300041, '장하윤', FALSE, NULL, 'CLS001', NOW(), NOW()),
+    (1300042, '윤서준', TRUE, NULL, 'CLS001', NOW(), NOW()),
+    (1300043, '조지안', FALSE, NULL, 'CLS001', NOW(), NOW()),
+    (1300044, '강시우', TRUE, NULL, 'CLS001', NOW(), NOW()),
+    (1300045, '정수아', FALSE, NULL, 'CLS001', NOW(), NOW()),
+    (1300046, '최유준', TRUE, NULL, 'CLS001', NOW(), NOW()),
+    (1300047, '한서아', FALSE, NULL, 'CLS001', NOW(), NOW()),
+    (1300048, '정은우', TRUE, NULL, 'CLS001', NOW(), NOW()),
+    (1300049, '강지안', FALSE, NULL, 'CLS001', NOW(), NOW()),
     (1300050, '박채원', FALSE, NULL, 'CLS001', NOW(), NOW());
-
-
-
