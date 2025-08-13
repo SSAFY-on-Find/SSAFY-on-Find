@@ -100,15 +100,10 @@ export default function MyTeamPage() {
   })
 
   const {
-    data: teamRequests, // INotificationStatus[] | undefined
+    data: teamRequests,
     isLoading: isLoadingTeamRequests,
     error: teamRequestsError,
   } = useTeamNotification(typeof teamId === "number" ? teamId : null, requestType)
-
-  const teamStatusList: INotificationStatus[] = useMemo(
-    () => (teamRequests ?? []).flatMap((n: INotification) => n.notificationStatusList ?? []),
-    [teamRequests]
-  )
 
   const type = requestTab === "left" ? "receive" : "send"
   const { cancleInvitationAsync, isPending: isCanceling } = useInviteCancel(type)
@@ -205,10 +200,10 @@ export default function MyTeamPage() {
 
             {!isLoadingTeamRequests && !teamRequestsError && (
               <>
-                {teamStatusList.length > 0 ? (
-                  teamStatusList.map((req) => (
+                {teamRequests && teamRequests.length > 0 ? (
+                  teamRequests.map((req) => (
                     <ApplicantCard
-                      key={String(req.statusId)}
+                      key={String(req.notificationId)}
                       {...req}
                       tab={requestType}
                       onAccept={handleAcceptInvitation}

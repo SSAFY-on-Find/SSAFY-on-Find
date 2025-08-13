@@ -1,79 +1,71 @@
-// components/ApplicantCard.tsx
-import { Button, UserImg } from "@/components/atoms"
-import type { INotificationStatus } from "@/types/notification"
+import { Button, MajorTag, PositionTag, UserImg } from "@/components/atoms"
+import type { INotificationTeam } from "@/types/notification"
 
 type TabType = "receive" | "send"
 
-interface ApplicantCardProps extends INotificationStatus {
+interface ApplicantCardProps extends INotificationTeam {
   tab: TabType
   onAccept?: (notificationId: string) => void
   onReject?: (notificationId: string) => void
   onCancel?: (notificationId: string) => void
 }
 
-const statusLabelMap = {
-  PENDING: "대기",
-  ACCEPTED: "수락",
-  REJECTED: "거절",
-  CANCELED: "취소",
+const statusConfig = {
+  PENDING: { label: "대기중", className: "bg-line/5 text-text border-line" },
+  ACCEPTED: { label: "수락 완료", className: "bg-main/5 text-main border-line" },
+  REJECTED: { label: "거절함", className: "bg-error/5 text-error border-line" },
+  CANCELED: { label: "취소됨", className: "bg-line/5 text-subtext border-line" },
 } as const
+
+type StatusKey = keyof typeof statusConfig
+
+function StatusBadge({ status }: { status: StatusKey }) {
+  const s = statusConfig[status]
+  return <span className={`rounded-full border px-2 py-0.5 text-sm ${s.className}`}>{s.label}</span>
+}
 
 export default function ApplicantCard({
   notificationId,
+  profileImageUrl,
+  name,
   status,
-  isRead,
-  updatedAt,
-  pubNotificationTitle,
-  pubNotificationMessage,
-  subNotificationTitle,
-  subNotificationMessage,
-  publisherId,
-  publisherType,
-  subscriberId,
-  subscriberType,
-  targetType,
-  role,
+  isMajor,
+  position,
+  majorCount,
+  nonMajorCount,
   tab,
   onAccept,
   onReject,
   onCancel,
-  ..._rest
 }: ApplicantCardProps) {
   const isPending = status === "PENDING"
+  const disabledClass = !isPending ? "pointer-events-none opacity-40" : ""
+  const isTeam = !isMajor
 
   return (
-    <div className="hover:bg-main/10 flex items-center justify-between rounded-lg p-4">
+    <div className={`hover:bg-main/10 flex items-center justify-between rounded-lg p-2 ${disabledClass}`}>
       <div className="flex items-center gap-4">
         <UserImg
-          name={String(publisherId)}
+          name={name}
           size={"m"}
           showTeamBadge={false}
-          url={publisherType === "TEAM" ? "../../../../public/ssafy.png" : ""}
+          url={isTeam ? "../../../../public/ssafy.png" : profileImageUrl ? profileImageUrl : ""}
         />
 
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            {tab === "receive" ? (
-              <p className="font-senibold text-text text-sm">{publisherId}</p>
+        <div className="flex flex-row gap-1">
+          <div className="mr-3">{name}</div>
+          <div className="flex flex-row gap-2">
+            {isTeam ? (
+              <>
+                <MajorTag tagContent={`전공 ${majorCount}`} />
+                <MajorTag tagContent={`비전공 ${nonMajorCount}`} />
+              </>
             ) : (
-              <p className="font-senibold text-text text-sm">{subscriberId}</p>
+              <>
+                <MajorTag tagContent={isMajor ? "전공" : "비전공"} />
+                <PositionTag positionName={position} />
+              </>
             )}
-
-            <span
-              className={`border-line rounded-full border px-2 py-0.5 text-xs ${
-                status === "PENDING"
-                  ? "bg-line/5 text-text border-line"
-                  : status === "ACCEPTED"
-                    ? "bg-main/5 text-main border-lin"
-                    : status === "REJECTED"
-                      ? "bbg-error/5 text-error border-line"
-                      : status === "CANCELED"
-                        ? "bg-line/5 text-subtext border-line"
-                        : "bg-gray-100 text-gray-500"
-              }`}
-            >
-              {statusLabelMap[status]}
-            </span>
           </div>
         </div>
       </div>
@@ -96,13 +88,13 @@ export default function ApplicantCard({
               </div>
             </>
           ) : (
-            <></>
+            <StatusBadge status={status as StatusKey} />
           )
-        ) : // tab === "send"
+        ) : /* tab === "send" */
         isPending ? (
           <Button text="취소" variant="text" size="s" isIcon={false} onClick={() => onCancel?.(notificationId)} />
         ) : (
-          <></>
+          <StatusBadge status={status as StatusKey} />
         )}
       </div>
     </div>
