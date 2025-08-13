@@ -39,7 +39,7 @@ export default function MyTeamPage() {
     enabled: !!teamId,
   })
   const studentsExceptMe = students?.filter((s) => s.student.studentId !== Number(authData?.studentId))
-
+  console.log("chatRoomId", chatRoomId)
   const rawMembers = myTeamData?.teamInfo.members ?? []
   const teamMembers: ITeamMember[] = useMemo(
     () =>
@@ -62,7 +62,6 @@ export default function MyTeamPage() {
       console.error("채팅방 나가기 실패:", error)
     },
   })
-
   const handleLeaveTeam = () => {
     if (window.confirm("정말로 팀에서 탈퇴하시겠습니까?")) {
       leaveTeam()
@@ -79,6 +78,7 @@ export default function MyTeamPage() {
   const handleInviteStudent = (targetStudentId: number) => {
     // 새로운 학생을 우리 팀으로 초대하는 로직이 들어가야합니다!
   }
+
   const {
     data: fetchedRoomId,
     isFetching: isFetchingRoomId,
@@ -90,6 +90,7 @@ export default function MyTeamPage() {
     enabled: !!teamId,
     retry: false,
   })
+  console.log("fetchedRoomId", fetchedRoomId)
 
   const { data: initialMessages, isLoading: isMessagesLoading } = useQuery({
     queryKey: ["chatMessages", chatRoomId],
@@ -136,15 +137,14 @@ export default function MyTeamPage() {
       navigate("/no-team")
     }
   }, [teamId, navigate, isMyTeamLoading])
-  // useEffect(() => {
-  //   if (isSuccess && fetchedRoomId) setChatRoomId(fetchedRoomId)
-  // }, [isSuccess, fetchedRoomId])
+  useEffect(() => {
+    if (isSuccess && fetchedRoomId) setChatRoomId(fetchedRoomId)
+  }, [isSuccess, fetchedRoomId])
 
-  // useEffect(() => {
-  //   if (isError && teamId && !isCreating) createRoom(teamId)
-  // }, [isError, teamId, createRoom, isCreating])
+  useEffect(() => {
+    if (isError && teamId && !isCreating) createRoom(teamId)
+  }, [isError, teamId, createRoom, isCreating])
 
-  // [수정] 전체 로딩 상태에 isMessagesLoading 추가
   const isLoading = isFetchingRoomId || isCreating || isMyTeamLoading || isMessagesLoading
 
   return (
