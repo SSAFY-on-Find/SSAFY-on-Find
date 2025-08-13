@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { Mail, User, Users } from "lucide-react"
 
 import { Button } from "@/components/atoms"
@@ -72,14 +73,23 @@ export default function NotificationItem({
   onReject: (statusId: string) => void
   onCancel: (statusId: string) => void
 }) {
+  const navigate = useNavigate()
   const isInvitation = data.role === "PUBLISHER"
   const isPending = data.status === "PENDING"
+
+  const goToMyTeamIfTeam = () => {
+    const goLeft = tab === "left" && data.subscriberType === "TEAM"
+    const goRight = tab === "right" && data.publisherType === "TEAM"
+    if (goLeft || goRight) {
+      navigate("/myteam")
+    }
+  }
 
   return (
     <div className="transform rounded-lg border border-gray-200 bg-white p-4 transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-md">
       <div className="flex flex-col items-start justify-between gap-2">
         <div className="flex w-full items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex cursor-pointer items-center gap-3" onClick={goToMyTeamIfTeam}>
             <div>{getNotificationIcon(tab === "left" ? data.subscriberType : data.publisherType)}</div>
             <h3 className="text-text text-sm font-bold">
               {tab === "left" ? data.pubNotificationTitle : data.subNotificationTitle}
