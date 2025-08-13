@@ -187,17 +187,6 @@ export default function ProfileCreatePage() {
           }}
         />
         <FormCheckTag
-          title={"기술 스택"}
-          isNecessary={true}
-          list={codes.techStack}
-          selected={techStack}
-          onToggle={(item) => {
-            const exists = techStack.some((i) => i.subcode === item.subcode)
-            const next = exists ? techStack.filter((i) => i.subcode !== item.subcode) : [...techStack, item]
-            setCodes({ techStack: next })
-          }}
-        />
-        <FormCheckTag
           title={"목표"}
           isNecessary={true}
           list={codes.goal}
@@ -208,6 +197,17 @@ export default function ProfileCreatePage() {
             } else {
               setCodes({ goal: item })
             }
+          }}
+        />
+        <FormCheckTag
+          title={"기술 스택"}
+          isNecessary={true}
+          list={codes.techStack}
+          selected={techStack}
+          onToggle={(item) => {
+            const exists = techStack.some((i) => i.subcode === item.subcode)
+            const next = exists ? techStack.filter((i) => i.subcode !== item.subcode) : [...techStack, item]
+            setCodes({ techStack: next })
           }}
         />
       </FormCard>

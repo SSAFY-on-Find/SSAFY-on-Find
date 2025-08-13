@@ -12,7 +12,7 @@ interface IFormDropdown {
 function FormDropdown({ title, isNecessary = false, placeholder, options, value, onChange }: IFormDropdown) {
   return (
     <div className="flex flex-col gap-1">
-      <div className="text-text text-sm font-normal">
+      <div className="text-text text-sm font-bold">
         {title}
         {isNecessary && <span className="text-error"> *</span>}
       </div>
