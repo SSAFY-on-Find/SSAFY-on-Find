@@ -56,6 +56,22 @@ VALUES ('MBTI001', 'MBTI', 'INTJ', 'INTJ을(를) 나타내는 코드. (코드: M
        ('MBTI015', 'MBTI', 'ESTP', 'ESTP을(를) 나타내는 코드. (코드: MBTI015)', true, NOW(), NOW()),
        ('MBTI016', 'MBTI', 'ESFP', 'ESFP을(를) 나타내는 코드. (코드: MBTI016)', true, NOW(), NOW());
 
+-- == CLS (소속 반 종류) ==
+INSERT IGNORE INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_at, updated_at)
+VALUES ('CLS001', 'CLS', '1반', '1반을(를) 나타내는 코드. (코드: CLS001)', true, NOW(), NOW()),
+       ('CLS002', 'CLS', '2반', '2반을(를) 나타내는 코드. (코드: CLS002)', true, NOW(), NOW()),
+       ('CLS003', 'CLS', '3반', '3반을(를) 나타내는 코드. (코드: CLS003)', true, NOW(), NOW()),
+       ('CLS004', 'CLS', '4반', '4반을(를) 나타내는 코드. (코드: CLS004)', true, NOW(), NOW()),
+       ('CLS005', 'CLS', '5반', '5반을(를) 나타내는 코드. (코드: CLS005)', true, NOW(), NOW()),
+       ('CLS006', 'CLS', '6반', '6반을(를) 나타내는 코드. (코드: CLS006)', true, NOW(), NOW()),
+       ('CLS007', 'CLS', '7반', '7반을(를) 나타내는 코드. (코드: CLS007)', true, NOW(), NOW());
+
+-- == RULE (팀 빌딩 규칙) ==
+INSERT IGNORE INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_at, updated_at)
+VALUES ('RULE001', 'RULE', 'SIZE_LIMIT', '6인 1팀 원칙', true, NOW(), NOW()),
+       ('RULE002', 'RULE', 'MIN_MAJOR', '전공자 2인 이상', true, NOW(), NOW()),
+       ('RULE003', 'RULE', 'MIN_NON_MAJOR', '비전공자 2인 이상', true, NOW(), NOW());
+
 -- == TECH (기술 스택) ==
 INSERT IGNORE INTO sub_code (SUB_CODE, MAIN_CODE, SUB_CODE_NAME, SUB_CODE_DESCRIPTION, USE_YN, created_at, updated_at)
 VALUES ('FE_TECH001', 'TECH', 'React', 'React을(를) 나타내는 코드. (코드: FE_TECH001)', true, NOW(), NOW()),
@@ -104,10 +120,12 @@ VALUES ('FE_TECH001', 'TECH', 'React', 'React을(를) 나타내는 코드. (코�
        ('MO_TECH044', 'TECH', 'Flutter', 'Flutter을(를) 나타내는 코드. (코드: MO_TECH044)', true, NOW(), NOW()),
        ('MO_TECH045', 'TECH', 'React Native', 'React Native을(를) 나타내는 코드. (코드: MO_TECH045)', true, NOW(), NOW()),
        ('MO_TECH046', 'TECH', 'Ionic', 'Ionic을(를) 나타내는 코드. (코드: MO_TECH046)', true, NOW(), NOW()),
-       ('MO_TECH047', 'TECH', 'Android (Java/Kotlin)', 'Android (Java/Kotlin)을(를) 나타내는 코드. (코드: MO_TECH047)', true, NOW(),NOW()),
+       ('MO_TECH047', 'TECH', 'Android (Java/Kotlin)', 'Android (Java/Kotlin)을(를) 나타내는 코드. (코드: MO_TECH047)', true,
+        NOW(), NOW()),
        ('LN_TECH048', 'TECH', 'Objective-C', 'Objective-C을(를) 나타내는 코드. (코드: LN_TECH048)', true, NOW(), NOW()),
        ('LN_TECH049', 'TECH', 'Swift', 'Swift을(를) 나타내는 코드. (코드: LN_TECH049)', true, NOW(), NOW()),
-       ('MO_TECH050', 'TECH', 'Kotlin Multiplatform Mobile (KMM)', 'Kotlin Multiplatform Mobile (KMM)을(를) 나타내는 코드. (코드: MO_TECH050)', true, NOW(), NOW()),
+       ('MO_TECH050', 'TECH', 'Kotlin Multiplatform Mobile (KMM)',
+        'Kotlin Multiplatform Mobile (KMM)을(를) 나타내는 코드. (코드: MO_TECH050)', true, NOW(), NOW()),
        ('MO_TECH051', 'TECH', 'Xamarin', 'Xamarin을(를) 나타내는 코드. (코드: MO_TECH051)', true, NOW(), NOW()),
        ('LN_TECH052', 'TECH', 'C', 'C을(를) 나타내는 코드. (코드: LN_TECH052)', true, NOW(), NOW()),
        ('LN_TECH053', 'TECH', 'C++', 'C++을(를) 나타내는 코드. (코드: LN_TECH053)', true, NOW(), NOW()),
@@ -127,17 +145,17 @@ VALUES ('FE_TECH001', 'TECH', 'React', 'React을(를) 나타내는 코드. (코�
        ('IN_TECH067', 'TECH', 'Kafka', 'Kafka을(를) 나타내는 코드. (코드: IN_TECH067)', true, NOW(), NOW()),
        ('IN_TECH068', 'TECH', 'OpenSearch', 'OpenSearch을(를) 나타내는 코드. (코드: IN_TECH068)', true, NOW(), NOW()),
        ('IN_TECH069', 'TECH', 'Elasticsearch', 'Elasticsearch을(를) 나타내는 코드. (코드: IN_TECH069)', true, NOW(), NOW()),
-       ('IN_TECH070', 'TECH', 'Rush (Monorepo tool)', 'Rush (Monorepo tool)을(를) 나타내는 코드. (코드: IN_TECH070)', true, NOW(),NOW());
+       ('IN_TECH070', 'TECH', 'Rush (Monorepo tool)', 'Rush (Monorepo tool)을(를) 나타내는 코드. (코드: IN_TECH070)', true, NOW(),
+        NOW());
 
 
 -- == Team ==
 INSERT INTO teams (name, description, track_code, is_deleted, major_count, non_major_count, created_at, updated_at)
-VALUES
-    ('팀 001', '웹 기술 기반 프로젝트 수행팀 A', 'TRK001', FALSE, 2, 1, NOW(), NOW()),
-    ('팀 002', '웹 디자인 전문팀 A', 'TRK002', FALSE, 1, 1, NOW(), NOW()),
-    ('팀 003', 'AIoT 융합 프로젝트팀 A', 'TRK003', FALSE, 2, 2, NOW(), NOW()),
-    ('팀 004', '모바일 앱 개발팀 A', 'TRK004', FALSE, 0, 2, NOW(), NOW()),
-    ('팀 005', '웹 디자인 전문팀 B', 'TRK002', FALSE, 2, 3, NOW(), NOW());
+VALUES ('팀 001', '웹 기술 기반 프로젝트 수행팀 A', 'TRK001', FALSE, 2, 1, NOW(), NOW()),
+       ('팀 002', '웹 디자인 전문팀 A', 'TRK002', FALSE, 1, 1, NOW(), NOW()),
+       ('팀 003', 'AIoT 융합 프로젝트팀 A', 'TRK003', FALSE, 2, 2, NOW(), NOW()),
+       ('팀 004', '모바일 앱 개발팀 A', 'TRK004', FALSE, 0, 2, NOW(), NOW()),
+       ('팀 005', '웹 디자인 전문팀 B', 'TRK002', FALSE, 2, 3, NOW(), NOW());
 
 -- == Recruit ==
 INSERT INTO recruitments (position_code, team_id, created_at, updated_at)
@@ -160,7 +178,8 @@ VALUES
     ('POS006', 4, NOW(), NOW()), -- 모바일
     -- 웹 디자인 팀 005
     ('POS001', 5, NOW(), NOW()), -- 프론트
-    ('POS002', 5, NOW(), NOW()); -- 백엔드
+    ('POS002', 5, NOW(), NOW());
+-- 백엔드
 
 
 -- == Student ==
