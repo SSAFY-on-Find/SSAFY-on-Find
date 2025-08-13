@@ -126,13 +126,7 @@ export default function MyTeamPage() {
     cancelInvitation(notificationId)
   }
 
-  // useEffect(() => {
-  //   if (!teamId) {
-  //     navigate("/create-team")
-  //   }
-  // }, [teamId, navigate])
   useEffect(() => {
-    // 로딩 상태도 함께 확인
     if (!teamId && !isMyTeamLoading) {
       navigate("/no-team")
     }

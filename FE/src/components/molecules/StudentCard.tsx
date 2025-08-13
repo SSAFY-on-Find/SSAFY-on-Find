@@ -5,7 +5,19 @@ import { MainTag, MajorTag, NormalTag, PositionTag, UserImg } from "@/components
 import { useStudentFavoriteToggle } from "@/hooks/useFavorite"
 import type { IStudentCard } from "@/types/student"
 
-function StudentCard({ student, position, track, goal, profileImageUrl, isFavorite, teamName }: IStudentCard) {
+interface IStudentCardWithMyId extends IStudentCard {
+  userId: number
+}
+function StudentCard({
+  student,
+  position,
+  track,
+  goal,
+  profileImageUrl,
+  isFavorite,
+  teamName,
+  userId,
+}: IStudentCardWithMyId) {
   const navigate = useNavigate()
   const { toggleFavorite, isLoading } = useStudentFavoriteToggle()
 
@@ -23,15 +35,19 @@ function StudentCard({ student, position, track, goal, profileImageUrl, isFavori
           showTeamBadge={false}
           url={profileImageUrl === null ? "" : profileImageUrl}
         />
-        <Heart
-          className={`absolute right-2 bottom-1 cursor-pointer ${isFavorite ? "text-error" : "text-subtext"}`}
-          size={24}
-          fill={isFavorite ? "currentColor" : "none"}
-          onClick={(e) => {
-            e.stopPropagation()
-            if (!isLoading(student.studentId)) toggleFavorite(student.studentId)
-          }}
-        />
+        {userId !== student.studentId ? (
+          <Heart
+            className={`absolute right-2 bottom-1 cursor-pointer ${isFavorite ? "text-error" : "text-subtext"}`}
+            size={24}
+            fill={isFavorite ? "currentColor" : "none"}
+            onClick={(e) => {
+              e.stopPropagation()
+              if (!isLoading(student.studentId)) toggleFavorite(student.studentId)
+            }}
+          />
+        ) : (
+          <></>
+        )}
       </div>
       <div className="flex flex-row items-center justify-center gap-2">
         <div className="text-text text-lg font-bold">{student.name}</div>
