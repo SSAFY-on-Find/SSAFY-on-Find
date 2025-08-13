@@ -53,15 +53,22 @@ export default function ProfileCreatePage() {
   const qc = useQueryClient()
   const markProfileCreated = useUserStore((s) => s.markProfileCreated)
 
+  // 에러 표시해주는 상태 만들기
+  const [errors, setErrors] = useState<{ [key: string]: boolean }>({})
+  const fieldRefs = {
+    position: useRef<HTMLDivElement>(null),
+    track: useRef<HTMLDivElement>(null),
+    goal: useRef<HTMLDivElement>(null),
+    techStack: useRef<HTMLDivElement>(null),
+  }
+
   useEffect(() => {
     if (isSuccess) {
       // 1) React Query 캐시 갱신 (가드가 이 값을 봄)
       qc.setQueryData<IStudentSignin>(["user-auth"], (prev) => (prev ? { ...prev, isCreatedStudentInfo: true } : prev))
-      // (서버 상태와 완전 동기화하고 싶으면 invalidate도 추가 가능)
-      // await qc.invalidateQueries({ queryKey: ["user-auth"] })
 
       // 2) zustand도 갱신
-      markProfileCreated() // or useUserStore.setState(...) 방식 그대로
+      markProfileCreated()
 
       // 3) UX
       toast.success("자기소개가 성공적으로 저장되었습니다!")
@@ -102,23 +109,38 @@ export default function ProfileCreatePage() {
   }
 
   const handleSave = () => {
+    const newErrors: { [key: string]: boolean } = {}
+
     if (!position) {
-      toast.warn("희망 포지션을 선택해주세요.")
+      newErrors.position = true
+      fieldRefs.position.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+      setErrors(newErrors)
+
+      toast.error("희망 포지션을 선택해주세요.")
       return
     }
     if (!track) {
+      newErrors.track = true
+      fieldRefs.track.current?.scrollIntoView({ behavior: "smooth", block: "center" })
       toast.warn("희망 트랙을 선택해주세요.")
-      return
-    }
-    if (techStack.length === 0) {
-      toast.warn("기술 스택을 선택해주세요.")
+      setErrors(newErrors)
       return
     }
     if (!goal) {
+      newErrors.goal = true
+      fieldRefs.goal.current?.scrollIntoView({ behavior: "smooth", block: "center" })
       toast.warn("목표를 선택해주세요.")
+      setErrors(newErrors)
       return
     }
-
+    if (techStack.length === 0) {
+      newErrors.techStack = true
+      fieldRefs.techStack.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+      toast.warn("기술 스택을 선택해주세요.")
+      setErrors(newErrors)
+      return
+    }
+    setErrors({})
     createProfile(profileStore)
   }
 
@@ -158,58 +180,70 @@ export default function ProfileCreatePage() {
         <FormInput title={"전공여부"} text={""} size={"s"} placeholder={user?.major ?? "-"} isDisabled={true} />
       </FormCard>
       <FormCard title={"필수 정보"} info={"팀 매칭에 필요한 필수 정보입니다."} isNecessary={true}>
-        <FormDropdown
-          title={"희망 포지션"}
-          placeholder={"희망 포지션을 선택하세요"}
-          options={codes.position.map((item) => ({
-            label: item.subcodeName,
-            value: item.subcode,
-          }))}
-          isNecessary={true}
-          value={position?.subcodeName}
-          onChange={(selectedSubcode) => {
-            const selected = codes.position.find((item) => item.subcode === selectedSubcode) ?? null
-            setCodes({ position: selected })
-          }}
-        />
-        <FormDropdown
-          title={"희망 트랙"}
-          placeholder={"희망 트랙을 선택하세요"}
-          options={codes.track.map((item) => ({
-            label: item.subcodeName,
-            value: item.subcode,
-          }))}
-          isNecessary={true}
-          value={track?.subcodeName}
-          onChange={(selectedSubcode) => {
-            const selected = codes.track.find((item) => item.subcode === selectedSubcode) ?? null
-            setCodes({ track: selected })
-          }}
-        />
-        <FormCheckTag
-          title={"기술 스택"}
-          isNecessary={true}
-          list={codes.techStack}
-          selected={techStack}
-          onToggle={(item) => {
-            const exists = techStack.some((i) => i.subcode === item.subcode)
-            const next = exists ? techStack.filter((i) => i.subcode !== item.subcode) : [...techStack, item]
-            setCodes({ techStack: next })
-          }}
-        />
-        <FormCheckTag
-          title={"목표"}
-          isNecessary={true}
-          list={codes.goal}
-          selected={goal ? [goal] : []}
-          onToggle={(item) => {
-            if (goal && goal.subcode === item.subcode) {
-              setCodes({ goal: null })
-            } else {
-              setCodes({ goal: item })
-            }
-          }}
-        />
+        <div ref={fieldRefs.position}>
+          <FormDropdown
+            title={"희망 포지션"}
+            placeholder={"희망 포지션을 선택하세요"}
+            options={codes.position.map((item) => ({
+              label: item.subcodeName,
+              value: item.subcode,
+            }))}
+            hasError={errors.position}
+            isNecessary={true}
+            value={position?.subcodeName}
+            onChange={(selectedSubcode) => {
+              const selected = codes.position.find((item) => item.subcode === selectedSubcode) ?? null
+              setCodes({ position: selected })
+            }}
+          />
+        </div>
+        <div ref={fieldRefs.track}>
+          <FormDropdown
+            title={"희망 트랙"}
+            placeholder={"희망 트랙을 선택하세요"}
+            options={codes.track.map((item) => ({
+              label: item.subcodeName,
+              value: item.subcode,
+            }))}
+            hasError={errors.track}
+            isNecessary={true}
+            value={track?.subcodeName}
+            onChange={(selectedSubcode) => {
+              const selected = codes.track.find((item) => item.subcode === selectedSubcode) ?? null
+              setCodes({ track: selected })
+            }}
+          />
+        </div>
+        <div ref={fieldRefs.goal}>
+          <FormCheckTag
+            title={"목표"}
+            isNecessary={true}
+            list={codes.goal}
+            hasError={errors.goal}
+            selected={goal ? [goal] : []}
+            onToggle={(item) => {
+              if (goal && goal.subcode === item.subcode) {
+                setCodes({ goal: null })
+              } else {
+                setCodes({ goal: item })
+              }
+            }}
+          />
+        </div>
+        <div ref={fieldRefs.techStack}>
+          <FormCheckTag
+            title={"기술 스택"}
+            isNecessary={true}
+            list={codes.techStack}
+            selected={techStack}
+            hasError={errors.techStack}
+            onToggle={(item) => {
+              const exists = techStack.some((i) => i.subcode === item.subcode)
+              const next = exists ? techStack.filter((i) => i.subcode !== item.subcode) : [...techStack, item]
+              setCodes({ techStack: next })
+            }}
+          />
+        </div>
       </FormCard>
       <FormCard title={"선택 정보"} info={"추가로 공유하고 싶은 정보를 입력해주세요."}>
         <div className="flex flex-col gap-1">
@@ -295,7 +329,7 @@ export default function ProfileCreatePage() {
                       <button
                         key={type}
                         onClick={() => handleToggle(idx, type)}
-                        className={`aspect-square rounded-full border-0 px-2 py-1 text-xs font-bold ${
+                        className={`aspect-square rounded-full border-0 px-2 py-1 text-xs font-bold transition-colors duration-300 ease-in-out ${
                           mbtiSelected[idx] === type ? "bg-main text-white" : "text-text"
                         }`}
                         style={{ minWidth: 28 }}

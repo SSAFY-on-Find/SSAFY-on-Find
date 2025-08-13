@@ -21,8 +21,9 @@ interface IChatUser {
 }
 interface IStudentListItem extends IChatUser {
   onClick: () => void
+  userProfile?: string
 }
-function StudentListItem({ name, major, position, hasTeam, onClick }: IStudentListItem) {
+function StudentListItem({ name, major, position, hasTeam, onClick, userProfile }: IStudentListItem) {
   // 1대1 채팅이나 초대 요청시 id기반으로 동작 예정
   return (
     <div
@@ -30,11 +31,15 @@ function StudentListItem({ name, major, position, hasTeam, onClick }: IStudentLi
       onClick={onClick}
     >
       <div className="flex items-center gap-2">
-        <UserImg name={name} size={"s"} showTeamBadge={true} hasTeam={hasTeam} />
+        {userProfile ? (
+          <UserImg name={name} size={"s"} showTeamBadge={true} hasTeam={hasTeam} url={userProfile} />
+        ) : (
+          <UserImg name={name} size={"s"} showTeamBadge={true} hasTeam={hasTeam} />
+        )}
         <div className="text-sm font-medium">{name}</div>
         <div className="flex items-center justify-center gap-1">
           <MajorTag tagContent={major} />
-          <PositionTag positionName={position} />
+          {position && <PositionTag positionName={position} />}
         </div>
       </div>
       <Send className="text-main hover:cursor-pointer" />
@@ -72,6 +77,7 @@ function StudentSearchModal({ isOpen, onClose, students, onStudentClick }: IStud
               position={ele.position.subcodeName}
               hasTeam={ele.teamName ? true : false}
               onClick={() => onStudentClick(String(ele.student.studentId))}
+              userProfile={ele.profileImageUrl}
             />
           ))}
         </div>

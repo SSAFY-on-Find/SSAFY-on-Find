@@ -5,7 +5,7 @@ import { SearchBar } from "@/components/atoms"
 import { StudentCard } from "@/components/molecules"
 import Loading from "@/components/templates/Loading"
 import { useProfileCodes } from "@/hooks/useProfile"
-import { useStudentList } from "@/hooks/useStudent"
+import { useAuth, useStudentList } from "@/hooks/useStudent"
 
 import { FilterBox } from "./organisms/FilterBox"
 
@@ -19,7 +19,7 @@ export default function StudentListPage() {
   const { data: codes, isLoading: isCodesLoading, error: codesError } = useProfileCodes()
   const { data: students, isLoading: isStudentsLoading, error: studentsError } = useStudentList()
   const [searchParams, setSearchParams] = useSearchParams()
-
+  const { data: authData } = useAuth()
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get("q") ?? "")
   const [selectedPositions, setSelectedPositions] = useState<Set<string>>(() => fromCsv(searchParams.get("pos")))
   const [selectedTracks, setSelectedTracks] = useState<Set<string>>(() => fromCsv(searchParams.get("trk")))
@@ -140,6 +140,7 @@ export default function StudentListPage() {
               profileImageUrl={s.profileImageUrl}
               isFavorite={s.isFavorite}
               teamName={s.teamName ?? ""}
+              userId={Number(authData?.studentId)}
             />
           ))
         ) : (

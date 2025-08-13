@@ -1,17 +1,18 @@
 package com.sonfind.chelsea.facade;
 
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-
 import com.sonfind.chelsea.domain.student.Student;
 import com.sonfind.chelsea.dto.student.response.StudentResponseDto;
 import com.sonfind.chelsea.dto.student.response.StudentUnionForNotificationResponseDto;
 import com.sonfind.chelsea.dto.studentInfo.response.StudentInfoForNotificationResponseDto;
+import com.sonfind.chelsea.dto.studentInfo.response.StudentMini;
 import com.sonfind.chelsea.service.StudentInfoService;
 import com.sonfind.chelsea.service.StudentService;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -34,16 +35,16 @@ public class StudentFacade {
 	public StudentUnionForNotificationResponseDto findByStudentIdForSse(Long studentId) {
 		StudentResponseDto findStudent = studentService.findByStudentIdForSse(studentId);
 		StudentInfoForNotificationResponseDto findStudentInfo = studentInfoService.findByStudentId(
-			findStudent.studentId());
+				findStudent.studentId());
 
 		return StudentUnionForNotificationResponseDto.builder()
-			.studentId(findStudent.studentId())
-			.name(findStudent.name())
-			.isMajor(findStudent.major())
-			.position(findStudentInfo.position())
-			.track(findStudentInfo.track())
-			.profileImageUrl(findStudentInfo.profileImageUrl())
-			.build();
+				.studentId(findStudent.studentId())
+				.name(findStudent.name())
+				.isMajor(findStudent.major())
+				.position(findStudentInfo.position())
+				.track(findStudentInfo.track())
+				.profileImageUrl(findStudentInfo.profileImageUrl())
+				.build();
 	}
 
 	// 해당 학생이 팀의 멤버인지 확인하는 메소드
@@ -60,7 +61,11 @@ public class StudentFacade {
 		return false; // 학생이 팀의 멤버가 아닌 경우 false 반환
 	}
 
-  public List<Long> findStudentIdList(Long teamId) {
-    return studentService.getStudentIdList(teamId);
-  }
+	public List<Long> findStudentIdList(Long teamId) {
+		return studentService.getStudentIdList(teamId);
+	}
+
+	public Map<Long, StudentMini> findStudentMiniMap(Collection<Long> ids) {
+		return studentService.findStudentMiniMapByIds(ids);
+	}
 }

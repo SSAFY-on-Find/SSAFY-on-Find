@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/atoms"
 import { TeamDetail } from "@/components/molecules"
 import { useInvte } from "@/hooks/useInvite"
+import { useTeamStore } from "@/stores/teamStore"
 import { useUserStore } from "@/stores/userStore"
 import type { ITeamDetails } from "@/types/team"
 
@@ -20,7 +21,7 @@ function TeamDetailModal({ teamId, isOpen, onClose, teamData, userTeamId }: ITea
   const { applyAsMate, mergeTeams } = useInvte(userTeamId ?? null)
   const myMateId = useUserStore((s) => s.user?.studentId)
   const navigate = useNavigate()
-
+  const { closeDetailModal } = useTeamStore()
   const renderButtons = () => {
     if (userTeamId === null) {
       return (
@@ -61,6 +62,7 @@ function TeamDetailModal({ teamId, isOpen, onClose, teamData, userTeamId }: ITea
         onClick={() => {
           navigate("/myteam")
           onClose()
+          closeDetailModal()
         }}
       />
     )
@@ -68,7 +70,7 @@ function TeamDetailModal({ teamId, isOpen, onClose, teamData, userTeamId }: ITea
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={"m"}>
       <div className="p-6">
-        <TeamDetail {...teamData}></TeamDetail>
+        <TeamDetail {...teamData} onClose={onClose}></TeamDetail>
         <div className="mt-10 mb-4 flex gap-3 px-5">{renderButtons()}</div>
       </div>
     </Modal>

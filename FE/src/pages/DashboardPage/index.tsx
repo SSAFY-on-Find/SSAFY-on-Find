@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { useQueryClient } from "@tanstack/react-query"
 import { Info, RotateCw } from "lucide-react"
 
@@ -19,6 +20,7 @@ import TeamBuildingProgress from "./organisms/TeamBuildingProgress"
 import TeamCardCarousel from "./organisms/TeamCardCarousel"
 
 export default function DashboardPage() {
+  const navigate = useNavigate()
   const studentId = useUserStore((s) => s.user?.studentId)
   const { data: summary, isLoading: isSummaryLoading, error: summaryError } = useSummaryInfo()
   const { data: teamRatio, isLoading: isTeamRatioLoading, error: teamRatioError } = useTeamRatio()
@@ -44,14 +46,19 @@ export default function DashboardPage() {
       {/* 대시보드 */}
       <div className="text-text flex flex-row gap-3">
         <div className="flex flex-col justify-between gap-3">
-          <StudentInfo
-            name={summary?.student.name ?? ""}
-            studentId={String(summary?.student.studentId)}
-            imgUrl={summary?.profileImageUrl ?? ""}
-            teamInfo={summary?.team ?? null}
-            variant="dashboard"
-            isMyProfile={true}
-          />
+          {summary && (
+            <StudentInfo
+              name={summary?.student.name ?? ""}
+              studentId={String(summary?.student.studentId)}
+              imgUrl={summary?.profileImageUrl ?? ""}
+              teamInfo={summary?.team ?? null}
+              variant="dashboard"
+              isMyProfile={true}
+              major={summary?.student.major}
+              position={summary?.position.subcodeName}
+              track={summary?.track.subcodeName}
+            />
+          )}
           <DashboardCard title={"팀 빌딩 진행률 🏃‍♀️"}>
             {teamRatio ? <TeamBuildingProgress data={teamRatio} /> : null}
           </DashboardCard>
@@ -108,7 +115,11 @@ export default function DashboardPage() {
           {!isLoading && aiRecommend && (
             <div className="mt-3 flex flex-col gap-2">
               {aiRecommend?.map((rec, index) => (
-                <div key={rec.studentId}>
+                <div
+                  key={rec.studentId}
+                  className="hover:cursor-pointer"
+                  onClick={() => navigate(`/studentlist/${rec.studentId}`)}
+                >
                   <Tooltip content={rec.reason} side="top" className="block w-full">
                     <div className="hover:bg-main/10 flex items-center justify-between rounded-lg p-2 transition-colors">
                       {/* Left Section */}
@@ -116,16 +127,14 @@ export default function DashboardPage() {
                         <span className="text-text w-8 text-lg font-bold">{index + 1}위</span>
                         <UserImg name={rec.name} url={rec.profileImageUrl ?? ""} size="m" showTeamBadge={false} />
                         <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                          <span className="text-text font-semibold">{rec.name}</span>
+                          <span className="text-text font-semibold text-nowrap">{rec.name}</span>
                           <div className="mt-1 flex items-center gap-2 sm:mt-0">
                             {rec.majorYn ? <MajorTag tagContent="전공" /> : <MajorTag tagContent="비전공" />}
                             {rec.position && <PositionTag positionName={rec.position} />}
-                            <NormalTag tagContent={`${rec.goal} 우선`} />
+                            {/* <NormalTag tagContent={`${rec.goal} 우선`} /> */}
                           </div>
                         </div>
                       </div>
-
-                      {/* Right Section */}
                       <span className="text-main text-lg font-bold">{rec.score}%</span>
                     </div>
                   </Tooltip>

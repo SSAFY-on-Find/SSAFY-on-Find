@@ -1,9 +1,6 @@
 package com.sonfind.chelsea.service;
 
-import com.sonfind.chelsea.dto.dashboard.MemberSummary;
-import com.sonfind.chelsea.dto.dashboard.PositionChangeRequestDto;
-import com.sonfind.chelsea.dto.dashboard.TeamMemberChangedDto;
-import com.sonfind.chelsea.dto.dashboard.TeamProgressDto;
+import com.sonfind.chelsea.dto.dashboard.*;
 import com.sonfind.chelsea.types.MemberChageAction;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -41,8 +38,9 @@ public class DashBoardCommandService {
 	}
 
 	// 팀 정보 변경에 따른 이벤트를 발행하는 메소드
-	public void publishTeamInfoUpdateEvent() {
+	public void publishTeamInfoUpdateEvent(TeamInfoUpdateDto eventDto) {
 		log.info("팀 정보 업데이트 이벤트 발행");
+		eventPublisher.publishEvent(eventDto);
 
 	}
 

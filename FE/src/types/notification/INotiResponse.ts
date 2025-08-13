@@ -3,8 +3,8 @@ export type TargetType = "TEAM" | "STUDENT"
 export type Status = "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELED"
 
 export interface INotificationStatus {
-  statusId: { timestamp: number; date: string }
-  notificationId: { timestamp: number; date: string }
+  statusId: string
+  notificationId: string
   targetId: number
   targetType: TargetType
   role: Role

@@ -1,6 +1,7 @@
 package com.sonfind.chelsea.global.event;
 
 import com.sonfind.chelsea.dto.dashboard.PositionChangeRequestDto;
+import com.sonfind.chelsea.dto.dashboard.TeamInfoUpdateDto;
 import com.sonfind.chelsea.dto.dashboard.TeamMemberChangedDto;
 import com.sonfind.chelsea.dto.dashboard.TeamProgressDto;
 import com.sonfind.chelsea.service.SseService;
@@ -32,11 +33,23 @@ public class DashboardEventListener {
 	public void onTeamBuildingRateDashboardEvent(TeamProgressDto e) {
 		Map<String, Object> payload = Map.of(
 				"type", "TEAM_PROGRESS_SNAPSHOT",
-				"ts", Instant.now().toEpochMilli(),
+				"time", Instant.now().toEpochMilli(),
 				"data", e
 		);
 
 		sseService.broadcastToAll("TeamProgress", payload);
+	}
+
+	@EventListener
+	@TransactionalEventListener(phase = AFTER_COMMIT)
+	public void onTeamInfoUpdateDashboardEvent(TeamInfoUpdateDto e) {
+		Map<String, Object> payload = Map.of(
+				"type", "TEAM_INFO_SNAPSHOT",
+				"time", Instant.now().toEpochMilli(),
+				"data", e
+		);
+
+		sseService.broadcastToAll("TeamUpdate", payload);
 	}
 
 	/**
@@ -52,7 +65,7 @@ public class DashboardEventListener {
 	public void onJoinAndLeaveTeamDashboardEvent(TeamMemberChangedDto e) {
 		Map<String, Object> payload = Map.of(
 				"type", "TEAM_MEMBER_CHANGED",
-				"ts", Instant.now().toEpochMilli(),
+				"time", Instant.now().toEpochMilli(),
 				"data", e
 		);
 
@@ -69,7 +82,7 @@ public class DashboardEventListener {
 	public void onClassStudentWishPositionDashboardEvent(PositionChangeRequestDto e) {
 		Map<String, Object> payload = Map.of(
 				"type", "",
-				"ts", Instant.now().toEpochMilli(),
+				"time", Instant.now().toEpochMilli(),
 				"data", e
 		);
 
