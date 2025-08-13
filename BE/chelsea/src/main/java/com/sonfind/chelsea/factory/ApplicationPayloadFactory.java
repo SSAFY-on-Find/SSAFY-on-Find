@@ -8,6 +8,7 @@ import com.sonfind.chelsea.facade.StudentFacade;
 import com.sonfind.chelsea.global.event.InvitationRequestEvent;
 import com.sonfind.chelsea.service.NotificationService;
 import com.sonfind.chelsea.service.TeamService;
+import com.sonfind.chelsea.types.EventTargetType;
 import com.sonfind.chelsea.types.NotificationType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ public class ApplicationPayloadFactory implements RequestPayloadFactory {
 	private final StudentFacade studentFacade;
 	private final NotificationService notificationService;
 	private final TeamService teamService;
+	private final EventTargetType TYPE = EventTargetType.NOTIFICATION;
 
 	@Override
 	public NotificationType supportType() {
@@ -56,8 +58,8 @@ public class ApplicationPayloadFactory implements RequestPayloadFactory {
 		// 최종 응답 DTO
 		return NotificationDto.<ApplicationPubData>builder()
 				.id(e.getNotificationId().toHexString())
-				.event(e.getClass().getSimpleName())
-				.type(e.getType())         // APPLICATION 으로
+				.event(e.getType())
+				.type(TYPE)
 				.time(e.getUpdatedAt())
 				.data(payload)
 				.build();
@@ -107,8 +109,8 @@ public class ApplicationPayloadFactory implements RequestPayloadFactory {
 		// 최종 응답 DTO
 		return NotificationDto.<ApplicationSubData>builder()
 				.id(e.getNotificationId().toHexString())
-				.event(e.getClass().getSimpleName())
-				.type(e.getType())         // APPLICATION 으로
+				.event(e.getType())
+				.type(TYPE)
 				.time(e.getUpdatedAt())
 				.data(payload)
 				.build();

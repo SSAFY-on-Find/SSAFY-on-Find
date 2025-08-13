@@ -98,7 +98,6 @@ public class NotificationEventListener {
 
 	private void sendBoth(HasPublisher pubData, NotificationDto<?> pubPayload, HasSubscriber subData,
 	                      NotificationDto<?> subPayload) {
-		log.info("ㄱㄱ");
 		sseService.dispatch(
 				pubData.publisher().id(),
 				pubData.publisher().type(),
