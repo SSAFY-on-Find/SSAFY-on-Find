@@ -61,6 +61,7 @@ public class StudentInfo extends BaseEntity {
 	@AttributeOverride(name = "originalFileName", column = @Column(name = "portfolio_original_filename"))
 	private Portfolio portfolio;
 
+	@Column(columnDefinition = "TEXT")
 	private String description;
 
 	@ManyToOne
