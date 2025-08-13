@@ -9,7 +9,7 @@ function CheckCircle({ isChecked = false }) {
   const checkOnOff = isChecked ? "bg-main text-white border-main" : "bg-background text-background border-subtext/30 "
   return (
     <>
-      <div className={`${checkOnOff} flex rounded-full border-2 stroke-2 p-0.5`}>
+      <div className={`${checkOnOff} flex rounded-full border-1 stroke-2 p-0.5`}>
         <Check strokeWidth={4} size={8} />
       </div>
     </>

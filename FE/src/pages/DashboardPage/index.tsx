@@ -1,4 +1,5 @@
-import { useEffect } from "react"
+import { useQueryClient } from "@tanstack/react-query"
+import { Info, RotateCw } from "lucide-react"
 
 import { MajorTag, NormalTag, PositionTag, Tooltip, UserImg } from "@/components/atoms"
 import { StudentInfo } from "@/components/molecules"
@@ -23,20 +24,21 @@ export default function DashboardPage() {
   const { data: teamRatio, isLoading: isTeamRatioLoading, error: teamRatioError } = useTeamRatio()
   const { data: positionRatio, isLoading: isPositionRatioLoading, error: positionRatioError } = usePositionRatio()
   const { data: recommendTeam, isLoading: isRecommendTeamLoading, error: recommendTeamError } = useRecommendTeam()
-
-  const aiRecommend = useAIRecommendations()
-
-  useEffect(() => {
-    if (studentId && aiRecommend.isIdle) aiRecommend.mutate(Number(studentId))
-  }, [studentId])
-
+  const { data: aiRecommend, isLoading } = useAIRecommendations(studentId ? Number(studentId) : undefined)
+  const queryClient = useQueryClient()
+  const handleRefreshAiRecommend = () => {
+    if (studentId) {
+      queryClient.invalidateQueries({
+        queryKey: ["aiRecommendations", Number(studentId)],
+      })
+    }
+  }
   if (isSummaryLoading || isTeamRatioLoading || isPositionRatioLoading || isRecommendTeamLoading)
     return <Loading fullScreen text="정보를 불러오는 중..." />
   if (summaryError) return <div>프로필 요약 정보를 불러올 수 없습니다.</div>
   if (teamRatioError) return <div>팀 빌딩 현황 정보를 불러올 수 없습니다.</div>
   if (positionRatioError) return <div>포지션별 팀 빌딩 현황 정보를 불러올 수 없습니다.</div>
   if (recommendTeamError) return <div>추천 팀 목록을 불러올 수 없습니다.</div>
-
   return (
     <div className="bg-background flex min-h-screen flex-col gap-5 px-15 py-10">
       {/* 대시보드 */}
@@ -72,15 +74,40 @@ export default function DashboardPage() {
             )
           ) : null}
         </DashboardCard>
-        <DashboardCard title={"AI 추천 개인 궁합도 😊"}>
-          {aiRecommend.isPending && (
+        <DashboardCard title={""}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h3 className="text-text text-lg font-bold">AI 추천 개인 궁합도 😊</h3>
+              <div>
+                <Tooltip
+                  content={
+                    <>
+                      <span className="block w-50"></span>자기소개의 여러 요소를 종합하여 평가한 지표입니다.
+                    </>
+                  }
+                  side="right"
+                >
+                  <Info className="text-subtext w-4" />
+                </Tooltip>
+              </div>
+            </div>
+            <button
+              onClick={handleRefreshAiRecommend}
+              disabled={isLoading}
+              className="hover:bg-main/20 rounded-full p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              title="새로고침"
+            >
+              <RotateCw size={16} className={isLoading ? "animate-spin" : ""} />
+            </button>
+          </div>
+          {isLoading && (
             <div className="text-subtext mt-15 text-center">
               <Loading text="AI가 최적의 팀원을 분석 중입니다..." bg="bg-white" />
             </div>
           )}
-          {aiRecommend.isSuccess && (
+          {!isLoading && aiRecommend && (
             <div className="mt-3 flex flex-col gap-2">
-              {aiRecommend?.data?.map((rec, index) => (
+              {aiRecommend?.map((rec, index) => (
                 <div key={rec.studentId}>
                   <Tooltip content={rec.reason} side="top" className="block w-full">
                     <div className="hover:bg-main/10 flex items-center justify-between rounded-lg p-2 transition-colors">
@@ -92,6 +119,7 @@ export default function DashboardPage() {
                           <span className="text-text font-semibold">{rec.name}</span>
                           <div className="mt-1 flex items-center gap-2 sm:mt-0">
                             {rec.majorYn ? <MajorTag tagContent="전공" /> : <MajorTag tagContent="비전공" />}
+                            {rec.position && <PositionTag positionName={rec.position} />}
                             <NormalTag tagContent={`${rec.goal} 우선`} />
                           </div>
                         </div>

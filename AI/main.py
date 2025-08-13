@@ -106,6 +106,7 @@ async def get_recommendations(student_id: int):
                     "name": student_details.get("name"),
                     "profileImageUrl": student_details.get("profile_image_url"),
                     "majorYn": student_details.get("major_yn"),
+                    "position": student_details.get("position"),
                     "goal": student_details.get("goal"),
                     "score": rec['score'],
                     "reason": rec['reason']

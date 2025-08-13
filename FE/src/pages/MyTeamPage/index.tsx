@@ -1,14 +1,21 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { UserPlus } from "lucide-react"
 
 import { createTeamChatRoom, getChatMessages, getTeamChatRoomId, leaveChatRoom } from "@/apis/chatRoom"
 import { teamApi } from "@/apis/teamApi"
+import { Button } from "@/components/atoms"
+import { Segmented } from "@/components/atoms"
 import { TeamDetail } from "@/components/molecules"
+import { StudentSearchModal } from "@/components/templates"
 import Loading from "@/components/templates/Loading"
-import { useTeamNotifications } from "@/hooks/useTeamNotifications"
-import { useUserStore } from "@/stores/userStore"
+import { useInviteAccept, useInviteCancel, useInviteReject } from "@/hooks/useInvite"
+import { useTeamNotification } from "@/hooks/useNotification"
+import { useAuth, useStudentList } from "@/hooks/useStudent"
+import { useLeaveTeam } from "@/hooks/useTeam"
+import type { INotification, INotificationStatus } from "@/types/notification"
 import type { IMyTeam, ITeamMember } from "@/types/team"
 
 import ApplicantCard from "./organisms/ApplicantCard"
@@ -17,23 +24,36 @@ import TeamChat from "./organisms/TeamChat"
 export default function MyTeamPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const teamId = useUserStore((state) => state.user?.teamId)
-  const studentId = useUserStore((state) => state.user?.studentId)
+  const { data: authData } = useAuth()
+  const teamId = authData?.teamId
+  const studentId = authData?.studentId
   const [chatRoomId, setChatRoomId] = useState<number | null>(null)
+  const [requestTab, setRequestTab] = useState<"left" | "right">("left")
+  const requestType = requestTab === "left" ? "receive" : "send"
 
+  const { mutate: leaveTeam } = useLeaveTeam()
+  const [studentSearchModal, setStudentSearchModal] = useState(false)
+  const { data: students, isLoading: isStudentListLoading } = useStudentList()
   const { data: myTeamData, isLoading: isMyTeamLoading } = useQuery<IMyTeam>({
     queryKey: ["myTeam"],
     queryFn: () => teamApi.getMyTeam().then((res) => res.data),
     enabled: !!teamId,
   })
+  const studentsExceptMe = students?.filter((s) => s.student.studentId !== Number(authData?.studentId))
+  console.log("chatRoomId", chatRoomId)
+  const rawMembers = myTeamData?.teamInfo.members ?? []
+  const teamMembers: ITeamMember[] = useMemo(
+    () =>
+      rawMembers.map((user) => ({
+        studentId: user.studentId,
+        name: user.name,
+        major: user.major,
+        profileImageUrl: user.profileImageUrl,
+        position: user.position,
+      })),
+    [rawMembers]
+  )
 
-  const teamMembers: ITeamMember[] | undefined = myTeamData?.teamInfo.members?.map((user) => ({
-    studentId: user.studentId,
-    name: user.name,
-    major: user.major,
-    profileImageUrl: user.profileImageUrl,
-    position: user.position,
-  }))
   const { mutate: leaveRoom } = useMutation({
     mutationFn: (id: number) => leaveChatRoom(id),
     onSuccess: () => {
@@ -41,22 +61,6 @@ export default function MyTeamPage() {
     },
     onError: (error) => {
       console.error("채팅방 나가기 실패:", error)
-    },
-  })
-  const { mutate: leaveTeam } = useMutation({
-    mutationFn: () => teamApi.leaveTeam(), // teamApi에 leaveTeam 함수가 있다고 가정
-    onSuccess: () => {
-      // 1. 팀 탈퇴 성공 시, 채팅방 나가기 실행
-      if (chatRoomId) {
-        leaveRoom(chatRoomId)
-      }
-      queryClient.invalidateQueries({ queryKey: ["myTeam"] })
-      alert("팀에서 성공적으로 탈퇴했습니다.")
-      navigate("/") // 메인 페이지 등으로 이동
-    },
-    onError: (error) => {
-      alert("팀 탈퇴에 실패했습니다.")
-      console.error(error)
     },
   })
   const handleLeaveTeam = () => {
@@ -72,6 +76,10 @@ export default function MyTeamPage() {
     onError: () => console.error("채팅방 생성에 실패했습니다."),
   })
 
+  const handleInviteStudent = (targetStudentId: number) => {
+    // 새로운 학생을 우리 팀으로 초대하는 로직이 들어가야합니다!
+  }
+
   const {
     data: fetchedRoomId,
     isFetching: isFetchingRoomId,
@@ -83,6 +91,7 @@ export default function MyTeamPage() {
     enabled: !!teamId,
     retry: false,
   })
+  console.log("fetchedRoomId", fetchedRoomId)
 
   const { data: initialMessages, isLoading: isMessagesLoading } = useQuery({
     queryKey: ["chatMessages", chatRoomId],
@@ -91,17 +100,54 @@ export default function MyTeamPage() {
   })
 
   const {
-    notifications: applicants,
-    isLoading: isLoadingApplicants,
-    error: applicantsError,
-  } = useTeamNotifications(teamId!, "receive")
+    data: teamRequests, // INotificationStatus[] | undefined
+    isLoading: isLoadingTeamRequests,
+    error: teamRequestsError,
+  } = useTeamNotification(typeof teamId === "number" ? teamId : null, requestType)
 
+  const teamStatusList: INotificationStatus[] = useMemo(
+    () => (teamRequests ?? []).flatMap((n: INotification) => n.notificationStatusList ?? []),
+    [teamRequests]
+  )
+
+  const type = requestTab === "left" ? "receive" : "send"
+  const { cancleInvitationAsync, isPending: isCanceling } = useInviteCancel(type)
+  const { acceptInvitationAsync, isPending: isAccepting } = useInviteAccept(type)
+  const { rejectInvitationAsync, isPending: isRejecting } = useInviteReject(type)
+
+  const handleAcceptInvitation = async (id: string) => {
+    if (!id) return
+    await toast.promise(acceptInvitationAsync(id), {
+      success: "초대를 수락했습니다!",
+      error: { render: (e) => (e?.data as Error)?.message ?? "수락 중 오류가 발생했습니다." },
+    })
+  }
+  const handleRejectInvitation = async (id: string) => {
+    if (!id) return
+    await toast.promise(rejectInvitationAsync(id), {
+      success: "초대를 거절했습니다!",
+      error: { render: (e) => (e?.data as Error)?.message ?? "거절 중 오류가 발생했습니다." },
+    })
+  }
+  const handleCancelInvitation = async (id: string) => {
+    if (!id) return
+    await toast.promise(cancleInvitationAsync(id), {
+      success: "초대를 취소했습니다!",
+      error: { render: (e) => (e?.data as Error)?.message ?? "취소 중 오류가 발생했습니다." },
+    })
+  }
+
+  // useEffect(() => {
+  //   if (!teamId) {
+  //     navigate("/create-team")
+  //   }
+  // }, [teamId, navigate])
   useEffect(() => {
-    if (!teamId) {
-      navigate("/create-team")
+    // 로딩 상태도 함께 확인
+    if (!teamId && !isMyTeamLoading) {
+      navigate("/no-team")
     }
-  }, [teamId, navigate])
-
+  }, [teamId, navigate, isMyTeamLoading])
   useEffect(() => {
     if (isSuccess && fetchedRoomId) setChatRoomId(fetchedRoomId)
   }, [isSuccess, fetchedRoomId])
@@ -110,7 +156,6 @@ export default function MyTeamPage() {
     if (isError && teamId && !isCreating) createRoom(teamId)
   }, [isError, teamId, createRoom, isCreating])
 
-  // [수정] 전체 로딩 상태에 isMessagesLoading 추가
   const isLoading = isFetchingRoomId || isCreating || isMyTeamLoading || isMessagesLoading
 
   return (
@@ -126,22 +171,55 @@ export default function MyTeamPage() {
             <div>
               <div className="flex items-center gap-[15px]">
                 <h3 className="text-text text-2xl font-bold">대기목록</h3>
-                <UserPlus />
+                <div className="w-30">
+                  <Button
+                    size={"s"}
+                    isIcon={true}
+                    Icon={UserPlus}
+                    variant="outline"
+                    text="팀원 초대"
+                    onClick={() => setStudentSearchModal(true)}
+                  />
+                </div>
+                {!isStudentListLoading && studentsExceptMe && (
+                  <StudentSearchModal
+                    isOpen={studentSearchModal}
+                    onClose={() => setStudentSearchModal(false)}
+                    students={studentsExceptMe}
+                    onStudentClick={(studentId) => {
+                      handleInviteStudent(Number(studentId))
+                      setStudentSearchModal(false)
+                    }}
+                  />
+                )}
               </div>
-              <p className="text-subtext text-sm text-pretty">
+              <p className="text-subtext mt-2 text-sm text-pretty">
                 팀 합류를 신청한 교육생들입니다. 신중하게 검토 후 결정해주세요.
               </p>
             </div>
 
-            {isLoadingApplicants && <Loading text="대기 목록을 불러오는 중" />}
-            {applicantsError && <div className="text-red-500">대기 목록을 불러오는 데 실패했습니다.</div>}
+            <Segmented activeSegment={requestTab} onSegmentChange={setRequestTab} />
 
-            {!isLoadingApplicants && !applicantsError && (
+            {isLoadingTeamRequests && <Loading text="요청 목록을 불러오는 중" />}
+            {teamRequestsError && <div className="text-error">요청 목록을 불러오는 데 실패했습니다.</div>}
+
+            {!isLoadingTeamRequests && !teamRequestsError && (
               <>
-                {applicants && applicants.length > 0 ? (
-                  applicants.map((applicant) => <ApplicantCard key={applicant.statusId} applicant={applicant} />)
+                {teamStatusList.length > 0 ? (
+                  teamStatusList.map((req) => (
+                    <ApplicantCard
+                      key={String(req.statusId)}
+                      {...req}
+                      tab={requestType}
+                      onAccept={handleAcceptInvitation}
+                      onReject={handleRejectInvitation}
+                      onCancel={handleCancelInvitation}
+                    />
+                  ))
                 ) : (
-                  <p className="text-center text-gray-500">합류 신청자가 없습니다.</p>
+                  <p className="text-subtext text-center text-sm">
+                    {requestType === "receive" ? "받은 요청이 없습니다." : "보낸 요청이 없습니다."}
+                  </p>
                 )}
               </>
             )}
@@ -151,7 +229,7 @@ export default function MyTeamPage() {
         <div className="border-line flex h-[400px] w-full flex-col rounded-lg border-1 bg-white md:h-[500px] lg:h-[600px] lg:w-[430px] lg:flex-shrink-0">
           {isLoading && <div className="flex h-full items-center justify-center">채팅 정보를 불러오는 중...</div>}
           {isError && !isCreating && !chatRoomId && (
-            <div className="flex h-full items-center justify-center text-red-500">
+            <div className="text-error flex h-full items-center justify-center">
               채팅방 정보를 가져오는데 실패했습니다.
             </div>
           )}

@@ -5,7 +5,6 @@ import { useQueryClient } from "@tanstack/react-query"
 import { favoriteApi } from "@/apis/favoriteApi"
 import type { IStudentCard, IStudentInfo } from "@/types/student"
 import type { ITeamCard } from "@/types/team"
-import { sortTeamsByFavorite } from "@/utils"
 
 export const useTeamFavoriteToggle = () => {
   const [loadingTeams, setLoadingTeams] = useState<Set<number>>(new Set())
@@ -21,11 +20,10 @@ export const useTeamFavoriteToggle = () => {
 
       if (response.status === "SUCCESS") {
         queryClient.setQueryData(["teams"], (oldData: ITeamCard[]) => {
-          // toast.success("팀 좋아요 성공!")
           const updatedData = oldData?.map((team: ITeamCard) =>
             team.teamId === teamId ? { ...team, isFavorite: !team.isFavorite } : team
           )
-          return sortTeamsByFavorite(updatedData)
+          return updatedData
         })
       } else {
         toast.error("좋아요 처리에 실패했습니다.")

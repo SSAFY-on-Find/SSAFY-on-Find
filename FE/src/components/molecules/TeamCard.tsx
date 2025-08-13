@@ -116,7 +116,11 @@ function TeamCard({
         <div className="mb-5 flex px-[5px]">
           {members.map((ele, idx) => (
             <div key={ele.studentId} className={idx > 0 ? "-ml-2" : ""}>
-              <UserImg name={ele.name} size={"xs"} showTeamBadge={false} url={ele.profileImageUrl} />
+              {ele.profileImageUrl ? (
+                <UserImg name={ele.name} size={"xs"} showTeamBadge={false} url={ele.profileImageUrl} />
+              ) : (
+                <UserImg name={ele.name} size={"xs"} showTeamBadge={false} />
+              )}
             </div>
           ))}
         </div>

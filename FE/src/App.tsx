@@ -4,6 +4,7 @@ import { ToastContainer } from "react-toastify"
 
 import Loading from "@/components/templates/Loading"
 import { useAuth } from "@/hooks/useStudent"
+import { useNotificationStream } from "@/hooks/useSubscribe"
 import { Header, SideBar } from "@/layout"
 import CreateProfile from "@/pages/CreateProfilePage"
 import Dashboard from "@/pages/DashboardPage"
@@ -18,6 +19,7 @@ import TeamList from "@/pages/TeamListPage"
 import { useUserStore } from "@/stores/userStore"
 
 import ChatView from "./components/templates/ChatView"
+import NoTeamPage from "./pages/NoTeamPage"
 import TeamEditPage from "./pages/TeamUpdatePage"
 import { useChatViewStore } from "./stores/useChatViewStore"
 import ScrollToTop from "./utils/ScrollToTop"
@@ -38,6 +40,9 @@ function App() {
     if (authUser) setUser(authUser)
     if (isError) resetUser()
   }, [authUser, isError, setUser, resetUser])
+
+  const sseEnabled = !!authUser && authUser.isCreatedStudentInfo
+  useNotificationStream(sseEnabled)
 
   // 2) 로딩 화면
   if (isLoading) {
@@ -91,6 +96,7 @@ function App() {
             <Route path="/myteam" element={<MyTeam />} />
             <Route path="/teamlist" element={<TeamList />} />
             <Route path="/create-team" element={<TeamCreatePage />} />
+            <Route path="/no-team" element={<NoTeamPage />} />
             <Route path="/edit-team" element={<TeamEditPage />} />
             <Route path="/studentlist" element={<StudentList />} />
             <Route path="/studentlist/:studentId" element={<StudentDetail />} />

@@ -5,16 +5,16 @@ import { Tooltip } from "@/components/atoms"
 import { ChatList, Nav } from "@/components/molecules"
 import { StudentSearchModal } from "@/components/templates"
 import { useCreateDirectChatRoom, useMyDirectChatRooms } from "@/hooks/useDM"
-import { useStudentList } from "@/hooks/useStudent"
+import { useAuth, useStudentList } from "@/hooks/useStudent"
 import { useChatViewStore } from "@/stores/useChatViewStore"
 
 function SideBar() {
   const [open, setOpen] = useState(true)
   const [studentSearchModal, setStudentSearchModal] = useState(false)
-
+  const { data: authData } = useAuth()
   const { data: chatRooms, isLoading: isChatListLoading } = useMyDirectChatRooms()
   const { data: students, isLoading: isStudentListLoading } = useStudentList()
-
+  const studentsExceptMe = students?.filter((s) => s.student.studentId !== Number(authData?.studentId))
   const openChat = useChatViewStore((state) => state.openChat)
   const { mutate: createChat } = useCreateDirectChatRoom()
 
@@ -79,11 +79,11 @@ function SideBar() {
         </div>
       </aside>
 
-      {!isStudentListLoading && students && (
+      {!isStudentListLoading && studentsExceptMe && (
         <StudentSearchModal
           isOpen={studentSearchModal}
           onClose={() => setStudentSearchModal(false)}
-          students={students}
+          students={studentsExceptMe}
           onStudentClick={(studentId) => {
             handleStartNewChat(Number(studentId))
             setStudentSearchModal(false)
