@@ -55,7 +55,7 @@ public class NotificationContentService {
 
 	private String buildMergeMessage(RecipientRole role, NotificationContext ctx) {
 		if (role == RecipientRole.PUBLISHER) {
-			return "%s(%s)에서 %%s(%s)에게 팀 합치기를 제안했습니다.".formatted(
+			return "%s(%s)에서 %s(%s)에게 팀 합치기를 제안했습니다.".formatted(
 					ctx.publisher().displayName(),
 					ctx.publisher().track(),
 					ctx.subscriber().displayName(),
