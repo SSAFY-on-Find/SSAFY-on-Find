@@ -4,8 +4,12 @@ import { useNavigate, useParams } from "react-router-dom"
 
 import { Button, MajorTag, NormalTag, PositionTag } from "@/components/atoms"
 import { StudentInfo } from "@/components/molecules"
+import { TeamDetailModal } from "@/components/templates"
 import Loading from "@/components/templates/Loading"
 import { useStudentInfo } from "@/hooks/useStudent"
+import { useTeamDetails } from "@/hooks/useTeam"
+import { useTeamStore } from "@/stores/teamStore"
+import { useUserStore } from "@/stores/userStore"
 import type { ISubcode } from "@/types/common"
 
 import "github-markdown-css/github-markdown-light.css"
@@ -15,6 +19,9 @@ export default function StudentDetailPage() {
   const { studentId } = useParams<{ studentId: string }>()
   const parsedId = Number(studentId)
   const { data, isLoading, isError, error } = useStudentInfo(parsedId)
+  const { isDetailModalOpen, selectedTeamId, closeDetailModal } = useTeamStore()
+  const { data: selectedTeamData } = useTeamDetails(selectedTeamId || 0)
+  const userTeamId = useUserStore((state) => state.user?.teamId)
   const {
     student,
     position,
@@ -116,6 +123,15 @@ export default function StudentDetailPage() {
         <div className="markdown-body border-line items-center justify-start rounded-lg border bg-white p-10">
           <ReactMarkdown>{description}</ReactMarkdown>
         </div>
+      )}
+      {isDetailModalOpen && selectedTeamData && selectedTeamId && (
+        <TeamDetailModal
+          userTeamId={userTeamId}
+          isOpen={isDetailModalOpen}
+          onClose={closeDetailModal}
+          teamData={selectedTeamData}
+          teamId={selectedTeamId}
+        />
       )}
     </div>
   )

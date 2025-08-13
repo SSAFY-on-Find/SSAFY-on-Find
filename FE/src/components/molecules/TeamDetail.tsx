@@ -1,13 +1,13 @@
 import { useNavigate } from "react-router-dom"
 import { FilePenLine, LogOut } from "lucide-react"
 
-import { useLeaveTeam } from "@/hooks/useTeam"
 import type { ITeamDetails } from "@/types/team"
 
 import { Button, MainTag, PositionTag, UserImg } from "../atoms"
-interface ITeamDetailMole extends ITeamDetails {
+interface ITeamDetailModal extends ITeamDetails {
   varient?: "myteam"
   onLeaveTeam?: () => void
+  onClose?: () => void
 }
 function TeamDetail({
   teamName,
@@ -21,13 +21,19 @@ function TeamDetail({
   isFavorite,
   varient,
   onLeaveTeam = () => {},
-}: ITeamDetailMole) {
+  onClose = () => {},
+}: ITeamDetailModal) {
   const navigate = useNavigate()
   const majorMembers = members.filter((ele) => ele.major === "전공")
   const nonMajorMembers = members.filter((ele) => ele.major === "비전공")
   const handleEditClick = () => {
     navigate(`/edit-team`)
   }
+  const handleMemberClick = (studentId: string | number) => {
+    onClose()
+    navigate(`/studentlist/${studentId}`)
+  }
+
   return (
     <div className="w-full">
       <div className="flex flex-col gap-2 p-8">
@@ -76,7 +82,7 @@ function TeamDetail({
                     <div
                       key={idx}
                       className="hover:bg-main/10 flex flex-col items-center rounded-md p-1 px-[10px] hover:cursor-pointer"
-                      onClick={() => navigate(`/studentlist/${ele.studentId}`)}
+                      onClick={() => handleMemberClick(ele.studentId)}
                     >
                       <UserImg name={ele.name} size={"m"} showTeamBadge={false} url={ele.profileImageUrl} />
                       <p className="mt-2 mb-[5px] text-sm">{ele.name}</p>
@@ -105,6 +111,7 @@ function TeamDetail({
                   {nonMajorMembers.map((ele, idx) => (
                     <div
                       key={idx}
+                      onClick={() => handleMemberClick(ele.studentId)}
                       className="hover:bg-main/10 flex flex-col items-center rounded-md p-1 px-[10px] hover:cursor-pointer"
                     >
                       <UserImg name={ele.name} size={"m"} showTeamBadge={false} url={ele.profileImageUrl} />

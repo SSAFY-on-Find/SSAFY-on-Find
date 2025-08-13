@@ -110,6 +110,7 @@ export default function MyProfile() {
             studentId={student?.studentId?.toString() ?? ""}
             imgUrl={profileImageUrl ?? ""}
             teamInfo={teamInfo}
+            variant="detail"
           />
         </div>
         <div className="border-line flex w-full flex-col gap-7 rounded-lg border bg-white p-10">
