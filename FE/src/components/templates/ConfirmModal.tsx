@@ -11,6 +11,7 @@ interface IConfirmModal {
   onConfirm: () => void
   onCancel: () => void
   isDestructive?: boolean
+  isSingleBtn?: boolean
 }
 function ConfirmModal({
   isOpen,
@@ -21,6 +22,7 @@ function ConfirmModal({
   onConfirm,
   onCancel,
   isDestructive = false,
+  isSingleBtn = false,
 }: IConfirmModal) {
   return (
     <Modal isOpen={isOpen} onClose={onCancel} size={"s"}>
@@ -28,7 +30,7 @@ function ConfirmModal({
         <h3 className="text-text mb-3 text-xl font-bold">{title}</h3>
         <p className="text-subtext text-sm">{message}</p>
         <div className="mt-4 flex justify-end gap-3">
-          <Button size={"m"} isIcon={false} text={cancelText} onClick={onCancel} variant="text" />
+          {!isSingleBtn && <Button size={"m"} isIcon={false} text={cancelText} onClick={onCancel} variant="text" />}
           <Button
             size={"m"}
             isIcon={false}

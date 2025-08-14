@@ -86,9 +86,7 @@ export default function StudentDetailPage() {
         onSuccess: (roomId) => {
           openChat({ roomId, roomType: "direct" })
         },
-        onError: (error) => {
-          console.log("1대1채팅방 생성 에러 : ", error)
-        },
+        onError: (error) => {},
       }
     )
   }
@@ -114,7 +112,7 @@ export default function StudentDetailPage() {
           studentId={student?.studentId?.toString() ?? ""}
           imgUrl={profileImageUrl ?? ""}
           teamInfo={teamInfo}
-          variant="dashboard"
+          variant="detail"
         />
       </div>
       <div className="border-line flex w-full flex-col gap-7 rounded-lg border bg-white p-10">

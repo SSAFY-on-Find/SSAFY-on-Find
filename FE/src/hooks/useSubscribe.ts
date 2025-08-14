@@ -25,10 +25,8 @@ export function useNotificationStream(enabled: boolean) {
 
     // 대시보드 계열은 서버 집계라 invalidate 권장(이벤트 폭주 대비 디바운스)
     const invalidateDashboards = debounce(() => {
-      qc.invalidateQueries({ queryKey: ["dashboard-teamRatio"] })
-      qc.invalidateQueries({ queryKey: ["dashboard-positionRatio"] })
-      qc.refetchQueries({ queryKey: ["dashboard-teamRatio"], type: "active" })
-      qc.refetchQueries({ queryKey: ["dashboard-positionRatio"], type: "active" })
+      qc.invalidateQueries({ queryKey: ["dashboard"], exact: false })
+      qc.refetchQueries({ queryKey: ["dashboard"], type: "all" })
     }, 120)
 
     const refetchMyNotifications = () => {
@@ -53,33 +51,50 @@ export function useNotificationStream(enabled: boolean) {
       },
     }
 
-    // 공통 파서 + 라우팅
+    // 공통 핸들러: raw(JSON string) → 파싱 → 라우팅
     const handleRaw = (raw: string) => {
-      if (!raw) return // :ping 같은 하트비트 무시
+      if (!raw || raw.startsWith(":")) return // :connected 등 하트비트 무시
       let msg: ISubscribe
       try {
-        msg = JSON.parse(raw) as ISubscribe
-      } catch (err) {
-        console.error("SSE parse error:", err, raw) // [added] no-empty 방지 및 디버깅
+        msg = JSON.parse(raw)
+      } catch {
         return
       }
 
-      // 같은 이벤트 id 중복 처리 방지
-      if (msg.id && seen.has(msg.id)) return
-      if (msg.id) seen.add(msg.id)
+      const id = msg.id
+      if (id && seen.has(id)) return
+      if (id) seen.add(id)
 
-      const handler = handlers[msg.type]
-      if (handler) {
-        handler(msg)
-      } else {
-        // 모르는 타입이라도 대시보드는 갱신하고, 벨은 눌러주자(옵션)
-        // invalidateDashboards()
-        // bump()
+      const logicalType = msg.type ?? "UNKNOWN" // "DASHBOARD" | "NOTIFICATION" | ...
+      switch (logicalType) {
+        case "NOTIFICATION":
+          refetchTeamNotifications()
+          refetchMyNotifications()
+          bump()
+          break
+        case "DASHBOARD":
+          invalidateDashboards()
+          bump()
+          break
+        default:
+          // 필요시 기본 처리
+          break
       }
     }
 
     // 탭 중복 연결 방지 (선택): 같은 origin 탭끼리 한 탭만 실제 연결
     const bc = new BroadcastChannel("sse-control")
+
+    // 모든 탭에서 SSE 이벤트 수신 브로드캐스트 처리
+    bc.onmessage = (e) => {
+      const data = e.data
+      if (data?.type === "PONG" || data?.type === "PING") return
+      if (data?.type === "SSE_EVENT" && typeof data.payload === "string") {
+        // 리더가 보낸 raw 이벤트를 팔로워 탭에서도 처리
+        handleRaw(data.payload)
+      }
+    }
+
     let leader = false
     const claim = () => bc.postMessage({ type: "PING" })
     let pingTimer: number | null = null
@@ -100,35 +115,31 @@ export function useNotificationStream(enabled: boolean) {
         console.log("[SSE] open:", es.readyState)
       }
 
-      // [changed] 기본(onmessage)과 커스텀 이벤트 둘 다 처리
-      es.onmessage = (e) => {
-        console.log("[SSE] message received:")
-        console.log("- event type:", e.type)
-        console.log("- raw data:", e.data)
+      // 1) 커스텀 이벤트: DASHBOARD
+      es.addEventListener("DASHBOARD", (e: MessageEvent) => {
+        const raw = e.data as string
+        handleRaw(raw) // 리더 탭 로컬 처리
+        bc.postMessage({ type: "SSE_EVENT", payload: raw }) // 모든 탭에 브로드캐스트
+      })
 
-        try {
-          const parsed = JSON.parse(e.data)
-          console.log("- parsed type:", parsed.type) // MERGE, INVITATION 등
-        } catch (err) {
-          console.log("- parse error:", err)
-        }
-        handleRaw(e.data) // [added]
+      // 2) 커스텀 이벤트: NOTIFICATION
+      es.addEventListener("NOTIFICATION", (e: MessageEvent) => {
+        const raw = e.data as string
+        handleRaw(raw)
+        bc.postMessage({ type: "SSE_EVENT", payload: raw })
+      })
+
+      // 3) 이름 없는 기본 메시지(있을 경우 대비)
+      es.onmessage = (e) => {
+        const raw = e.data as string
+        handleRaw(raw)
+        bc.postMessage({ type: "SSE_EVENT", payload: raw })
       }
 
       es.onerror = (e) => {
-        console.log("[SSE] error:", e)
-        // 브라우저가 자동 재시도
+        console.log("[SSE] error", e)
+        // 브라우저 자동 재시도
       }
-
-      // [added] 서버가 event: <커스텀이름>으로 보내는 경우 대비
-      es.addEventListener("NOTIFICATION", (e: MessageEvent) => {
-        console.log("[SSE] notification:", e.data)
-        handleRaw(e.data)
-      })
-
-      // (선택) open/error 커스텀 이벤트 로깅
-      es.addEventListener("open", () => console.log("[SSE] event:open"))
-      es.addEventListener("error", (e) => console.log("[SSE] event:error", e))
     }, 150) as unknown as number
 
     return () => {

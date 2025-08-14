@@ -37,7 +37,7 @@ export default function TeamListPage() {
                 isIcon={true}
                 Icon={UserPlus}
                 variant="outline"
-                text="팀생성"
+                text="팀 만들기"
                 onClick={() => navigate("/create-team")}
               />
             </div>
