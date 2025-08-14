@@ -23,7 +23,7 @@ function CheckTag({ tagContent, isChecked = false, onToggle }: ICheckTag) {
     <>
       <div
         onClick={handleClick}
-        className={`bg-background border-subtext/30 text-text inline-flex cursor-pointer items-center gap-1 rounded-full border-2 px-[11px] py-[3px] text-xs font-bold whitespace-nowrap`}
+        className={`bg-background border-subtext/30 text-text inline-flex cursor-pointer items-center gap-1 rounded-full border-1 px-[11px] py-[3px] text-xs font-bold whitespace-nowrap`}
       >
         <CheckCircle isChecked={isChecked} />
         {tagContent}

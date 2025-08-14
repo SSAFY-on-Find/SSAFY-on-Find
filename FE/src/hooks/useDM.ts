@@ -11,7 +11,7 @@ export const useMyDirectChatRooms = () => {
       const response = await getMyDirectChatRooms()
       return response.chatRooms
     },
-    refetchInterval: 1000,
+    refetchInterval: 5000,
   })
 }
 

@@ -29,9 +29,14 @@ export const leaveChatRoom = async (roomId: number): Promise<void> => {
 
 export const getChatMessages = async (roomId: number): Promise<ChatMessage[]> => {
   const response = await api.get(`/chat-rooms/${roomId}/messages`)
+  console.log("채팅방 메시지 조회 :", response)
   return response.data.data
 }
-
+export const endterTeamChat = async (roomId: number): Promise<ChatMessage[]> => {
+  const response = await api.post(`/chat-rooms/rooms/${roomId}/join`)
+  console.log("채팅방 참여 :", response)
+  return response.data.data
+}
 export const updateLastReadAt = async (roomId: number): Promise<void> => {
   await api.post(`/chat-rooms/${roomId}/last-read`)
 }

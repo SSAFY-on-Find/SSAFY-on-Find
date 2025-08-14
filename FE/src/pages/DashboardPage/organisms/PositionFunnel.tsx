@@ -157,6 +157,12 @@ export default function PositionFunnel({ api }: Props) {
           currentPartSizeExtension={13}
           currentBorderWidth={30}
           theme={{
+            labels: {
+              text: {
+                fontSize: 18,
+              },
+            },
+
             tooltip: {
               container: { minWidth: 140, whiteSpace: "nowrap", wordBreak: "keep-all" },
             },

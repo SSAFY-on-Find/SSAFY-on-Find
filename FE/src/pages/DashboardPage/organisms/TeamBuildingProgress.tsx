@@ -54,7 +54,7 @@ function ProgressBar({
     <div className="flex flex-col gap-1">
       <div className="text-text/80 flex items-center justify-between text-sm font-medium">
         <span>{label}</span>
-        <span className="tabular-nums">
+        <span className="text-base font-bold tabular-nums">
           {displayValue} / {max} 명
         </span>
       </div>
@@ -134,7 +134,7 @@ export default function TeamBuildingProgress({ data }: { data: ITeamRatio }) {
         {/* 중앙 퍼센트 라벨 */}
         <div className="pointer-events-none absolute inset-0 -top-12 flex flex-col items-center justify-center">
           <div className="text-text text-sm">전체</div>
-          <div className="text-text text-lg font-bold">{percent}%</div>
+          <div className="text-text text-2xl font-bold">{percent}%</div>
         </div>
       </div>
 
