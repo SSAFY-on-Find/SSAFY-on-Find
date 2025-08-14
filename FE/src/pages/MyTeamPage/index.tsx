@@ -10,7 +10,7 @@ import { teamApi } from "@/apis/teamApi"
 import { Button } from "@/components/atoms"
 import { Segmented } from "@/components/atoms"
 import { TeamDetail } from "@/components/molecules"
-import { StudentSearchModal } from "@/components/templates"
+import { ConfirmModal, StudentSearchModal } from "@/components/templates"
 import Loading from "@/components/templates/Loading"
 import { useInviteAccept, useInviteCancel, useInviteReject } from "@/hooks/useInvite"
 import { useTeamNotification } from "@/hooks/useNotification"
@@ -39,7 +39,7 @@ export default function MyTeamPage() {
   const [requestTab, setRequestTab] = useState<"left" | "right">("left")
   const requestType = requestTab === "left" ? "receive" : "send"
   const [hasTriedCreation, setHasTriedCreation] = useState(false)
-
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const { mutate: leaveTeam } = useLeaveTeam()
   const [studentSearchModal, setStudentSearchModal] = useState(false)
   const { data: students, isLoading: isStudentListLoading } = useStudentList()
@@ -84,11 +84,9 @@ export default function MyTeamPage() {
   })
 
   const handleLeaveTeam = () => {
-    if (window.confirm("정말로 팀에서 탈퇴하시겠습니까?")) {
+    if (chatRoomId) {
       leaveTeam()
-      if (chatRoomId) {
-        leaveRoom(chatRoomId)
-      }
+      leaveRoom(chatRoomId)
     }
   }
 
@@ -158,6 +156,9 @@ export default function MyTeamPage() {
       error: { render: ({ data }) => getErrorMessage(data, "거절 중 오류가 발생했습니다.") },
     })
   }
+  const handleModalClose = () => {
+    setIsModalOpen(false)
+  }
   const handleCancelInvitation = async (id: string) => {
     if (!id) return
     await toast.promise(cancleInvitationAsync(id), {
@@ -214,7 +215,7 @@ export default function MyTeamPage() {
         <div className="flex w-full flex-col gap-8 lg:flex-1">
           <div className="border-line flex rounded-xl border-1 bg-white pb-6">
             {myTeamData?.teamInfo && (
-              <TeamDetail {...myTeamData?.teamInfo} varient="myteam" onLeaveTeam={handleLeaveTeam} />
+              <TeamDetail {...myTeamData?.teamInfo} varient="myteam" onLeaveTeam={() => setIsModalOpen(true)} />
             )}
           </div>
           <div className="border-line flex flex-col gap-4 rounded-xl border-1 bg-white p-6">
@@ -298,6 +299,14 @@ export default function MyTeamPage() {
           )}
         </div>
       </div>
+      <ConfirmModal
+        isOpen={isModalOpen}
+        title="팀 탈퇴"
+        message="정말 탈퇴하시겠습니까"
+        confirmText="확인"
+        onConfirm={handleLeaveTeam}
+        onCancel={handleModalClose}
+      />
     </div>
   )
 }
