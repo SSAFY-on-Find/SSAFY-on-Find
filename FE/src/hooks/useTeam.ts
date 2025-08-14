@@ -100,7 +100,6 @@ export const useCreateTeam = () => {
     },
     onError: (error) => {
       toast.error("팀 생성 실패!")
-      console.log("팀 생성 실패 오류: ", error)
     },
   })
 }
@@ -150,7 +149,6 @@ export const useUpdateTeam = () => {
     },
     onError: (error) => {
       toast.error("팀 수정 실패!")
-      console.log("팀 수정 실패 오류: ", error)
     },
   })
 }

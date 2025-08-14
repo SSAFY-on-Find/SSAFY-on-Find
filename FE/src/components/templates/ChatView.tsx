@@ -28,7 +28,6 @@ function ChatView() {
   }
 
   const currentChatRoom = chatRooms.find((room) => room.chatRoomId === activeRoomId)
-  console.log("chatRooms", chatRooms)
   if (!currentChatRoom) {
     closeChat()
     return null
