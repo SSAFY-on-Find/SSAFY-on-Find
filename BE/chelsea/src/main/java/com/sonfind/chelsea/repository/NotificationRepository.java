@@ -18,7 +18,7 @@ public interface NotificationRepository extends MongoRepository<NotificationDocu
 			Long subscriberId,
 			NotificationDomainType subscriberType);
 
-	List<NotificationDocument> findAllBySubscriberIdAndSubscriberType(Long subscriberId, NotificationDomainType type);
+	List<NotificationDocument> findAllBySubscriberIdAndSubscriberTypeOrderByUpdatedAtDesc(Long subscriberId, NotificationDomainType type);
 
-	List<NotificationDocument> findAllByPublisherIdAndPublisherType(Long publisherId, NotificationDomainType type);
+	List<NotificationDocument> findAllByPublisherIdAndPublisherTypeOrderByUpdatedAtDesc(Long publisherId, NotificationDomainType type);
 }
