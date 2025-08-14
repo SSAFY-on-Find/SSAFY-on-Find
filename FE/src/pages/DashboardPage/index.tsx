@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useQueryClient } from "@tanstack/react-query"
 import { Info, RotateCw } from "lucide-react"
@@ -27,14 +28,24 @@ export default function DashboardPage() {
   const { data: positionRatio, isLoading: isPositionRatioLoading, error: positionRatioError } = usePositionRatio()
   const { data: recommendTeam, isLoading: isRecommendTeamLoading, error: recommendTeamError } = useRecommendTeam()
   const { data: aiRecommend, isLoading } = useAIRecommendations(studentId ? Number(studentId) : undefined)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const queryClient = useQueryClient()
   const handleRefreshAiRecommend = () => {
     if (studentId) {
-      queryClient.invalidateQueries({
+      setIsRefreshing(true)
+      queryClient.removeQueries({
         queryKey: ["aiRecommendations", Number(studentId)],
       })
+      queryClient
+        .invalidateQueries({
+          queryKey: ["aiRecommendations", Number(studentId)],
+        })
+        .then(() => {
+          setIsRefreshing(false)
+        })
     }
   }
+  const showAiLoading = isLoading || isRefreshing
   if (isSummaryLoading || isTeamRatioLoading || isPositionRatioLoading || isRecommendTeamLoading)
     return <Loading fullScreen text="정보를 불러오는 중..." />
   if (summaryError) return <div>프로필 요약 정보를 불러올 수 없습니다.</div>
@@ -100,19 +111,19 @@ export default function DashboardPage() {
             </div>
             <button
               onClick={handleRefreshAiRecommend}
-              disabled={isLoading}
+              disabled={showAiLoading}
               className="hover:bg-main/20 rounded-full p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               title="새로고침"
             >
-              <RotateCw size={16} className={isLoading ? "animate-spin" : ""} />
+              <RotateCw size={16} className={showAiLoading ? "animate-spin" : ""} />
             </button>
           </div>
-          {isLoading && (
+          {showAiLoading && (
             <div className="text-subtext mt-15 text-center">
               <Loading text="AI가 최적의 팀원을 분석 중입니다..." bg="bg-white" />
             </div>
           )}
-          {!isLoading && aiRecommend && (
+          {!showAiLoading && aiRecommend && (
             <div className="mt-3 flex flex-col gap-2">
               {aiRecommend?.map((rec, index) => (
                 <div
