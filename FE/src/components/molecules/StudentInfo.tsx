@@ -1,11 +1,22 @@
 import { useNavigate } from "react-router-dom"
-import { Heart, MessageSquarePlus, Send } from "lucide-react"
+import { toast } from "react-toastify"
+import { isAxiosError } from "axios"
+import { Heart, UserRoundPlus } from "lucide-react"
 
 import { Button, CircleGrid, MainTag, MajorTag, NormalTag, PositionTag, UserImg } from "@/components/atoms"
 import { useStudentFavoriteToggle } from "@/hooks/useFavorite"
+import { useInvte } from "@/hooks/useInvite"
 import { useTeamStore } from "@/stores/teamStore"
+import { useUserStore } from "@/stores/userStore"
 import type { ITeamInfo } from "@/types/team"
 
+function getErrorMessage(err: unknown, fallback: string) {
+  if (isAxiosError(err)) {
+    return err.response?.data?.data?.message ?? err.message ?? fallback
+  }
+  if (err instanceof Error) return err.message ?? fallback
+  return fallback
+}
 interface IStudentInfo {
   name: string
   studentId: string
@@ -38,6 +49,8 @@ function StudentInfo({
   const { toggleFavorite, isLoading } = useStudentFavoriteToggle()
   const targetUserTeamId = teamInfo?.teamId
   const { openDetailModal } = useTeamStore()
+  const { invitation } = useInvte()
+  const userTeamId = useUserStore((state) => state.user?.teamId)
 
   return (
     <div
@@ -105,7 +118,26 @@ function StudentInfo({
                 아직 팀이 <br /> 없습니다.
               </>
             ) : (
-              "아직 팀이 없습니다."
+              userTeamId && (
+                <>
+                  <div>아직 팀이 없습니다.</div>
+                  <div className="m-3 w-30">
+                    <Button
+                      size="m"
+                      isIcon
+                      Icon={UserRoundPlus}
+                      variant="primary"
+                      text="초대하기"
+                      onClick={async () => {
+                        await toast.promise(invitation(Number(studentId), Number(userTeamId)), {
+                          success: "초대를 보냈습니다!",
+                          error: { render: ({ data }) => getErrorMessage(data, "초대 전송에 실패했습니다.") },
+                        })
+                      }}
+                    />
+                  </div>
+                </>
+              )
             )}
           </div>
           {isMyProfile && (

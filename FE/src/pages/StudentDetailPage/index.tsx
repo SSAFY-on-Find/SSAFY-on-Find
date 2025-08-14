@@ -1,13 +1,16 @@
 import { useMemo } from "react"
 import ReactMarkdown from "react-markdown"
 import { useNavigate, useParams } from "react-router-dom"
-import { Send } from "lucide-react"
+import { toast } from "react-toastify"
+import { isAxiosError } from "axios"
+import { Send, UserRoundPlus } from "lucide-react"
 
 import { Button, MajorTag, NormalTag, PositionTag } from "@/components/atoms"
 import { StudentInfo } from "@/components/molecules"
 import { TeamDetailModal } from "@/components/templates"
 import Loading from "@/components/templates/Loading"
 import { useCreateDirectChatRoom } from "@/hooks/useDM"
+import { useInvte } from "@/hooks/useInvite"
 import { useStudentInfo } from "@/hooks/useStudent"
 import { useTeamDetails } from "@/hooks/useTeam"
 import { useTeamStore } from "@/stores/teamStore"
@@ -57,6 +60,8 @@ export default function StudentDetailPage() {
       teamInfo: data?.teamInfo ?? null,
     }
   }, [data, parsedId])
+
+  const targetUserTeamId = teamInfo?.teamId
 
   if (!studentId || Number.isNaN(parsedId) || studentId.length !== 7) {
     return (

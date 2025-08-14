@@ -1,4 +1,6 @@
 import { useState } from "react"
+import { toast } from "react-toastify"
+import { isAxiosError } from "axios"
 import { ChevronDown, ChevronUp, Info, Plus } from "lucide-react"
 
 import { Tooltip } from "@/components/atoms"
@@ -7,6 +9,14 @@ import { StudentSearchModal } from "@/components/templates"
 import { useCreateDirectChatRoom, useMyDirectChatRooms } from "@/hooks/useDM"
 import { useAuth, useStudentList } from "@/hooks/useStudent"
 import { useChatViewStore } from "@/stores/useChatViewStore"
+
+function getErrorMessage(err: unknown, fallback: string) {
+  if (isAxiosError(err)) {
+    return err.response?.data?.data?.message ?? err.message ?? fallback
+  }
+  if (err instanceof Error) return err.message ?? fallback
+  return fallback
+}
 
 function SideBar() {
   const [open, setOpen] = useState(true)
@@ -24,8 +34,13 @@ function SideBar() {
       {
         onSuccess: (roomId) => {
           openChat({ roomId, roomType: "direct" })
+          toast.success("일대일 채팅방이 생성되었습니다!")
+          setStudentSearchModal(true)
+          //todo: 생성된 채팅방 바로 보이도록
         },
-        onError: (error) => {},
+        onError: (error) => {
+          toast.error(getErrorMessage(error, "채팅 시작 중 오류가 발생했습니다."))
+        },
       }
     )
   }
@@ -84,7 +99,6 @@ function SideBar() {
           students={studentsExceptMe}
           onStudentClick={(studentId) => {
             handleStartNewChat(Number(studentId))
-            setStudentSearchModal(false)
           }}
         />
       )}

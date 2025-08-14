@@ -6,25 +6,64 @@ import { favoriteApi } from "@/apis/favoriteApi"
 import type { IStudentCard, IStudentInfo } from "@/types/student"
 import type { ITeamCard } from "@/types/team"
 
+type DashboardRecommendCache = ITeamCard[] | { items: ITeamCard[]; message: string | null } | undefined
+
 export const useTeamFavoriteToggle = () => {
   const [loadingTeams, setLoadingTeams] = useState<Set<number>>(new Set())
   const queryClient = useQueryClient()
 
   const toggleFavorite = async (teamId: number) => {
     if (loadingTeams.has(teamId)) return
-
     setLoadingTeams((prev) => new Set(prev).add(teamId))
+
+    const pickNextFavorite = (): boolean | undefined => {
+      // teams 리스트에서 먼저 시도
+      const teams = queryClient.getQueryData<ITeamCard[] | undefined>(["teams"])
+      const fromTeams = teams?.find((t) => t.teamId === teamId)?.isFavorite
+      if (typeof fromTeams === "boolean") return !fromTeams
+
+      // 대시보드 추천에서 시도 (배열/객체 모두)
+      const dash = queryClient.getQueryData<DashboardRecommendCache>(["dashboard", "recommendTeam"])
+      if (Array.isArray(dash)) {
+        const hit = dash.find((t) => t.teamId === teamId)?.isFavorite
+        if (typeof hit === "boolean") return !hit
+      } else if (dash && Array.isArray(dash.items)) {
+        const hit = dash.items.find((t) => t.teamId === teamId)?.isFavorite
+        if (typeof hit === "boolean") return !hit
+      }
+
+      return undefined
+    }
 
     try {
       const response = await favoriteApi.doToggle(teamId)
 
       if (response.status === "SUCCESS") {
-        queryClient.setQueryData(["teams"], (oldData: ITeamCard[]) => {
-          const updatedData = oldData?.map((team: ITeamCard) =>
-            team.teamId === teamId ? { ...team, isFavorite: !team.isFavorite } : team
-          )
-          return updatedData
+        // 1) 팀 목록 캐시 즉시 반영
+        queryClient.setQueryData<ITeamCard[] | undefined>(["teams"], (old) =>
+          old?.map((t) => (t.teamId === teamId ? { ...t, isFavorite: !t.isFavorite } : t))
+        )
+
+        // 2) 대시보드 추천 팀 캐시 즉시 반영
+        queryClient.setQueryData<DashboardRecommendCache>(["dashboard", "recommendTeam"], (old) => {
+          if (Array.isArray(old)) {
+            return old.map((t) => (t.teamId === teamId ? { ...t, isFavorite: !t.isFavorite } : t))
+          }
+          if (old && Array.isArray(old.items)) {
+            return {
+              ...old,
+              items: old.items.map((t) => (t.teamId === teamId ? { ...t, isFavorite: !t.isFavorite } : t)),
+            }
+          }
+          return old
         })
+
+        const next = pickNextFavorite()
+        if (typeof next === "boolean") {
+          toast.success(next ? "즐겨찾기에 해제했어요." : "즐겨찾기를 추가했어요.")
+        } else {
+          toast.success("즐겨찾기 상태가 변경되었습니다.")
+        }
       } else {
         toast.error("좋아요 처리에 실패했습니다.")
       }
