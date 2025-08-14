@@ -116,7 +116,9 @@ function TeamDetail({
                       onClick={() => handleMemberClick(ele.studentId)}
                       className="hover:bg-main/10 flex flex-col items-center rounded-md p-1 px-[10px] hover:cursor-pointer"
                     >
-                      <UserImg name={ele.name} size={"m"} showTeamBadge={false} url={ele.profileImageUrl} />
+                      <div>
+                        <UserImg name={ele.name} size={"m"} showTeamBadge={false} url={ele.profileImageUrl} />
+                      </div>
                       <p className="mt-2 mb-[5px] text-sm">{ele.name}</p>
                       {ele.position && <PositionTag positionName={ele.position.subcodeName} />}
                     </div>
