@@ -1,17 +1,7 @@
-import { toast } from "react-toastify"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { isAxiosError } from "axios"
 
 import { inviteApi } from "@/apis/inviteApi"
 import type { IInvitationRequest } from "@/types/invitation"
-
-function getErrorMessage(err: unknown, fallback: string) {
-  if (isAxiosError(err)) {
-    return err.response?.data?.data?.message ?? err.message ?? fallback
-  }
-  if (err instanceof Error) return err.message ?? fallback
-  return fallback
-}
 
 /** 선택: 내 팀 ID를 넘길 수 있게. 없으면 MERGE 시 에러 처리 */
 export function useInvte(myTeamId?: number | null) {
@@ -85,6 +75,7 @@ export function useInviteCancel(currentTab?: "receive" | "send") {
       await qc.invalidateQueries({ queryKey: ["my-notification"], exact: false })
       if (currentTab) {
         await qc.invalidateQueries({ queryKey: ["my-notification", currentTab] })
+        await qc.invalidateQueries({ queryKey: ["team-notification", currentTab] })
       }
     },
   })
@@ -102,9 +93,12 @@ export function useInviteAccept(currentTab?: "receive" | "send") {
     },
     retry: false,
     onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ["my-notification"], exact: false })
+      await qc.invalidateQueries({ queryKey: ["my-notification"] })
+      await qc.invalidateQueries({ queryKey: ["myTeam"] })
+
       if (currentTab) {
         await qc.invalidateQueries({ queryKey: ["my-notification", currentTab] })
+        await qc.invalidateQueries({ queryKey: ["team-notification", currentTab] })
       }
     },
   })
@@ -125,6 +119,7 @@ export function useInviteReject(currentTab?: "receive" | "send") {
       await qc.invalidateQueries({ queryKey: ["my-notification"], exact: false })
       if (currentTab) {
         await qc.invalidateQueries({ queryKey: ["my-notification", currentTab] })
+        await qc.invalidateQueries({ queryKey: ["team-notification", currentTab] })
       }
     },
   })

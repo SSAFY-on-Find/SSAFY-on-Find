@@ -7,7 +7,7 @@ import type { IAiRecommend, PositionRow, PositionType } from "@/types/dashboard"
 
 export const useSummaryInfo = () => {
   return useQuery({
-    queryKey: ["dashboard-summaryInfo"],
+    queryKey: ["dashboard", "summaryInfo"],
     queryFn: async () => {
       const response = await dashboardApi.getMySummary()
       if (response.status !== "SUCCESS") {
@@ -22,7 +22,7 @@ export const useSummaryInfo = () => {
 
 export const useTeamRatio = () => {
   return useQuery({
-    queryKey: ["dashboard-teamRatio"],
+    queryKey: ["dashboard", "teamRatio"],
     queryFn: async () => {
       const response = await dashboardApi.getTeamRatio()
       if (response.status !== "SUCCESS") {
@@ -37,7 +37,7 @@ export const useTeamRatio = () => {
 
 export const usePositionRatio = () => {
   return useQuery({
-    queryKey: ["dashboard-positionRatio"],
+    queryKey: ["dashboard", "positionRatio"],
     queryFn: async () => {
       const response = await dashboardApi.getPositionRatio()
       if (response.status !== "SUCCESS") {
@@ -58,7 +58,7 @@ export const usePositionRatio = () => {
 
 export const useRecommendTeam = () => {
   return useQuery({
-    queryKey: ["dashboard-recommendTeam"],
+    queryKey: ["dashboard", "recommendTeam"],
     queryFn: async () => {
       const response = await dashboardApi.getRecommendTeam()
       if (response.status !== "SUCCESS") {
