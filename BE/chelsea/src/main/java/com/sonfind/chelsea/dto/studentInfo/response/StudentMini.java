@@ -3,6 +3,8 @@ package com.sonfind.chelsea.dto.studentInfo.response;
 public interface StudentMini {
 	Long getStudentId();
 
+	String getType();
+
 	String getName();
 
 	String getPosition();
