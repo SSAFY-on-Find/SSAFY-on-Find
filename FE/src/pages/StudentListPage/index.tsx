@@ -109,6 +109,14 @@ export default function StudentListPage() {
     })
   }, [students, searchQuery, selectedPositions, selectedTracks, selectedMajor, teamFilter])
 
+  const sorted = [...filtered].sort((a, b) => {
+    const aWrote = a.position?.subcode ? true : false
+    const bWrote = b.position?.subcode ? true : false
+
+    if (aWrote === bWrote) return 0 // 둘 다 동일하면 순서 유지
+    return aWrote ? -1 : 1 // true 먼저
+  })
+
   if (isCodesLoading || isStudentsLoading) return <Loading fullScreen />
   if (codesError || !codes) return <div>코드 리스트를 불러올 수 없습니다.</div>
   if (studentsError) return <div>교육생 목록을 불러올 수 없습니다.</div>
@@ -129,8 +137,8 @@ export default function StudentListPage() {
         onToggleTeam={toggleTeam}
       />
       <div className="grid w-full grid-cols-3 gap-5">
-        {filtered.length ? (
-          filtered.map((s) => (
+        {sorted.length ? (
+          sorted.map((s) => (
             <StudentCard
               key={s.student.studentId}
               student={s.student}
