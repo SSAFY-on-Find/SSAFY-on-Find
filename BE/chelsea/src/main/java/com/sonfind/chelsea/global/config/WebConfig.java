@@ -18,15 +18,20 @@ public class WebConfig implements WebMvcConfigurer {
 		//web에서 접근할 URL 경로 설정
 		String profileWebPath = "/api/v1/uploads/profiles/**";
 		String portfolioWebPath = "/api/v1/uploads/portfolios/**";
+		String siteWebPath = "/api/v1/uploads/team/**";
 
 		String profileResourcePath = "file:///" + uploadDirPath + "/" + FileType.PROFILE.getDirectoryName() + "/";
 		String portfolioResourcePath = "file:///" + uploadDirPath + "/" + FileType.PORTFOLIO.getDirectoryName() + "/";
+		String siteResourcePath = "file:///" + uploadDirPath + "/team/";
 
 		registry.addResourceHandler(profileWebPath)
 			.addResourceLocations(profileResourcePath);
 
 		registry.addResourceHandler(portfolioWebPath)
 			.addResourceLocations(portfolioResourcePath);
+
+		registry.addResourceHandler(siteWebPath)
+			.addResourceLocations(siteResourcePath);
 
 	}
 }

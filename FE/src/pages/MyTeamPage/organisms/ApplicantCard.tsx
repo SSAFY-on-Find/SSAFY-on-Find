@@ -41,7 +41,7 @@ export default function ApplicantCard({
   const isPending = status === "PENDING"
   const disabledClass = !isPending ? "pointer-events-none opacity-40" : ""
   const isTeam = !isMajor
-
+  const BASEURL = import.meta.env.VITE_BASE_URL;
   return (
     <div className={`hover:bg-main/10 flex items-center justify-between rounded-lg p-2 ${disabledClass}`}>
       <div className="flex items-center gap-4">
@@ -49,7 +49,7 @@ export default function ApplicantCard({
           name={name}
           size={"m"}
           showTeamBadge={false}
-          url={isTeam ? "../../../../public/ssafy.png" : profileImageUrl ? profileImageUrl : ""}
+          url={isTeam ? `${BASEURL}/uploads/team/ssafy.png` : profileImageUrl ? profileImageUrl : ""}
         />
 
         <div className="flex flex-row gap-1">
