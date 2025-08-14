@@ -48,7 +48,6 @@ export default function MyTeamPage() {
     enabled: !!teamId,
   })
   const studentsExceptMe = students?.filter((s) => s.student.studentId !== Number(authData?.studentId))
-  console.log("chatRoomId", chatRoomId)
   const rawMembers = myTeamData?.teamInfo.members ?? []
   const teamMembers: ITeamMember[] = useMemo(
     () =>
@@ -64,9 +63,7 @@ export default function MyTeamPage() {
 
   const { mutate: leaveRoom } = useMutation({
     mutationFn: (id: number) => leaveChatRoom(id),
-    onSuccess: () => {
-      console.log("채팅방에서 성공적으로 나갔습니다.")
-    },
+    onSuccess: () => {},
     onError: (error) => {
       console.error("채팅방 나가기 실패:", error)
     },
@@ -95,7 +92,6 @@ export default function MyTeamPage() {
     enabled: !!teamId,
     retry: false,
   })
-  console.log("fetchedRoomId", fetchedRoomId)
 
   const { data: initialMessages, isLoading: isMessagesLoading } = useQuery({
     queryKey: ["chatMessages", chatRoomId],

@@ -33,7 +33,5 @@ export const getChatMessages = async (roomId: number): Promise<ChatMessage[]> =>
 }
 
 export const updateLastReadAt = async (roomId: number): Promise<void> => {
-  console.log("lastread 호출 : ", roomId)
-
   await api.post(`/chat-rooms/${roomId}/last-read`)
 }

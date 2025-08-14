@@ -38,9 +38,7 @@ export default function TeamCreatePage() {
   }
 
   const handleTrackChange = (subcode: string) => {
-    console.log("handleTrackChange - selectedTrackName", subcode)
     const selectedTrack = teamWarmup?.tracks.find((track) => track.subcode === subcode)
-    console.log("selectedTrack", selectedTrack)
     if (selectedTrack) {
       setSelectedTrackCode(selectedTrack.subcode)
       setSelectedTrackCodeName(selectedTrack.subcodeName)

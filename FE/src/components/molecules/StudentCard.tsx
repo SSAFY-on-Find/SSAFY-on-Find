@@ -20,10 +20,11 @@ function StudentCard({
 }: IStudentCardWithMyId) {
   const navigate = useNavigate()
   const { toggleFavorite, isLoading } = useStudentFavoriteToggle()
+  const alreadyWroteProfile = position.subcode ? true : false
 
   return (
     <div
-      className="border-line flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border bg-white px-20 py-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg"
+      className={`${alreadyWroteProfile ? "cursor-pointer" : "pointer-events-none cursor-not-allowed"} border-line flex flex-col items-center justify-center gap-3 rounded-lg border bg-white px-20 py-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg`}
       onClick={() => {
         if (userId !== student.studentId) {
           navigate(`/studentlist/${student.studentId}`)
