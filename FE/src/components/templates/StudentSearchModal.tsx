@@ -38,7 +38,7 @@ function StudentListItem({ name, major, position, hasTeam, onClick, userProfile 
   // 1대1 채팅이나 초대 요청시 id기반으로 동작 예정
   return (
     <div
-      className="hover:bg-main/10 flex w-full cursor-pointer items-center justify-between gap-2 rounded-md px-1 py-1"
+      className="group hover:bg-main/10 flex w-full cursor-pointer items-center gap-2 rounded-md px-1 py-1"
       onClick={onClick}
     >
       <div className="flex items-center gap-2">
@@ -53,7 +53,7 @@ function StudentListItem({ name, major, position, hasTeam, onClick, userProfile 
           {position && <PositionTag positionName={position} />}
         </div>
       </div>
-      <Send className="text-main hover:cursor-pointer" />
+      <Send className="text-main pointer-events-none invisible mr-1 ml-auto h-5 w-5 shrink-0 stroke-[1.8] group-hover:visible" />
     </div>
   )
 }
@@ -76,7 +76,9 @@ function StudentSearchModal({ isOpen, onClose, students, onStudentClick, myTeamI
     <Modal isOpen={isOpen} onClose={onClose} size={"m"}>
       <div className="min-h-[550px] p-10">
         <div className="px-[10px] py-[10px]">
-          <h3 className="text-text mb-[15px] text-xl font-bold">교육생 찾기</h3>
+          <h3 className="text-text mb-[15px] text-xl font-bold">
+            {myTeamId ? "팀원 초대하기" : "일대일 채팅 시작하기"}
+          </h3>
           <SearchBar onSearch={handleSearch} />
         </div>
         <div className="flex max-h-[370px] flex-col gap-3 overflow-y-auto px-[15px] pt-[10px]">

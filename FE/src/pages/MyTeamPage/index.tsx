@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { isAxiosError } from "axios"
-import { UserPlus } from "lucide-react"
+import { UserRoundPlus } from "lucide-react"
 
 import { createTeamChatRoom, endterTeamChat, getChatMessages, getTeamChatRoomId, leaveChatRoom } from "@/apis/chatRoom"
 import { teamApi } from "@/apis/teamApi"
@@ -224,9 +224,9 @@ export default function MyTeamPage() {
                 <h3 className="text-text text-2xl font-bold">대기목록</h3>
                 <div className="w-30">
                   <Button
-                    size={"s"}
+                    size={"m"}
                     isIcon={true}
-                    Icon={UserPlus}
+                    Icon={UserRoundPlus}
                     variant="outline"
                     text="팀원 초대"
                     onClick={() => setStudentSearchModal(true)}
