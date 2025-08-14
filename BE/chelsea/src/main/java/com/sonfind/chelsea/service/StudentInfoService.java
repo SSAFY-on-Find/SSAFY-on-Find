@@ -138,16 +138,12 @@ public class StudentInfoService {
 			//새로운 프로필 이미지 입력 시 변경
 			if (profile != null && !profile.isEmpty()) {
 				Profile newProfileImage = fileService.saveProfileImage(profile);
-				Profile oldProfileImage = studentInfo.getProfile();
 				studentInfo.updateProfileImage(newProfileImage);
-				fileService.deleteProfileImage(oldProfileImage);
 			}
 			//새로운 포트폴리오 입력 시 변경
 			if (portfolio != null && !portfolio.isEmpty()) {
 				Portfolio newPortfolio = fileService.savePortfolio(portfolio);
-				Portfolio oldPortfolio = studentInfo.getPortfolio();
 				studentInfo.updatePortfolio(newPortfolio);
-				fileService.deletePortfolioFile(oldPortfolio);
 			}
 
 			List<String> requiredCodes = List.of(requestDto.track(), requestDto.position(), requestDto.goal(),
@@ -226,7 +222,6 @@ public class StudentInfoService {
 			.orElseThrow(AppException::studentInfoNotFound);
 
 		if (studentInfo.getProfile() != null) {
-			fileService.deleteProfileImage(studentInfo.getProfile());
 			studentInfo.updateProfileImage(null);
 		}
 	}
@@ -240,7 +235,6 @@ public class StudentInfoService {
 			.orElseThrow(AppException::studentInfoNotFound);
 
 		if (studentInfo.getPortfolio() != null) {
-			fileService.deletePortfolioFile(studentInfo.getPortfolio());
 			studentInfo.updatePortfolio(null);
 		}
 	}
