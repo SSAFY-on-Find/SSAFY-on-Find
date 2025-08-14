@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
 import { Heart } from "lucide-react"
 
 import { MainTag, MajorTag, NormalTag, PositionTag, UserImg } from "@/components/atoms"
@@ -24,9 +25,11 @@ function StudentCard({
 
   return (
     <div
-      className={`${alreadyWroteProfile ? "cursor-pointer" : "pointer-events-none cursor-not-allowed"} border-line flex flex-col items-center justify-center gap-3 rounded-lg border bg-white px-20 py-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg`}
+      className={`border-line flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border bg-white px-20 py-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg`}
       onClick={() => {
-        if (userId !== student.studentId) {
+        if (!alreadyWroteProfile) {
+          toast.warn("아직 가입하지 않은 교육생입니다.")
+        } else if (userId !== student.studentId) {
           navigate(`/studentlist/${student.studentId}`)
         } else {
           navigate(`/myprofile`)
@@ -42,7 +45,7 @@ function StudentCard({
         />
         {userId !== student.studentId ? (
           <Heart
-            className={`absolute right-2 bottom-1 cursor-pointer ${isFavorite ? "text-error" : "text-subtext"}`}
+            className={`absolute right-2 bottom-1 cursor-pointer transition-colors ${isFavorite ? "text-error fill-current" : "text-subtext hover:text-error/80 hover:fill-current/50"}`}
             size={24}
             fill={isFavorite ? "currentColor" : "none"}
             onClick={(e) => {
