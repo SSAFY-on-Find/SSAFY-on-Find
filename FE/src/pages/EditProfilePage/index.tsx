@@ -14,7 +14,20 @@ import { useProfileStore } from "@/stores/profileStore"
 import { useUserStore } from "@/stores/userStore"
 
 import "github-markdown-css/github-markdown-light.css"
+interface TechStackItem {
+  subcode: string
+  subcodeName: string
+}
 
+interface CategorizedTechStack {
+  frontend: TechStackItem[]
+  backend: TechStackItem[]
+  language: TechStackItem[]
+  database: TechStackItem[]
+  mobile: TechStackItem[]
+  infrastructure: TechStackItem[]
+  embedded: TechStackItem[]
+}
 const mbtiPairs = [
   ["I", "E"],
   ["N", "S"],
@@ -59,6 +72,22 @@ export default function ProfileEditPage() {
     goal: useRef<HTMLDivElement>(null),
     techStack: useRef<HTMLDivElement>(null),
   }
+
+  const parseTechStackByCategory = (techStackData: TechStackItem[]): CategorizedTechStack => {
+    const categories: CategorizedTechStack = {
+      frontend: techStackData.filter((item) => item.subcode.startsWith("FE_")),
+      backend: techStackData.filter((item) => item.subcode.startsWith("BE_")),
+      language: techStackData.filter((item) => item.subcode.startsWith("LN_")),
+      database: techStackData.filter((item) => item.subcode.startsWith("DB_")),
+      mobile: techStackData.filter((item) => item.subcode.startsWith("MO_")),
+      infrastructure: techStackData.filter((item) => item.subcode.startsWith("IN_")),
+      embedded: techStackData.filter((item) => item.subcode.startsWith("EM_")),
+    }
+    return categories
+  }
+
+  const categorizedTechStack: CategorizedTechStack | null = codes ? parseTechStackByCategory(codes.techStack) : null
+
   useEffect(() => {
     if (infos) {
       setCodes({
@@ -244,18 +273,185 @@ export default function ProfileEditPage() {
           />
         </div>
         <div ref={fieldRefs.techStack}>
-          <FormCheckTag
-            title={"기술 스택"}
-            isNecessary={true}
-            list={codes.techStack}
-            hasError={errors.techStack}
-            selected={techStack}
-            onToggle={(item) => {
-              const exists = techStack.some((i) => i.subcode === item.subcode)
-              const next = exists ? techStack.filter((i) => i.subcode !== item.subcode) : [...techStack, item]
-              setCodes({ techStack: next })
-            }}
-          />
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-1">
+              <div className="text-text text-sm font-bold">기술 스택</div>
+              <span className="text-error">*</span>
+            </div>
+            {errors.techStack && <div className="text-error text-xs">기술 스택을 선택해주세요.</div>}
+
+            {categorizedTechStack && (
+              <div className="flex flex-col gap-4">
+                {/* 프론트엔드 */}
+                {categorizedTechStack.frontend.length > 0 && (
+                  <div>
+                    <hr className="text-line pb-4" />
+                    <h4 className="text-text mb-2 text-xs font-medium">프론트엔드</h4>
+                    <div className="flex flex-wrap gap-2 pr-40">
+                      {categorizedTechStack.frontend.map((item) => (
+                        <CheckTag
+                          key={item.subcode}
+                          tagContent={item.subcodeName}
+                          isChecked={techStack.some((selected) => selected.subcode === item.subcode)}
+                          onToggle={() => {
+                            const exists = techStack.some((i) => i.subcode === item.subcode)
+                            const next = exists
+                              ? techStack.filter((i) => i.subcode !== item.subcode)
+                              : [...techStack, item]
+                            setCodes({ techStack: next })
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 백엔드 */}
+                {categorizedTechStack.backend.length > 0 && (
+                  <div>
+                    <hr className="text-line pb-4" />
+                    <h4 className="text-text mb-2 text-xs font-medium">백엔드</h4>
+                    <div className="flex flex-wrap gap-2 pr-40">
+                      {categorizedTechStack.backend.map((item) => (
+                        <CheckTag
+                          key={item.subcode}
+                          tagContent={item.subcodeName}
+                          isChecked={techStack.some((selected) => selected.subcode === item.subcode)}
+                          onToggle={() => {
+                            const exists = techStack.some((i) => i.subcode === item.subcode)
+                            const next = exists
+                              ? techStack.filter((i) => i.subcode !== item.subcode)
+                              : [...techStack, item]
+                            setCodes({ techStack: next })
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 프로그래밍 언어 */}
+                {categorizedTechStack.language.length > 0 && (
+                  <div>
+                    <hr className="text-line pb-4" />
+                    <h4 className="text-text mb-2 text-xs font-medium">프로그래밍 언어</h4>
+                    <div className="flex flex-wrap gap-2 pr-40">
+                      {categorizedTechStack.language.map((item) => (
+                        <CheckTag
+                          key={item.subcode}
+                          tagContent={item.subcodeName}
+                          isChecked={techStack.some((selected) => selected.subcode === item.subcode)}
+                          onToggle={() => {
+                            const exists = techStack.some((i) => i.subcode === item.subcode)
+                            const next = exists
+                              ? techStack.filter((i) => i.subcode !== item.subcode)
+                              : [...techStack, item]
+                            setCodes({ techStack: next })
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 데이터베이스 */}
+                {categorizedTechStack.database.length > 0 && (
+                  <div>
+                    <hr className="text-line pb-4" />
+                    <h4 className="text-text mb-2 text-xs font-medium">데이터베이스</h4>
+                    <div className="flex flex-wrap gap-2 pr-40">
+                      {categorizedTechStack.database.map((item) => (
+                        <CheckTag
+                          key={item.subcode}
+                          tagContent={item.subcodeName}
+                          isChecked={techStack.some((selected) => selected.subcode === item.subcode)}
+                          onToggle={() => {
+                            const exists = techStack.some((i) => i.subcode === item.subcode)
+                            const next = exists
+                              ? techStack.filter((i) => i.subcode !== item.subcode)
+                              : [...techStack, item]
+                            setCodes({ techStack: next })
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 모바일 */}
+                {categorizedTechStack.mobile.length > 0 && (
+                  <div>
+                    <hr className="text-line pb-4" />
+                    <h4 className="text-text mb-2 text-xs font-medium">모바일</h4>
+                    <div className="flex flex-wrap gap-2 pr-40">
+                      {categorizedTechStack.mobile.map((item) => (
+                        <CheckTag
+                          key={item.subcode}
+                          tagContent={item.subcodeName}
+                          isChecked={techStack.some((selected) => selected.subcode === item.subcode)}
+                          onToggle={() => {
+                            const exists = techStack.some((i) => i.subcode === item.subcode)
+                            const next = exists
+                              ? techStack.filter((i) => i.subcode !== item.subcode)
+                              : [...techStack, item]
+                            setCodes({ techStack: next })
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 인프라 */}
+                {categorizedTechStack.infrastructure.length > 0 && (
+                  <div>
+                    <hr className="text-line pb-4" />
+                    <h4 className="text-text mb-2 text-xs font-medium">인프라</h4>
+                    <div className="flex flex-wrap gap-2 pr-40">
+                      {categorizedTechStack.infrastructure.map((item) => (
+                        <CheckTag
+                          key={item.subcode}
+                          tagContent={item.subcodeName}
+                          isChecked={techStack.some((selected) => selected.subcode === item.subcode)}
+                          onToggle={() => {
+                            const exists = techStack.some((i) => i.subcode === item.subcode)
+                            const next = exists
+                              ? techStack.filter((i) => i.subcode !== item.subcode)
+                              : [...techStack, item]
+                            setCodes({ techStack: next })
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 임베디드 */}
+                {categorizedTechStack.embedded.length > 0 && (
+                  <div>
+                    <hr className="text-line pb-4" />
+                    <h4 className="text-text mb-2 text-xs font-medium">임베디드</h4>
+                    <div className="flex flex-wrap gap-2 pr-40">
+                      {categorizedTechStack.embedded.map((item) => (
+                        <CheckTag
+                          key={item.subcode}
+                          tagContent={item.subcodeName}
+                          isChecked={techStack.some((selected) => selected.subcode === item.subcode)}
+                          onToggle={() => {
+                            const exists = techStack.some((i) => i.subcode === item.subcode)
+                            const next = exists
+                              ? techStack.filter((i) => i.subcode !== item.subcode)
+                              : [...techStack, item]
+                            setCodes({ techStack: next })
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </FormCard>
       <FormCard title={"선택 정보"} info={"추가로 공유하고 싶은 정보를 입력해주세요."}>
