@@ -140,7 +140,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 
 		// 5) 다른 상태들도 일괄 변경
 		allStatuses.stream()
-				.filter(s -> !s.getId().equals(objId))
+				.filter(s -> !s.getId().equals(me.getId()))
 				.forEach(s -> {
 					s.setStatus(NotificationStatus.ACCEPTED);
 					s.setRead(false);
@@ -189,7 +189,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 
 		// 4) 다른 상태들도 일괄 변경
 		allStatuses.stream()
-				.filter(s -> !s.getId().equals(objId))
+				.filter(s -> !s.getId().equals(me.getId()))
 				.forEach(s -> {
 					s.setStatus(NotificationStatus.REJECTED);
 					s.setRead(false);
@@ -229,6 +229,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 
 		// 2) 내 상태만 먼저 변경
 		me.setStatus(NotificationStatus.CANCELED);
+		me.setUpdatedAt(now);
 		statusRepo.save(me);
 
 		// 3) 동일 notificationId를 가진 모든 상태 조회
@@ -237,7 +238,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 
 		// 4) 다른 상태들도 일괄 변경
 		allStatuses.stream()
-				.filter(s -> !s.getId().equals(objId))
+				.filter(s -> !s.getId().equals(me.getId()))
 				.forEach(s -> {
 					s.setStatus(NotificationStatus.CANCELED);
 					s.setRead(false);
@@ -350,14 +351,13 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 	 */
 	private NotificationDocument findLatestNotification(NotificationRequestDto dto) {
 		// 가장 최근에 업데이트된 알림을 찾음
-		NotificationDocument lastUpdatedLog = notificationRepo.findLatest(
-				dto.pubId(),
-				dto.pubType(),
-				dto.subId(),
-				dto.subType()
-		);
 
-		return lastUpdatedLog;
+		return notificationRepo.findTopByPublisherIdAndPublisherTypeAndSubscriberIdAndSubscriberTypeOrderByUpdatedAtDesc(
+				dto.pubId(),
+				NotificationDomainType.from(dto.pubType()),
+				dto.subId(),
+				NotificationDomainType.from(dto.subType())
+		).orElse(null);
 	}
 
 	/**

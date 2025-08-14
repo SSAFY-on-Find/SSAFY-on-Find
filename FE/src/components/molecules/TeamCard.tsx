@@ -1,10 +1,20 @@
 import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
+import { isAxiosError } from "axios"
 import { Heart } from "lucide-react"
 
 import { Button, MainTag, PositionTag, UserImg, WhiteTag } from "@/components/atoms"
 import { useInvte } from "@/hooks/useInvite"
 import { useUserStore } from "@/stores/userStore"
 import type { ITeamCard } from "@/types/team"
+
+function getErrorMessage(err: unknown, fallback: string) {
+  if (isAxiosError(err)) {
+    return err.response?.data?.data?.message ?? err.message ?? fallback
+  }
+  if (err instanceof Error) return err.message ?? fallback
+  return fallback
+}
 
 interface ITeamCardElement extends ITeamCard {
   userTeamId?: number | null
@@ -26,6 +36,7 @@ function TeamCard({
 }: ITeamCardElement) {
   const { applyAsMate, mergeTeams } = useInvte(userTeamId ?? null)
   const myMateId = useUserStore((s) => s.user?.studentId)
+
   const navigate = useNavigate()
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
@@ -37,14 +48,20 @@ function TeamCard({
   }
 
   const renderButtons = () => {
-    if (userTeamId === null) {
+    if (!userTeamId) {
       return (
         <Button
           size={"m"}
           isIcon={false}
           text="지원하기"
           variant={btnRecruit}
-          onClick={() => myMateId && applyAsMate(teamId, Number(myMateId))}
+          onClick={() => {
+            if (!myMateId) return
+            toast.promise(applyAsMate(teamId, Number(myMateId)), {
+              success: "팀에 지원을 보냈습니다!",
+              error: { render: ({ data }) => getErrorMessage(data, "지원 전송에 실패했습니다.") },
+            })
+          }}
         />
       )
     } else if (userTeamId !== teamId) {
@@ -54,14 +71,26 @@ function TeamCard({
             size={"m"}
             isIcon={false}
             text="지원하기"
-            onClick={() => myMateId && applyAsMate(teamId, Number(myMateId))}
+            onClick={() => {
+              if (!myMateId) return
+              toast.promise(applyAsMate(teamId, Number(myMateId)), {
+                success: "팀에 지원을 보냈습니다!",
+                error: { render: ({ data }) => getErrorMessage(data, "지원 전송에 실패했습니다.") },
+              })
+            }}
           />
           <Button
             size={"m"}
             isIcon={false}
             text="팀 합치기"
             variant="outline"
-            onClick={() => userTeamId && mergeTeams(teamId, Number(userTeamId))}
+            onClick={() => {
+              if (!userTeamId) return
+              toast.promise(mergeTeams(teamId, Number(userTeamId)), {
+                success: "팀 합치기 제안을 보냈습니다!",
+                error: { render: ({ data }) => getErrorMessage(data, "팀 합치기 요청 실패했습니다.") },
+              })
+            }}
           />
         </>
       )

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { isAxiosError } from "axios"
 import { UserPlus } from "lucide-react"
 
 import { createTeamChatRoom, getChatMessages, getTeamChatRoomId, leaveChatRoom } from "@/apis/chatRoom"
@@ -15,11 +16,18 @@ import { useInviteAccept, useInviteCancel, useInviteReject } from "@/hooks/useIn
 import { useTeamNotification } from "@/hooks/useNotification"
 import { useAuth, useStudentList } from "@/hooks/useStudent"
 import { useLeaveTeam } from "@/hooks/useTeam"
-import type { INotification, INotificationStatus } from "@/types/notification"
 import type { IMyTeam, ITeamMember } from "@/types/team"
 
 import ApplicantCard from "./organisms/ApplicantCard"
 import TeamChat from "./organisms/TeamChat"
+
+function getErrorMessage(err: unknown, fallback: string) {
+  if (isAxiosError(err)) {
+    return err.response?.data?.data?.message ?? err.message ?? fallback
+  }
+  if (err instanceof Error) return err.message ?? fallback
+  return fallback
+}
 
 export default function MyTeamPage() {
   const navigate = useNavigate()
@@ -40,7 +48,6 @@ export default function MyTeamPage() {
     enabled: !!teamId,
   })
   const studentsExceptMe = students?.filter((s) => s.student.studentId !== Number(authData?.studentId))
-  console.log("chatRoomId", chatRoomId)
   const rawMembers = myTeamData?.teamInfo.members ?? []
   const teamMembers: ITeamMember[] = useMemo(
     () =>
@@ -56,9 +63,7 @@ export default function MyTeamPage() {
 
   const { mutate: leaveRoom } = useMutation({
     mutationFn: (id: number) => leaveChatRoom(id),
-    onSuccess: () => {
-      console.log("채팅방에서 성공적으로 나갔습니다.")
-    },
+    onSuccess: () => {},
     onError: (error) => {
       console.error("채팅방 나가기 실패:", error)
     },
@@ -76,10 +81,6 @@ export default function MyTeamPage() {
     onError: () => console.error("채팅방 생성에 실패했습니다."),
   })
 
-  const handleInviteStudent = (targetStudentId: number) => {
-    // 새로운 학생을 우리 팀으로 초대하는 로직이 들어가야합니다!
-  }
-
   const {
     data: fetchedRoomId,
     isFetching: isFetchingRoomId,
@@ -91,7 +92,6 @@ export default function MyTeamPage() {
     enabled: !!teamId,
     retry: false,
   })
-  console.log("fetchedRoomId", fetchedRoomId)
 
   const { data: initialMessages, isLoading: isMessagesLoading } = useQuery({
     queryKey: ["chatMessages", chatRoomId],
@@ -114,21 +114,21 @@ export default function MyTeamPage() {
     if (!id) return
     await toast.promise(acceptInvitationAsync(id), {
       success: "초대를 수락했습니다!",
-      error: { render: (e) => (e?.data as Error)?.message ?? "수락 중 오류가 발생했습니다." },
+      error: { render: ({ data }) => getErrorMessage(data, "수락 중 오류가 발생했습니다.") },
     })
   }
   const handleRejectInvitation = async (id: string) => {
     if (!id) return
     await toast.promise(rejectInvitationAsync(id), {
       success: "초대를 거절했습니다!",
-      error: { render: (e) => (e?.data as Error)?.message ?? "거절 중 오류가 발생했습니다." },
+      error: { render: ({ data }) => getErrorMessage(data, "거절 중 오류가 발생했습니다.") },
     })
   }
   const handleCancelInvitation = async (id: string) => {
     if (!id) return
     await toast.promise(cancleInvitationAsync(id), {
       success: "초대를 취소했습니다!",
-      error: { render: (e) => (e?.data as Error)?.message ?? "취소 중 오류가 발생했습니다." },
+      error: { render: ({ data }) => getErrorMessage(data, "취소 중 오류가 발생했습니다.") },
     })
   }
 
@@ -175,10 +175,7 @@ export default function MyTeamPage() {
                     isOpen={studentSearchModal}
                     onClose={() => setStudentSearchModal(false)}
                     students={studentsExceptMe}
-                    onStudentClick={(studentId) => {
-                      handleInviteStudent(Number(studentId))
-                      setStudentSearchModal(false)
-                    }}
+                    myTeamId={Number(teamId)}
                   />
                 )}
               </div>
