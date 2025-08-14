@@ -84,7 +84,9 @@ export default function DashboardPage() {
         <DashboardCard title={`${summary?.student.name} 님을 위한 팀 추천 🚀`}>
           {recommendTeam ? (
             recommendTeam.message ? (
-              <div className="text-subtext text-center whitespace-pre-line">{recommendTeam.message}</div>
+              <div className="text-subtext flex h-full items-center justify-center text-center whitespace-pre-line">
+                {recommendTeam.message}
+              </div>
             ) : (
               <div className="mt-5">
                 <TeamCardCarousel items={recommendTeam.items} />

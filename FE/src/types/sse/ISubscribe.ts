@@ -1,6 +1,6 @@
 import type { Status } from "../notification"
 
-export type EventType = "INVITATION" | "DASHBOARD"
+export type EventType = "NOTIFICATION" | "DASHBOARD"
 
 export interface ISubscribe<T = unknown> {
   id: string
