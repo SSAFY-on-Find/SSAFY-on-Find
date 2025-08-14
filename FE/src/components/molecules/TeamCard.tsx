@@ -71,6 +71,7 @@ function TeamCard({
             size={"m"}
             isIcon={false}
             text="지원하기"
+            variant={btnRecruit}
             onClick={() => {
               if (!myMateId) return
               toast.promise(applyAsMate(teamId, Number(myMateId)), {
@@ -83,7 +84,7 @@ function TeamCard({
             size={"m"}
             isIcon={false}
             text="팀 합치기"
-            variant="outline"
+            variant={btnMerge}
             onClick={() => {
               if (!userTeamId) return
               toast.promise(mergeTeams(teamId, Number(userTeamId)), {
