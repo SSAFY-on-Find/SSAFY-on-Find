@@ -145,7 +145,10 @@ export const useUpdateTeam = () => {
         updateUserTeamId(successData.teamId)
       }
 
-      navigate("/myteam")
+      setTimeout(() => {
+        navigate("/myteam")
+      }, 1000)
+      toast.success("팀 생성 성공")
     },
     onError: (error) => {
       toast.error("팀 수정 실패!")

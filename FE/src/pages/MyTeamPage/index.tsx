@@ -32,7 +32,7 @@ function getErrorMessage(err: unknown, fallback: string) {
 export default function MyTeamPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { data: authData } = useAuth()
+  const { data: authData, isLoading: isAuthLoading } = useAuth()
   const teamId = authData?.teamId
   const studentId = authData?.studentId
   const [chatRoomId, setChatRoomId] = useState<number | null>(null)
@@ -133,7 +133,7 @@ export default function MyTeamPage() {
   }
 
   useEffect(() => {
-    if (!teamId && !isMyTeamLoading) {
+    if (!isAuthLoading && !isMyTeamLoading && !teamId) {
       navigate("/no-team")
     }
   }, [teamId, navigate, isMyTeamLoading])
