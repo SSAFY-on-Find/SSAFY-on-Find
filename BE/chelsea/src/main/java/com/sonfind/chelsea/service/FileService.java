@@ -112,35 +112,6 @@ public class FileService {
 		return fileName.substring(dotIndex + 1).toLowerCase();
 	}
 
-	//프로필 삭제
-	public void deleteProfileImage(Profile profile) {
-		if (profile != null) {
-			Path filePath = Paths.get(
-				uploadDirPath + "/" + FileType.PROFILE.getDirectoryName() + "/" + profile.getSavedFileName());
-			deleteFile(filePath);
-		}
-
-	}
-
-	//포트폴리오 삭제
-	public void deletePortfolioFile(Portfolio portfolio) {
-		if (portfolio != null) {
-			Path filePath = Paths.get(
-				uploadDirPath + "/" + FileType.PORTFOLIO.getDirectoryName() + "/" + portfolio.getSavedFileName());
-			deleteFile(filePath);
-		}
-
-	}
-
-	//파일 삭제
-	private void deleteFile(Path filePath) {
-		try {
-			Files.deleteIfExists(filePath);
-		} catch (IOException e) {
-			throw AppException.fileDeleteError();
-		}
-	}
-
 	//파일 url 얻는 함수
 	private String getFileUrl(String savedFileName, FileType fileType) {
 
