@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "react-toastify"
+import { isAxiosError } from "axios"
 
 import { Segmented } from "@/components/atoms"
 import { NotificationItem } from "@/components/molecules"
@@ -12,6 +13,14 @@ interface NotificationModalProps {
   isOpen: boolean
   onClose: () => void
   returnFocusRef?: React.RefObject<HTMLElement | null>
+}
+
+function getErrorMessage(err: unknown, fallback: string) {
+  if (isAxiosError(err)) {
+    return err.response?.data?.data?.message ?? err.message ?? fallback
+  }
+  if (err instanceof Error) return err.message ?? fallback
+  return fallback
 }
 
 export default function NotificationModal({ isOpen, onClose, returnFocusRef }: NotificationModalProps) {
@@ -35,21 +44,21 @@ export default function NotificationModal({ isOpen, onClose, returnFocusRef }: N
     if (!id) return
     await toast.promise(acceptInvitationAsync(id), {
       success: "초대를 수락했습니다!",
-      error: { render: (e) => (e?.data as Error)?.message ?? "수락 중 오류가 발생했습니다." },
+      error: { render: ({ data }) => getErrorMessage(data, "수락 중 오류가 발생했습니다.") },
     })
   }
   const handleRejectInvitation = async (id: string) => {
     if (!id) return
     await toast.promise(rejectInvitationAsync(id), {
       success: "초대를 거절했습니다!",
-      error: { render: (e) => (e?.data as Error)?.message ?? "거절 중 오류가 발생했습니다." },
+      error: { render: ({ data }) => getErrorMessage(data, "거절 중 오류가 발생했습니다.") },
     })
   }
   const handleCancelInvitation = async (id: string) => {
     if (!id) return
     await toast.promise(cancleInvitationAsync(id), {
       success: "초대를 취소했습니다!",
-      error: { render: (e) => (e?.data as Error)?.message ?? "취소 중 오류가 발생했습니다." },
+      error: { render: ({ data }) => getErrorMessage(data, "취소 중 오류가 발생했습니다.") },
     })
   }
 
