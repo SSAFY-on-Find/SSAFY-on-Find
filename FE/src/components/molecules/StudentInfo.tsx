@@ -68,7 +68,7 @@ function StudentInfo({
           <UserImg name={name} size={variant === "detail" ? "xl" : "l"} showTeamBadge={false} url={imgUrl} />
           {!isMyProfile && (
             <Heart
-              className={`absolute right-2 bottom-1 cursor-pointer ${isFavorite ? "text-error" : "text-subtext"}`}
+              className={`absolute right-2 bottom-1 cursor-pointer transition-colors ${isFavorite ? "text-error fill-current" : "text-subtext hover:text-error/80 hover:fill-current/50"}`}
               size={24}
               fill={isFavorite ? "currentColor" : "none"}
               onClick={(e) => {

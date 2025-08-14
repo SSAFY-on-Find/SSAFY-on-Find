@@ -60,7 +60,7 @@ export const useTeamFavoriteToggle = () => {
 
         const next = pickNextFavorite()
         if (typeof next === "boolean") {
-          toast.success(next ? "즐겨찾기에 해제했어요." : "즐겨찾기를 추가했어요.")
+          toast.success(next ? "즐겨찾기를 해제했어요." : "즐겨찾기에 추가했어요.")
         } else {
           toast.success("즐겨찾기 상태가 변경되었습니다.")
         }
