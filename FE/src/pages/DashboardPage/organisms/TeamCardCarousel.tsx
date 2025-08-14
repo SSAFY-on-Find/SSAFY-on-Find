@@ -3,6 +3,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 
 import { Button } from "@/components/atoms"
 import { TeamCard } from "@/components/molecules"
+import { useTeamFavoriteToggle } from "@/hooks/useFavorite"
+import { useTeamStore } from "@/stores/teamStore"
 import { useUserStore } from "@/stores/userStore"
 
 type TeamItem = React.ComponentProps<typeof TeamCard>
@@ -14,6 +16,8 @@ export default function TeamCardCarousel({ items }: { items: TeamItem[] }) {
   const [gap, setGap] = useState(12) // gap(px) - 기본 12px (tailwind gap-3)
   const trackRef = useRef<HTMLDivElement>(null)
   const userTeamId = useUserStore((state) => state.user?.teamId)
+  const { openDetailModal } = useTeamStore()
+  const { toggleFavorite } = useTeamFavoriteToggle()
 
   // 최초 마운트 시 카드 너비 & gap 측정
   useLayoutEffect(() => {
@@ -69,7 +73,13 @@ export default function TeamCardCarousel({ items }: { items: TeamItem[] }) {
         >
           {items.map((item) => (
             <div key={item.teamId} className="shrink-0">
-              <TeamCard {...item} variant="main" userTeamId={Number(userTeamId)} />
+              <TeamCard
+                {...item}
+                variant="main"
+                userTeamId={Number(userTeamId)}
+                onClickFavorite={() => toggleFavorite(item.teamId)}
+                onClickCard={() => openDetailModal(item.teamId)}
+              />
             </div>
           ))}
         </div>
