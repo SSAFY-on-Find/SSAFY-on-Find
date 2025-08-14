@@ -141,14 +141,17 @@ function StudentInfo({
             )}
           </div>
           {isMyProfile && (
-            <Button
-              text="팀 생성하기"
-              size={variant === "dashboard" ? "s" : "m"}
-              isIcon={false}
-              onClick={() => {
-                navigate("/create-team")
-              }}
-            />
+            <>
+              {variant === "detail" && <div className="text-subtext mb-3 text-center">아직 팀이 없습니다.</div>}
+              <Button
+                text="팀 생성하기"
+                size={variant === "dashboard" ? "s" : "m"}
+                isIcon={false}
+                onClick={() => {
+                  navigate("/create-team")
+                }}
+              />
+            </>
           )}{" "}
         </div>
       )}
