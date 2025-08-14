@@ -10,12 +10,13 @@ import { teamApi } from "@/apis/teamApi"
 import { Button } from "@/components/atoms"
 import { Segmented } from "@/components/atoms"
 import { TeamDetail } from "@/components/molecules"
-import { ConfirmModal, StudentSearchModal } from "@/components/templates"
+import { ConfirmModal, StudentSearchModal, TeamDetailModal } from "@/components/templates"
 import Loading from "@/components/templates/Loading"
 import { useInviteAccept, useInviteCancel, useInviteReject } from "@/hooks/useInvite"
 import { useTeamNotification } from "@/hooks/useNotification"
 import { useAuth, useStudentList } from "@/hooks/useStudent"
-import { useLeaveTeam } from "@/hooks/useTeam"
+import { useLeaveTeam, useTeamDetails } from "@/hooks/useTeam"
+import { useTeamStore } from "@/stores/teamStore"
 import type { IMyTeam, ITeamMember } from "@/types/team"
 
 import ApplicantCard from "./organisms/ApplicantCard"
@@ -31,6 +32,8 @@ function getErrorMessage(err: unknown, fallback: string) {
 
 export default function MyTeamPage() {
   const navigate = useNavigate()
+  const { isDetailModalOpen, selectedTeamId, closeDetailModal } = useTeamStore()
+  const { data: selectedTeamData } = useTeamDetails(selectedTeamId || 0)
   const { data: authData, isLoading: isAuthLoading, refetch: refetchAuth } = useAuth()
   const teamId = authData?.teamId
   const studentId = authData?.studentId
@@ -210,103 +213,114 @@ export default function MyTeamPage() {
   const isLoading = isFetchingRoomId || isCreating || isMyTeamLoading || isMessagesLoading || isEntering
 
   return (
-    <div className="bg-background min-h-screen px-15 py-10">
-      <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
-        <div className="flex w-full flex-col gap-8 lg:flex-1">
-          <div className="border-line flex rounded-xl border-1 bg-white pb-6">
-            {myTeamData?.teamInfo && (
-              <TeamDetail {...myTeamData?.teamInfo} varient="myteam" onLeaveTeam={() => setIsModalOpen(true)} />
-            )}
-          </div>
-          <div className="border-line flex flex-col gap-4 rounded-xl border-1 bg-white p-6">
-            <div>
-              <div className="flex items-center gap-[15px]">
-                <h3 className="text-text text-2xl font-bold">대기목록</h3>
-                <div className="w-30">
-                  <Button
-                    size={"m"}
-                    isIcon={true}
-                    Icon={UserRoundPlus}
-                    variant="outline"
-                    text="팀원 초대"
-                    onClick={() => setStudentSearchModal(true)}
-                  />
-                </div>
-                {!isStudentListLoading && studentsExceptMe && (
-                  <StudentSearchModal
-                    isOpen={studentSearchModal}
-                    onClose={() => setStudentSearchModal(false)}
-                    students={studentsExceptMe}
-                    myTeamId={Number(teamId)}
-                  />
-                )}
-              </div>
-              <p className="text-subtext mt-2 text-sm text-pretty">
-                팀 합류를 신청한 교육생들입니다. 신중하게 검토 후 결정해주세요.
-              </p>
+    <>
+      <div className="bg-background min-h-screen px-15 py-10">
+        <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
+          <div className="flex w-full flex-col gap-8 lg:flex-1">
+            <div className="border-line flex rounded-xl border-1 bg-white pb-6">
+              {myTeamData?.teamInfo && (
+                <TeamDetail {...myTeamData?.teamInfo} varient="myteam" onLeaveTeam={() => setIsModalOpen(true)} />
+              )}
             </div>
-
-            <Segmented activeSegment={requestTab} onSegmentChange={setRequestTab} />
-
-            {isLoadingTeamRequests && <Loading text="요청 목록을 불러오는 중" />}
-            {teamRequestsError && <div className="text-error">요청 목록을 불러오는 데 실패했습니다.</div>}
-
-            {!isLoadingTeamRequests && !teamRequestsError && (
-              <>
-                {teamRequests && teamRequests.length > 0 ? (
-                  teamRequests.map((req) => (
-                    <ApplicantCard
-                      key={String(req.notificationId)}
-                      {...req}
-                      tab={requestType}
-                      onAccept={handleAcceptInvitation}
-                      onReject={handleRejectInvitation}
-                      onCancel={handleCancelInvitation}
+            <div className="border-line flex flex-col gap-4 rounded-xl border-1 bg-white p-6">
+              <div>
+                <div className="flex items-center gap-[15px]">
+                  <h3 className="text-text text-2xl font-bold">대기목록</h3>
+                  <div className="w-30">
+                    <Button
+                      size={"m"}
+                      isIcon={true}
+                      Icon={UserRoundPlus}
+                      variant="outline"
+                      text="팀원 초대"
+                      onClick={() => setStudentSearchModal(true)}
                     />
-                  ))
-                ) : (
-                  <p className="text-subtext text-center text-sm">
-                    {requestType === "receive" ? "받은 요청이 없습니다." : "보낸 요청이 없습니다."}
-                  </p>
-                )}
-              </>
+                  </div>
+                  {!isStudentListLoading && studentsExceptMe && (
+                    <StudentSearchModal
+                      isOpen={studentSearchModal}
+                      onClose={() => setStudentSearchModal(false)}
+                      students={studentsExceptMe}
+                      myTeamId={Number(teamId)}
+                    />
+                  )}
+                </div>
+                <p className="text-subtext mt-2 text-sm text-pretty">
+                  팀 합류를 신청한 교육생들입니다. 신중하게 검토 후 결정해주세요.
+                </p>
+              </div>
+
+              <Segmented activeSegment={requestTab} onSegmentChange={setRequestTab} />
+
+              {isLoadingTeamRequests && <Loading text="요청 목록을 불러오는 중" />}
+              {teamRequestsError && <div className="text-error">요청 목록을 불러오는 데 실패했습니다.</div>}
+
+              {!isLoadingTeamRequests && !teamRequestsError && (
+                <>
+                  {teamRequests && teamRequests.length > 0 ? (
+                    teamRequests.map((req) => (
+                      <ApplicantCard
+                        key={String(req.notificationId)}
+                        {...req}
+                        tab={requestType}
+                        onAccept={handleAcceptInvitation}
+                        onReject={handleRejectInvitation}
+                        onCancel={handleCancelInvitation}
+                      />
+                    ))
+                  ) : (
+                    <p className="text-subtext text-center text-sm">
+                      {requestType === "receive" ? "받은 요청이 없습니다." : "보낸 요청이 없습니다."}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="border-line flex h-[400px] w-full flex-col rounded-lg border-1 bg-white md:h-[500px] lg:h-[600px] lg:w-[430px] lg:flex-shrink-0">
+            {isLoading && (
+              <div className="flex h-full items-center justify-center">
+                {isCreating
+                  ? "채팅방을 생성하는 중..."
+                  : isEntering
+                    ? "채팅방에 참여하는 중..."
+                    : "채팅 정보를 불러오는 중..."}
+              </div>
+            )}
+            {isRoomIdError && !isCreating && !chatRoomId && (
+              <div className="text-error flex h-full items-center justify-center">
+                채팅방 정보를 가져오는데 실패했습니다.
+              </div>
+            )}
+            {chatRoomId && studentId && teamMembers && (
+              <TeamChat
+                roomId={chatRoomId}
+                studentId={Number(studentId)}
+                members={teamMembers}
+                initialMessages={initialMessages}
+              />
             )}
           </div>
         </div>
-
-        <div className="border-line flex h-[400px] w-full flex-col rounded-lg border-1 bg-white md:h-[500px] lg:h-[600px] lg:w-[430px] lg:flex-shrink-0">
-          {isLoading && (
-            <div className="flex h-full items-center justify-center">
-              {isCreating
-                ? "채팅방을 생성하는 중..."
-                : isEntering
-                  ? "채팅방에 참여하는 중..."
-                  : "채팅 정보를 불러오는 중..."}
-            </div>
-          )}
-          {isRoomIdError && !isCreating && !chatRoomId && (
-            <div className="text-error flex h-full items-center justify-center">
-              채팅방 정보를 가져오는데 실패했습니다.
-            </div>
-          )}
-          {chatRoomId && studentId && teamMembers && (
-            <TeamChat
-              roomId={chatRoomId}
-              studentId={Number(studentId)}
-              members={teamMembers}
-              initialMessages={initialMessages}
-            />
-          )}
-        </div>
+        <ConfirmModal
+          isOpen={isModalOpen}
+          title="팀 탈퇴"
+          message="정말 탈퇴하시겠습니까"
+          confirmText="확인"
+          onConfirm={handleLeaveTeam}
+          onCancel={handleModalClose}
+        />
       </div>
-      <ConfirmModal
-        isOpen={isModalOpen}
-        title="팀 탈퇴"
-        message="정말 탈퇴하시겠습니까"
-        confirmText="확인"
-        onConfirm={handleLeaveTeam}
-        onCancel={handleModalClose}
-      />
-    </div>
+      {isDetailModalOpen && selectedTeamData && selectedTeamId && (
+        <TeamDetailModal
+          userTeamId={teamId}
+          isOpen={isDetailModalOpen}
+          onClose={closeDetailModal}
+          teamData={selectedTeamData}
+          teamId={selectedTeamId}
+        />
+      )}
+    </>
   )
 }
