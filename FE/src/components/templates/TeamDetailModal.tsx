@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
+import { isAxiosError } from "axios"
 
 import { Button } from "@/components/atoms"
 import { TeamDetail } from "@/components/molecules"
@@ -8,6 +10,14 @@ import { useUserStore } from "@/stores/userStore"
 import type { ITeamDetails } from "@/types/team"
 
 import Modal from "./Modal"
+
+function getErrorMessage(err: unknown, fallback: string) {
+  if (isAxiosError(err)) {
+    return err.response?.data?.data?.message ?? err.message ?? fallback
+  }
+  if (err instanceof Error) return err.message ?? fallback
+  return fallback
+}
 
 interface ITeamDetailModal {
   teamId: number
@@ -30,7 +40,13 @@ function TeamDetailModal({ teamId, isOpen, onClose, teamData, userTeamId }: ITea
           isIcon={false}
           text="지원하기"
           variant="primary"
-          onClick={() => myMateId && applyAsMate(teamId, Number(myMateId))}
+          onClick={() => {
+            if (!myMateId) return
+            toast.promise(applyAsMate(teamId, Number(myMateId)), {
+              success: "팀에 지원을 보냈습니다!",
+              error: { render: ({ data }) => getErrorMessage(data, "지원 전송에 실패했습니다.") },
+            })
+          }}
         />
       )
     } else if (userTeamId !== teamId) {
@@ -41,14 +57,26 @@ function TeamDetailModal({ teamId, isOpen, onClose, teamData, userTeamId }: ITea
             isIcon={false}
             text="지원하기"
             variant="primary"
-            onClick={() => myMateId && applyAsMate(teamId, Number(myMateId))}
+            onClick={() => {
+              if (!myMateId) return
+              toast.promise(applyAsMate(teamId, Number(myMateId)), {
+                success: "팀에 지원을 보냈습니다!",
+                error: { render: ({ data }) => getErrorMessage(data, "지원 전송에 실패했습니다.") },
+              })
+            }}
           />
           <Button
             size={"m"}
             isIcon={false}
             text="팀 합치기"
             variant="outline"
-            onClick={() => userTeamId && mergeTeams(teamId, Number(userTeamId))}
+            onClick={() => {
+              if (!userTeamId) return
+              toast.promise(mergeTeams(teamId, Number(userTeamId)), {
+                success: "팀 합치기 제안을 보냈습니다!",
+                error: { render: ({ data }) => getErrorMessage(data, "팀 합치기 요청 실패했습니다.") },
+              })
+            }}
           />
         </>
       )
