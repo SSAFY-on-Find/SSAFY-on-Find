@@ -75,7 +75,8 @@ export default function TeamCreatePage() {
       return
     }
 
-    createTeamMutation.mutate(createTeamData)
+    const createdTeamId = createTeamMutation.mutate(createTeamData)
+    console.log("생성된 팀id : ", createdTeamId)
   }
   if (isTeamWarmupLoading) {
     return <TeamCreateSkeleton />
