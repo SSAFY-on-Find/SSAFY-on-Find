@@ -292,7 +292,7 @@ public class TeamService {
 
 		//합칠 때 팀 규칙 정원 확인
 		if (sourceMembers.size() + targetMembers.size() > 6) {
-			throw new BusinessException(ErrorCode.CONFLICT);
+			throw new BusinessException(ErrorCode.TEAM_FULL);
 		}
 
 		//소스 팀 멤버를 타켓 팀으로 이동

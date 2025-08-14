@@ -23,10 +23,10 @@ public class NotificationContentService {
 
 	private String buildMergeTitle(RecipientRole role, NotificationContext ctx) {
 		if (role == RecipientRole.PUBLISHER) {
-			return "%s에 팀 합치기 제안".formatted(ctx.subscriber().displayName());
+			return "%s의 팀 합치기 제안".formatted(ctx.publisher().displayName());
 		}
 
-		return "%s의 팀 합치기 제안".formatted(ctx.publisher().displayName());
+		return "%s에 팀 합치기 제안".formatted(ctx.subscriber().displayName());
 	}
 
 	private String buildInvitationTitle(RecipientRole role, NotificationContext ctx) {

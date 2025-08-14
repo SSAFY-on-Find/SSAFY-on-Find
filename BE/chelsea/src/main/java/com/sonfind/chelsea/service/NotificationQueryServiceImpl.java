@@ -58,7 +58,7 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 		String role = getRole(type);
 		RecipientRole recipientRole = RecipientRole.valueOf(role.toUpperCase());
 		NotificationDomainType domain = NotificationDomainType.STUDENT;
-		List<NotificationStatusDocument> findNotifications = statusRepository.findAllByTargetIdAndTargetTypeAndRole(
+		List<NotificationStatusDocument> findNotifications = statusRepository.findAllByTargetIdAndTargetTypeAndRoleOrderByUpdatedAtDesc(
 				studentId,
 				domain, recipientRole);
 
@@ -120,7 +120,7 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 							.subNotificationMessage(doc.getSubNotificationMessage())
 							.build();
 				})
-				.toList().reversed();
+				.toList();
 
 		return Collections.singletonList(NotificationAndNotificationStatusForMyNotifResponseDto.builder()
 				.notificationStatusList(dtos)
@@ -141,10 +141,10 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 		final List<NotificationDocument> docs;
 		switch (type) {
 			case "send" -> // 팀 발신 → 상대는 subscriber
-					docs = notificationRepository.findAllByPublisherIdAndPublisherType(
+					docs = notificationRepository.findAllByPublisherIdAndPublisherTypeOrderByUpdatedAtDesc(
 							teamId, NotificationDomainType.TEAM);
 			case "receive" -> // 팀 수신 → 상대는 publisher
-					docs = notificationRepository.findAllBySubscriberIdAndSubscriberType(
+					docs = notificationRepository.findAllBySubscriberIdAndSubscriberTypeOrderByUpdatedAtDesc(
 							teamId, NotificationDomainType.TEAM);
 			default -> throw new AppException(ErrorCode.NOT_SUPPORTED_TYPE);
 		}

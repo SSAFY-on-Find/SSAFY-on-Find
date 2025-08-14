@@ -18,8 +18,8 @@ public interface NotificationStatusRepository extends MongoRepository<Notificati
 
 	Boolean existsByNotificationIdAndStatus(ObjectId notificationId, NotificationStatus status);
 
-	List<NotificationStatusDocument> findAllByTargetIdAndTargetTypeAndRole(Long studentId,
-	                                                                       NotificationDomainType targetType, RecipientRole role);
+	List<NotificationStatusDocument> findAllByTargetIdAndTargetTypeAndRoleOrderByUpdatedAtDesc(Long studentId,
+	                                                                                           NotificationDomainType targetType, RecipientRole role);
 
 	int countByTargetIdAndTargetTypeAndRoleAndIsReadFalse(Long studentId, NotificationDomainType targetType,
 	                                                      RecipientRole role);
