@@ -68,7 +68,7 @@ function StudentInfo({
           <UserImg name={name} size={variant === "detail" ? "xl" : "l"} showTeamBadge={false} url={imgUrl} />
           {!isMyProfile && (
             <Heart
-              className={`absolute right-2 bottom-1 cursor-pointer ${isFavorite ? "text-error" : "text-subtext"}`}
+              className={`absolute right-2 bottom-1 cursor-pointer transition-colors ${isFavorite ? "text-error fill-current" : "text-subtext hover:text-error/80 hover:fill-current/50"}`}
               size={24}
               fill={isFavorite ? "currentColor" : "none"}
               onClick={(e) => {
@@ -141,14 +141,17 @@ function StudentInfo({
             )}
           </div>
           {isMyProfile && (
-            <Button
-              text="팀 생성하기"
-              size={variant === "dashboard" ? "s" : "m"}
-              isIcon={false}
-              onClick={() => {
-                navigate("/create-team")
-              }}
-            />
+            <>
+              {variant === "detail" && <div className="text-subtext mb-3 text-center">아직 팀이 없습니다.</div>}
+              <Button
+                text="팀 생성하기"
+                size={variant === "dashboard" ? "s" : "m"}
+                isIcon={false}
+                onClick={() => {
+                  navigate("/create-team")
+                }}
+              />
+            </>
           )}{" "}
         </div>
       )}

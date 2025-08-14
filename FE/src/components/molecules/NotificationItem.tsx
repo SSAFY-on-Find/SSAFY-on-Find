@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
 import { Mail, User, Users } from "lucide-react"
 
 import { Button } from "@/components/atoms"
+import { useUserStore } from "@/stores/userStore"
 import type { INotificationStatus } from "@/types/notification"
 
 function formatDate(dateString?: string) {
@@ -60,6 +62,21 @@ function getNotificationIcon(type: string) {
   }
 }
 
+function getStatusBorderColor(status: string) {
+  switch (status) {
+    case "PENDING":
+      return "border-main/40 border-3"
+    case "ACCEPTED":
+      return "border-main"
+    case "REJECTED":
+      return "border-error"
+    case "CANCELED":
+      return "border-subtext"
+    default:
+      return "border-line"
+  }
+}
+
 export default function NotificationItem({
   data,
   tab,
@@ -74,22 +91,45 @@ export default function NotificationItem({
   onCancel: (statusId: string) => void
 }) {
   const navigate = useNavigate()
-  const isInvitation = data.role === "PUBLISHER"
+  const isInvitation =
+    (data.role === "SUBSCRIBER" && data.subscriberType === "STUDENT") ||
+    (data.role === "PUBLISHER" && data.publisherType === "STUDENT")
   const isPending = data.status === "PENDING"
+  const userTeamId = useUserStore((state) => state.user?.teamId)
 
   const goToMyTeamIfTeam = () => {
     const goLeft = tab === "left" && data.subscriberType === "TEAM"
     const goRight = tab === "right" && data.publisherType === "TEAM"
-    if (goLeft || goRight) {
-      navigate("/myteam")
+
+    if (goLeft) {
+      if (data.subscriberId === userTeamId) {
+        navigate("/myteam")
+      } else {
+        toast.error("현재는 가입되지 않은 팀입니다.")
+      }
+      return
+    }
+
+    if (goRight) {
+      if (data.publisherId === userTeamId) {
+        navigate("/myteam")
+      } else {
+        toast.error("현재는 가입되지 않은 팀입니다.")
+      }
+      return
     }
   }
 
   return (
-    <div className="transform rounded-lg border border-gray-200 bg-white p-4 transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-md">
+    <div
+      className={`transform rounded-lg border bg-white p-4 transition-all duration-300 ease-in-out ${getStatusBorderColor(data.status)} ${!isPending ? "pointer-events-none opacity-50" : ""} ${isPending ? "hover:scale-[1.02] hover:shadow-md" : ""}`}
+    >
       <div className="flex flex-col items-start justify-between gap-2">
         <div className="flex w-full items-center justify-between">
-          <div className="flex cursor-pointer items-center gap-3" onClick={goToMyTeamIfTeam}>
+          <div
+            className={`${!isInvitation ? "cursor-pointer" : ""} flex items-center gap-3`}
+            onClick={goToMyTeamIfTeam}
+          >
             <div>{getNotificationIcon(tab === "left" ? data.subscriberType : data.publisherType)}</div>
             <h3 className="text-text text-sm font-bold">
               {tab === "left" ? data.pubNotificationTitle : data.subNotificationTitle}

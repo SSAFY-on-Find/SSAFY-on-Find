@@ -135,7 +135,7 @@ function TeamCard({
           </div>
           {userTeamId !== teamId && (
             <Heart
-              className={`cursor-pointer transition-colors ${isFavorite ? heartFillColor : heartColor}`}
+              className={`cursor-pointer transition-colors ${isFavorite ? "text-error fill-current" : "text-subtext hover:text-error/80 hover:fill-current/50"}`}
               onClick={handleFavoriteClick}
             />
           )}

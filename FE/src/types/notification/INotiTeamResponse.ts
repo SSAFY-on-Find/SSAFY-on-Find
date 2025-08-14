@@ -7,4 +7,6 @@ export interface INotificationTeam {
   position: string
   majorCount: number
   nonMajorCount: number
+  id: number
+  type: string
 }
