@@ -25,9 +25,7 @@ function SideBar() {
         onSuccess: (roomId) => {
           openChat({ roomId, roomType: "direct" })
         },
-        onError: (error) => {
-          console.log("1대1채팅방 생성 에러 : ", error)
-        },
+        onError: (error) => {},
       }
     )
   }

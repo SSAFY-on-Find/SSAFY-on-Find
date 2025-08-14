@@ -36,6 +36,7 @@ function TeamCard({
 }: ITeamCardElement) {
   const { applyAsMate, mergeTeams } = useInvte(userTeamId ?? null)
   const myMateId = useUserStore((s) => s.user?.studentId)
+
   const navigate = useNavigate()
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
@@ -47,7 +48,7 @@ function TeamCard({
   }
 
   const renderButtons = () => {
-    if (userTeamId === null) {
+    if (!userTeamId) {
       return (
         <Button
           size={"m"}

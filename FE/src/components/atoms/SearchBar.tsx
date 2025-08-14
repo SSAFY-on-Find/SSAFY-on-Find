@@ -14,7 +14,6 @@ function SearchBar({ onSearch }: ISearchBar) {
       return
     }
     onSearch(trimedSearchValue)
-    console.log("검색버튼 클릭! 내용 : ", trimedSearchValue) // 검색 로직 개발 시 여기다 추가하기!!
   }
   const handleEnderPress = (ele: { key: string }) => {
     if (ele.key === "Enter") {
