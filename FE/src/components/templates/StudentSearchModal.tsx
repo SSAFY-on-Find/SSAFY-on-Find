@@ -1,16 +1,27 @@
 import { useEffect, useState } from "react"
+import { toast } from "react-toastify"
+import { isAxiosError } from "axios"
 import { Send } from "lucide-react"
 
+import { MajorTag, PositionTag, SearchBar, UserImg } from "@/components/atoms"
+import { useInvte } from "@/hooks/useInvite"
 import type { IStudentCard } from "@/types/student"
 
-import { MajorTag, PositionTag, SearchBar, UserImg } from "../atoms"
-
 import Modal from "./Modal"
+
+function getErrorMessage(err: unknown, fallback: string) {
+  if (isAxiosError(err)) {
+    return err.response?.data?.data?.message ?? err.message ?? fallback
+  }
+  if (err instanceof Error) return err.message ?? fallback
+  return fallback
+}
 interface IStudentSearchModal {
   isOpen: boolean
   onClose: () => void
   students: IStudentCard[]
-  onStudentClick: (userId: string) => void
+  onStudentClick?: (userId: string) => void
+  myTeamId?: number
 }
 interface IChatUser {
   id: string
@@ -47,8 +58,9 @@ function StudentListItem({ name, major, position, hasTeam, onClick, userProfile 
   )
 }
 
-function StudentSearchModal({ isOpen, onClose, students, onStudentClick }: IStudentSearchModal) {
+function StudentSearchModal({ isOpen, onClose, students, onStudentClick, myTeamId }: IStudentSearchModal) {
   const [searchQuery, setSearchQuery] = useState("")
+  const { invitation } = useInvte(myTeamId ?? null)
 
   useEffect(() => {
     if (isOpen) {
@@ -68,18 +80,34 @@ function StudentSearchModal({ isOpen, onClose, students, onStudentClick }: IStud
           <SearchBar onSearch={handleSearch} />
         </div>
         <div className="flex max-h-[370px] flex-col gap-3 overflow-y-auto px-[15px] pt-[10px]">
-          {filteredStudents.map((ele) => (
-            <StudentListItem
-              key={ele.student.studentId}
-              id={String(ele.student.studentId)}
-              name={ele.student.name}
-              major={ele.student.major}
-              position={ele.position.subcodeName}
-              hasTeam={ele.teamName ? true : false}
-              onClick={() => onStudentClick(String(ele.student.studentId))}
-              userProfile={ele.profileImageUrl}
-            />
-          ))}
+          {filteredStudents.map((ele) => {
+            const idNum = Number(ele.student.studentId)
+            const idStr = String(ele.student.studentId)
+
+            const handlePick = async () => {
+              if (typeof myTeamId === "number") {
+                await toast.promise(invitation(idNum, myTeamId), {
+                  success: "초대를 보냈습니다!",
+                  error: { render: ({ data }) => getErrorMessage(data, "초대 전송에 실패했습니다.") },
+                })
+              } else {
+                onStudentClick?.(idStr)
+              }
+            }
+
+            return (
+              <StudentListItem
+                key={idStr}
+                id={idStr}
+                name={ele.student.name}
+                major={ele.student.major}
+                position={ele.position.subcodeName}
+                hasTeam={!!ele.teamName}
+                onClick={handlePick}
+                userProfile={ele.profileImageUrl}
+              />
+            )
+          })}
         </div>
       </div>
     </Modal>
