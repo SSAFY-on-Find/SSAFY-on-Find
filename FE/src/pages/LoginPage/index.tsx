@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { User } from "lucide-react"
 
 import { Button, InputBox } from "@/components/atoms"
+import { Loading } from "@/components/templates"
 import { useStudentLogin } from "@/hooks/useStudent"
 import { useUserStore } from "@/stores/userStore"
 import type { IStudentSignin } from "@/types/student"
@@ -51,11 +52,7 @@ export default function LoginPage() {
   }, [isError, error])
 
   if (isPending) {
-    return (
-      <div className="bg-background flex min-h-screen items-center justify-center">
-        <div className="text-main text-center text-xl font-semibold">로그인 중입니다...</div>
-      </div>
-    )
+    return <Loading text="로그인 중..." fullScreen />
   }
 
   return (

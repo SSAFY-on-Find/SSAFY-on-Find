@@ -84,10 +84,6 @@ export default function MyTeamPage() {
     onError: () => console.error("채팅방 생성에 실패했습니다."),
   })
 
-  const handleInviteStudent = (targetStudentId: number) => {
-    // 새로운 학생을 우리 팀으로 초대하는 로직이 들어가야합니다!
-  }
-
   const {
     data: fetchedRoomId,
     isFetching: isFetchingRoomId,
