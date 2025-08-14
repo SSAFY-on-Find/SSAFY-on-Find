@@ -88,7 +88,7 @@ function TeamCard({
               if (!userTeamId) return
               toast.promise(mergeTeams(teamId, Number(userTeamId)), {
                 success: "팀 합치기 제안을 보냈습니다!",
-                error: { render: ({ data }) => getErrorMessage(data, "팀 합치기 요청 실패했습니다.") },
+                error: { render: ({ data }) => getErrorMessage(data, "팀 합치기 요청에 실패했습니다.") },
               })
             }}
           />
