@@ -62,16 +62,16 @@ public class TeamService {
 		}
 
 		//최초 생성자 전공?비전공?
-		int initialMajorCount = Boolean.TRUE.equals(student.getMajorYn()) ? 1 : 0;
-		int initialNonMajorCount = Boolean.FALSE.equals(student.getMajorYn()) ? 1 : 0;
+//		int initialMajorCount = Boolean.TRUE.equals(student.getMajorYn()) ? 1 : 0;
+//		int initialNonMajorCount = Boolean.FALSE.equals(student.getMajorYn()) ? 1 : 0;
 
 		//팀 명 없이 일단 저장
 		Team noTeamName = Team.builder()
 				.name("")
 				.description(request.description())
 				.track(track)
-				.majorCount(initialMajorCount)
-				.nonMajorCount(initialNonMajorCount)
+//				.majorCount(initialMajorCount)
+//				.nonMajorCount(initialNonMajorCount)
 				.build();
 
 		Team team = teamRepository.save(noTeamName);
