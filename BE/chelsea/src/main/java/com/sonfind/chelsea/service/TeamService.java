@@ -62,16 +62,16 @@ public class TeamService {
 		}
 
 		//최초 생성자 전공?비전공?
-		int initialMajorCount = Boolean.TRUE.equals(student.getMajorYn()) ? 1 : 0;
-		int initialNonMajorCount = Boolean.FALSE.equals(student.getMajorYn()) ? 1 : 0;
+//		int initialMajorCount = Boolean.TRUE.equals(student.getMajorYn()) ? 1 : 0;
+//		int initialNonMajorCount = Boolean.FALSE.equals(student.getMajorYn()) ? 1 : 0;
 
 		//팀 명 없이 일단 저장
 		Team noTeamName = Team.builder()
 				.name("")
 				.description(request.description())
 				.track(track)
-				.majorCount(initialMajorCount)
-				.nonMajorCount(initialNonMajorCount)
+//				.majorCount(initialMajorCount)
+//				.nonMajorCount(initialNonMajorCount)
 				.build();
 
 		Team team = teamRepository.save(noTeamName);
@@ -520,27 +520,69 @@ public class TeamService {
 	//최적화된 방식 2: fetch join
 	@Transactional(readOnly = true)
 	public List<TeamListResponseDto> getAllTeamsFetchJoin(Long currentStudentId) {
-		// 1. Fetch Join으로 팀과 모집공고 정보 조회
+		// 1) 팀/멤버/즐겨찾기 조회
 		List<Team> teams = teamRepository.findAllTeamsWithRecruitments();
 		List<Long> teamIds = teams.stream().map(Team::getTeamId).toList();
 
-		// 2. 멤버 정보는 별도 조회 (StudentInfo가 복잡하므로)
 		List<TeamMemberDto> members = teamRepository.findTeamMembersByTeamIds(teamIds);
 		Map<Long, List<TeamMemberDto>> membersByTeam = members.stream()
 				.collect(Collectors.groupingBy(TeamMemberDto::teamId));
 
-		// 3. 즐겨찾기 정보 조회
 		Map<Long, Boolean> favoritesByTeam = getFavoritesByTeams(currentStudentId, teamIds);
 
+		// 2) "내 팀" 빠른 판별용 Set (0-1개)
+		Set<Long> myTeamIds = membersByTeam.entrySet().stream()
+				.filter(e -> e.getValue() != null &&
+						e.getValue().stream().anyMatch(m -> Objects.equals(m.studentId(), currentStudentId)))
+				.map(Map.Entry::getKey)
+				.collect(Collectors.toSet());
+
+		// 3) 정렬: 내 팀(0) → 즐겨찾기(0) → 모집중(false) → 팀번호 asc
+		Comparator<Team> order = Comparator
+				// 내 팀은 키=1, 나머지=0  → 내 팀이 항상 뒤
+				.comparing((Team t) -> myTeamIds.contains(t.getTeamId()) ? 1 : 0)
+				// 즐겨찾기 먼저 (true를 0으로)
+				.thenComparing((Team t) -> favoritesByTeam.getOrDefault(t.getTeamId(), false) ? 0 : 1)
+				// 모집중 먼저: isRecruitingComplete == false 가 앞
+				.thenComparing((Team t) -> isRecruitingComplete(t, membersByTeam.get(t.getTeamId())))
+				// 번호 오름차순 (null 안전)
+				.thenComparing((Team t) -> parseTeamNumber(t.getName()), Comparator.nullsLast(Integer::compareTo))
+				// (선택) 최종 타이브레이커
+				.thenComparing(Team::getTeamId);
+
+		// 4) 정렬 후 DTO 매핑
 		return teams.stream()
-				.map(team -> convertToDto(team, membersByTeam.get(team.getTeamId()),
-						favoritesByTeam.getOrDefault(team.getTeamId(), false)))
-				.sorted(
-						Comparator.comparing(TeamListResponseDto::isRecruitingComplete)
-								.thenComparing(dto -> parseTeamNumber(dto.teamName()))
-				)
+				.sorted(order)
+				.map(team -> convertToDto(
+						team,
+						membersByTeam.get(team.getTeamId()),
+						favoritesByTeam.getOrDefault(team.getTeamId(), false)
+				))
 				.toList();
 	}
+//	@Transactional(readOnly = true)
+//	public List<TeamListResponseDto> getAllTeamsFetchJoin(Long currentStudentId) {
+//		// 1. Fetch Join으로 팀과 모집공고 정보 조회
+//		List<Team> teams = teamRepository.findAllTeamsWithRecruitments();
+//		List<Long> teamIds = teams.stream().map(Team::getTeamId).toList();
+//
+//		// 2. 멤버 정보는 별도 조회 (StudentInfo가 복잡하므로)
+//		List<TeamMemberDto> members = teamRepository.findTeamMembersByTeamIds(teamIds);
+//		Map<Long, List<TeamMemberDto>> membersByTeam = members.stream()
+//				.collect(Collectors.groupingBy(TeamMemberDto::teamId));
+//
+//		// 3. 즐겨찾기 정보 조회
+//		Map<Long, Boolean> favoritesByTeam = getFavoritesByTeams(currentStudentId, teamIds);
+//
+//		return teams.stream()
+//				.map(team -> convertToDto(team, membersByTeam.get(team.getTeamId()),
+//						favoritesByTeam.getOrDefault(team.getTeamId(), false)))
+//				.sorted(
+//						Comparator.comparing(TeamListResponseDto::isRecruitingComplete)
+//								.thenComparing(dto -> parseTeamNumber(dto.teamName()))
+//				)
+//				.toList();
+//	}
 
 	//fetch join용 메서드
 	// 3. convertToDto 메서드 수정 (Team 엔티티용)
