@@ -1,12 +1,20 @@
 // NoTeamPage.jsx
+import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Plus, Users } from "lucide-react"
+import { Plus } from "lucide-react"
 
 import { Button } from "@/components/atoms"
+import { useAuth } from "@/hooks/useStudent"
 
 export default function NoTeamPage() {
   const navigate = useNavigate()
-
+  const { data: authData } = useAuth()
+  const teamId = authData?.teamId
+  useEffect(() => {
+    if (teamId) {
+      navigate("/myteam")
+    }
+  }, [teamId, navigate])
   return (
     <div className="bg-background flex min-h-[calc(100vh-64px)] items-center justify-center">
       <div className="max-w-md rounded-xl p-8 text-center">
