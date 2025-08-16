@@ -287,7 +287,12 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 			teamService.mergeTeams(findNotification.publisherId(), findStudent.getTeamId());
 		} else {
 			// 2) 팀에 학생 추가 및 팀원 변경 이벤트 발행(팀 목록 혹은 팀 상세보기 갱신용) - 개인 초대/지원
-			teamService.addStudentToTeam( findNotification.publisherId(),findNotification.subscriberId());
+			if(findNotification.publisherId() > findNotification.subscriberId()){
+				teamService.addStudentToTeam( findNotification.subscriberId(),findNotification.publisherId());
+			}else{
+				teamService.addStudentToTeam( findNotification.publisherId(),findNotification.subscriberId());
+			}
+
 		}
 	}
 
