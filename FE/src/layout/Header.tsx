@@ -1,4 +1,4 @@
-import { forwardRef, useRef, useState } from "react"
+import { forwardRef, useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Inbox, Search } from "lucide-react"
 
@@ -7,10 +7,39 @@ import { useNotificationStore } from "@/stores/notificationStore"
 import { useUserStore } from "@/stores/userStore"
 
 function DeadlineNotification() {
+  const [timeLeft, setTimeLeft] = useState("")
+  const [dayLeft, setDayLeft] = useState("")
+  useEffect(() => {
+    const deadline = new Date("2025-08-22T10:00:00")
+
+    const updateTimer = () => {
+      const now = new Date()
+      const diff = deadline.getTime() - now.getTime()
+
+      if (diff > 0) {
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+        setDayLeft(`${days}일 `)
+        setTimeLeft(`${hours}시간 ${minutes}분 ${seconds}초`)
+      } else {
+        setTimeLeft("마감됨")
+      }
+    }
+
+    updateTimer()
+    const interval = setInterval(updateTimer, 1000)
+
+    return () => clearInterval(interval)
+  }, [])
   return (
     <div className="border-main flex items-center justify-center gap-3 rounded-md border px-3.5 py-1.5">
-      <div className="text-main text-sm font-semibold">팀빌딩 마감시각</div>
-      <div className="text-text text-base font-semibold">2025.07.21 10:00</div>
+      <div className="text-main text-sm font-semibold">팀빌딩 마감까지</div>
+      <div className="flex min-w-42 gap-2">
+        <div className="text-text text-base font-semibold">{dayLeft}</div>
+        <div className="text-subtext text-base font-normal">{timeLeft}</div>
+      </div>
     </div>
   )
 }
@@ -29,9 +58,9 @@ const AlarmBox = forwardRef<HTMLButtonElement, AlarmBoxProps>(({ onClick, isBlin
     aria-label="알림함 열기"
     className={[
       "focus:ring-main/50 relative flex aspect-square h-[120%] cursor-pointer items-center justify-center rounded-full shadow-2xl transition-opacity focus:ring-2 focus:outline-none",
-      "bg-main hover:opacity-90",
+      "bg-main hover:opacity-80",
       // [added] 반짝임 (필요 시 pulse → ring 강조)
-      isBlinking ? "ring-main/40 animate-pulse ring-4" : "",
+      isBlinking ? "ring-main/40 animate-bounce ring-4" : "",
     ].join(" ")}
   >
     <Inbox className="h-5 w-5 text-white" />
