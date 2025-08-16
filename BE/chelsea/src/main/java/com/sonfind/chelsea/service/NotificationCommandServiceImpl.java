@@ -284,7 +284,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				findNotification.subscriberType() == NotificationDomainType.TEAM) {
 			Student findStudent = studentFacade.findByStudentId(studentId);
 			// 2) 팀에 학생 추가 및 팀원 변경 이벤트 발행(팀 목록 혹은 팀 상세보기 갱신용) - 팀 합치기(합치기 발신 팀ID, 합치기 수신 팀ID)
-			teamService.mergeTeams(findNotification.publisherId(), findStudent.getTeamId());
+			teamService.mergeTeams(findStudent.getTeamId(),findNotification.publisherId());
 		} else {
 			// 2) 팀에 학생 추가 및 팀원 변경 이벤트 발행(팀 목록 혹은 팀 상세보기 갱신용) - 개인 초대/지원
 			if(findNotification.publisherId() > findNotification.subscriberId()){
