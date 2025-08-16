@@ -1,0 +1,51 @@
+services:
+  nginx-proxy:
+    image: "pug9483/chelsea-fe:latest"
+    container_name: "my-nginx-container"
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot
+    depends_on:
+      - spring-app
+    networks:
+      - my_network
+
+  spring-app:
+    image: "pug9483/chelsea-be:latest"
+    container_name: "my-spring-container"
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://${MYSQL_CONTAINER_NAME}:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=${MYSQL_USER}
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}
+      - SPRING_REDIS_HOST=my-redis-cache
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SPRING_DATA_MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@my-mongo-db:27017/${MONGO_INITDB_DATABASE}?authSource=admin
+    volumes:
+      - /home/ubuntu/app/storage:/app/uploads
+    networks:
+      - my_network
+
+  ai-app:
+    image: "pug9483/chelsea-ai:latest"
+    container_name: "my-ai-container"
+    restart: always
+    ports:
+      - "9091:9091"
+    env_file:
+      - ./.env
+    networks:
+      - my_network
+    
+networks:
+  my_network:
+    external: true
+    name: app_my_network

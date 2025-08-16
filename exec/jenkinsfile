@@ -1,0 +1,98 @@
+pipeline {
+    agent any
+
+    environment {
+        PROJECT_DIR = '.'
+        FRONTEND_DIR = "${PROJECT_DIR}/FE"
+        BACKEND_DIR = "${PROJECT_DIR}/BE/chelsea"
+        AI_DIR = "${PROJECT_DIR}/AI"
+        
+        DOCKER_FRONTEND_IMAGE = 'pug9483/chelsea-fe'
+        DOCKER_BACKEND_IMAGE = 'pug9483/chelsea-be'
+        DOCKER_AI_IMAGE = 'pug9483/chelsea-ai'
+        DOCKER_HUB_CREDENTIAL_ID = 'dockerhub-jenkins'
+        IMAGE_TAG = 'latest' 
+        
+        VITE_APP_BASE_URL = 'https://i13a704.p.ssafy.io/api/v1' 
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                cleanWs()
+                git url: 'https://lab.ssafy.com/s13-webmobile1-sub1/S13P11A704.git', 
+                    branch: 'dev', 
+                    credentialsId: 'gitlab-jenkins'
+            }
+        }
+
+        stage('Build Backend') {
+            steps {
+                echo '1. Backend 애플리케이션을 Gradle로 빌드합니다.'
+                dir(BACKEND_DIR) {
+                    sh 'chmod +x ./gradlew'
+                    sh './gradlew clean build -x test -x checkstyleMain -x checkstyleTest'
+                }
+            }
+        }
+        
+        stage('Build & Push Docker Images') {
+            steps {
+                echo '2. Frontend와 Backend 도커 이미지를 빌드하고 푸시합니다.'
+                script {
+                    withCredentials([usernamePassword(credentialsId: DOCKER_HUB_CREDENTIAL_ID, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                    }
+                    
+                    dir(FRONTEND_DIR) {
+                        sh "docker build --build-arg VITE_APP_BASE_URL=${VITE_APP_BASE_URL} -t ${DOCKER_FRONTEND_IMAGE}:${IMAGE_TAG} ."
+                        sh "docker push ${DOCKER_FRONTEND_IMAGE}:${IMAGE_TAG}"
+                    }
+                    
+                    dir(BACKEND_DIR) {
+                        sh 'cp `find ./build/libs -name "*.jar" | grep -v "plain.jar"` ./app.jar'
+                        sh "docker build -t ${DOCKER_BACKEND_IMAGE}:${IMAGE_TAG} ."
+                        sh "docker push ${DOCKER_BACKEND_IMAGE}:${IMAGE_TAG}"
+                    }
+                    
+                    dir(AI_DIR) {
+                        sh "docker build -t ${DOCKER_AI_IMAGE}:${IMAGE_TAG} ."
+                        sh "docker push ${DOCKER_AI_IMAGE}:${IMAGE_TAG}"
+                    }
+                }
+            }
+        }
+        
+        stage('Deploy on EC2') {
+            steps {
+                echo 'SSH Agent를 사용하여 EC2에 재배포합니다.'
+                sshagent(credentials: ['ssh-credentials']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ubuntu@172.26.0.222 '''
+                            # docker-compose-app.yml 파일이 있는 경로로 이동합니다.
+                            cd /home/ubuntu/app
+        
+                            echo "docker-compose-app.yml을 사용하여 배포를 시작합니다."
+                            
+                            docker compose -f docker-compose-app.yml pull
+        
+                            docker compose -f docker-compose-app.yml up -d --force-recreate --no-deps
+        
+                            echo "배포가 완료되었습니다."
+                        '''
+                    """
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo '✅ 파이프라인이 성공적으로 종료되었습니다. 작업 공간을 정리합니다.'
+            cleanWs()
+        }
+        failure {
+            echo '❌ 파이프라인이 실패했습니다. 디버깅을 위해 작업 공간을 보존합니다.'
+        }
+    }
+}
