@@ -202,13 +202,13 @@ export default function MyTeamPage() {
     }
   }, [isRoomIdError, teamId, createRoom, isCreating, isEntering, isMyTeamLoading, myTeamData, hasTriedCreation])
 
-  useEffect(() => {
-    if (teamId) {
-      setHasJoinedChat(false)
-      setChatRoomId(null)
-      setHasTriedCreation(false)
-    }
-  }, [teamId])
+  // useEffect(() => {
+  //   if (teamId) {
+  //     setHasJoinedChat(false)
+  //     setChatRoomId(null)
+  //     setHasTriedCreation(false)
+  //   }
+  // }, [teamId])
 
   const isLoading = isFetchingRoomId || isCreating || isMyTeamLoading || isMessagesLoading || isEntering
 
