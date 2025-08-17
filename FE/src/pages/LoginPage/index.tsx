@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import { useQueryClient } from "@tanstack/react-query"
+import { isAxiosError } from "axios"
 import { User } from "lucide-react"
 
 import { Button, InputBox } from "@/components/atoms"
@@ -10,11 +11,17 @@ import { useStudentLogin } from "@/hooks/useStudent"
 import { useUserStore } from "@/stores/userStore"
 import type { IStudentSignin } from "@/types/student"
 
+function getErrorMessage(err: unknown, fallback: string) {
+  if (isAxiosError(err)) return err.response?.data?.data?.message ?? err.message ?? fallback
+  if (err instanceof Error) return err.message ?? fallback
+  return fallback
+}
+
 export default function LoginPage() {
   const qc = useQueryClient()
   const [inputBoxValue, setInputBoxValue] = useState("")
   const navigate = useNavigate()
-  const { mutate: login, isPending, isError, error } = useStudentLogin()
+  const { mutate: login, isPending } = useStudentLogin()
   const { setUser } = useUserStore()
   const handleFreePass = () => {
     login("1300030", {
@@ -23,6 +30,9 @@ export default function LoginPage() {
         qc.setQueryData<IStudentSignin>(["user-auth"], user)
         navigate("/")
         toast.success("로그인에 성공했습니다.")
+      },
+      onError: (err) => {
+        toast.error(getErrorMessage(err, "로그인에 실패하였습니다. 다시 시도해 주세요"))
       },
     })
   }
@@ -42,14 +52,11 @@ export default function LoginPage() {
         navigate("/")
         toast.success("로그인에 성공했습니다.")
       },
+      onError: (err) => {
+        toast.error(getErrorMessage(err, "로그인에 실패하였습니다. 다시 시도해 주세요"))
+      },
     })
   }
-
-  useEffect(() => {
-    if (isError) {
-      toast.error("로그인에 실패했습니다.")
-    }
-  }, [isError, error])
 
   if (isPending) {
     return <Loading text="로그인 중..." fullScreen />

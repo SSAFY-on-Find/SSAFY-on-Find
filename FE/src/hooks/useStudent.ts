@@ -1,24 +1,31 @@
 import { toast } from "react-toastify"
 import { useMutation, useQuery } from "@tanstack/react-query"
+import { isAxiosError } from "axios"
 
 import { authApi } from "@/apis/authApi"
 import { studentApi, studentInfoApi } from "@/apis/studentApi"
+import type { IStudentSignin } from "@/types/student"
+
+type LoginSuccess = { status: "SUCCESS"; data: IStudentSignin }
+type LoginError = { status: "ERROR"; data: { message: string; path?: string } }
+type LoginResponse = LoginSuccess | LoginError
 
 export const useStudentLogin = () => {
-  return useMutation({
+  return useMutation<IStudentSignin, Error, string>({
     mutationFn: async (studentId: string) => {
       try {
-        const response = await studentApi.login(studentId)
-        if (response.status !== "SUCCESS") {
-          toast.error("로그인에 실패하였습니다. 다시 시도해 주세요")
-          throw new Error("로그인에 실패하였습니다.")
+        const response = (await studentApi.login(studentId)) as LoginResponse
+
+        if (response.status === "SUCCESS") {
+          return response.data
         }
-        return response.data
-      } catch (error) {
-        if (error instanceof Error) {
-          throw new Error(error.message)
+
+        throw new Error(response.data.message ?? "로그인에 실패하였습니다.")
+      } catch (e) {
+        if (isAxiosError(e)) {
+          throw new Error(e.response?.data?.data?.message ?? e.message ?? "로그인 중 오류가 발생했습니다.")
         }
-        toast.error("로그인에 실패하였습니다. 다시 시도해 주세요")
+        if (e instanceof Error) throw e
         throw new Error("로그인 중 오류가 발생했습니다.")
       }
     },
