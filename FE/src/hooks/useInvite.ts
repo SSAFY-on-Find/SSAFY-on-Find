@@ -93,8 +93,9 @@ export function useInviteAccept(currentTab?: "receive" | "send") {
     },
     retry: false,
     onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ["my-notification"] })
-      await qc.invalidateQueries({ queryKey: ["myTeam"] })
+      await qc.invalidateQueries({ queryKey: ["my-notification"], exact: false })
+      await qc.invalidateQueries({ queryKey: ["team-notification"], exact: false })
+      await qc.invalidateQueries({ queryKey: ["myTeam"], exact: false })
 
       if (currentTab) {
         await qc.invalidateQueries({ queryKey: ["my-notification", currentTab] })
