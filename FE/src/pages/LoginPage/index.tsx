@@ -17,7 +17,7 @@ export default function LoginPage() {
   const { mutate: login, isPending, isError, error } = useStudentLogin()
   const { setUser } = useUserStore()
   const handleFreePass = () => {
-    login("1300001", {
+    login("1300030", {
       onSuccess: (user) => {
         setUser(user)
         qc.setQueryData<IStudentSignin>(["user-auth"], user)
