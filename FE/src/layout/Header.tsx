@@ -36,7 +36,7 @@ function DeadlineNotification() {
   return (
     <div className="border-main flex items-center justify-center gap-3 rounded-md border px-3.5 py-1.5">
       <div className="text-main text-sm font-semibold">팀빌딩 마감까지</div>
-      <div className="flex min-w-42 gap-2">
+      <div className="flex min-w-40 items-center justify-center gap-2">
         <div className="text-text text-base font-semibold">{dayLeft}</div>
         <div className="text-subtext text-base font-normal">{timeLeft}</div>
       </div>
