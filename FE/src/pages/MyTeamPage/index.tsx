@@ -145,9 +145,9 @@ export default function MyTeamPage() {
   const { acceptInvitationAsync } = useInviteAccept(type)
   const { rejectInvitationAsync } = useInviteReject(type)
 
-  const handleAcceptInvitation = async (id: string) => {
-    if (!id) return
-    await toast.promise(acceptInvitationAsync(id), {
+  const handleAcceptInvitation = async (args: { notificationId: string; nextTeamId?: number }) => {
+    if (!args?.notificationId) return
+    await toast.promise(acceptInvitationAsync(args), {
       success: "초대를 수락했습니다!",
       error: { render: ({ data }) => getErrorMessage(data, "수락 중 오류가 발생했습니다.") },
     })
@@ -258,16 +258,19 @@ export default function MyTeamPage() {
               {!isLoadingTeamRequests && !teamRequestsError && (
                 <>
                   {teamRequests && teamRequests.length > 0 ? (
-                    teamRequests.map((req) => (
-                      <ApplicantCard
-                        key={String(req.notificationId)}
-                        {...req}
-                        tab={requestType}
-                        onAccept={handleAcceptInvitation}
-                        onReject={handleRejectInvitation}
-                        onCancel={handleCancelInvitation}
-                      />
-                    ))
+                    teamRequests
+                      .slice() // 원본 보존
+                      .reverse() // 역순
+                      .map((req) => (
+                        <ApplicantCard
+                          key={String(req.notificationId)}
+                          {...req}
+                          tab={requestType}
+                          onAccept={handleAcceptInvitation}
+                          onReject={handleRejectInvitation}
+                          onCancel={handleCancelInvitation}
+                        />
+                      ))
                   ) : (
                     <p className="text-subtext text-center text-sm">
                       {requestType === "receive" ? "받은 요청이 없습니다." : "보낸 요청이 없습니다."}
@@ -308,6 +311,8 @@ export default function MyTeamPage() {
           title="팀 탈퇴"
           message="정말 탈퇴하시겠습니까"
           confirmText="확인"
+          cancelText="취소"
+          isDestructive
           onConfirm={handleLeaveTeam}
           onCancel={handleModalClose}
         />

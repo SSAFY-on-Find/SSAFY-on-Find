@@ -86,7 +86,7 @@ export default function NotificationItem({
 }: {
   data: INotificationStatus
   tab: "left" | "right"
-  onAccept: (statusId: string) => void
+  onAccept: (args: { notificationId: string; nextTeamId?: number }) => void
   onReject: (statusId: string) => void
   onCancel: (statusId: string) => void
 }) {
@@ -118,6 +118,16 @@ export default function NotificationItem({
       }
       return
     }
+  }
+
+  const handleAcceptClick = () => {
+    const shouldCarryNextTeamId =
+      tab === "left" && data.subscriberType === "STUDENT" && data.publisherType === "TEAM" && data.publisherId !== null
+
+    onAccept({
+      notificationId: data.notificationId,
+      nextTeamId: shouldCarryNextTeamId ? data.publisherId! : undefined,
+    })
   }
 
   return (
@@ -159,13 +169,7 @@ export default function NotificationItem({
       {tab === "left" && isInvitation && isPending && (
         <div className="mt-3 flex space-x-2 pt-2">
           <Button text="거절" variant="text" size="s" isIcon={false} onClick={() => onReject?.(data.notificationId)} />
-          <Button
-            text="수락"
-            variant="primary"
-            size="s"
-            isIcon={false}
-            onClick={() => onAccept?.(data.notificationId)}
-          />
+          <Button text="수락" variant="primary" size="s" isIcon={false} onClick={handleAcceptClick} />
         </div>
       )}
 

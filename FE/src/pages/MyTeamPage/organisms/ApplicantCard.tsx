@@ -9,7 +9,7 @@ type TabType = "receive" | "send"
 
 interface ApplicantCardProps extends INotificationTeam {
   tab: TabType
-  onAccept?: (notificationId: string) => void
+  onAccept?: (args: { notificationId: string; nextTeamId?: number }) => void
   onReject?: (notificationId: string) => void
   onCancel?: (notificationId: string) => void
 }
@@ -51,6 +51,12 @@ export default function ApplicantCard({
   const BASEURL = import.meta.env.VITE_APP_BASE_URL
   const { selectedTeamId, openDetailModal } = useTeamStore()
   const { data: selectedTeamData } = useTeamDetails(selectedTeamId || 0)
+
+  const handleAcceptClick = () => {
+    const nextTeamId = tab === "receive" && type === "TEAM" && typeof id === "number" ? id : undefined
+    const safeAccept = onAccept ?? (() => {})
+    safeAccept({ notificationId, nextTeamId })
+  }
 
   return (
     <div className={`hover:bg-main/10 flex items-center justify-between rounded-lg p-2 ${disabledClass}`}>
@@ -94,13 +100,7 @@ export default function ApplicantCard({
                 <Button text="거절" variant="text" size="m" isIcon={false} onClick={() => onReject?.(notificationId)} />
               </div>
               <div className="w-15">
-                <Button
-                  text="수락"
-                  variant="primary"
-                  size="m"
-                  isIcon={false}
-                  onClick={() => onAccept?.(notificationId)}
-                />
+                <Button text="수락" variant="primary" size="m" isIcon={false} onClick={handleAcceptClick} />
               </div>
             </>
           ) : (

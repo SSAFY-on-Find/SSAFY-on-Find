@@ -13,6 +13,7 @@ interface NotificationModalProps {
   isOpen: boolean
   onClose: () => void
   returnFocusRef?: React.RefObject<HTMLElement | null>
+  panelRef?: React.RefObject<HTMLDivElement | null>
 }
 
 function getErrorMessage(err: unknown, fallback: string) {
@@ -23,7 +24,7 @@ function getErrorMessage(err: unknown, fallback: string) {
   return fallback
 }
 
-export default function NotificationModal({ isOpen, onClose, returnFocusRef }: NotificationModalProps) {
+export default function NotificationModal({ isOpen, onClose, returnFocusRef, panelRef }: NotificationModalProps) {
   const [activeTab, setActiveTab] = useState<"left" | "right">("left")
   const containerRef = useRef<HTMLDivElement | null>(null)
 
@@ -36,13 +37,18 @@ export default function NotificationModal({ isOpen, onClose, returnFocusRef }: N
     [data]
   )
 
+  const setBothRefs = (el: HTMLDivElement | null) => {
+    containerRef.current = el
+    if (panelRef) panelRef.current = el
+  }
+
   const { cancleInvitationAsync, isPending: isCanceling } = useInviteCancel(type)
   const { acceptInvitationAsync, isPending: isAccepting } = useInviteAccept(type)
   const { rejectInvitationAsync, isPending: isRejecting } = useInviteReject(type)
 
-  const handleAcceptInvitation = async (id: string) => {
-    if (!id) return
-    await toast.promise(acceptInvitationAsync(id), {
+  const handleAcceptInvitation = async (args: { notificationId: string; nextTeamId?: number }) => {
+    if (!args?.notificationId) return
+    await toast.promise(acceptInvitationAsync(args), {
       success: "초대를 수락했습니다!",
       error: { render: ({ data }) => getErrorMessage(data, "수락 중 오류가 발생했습니다.") },
     })
@@ -91,7 +97,7 @@ export default function NotificationModal({ isOpen, onClose, returnFocusRef }: N
       role="dialog"
       aria-modal="true"
       aria-label="알림함"
-      ref={containerRef}
+      ref={setBothRefs}
       tabIndex={-1}
       onMouseEnter={lockScroll}
       onMouseLeave={unlockScroll}

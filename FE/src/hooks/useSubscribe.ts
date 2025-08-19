@@ -4,7 +4,32 @@ import { useQueryClient } from "@tanstack/react-query"
 import { subscribeSSE } from "@/apis/subscribeApi"
 import { sseManager } from "@/libs/sseManager"
 import { useNotificationStore } from "@/stores/notificationStore"
-import type { EventType, ISubscribe } from "@/types/sse"
+import { useUserStore } from "@/stores/userStore"
+import type { ISubscribe } from "@/types/sse"
+import type { IStudentSignin } from "@/types/student"
+
+const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null
+
+type TeamEntity = {
+  id: number
+  type: "TEAM"
+  name: string
+  track: string
+  memberCount?: number
+  majorCount?: number
+  nonMajorCount?: number
+}
+
+type MergePayload = { publisher: TeamEntity; subscriber: TeamEntity }
+
+const isTeam = (v: unknown): v is TeamEntity =>
+  isRecord(v) &&
+  v.type === "TEAM" &&
+  typeof v.id === "number" &&
+  typeof v.name === "string" &&
+  typeof v.track === "string"
+
+const isMergePayload = (v: unknown): v is MergePayload => isRecord(v) && isTeam(v.publisher) && isTeam(v.subscriber)
 
 export function useNotificationStream(enabled: boolean) {
   const qc = useQueryClient()
@@ -23,40 +48,23 @@ export function useNotificationStream(enabled: boolean) {
       }
     }
 
-    // 대시보드 계열은 서버 집계라 invalidate 권장(이벤트 폭주 대비 디바운스)
-    const invalidateDashboards = debounce(() => {
-      qc.invalidateQueries({ queryKey: ["dashboard"], exact: false })
-      qc.refetchQueries({ queryKey: ["dashboard"], type: "all" })
-    }, 120)
-
-    const refetchMyNotifications = () => {
-      qc.invalidateQueries({ queryKey: ["my-notification"], exact: false })
-      qc.refetchQueries({ queryKey: ["my-notification"], exact: false, type: "all" })
-    }
-    const refetchTeamNotifications = () => {
-      qc.invalidateQueries({ queryKey: ["team-notification"], exact: false })
-      qc.refetchQueries({ queryKey: ["team-notification"], exact: false, type: "all" })
+    const touchActive = (key: unknown[]) => {
+      qc.invalidateQueries({ queryKey: key, exact: false })
+      qc.refetchQueries({ queryKey: key, type: "active" })
     }
 
-    // 타입별 핸들러
-    const handlers: Record<EventType | string, (msg: ISubscribe<unknown>) => void> = {
-      NOTIFICATION: () => {
-        refetchTeamNotifications()
-        refetchMyNotifications()
-        bump()
-      },
-      DASHBOARD: () => {
-        invalidateDashboards()
-        bump()
-      },
-    }
+    const refetchMyNotifications = debounce(() => touchActive(["my-notification"]), 160)
+    const refetchTeamNotifications = debounce(() => touchActive(["team-notification"]), 160)
+    const refetchMyTeam = debounce(() => touchActive(["myTeam"]), 160)
+    const invalidateDashboards = debounce(() => touchActive(["dashboard"]), 250)
 
     // 공통 핸들러: raw(JSON string) → 파싱 → 라우팅
     const handleRaw = (raw: string) => {
       if (!raw || raw.startsWith(":")) return // :connected 등 하트비트 무시
-      let msg: ISubscribe
+
+      let msg: ISubscribe<unknown>
       try {
-        msg = JSON.parse(raw)
+        msg = JSON.parse(raw) as ISubscribe<unknown>
       } catch {
         return
       }
@@ -67,17 +75,26 @@ export function useNotificationStream(enabled: boolean) {
 
       const logicalType = msg.type ?? "UNKNOWN" // "DASHBOARD" | "NOTIFICATION" | ...
       switch (logicalType) {
-        case "NOTIFICATION":
+        case "NOTIFICATION": {
+          const ev = msg.event
+          console.log("NOTI: " + ev)
           refetchTeamNotifications()
           refetchMyNotifications()
+          refetchMyTeam()
           bump()
           break
-        case "DASHBOARD":
+        }
+        case "DASHBOARD": {
+          const ev = msg.event
+          console.log("DASH: " + ev)
+          refetchTeamNotifications()
+          refetchMyNotifications()
           invalidateDashboards()
+          refetchMyTeam()
           bump()
           break
+        }
         default:
-          // 필요시 기본 처리
           break
       }
     }
