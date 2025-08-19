@@ -4,7 +4,32 @@ import { useQueryClient } from "@tanstack/react-query"
 import { subscribeSSE } from "@/apis/subscribeApi"
 import { sseManager } from "@/libs/sseManager"
 import { useNotificationStore } from "@/stores/notificationStore"
-import type { EventType, ISubscribe } from "@/types/sse"
+import { useUserStore } from "@/stores/userStore"
+import type { ISubscribe } from "@/types/sse"
+import type { IStudentSignin } from "@/types/student"
+
+const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null
+
+type TeamEntity = {
+  id: number
+  type: "TEAM"
+  name: string
+  track: string
+  memberCount?: number
+  majorCount?: number
+  nonMajorCount?: number
+}
+
+type MergePayload = { publisher: TeamEntity; subscriber: TeamEntity }
+
+const isTeam = (v: unknown): v is TeamEntity =>
+  isRecord(v) &&
+  v.type === "TEAM" &&
+  typeof v.id === "number" &&
+  typeof v.name === "string" &&
+  typeof v.track === "string"
+
+const isMergePayload = (v: unknown): v is MergePayload => isRecord(v) && isTeam(v.publisher) && isTeam(v.subscriber)
 
 export function useNotificationStream(enabled: boolean) {
   const qc = useQueryClient()
@@ -38,25 +63,13 @@ export function useNotificationStream(enabled: boolean) {
       qc.refetchQueries({ queryKey: ["team-notification"], exact: false, type: "all" })
     }
 
-    // 타입별 핸들러
-    const handlers: Record<EventType | string, (msg: ISubscribe<unknown>) => void> = {
-      NOTIFICATION: () => {
-        refetchTeamNotifications()
-        refetchMyNotifications()
-        bump()
-      },
-      DASHBOARD: () => {
-        invalidateDashboards()
-        bump()
-      },
-    }
-
     // 공통 핸들러: raw(JSON string) → 파싱 → 라우팅
     const handleRaw = (raw: string) => {
       if (!raw || raw.startsWith(":")) return // :connected 등 하트비트 무시
-      let msg: ISubscribe
+
+      let msg: ISubscribe<unknown>
       try {
-        msg = JSON.parse(raw)
+        msg = JSON.parse(raw) as ISubscribe<unknown>
       } catch {
         return
       }
@@ -67,17 +80,31 @@ export function useNotificationStream(enabled: boolean) {
 
       const logicalType = msg.type ?? "UNKNOWN" // "DASHBOARD" | "NOTIFICATION" | ...
       switch (logicalType) {
-        case "NOTIFICATION":
+        case "NOTIFICATION": {
+          const ev = msg.event
+          console.log("ev: " + ev)
+          // MERGE 알림 처리 (내 팀이 subscriber라면 내 teamId를 publisher.id로 교체)
+          if (ev === "MERGE" && isMergePayload(msg.data)) {
+            const { publisher: pub, subscriber: sub } = msg.data
+            const myTeamId = useUserStore.getState().user?.teamId ?? null
+            console.log(myTeamId)
+            console.log(typeof myTeamId)
+
+            if (typeof myTeamId === "number" && sub.id === myTeamId) {
+              useUserStore.getState().updateUserTeamId(pub.id)
+              qc.setQueryData<IStudentSignin>(["user-auth"], (prev) => (prev ? { ...prev, teamId: pub.id } : prev))
+            }
+          }
           refetchTeamNotifications()
           refetchMyNotifications()
           bump()
           break
+        }
         case "DASHBOARD":
           invalidateDashboards()
           bump()
           break
         default:
-          // 필요시 기본 처리
           break
       }
     }

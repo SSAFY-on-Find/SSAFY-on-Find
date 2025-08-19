@@ -40,9 +40,9 @@ export default function NotificationModal({ isOpen, onClose, returnFocusRef }: N
   const { acceptInvitationAsync, isPending: isAccepting } = useInviteAccept(type)
   const { rejectInvitationAsync, isPending: isRejecting } = useInviteReject(type)
 
-  const handleAcceptInvitation = async (id: string) => {
-    if (!id) return
-    await toast.promise(acceptInvitationAsync(id), {
+  const handleAcceptInvitation = async (args: { notificationId: string; nextTeamId?: number }) => {
+    if (!args?.notificationId) return
+    await toast.promise(acceptInvitationAsync(args), {
       success: "초대를 수락했습니다!",
       error: { render: ({ data }) => getErrorMessage(data, "수락 중 오류가 발생했습니다.") },
     })

@@ -3,7 +3,9 @@ import { useQuery } from "@tanstack/react-query"
 import { notificationApi } from "@/apis/notificationApi"
 import type { INotification, INotificationTeam } from "@/types/notification"
 
-export const useNotification = (type: string) =>
+type BoxType = "receive" | "send"
+
+export const useNotification = (type: BoxType) =>
   useQuery<INotification[]>({
     queryKey: ["my-notification", type],
     queryFn: async () => {
@@ -16,7 +18,7 @@ export const useNotification = (type: string) =>
     refetchOnWindowFocus: false,
   })
 
-export const useTeamNotification = (teamId: number | null | undefined, type: string) =>
+export const useTeamNotification = (teamId: number | null | undefined, type: BoxType) =>
   useQuery<INotificationTeam[]>({
     queryKey: ["team-notification", teamId, type],
     queryFn: async () => {
@@ -25,7 +27,6 @@ export const useTeamNotification = (teamId: number | null | undefined, type: str
       if (res.status !== "SUCCESS") throw new Error("팀 알림 목록 조회 실패")
       return res.data.notification
     },
-    enabled: typeof teamId === "number" && !!type,
     staleTime: 60_000,
     gcTime: 10 * 60_000,
     refetchOnWindowFocus: false,
