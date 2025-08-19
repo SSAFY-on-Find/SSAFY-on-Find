@@ -311,6 +311,8 @@ export default function MyTeamPage() {
           title="팀 탈퇴"
           message="정말 탈퇴하시겠습니까"
           confirmText="확인"
+          cancelText="취소"
+          isDestructive
           onConfirm={handleLeaveTeam}
           onCancel={handleModalClose}
         />
