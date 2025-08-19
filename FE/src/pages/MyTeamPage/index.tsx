@@ -258,16 +258,19 @@ export default function MyTeamPage() {
               {!isLoadingTeamRequests && !teamRequestsError && (
                 <>
                   {teamRequests && teamRequests.length > 0 ? (
-                    teamRequests.map((req) => (
-                      <ApplicantCard
-                        key={String(req.notificationId)}
-                        {...req}
-                        tab={requestType}
-                        onAccept={handleAcceptInvitation}
-                        onReject={handleRejectInvitation}
-                        onCancel={handleCancelInvitation}
-                      />
-                    ))
+                    teamRequests
+                      .slice() // 원본 보존
+                      .reverse() // 역순
+                      .map((req) => (
+                        <ApplicantCard
+                          key={String(req.notificationId)}
+                          {...req}
+                          tab={requestType}
+                          onAccept={handleAcceptInvitation}
+                          onReject={handleRejectInvitation}
+                          onCancel={handleCancelInvitation}
+                        />
+                      ))
                   ) : (
                     <p className="text-subtext text-center text-sm">
                       {requestType === "receive" ? "받은 요청이 없습니다." : "보낸 요청이 없습니다."}

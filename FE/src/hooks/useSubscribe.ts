@@ -48,20 +48,15 @@ export function useNotificationStream(enabled: boolean) {
       }
     }
 
-    // 대시보드 계열은 서버 집계라 invalidate 권장(이벤트 폭주 대비 디바운스)
-    const invalidateDashboards = debounce(() => {
-      qc.invalidateQueries({ queryKey: ["dashboard"], exact: false })
-      qc.refetchQueries({ queryKey: ["dashboard"], type: "all" })
-    }, 120)
+    const touchActive = (key: unknown[]) => {
+      qc.invalidateQueries({ queryKey: key, exact: false })
+      qc.refetchQueries({ queryKey: key, type: "active" })
+    }
 
-    const refetchMyNotifications = () => {
-      qc.invalidateQueries({ queryKey: ["my-notification"], exact: false })
-      qc.refetchQueries({ queryKey: ["my-notification"], exact: false, type: "all" })
-    }
-    const refetchTeamNotifications = () => {
-      qc.invalidateQueries({ queryKey: ["team-notification"], exact: false })
-      qc.refetchQueries({ queryKey: ["team-notification"], exact: false, type: "all" })
-    }
+    const refetchMyNotifications = debounce(() => touchActive(["my-notification"]), 160)
+    const refetchTeamNotifications = debounce(() => touchActive(["team-notification"]), 160)
+    const refetchMyTeam = debounce(() => touchActive(["myTeam"]), 160)
+    const invalidateDashboards = debounce(() => touchActive(["dashboard"]), 250)
 
     // 공통 핸들러: raw(JSON string) → 파싱 → 라우팅
     const handleRaw = (raw: string) => {
@@ -82,28 +77,23 @@ export function useNotificationStream(enabled: boolean) {
       switch (logicalType) {
         case "NOTIFICATION": {
           const ev = msg.event
-          console.log("ev: " + ev)
-          // MERGE 알림 처리 (내 팀이 subscriber라면 내 teamId를 publisher.id로 교체)
-          if (ev === "MERGE" && isMergePayload(msg.data)) {
-            const { publisher: pub, subscriber: sub } = msg.data
-            const myTeamId = useUserStore.getState().user?.teamId ?? null
-            console.log(myTeamId)
-            console.log(typeof myTeamId)
-
-            if (typeof myTeamId === "number" && sub.id === myTeamId) {
-              useUserStore.getState().updateUserTeamId(pub.id)
-              qc.setQueryData<IStudentSignin>(["user-auth"], (prev) => (prev ? { ...prev, teamId: pub.id } : prev))
-            }
-          }
+          console.log("NOTI: " + ev)
           refetchTeamNotifications()
           refetchMyNotifications()
+          refetchMyTeam()
           bump()
           break
         }
-        case "DASHBOARD":
+        case "DASHBOARD": {
+          const ev = msg.event
+          console.log("DASH: " + ev)
+          refetchTeamNotifications()
+          refetchMyNotifications()
           invalidateDashboards()
+          refetchMyTeam()
           bump()
           break
+        }
         default:
           break
       }
