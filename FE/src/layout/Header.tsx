@@ -70,14 +70,30 @@ const AlarmBox = forwardRef<HTMLButtonElement, AlarmBoxProps>(({ onClick, isBlin
 function Header() {
   const navigate = useNavigate()
   const user = useUserStore((state) => state.user)
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const triggerRef = useRef<HTMLButtonElement | null>(null)
-  const { unread, isBlinking, reset } = useNotificationStore()
+  const panelRef = useRef<HTMLDivElement | null>(null)
+  const { unread, isBlinking, isOpen, setOpen, reset } = useNotificationStore()
 
   const handleAlarmClick = () => {
-    setIsNotificationOpen((prev) => !prev)
-    if (!isNotificationOpen) reset()
+    const next = !isOpen
+    setOpen(next)
+    if (next) reset() // 열릴 때만 읽음 처리 + 깜빡임 OFF
   }
+
+  useEffect(() => {
+    const onPointerDown = (e: PointerEvent) => {
+      if (!isOpen) return
+      const t = e.target as Node
+      if (panelRef.current?.contains(t)) return
+      if (triggerRef.current?.contains(t)) return
+      setOpen(false)
+    }
+
+    const opts: AddEventListenerOptions = { capture: true }
+
+    document.addEventListener("pointerdown", onPointerDown, opts)
+    return () => document.removeEventListener("pointerdown", onPointerDown, opts)
+  }, [isOpen, setOpen])
 
   return (
     <>
@@ -103,9 +119,10 @@ function Header() {
         </div>
       </header>
       <NotificationModal
-        isOpen={isNotificationOpen}
-        onClose={() => setIsNotificationOpen(false)}
+        isOpen={isOpen}
+        onClose={() => setOpen(false)}
         returnFocusRef={triggerRef}
+        panelRef={panelRef}
       />
     </>
   )
