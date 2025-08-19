@@ -122,7 +122,7 @@ export default function StudentDetailPage() {
       </div>
       <div className="border-line flex w-full flex-col gap-7 rounded-lg border bg-white p-10">
         <div className="flex flex-col gap-1">
-          <div className="text-text text-sm font-normal">기본정보</div>
+          <div className="text-text text-base font-bold">기본정보</div>
           <div className="flex flex-wrap gap-2">
             {student?.major && <MajorTag tagContent={student.major} />}
             {position?.subcodeName && <PositionTag positionName={position.subcodeName} />}
@@ -131,7 +131,7 @@ export default function StudentDetailPage() {
           </div>
         </div>
         <div className="flex flex-col gap-1">
-          <div className="text-text text-sm font-normal">기술스택</div>
+          <div className="text-text text-base font-bold">기술스택</div>
           <div className="flex flex-wrap gap-2">
             {techStack.length > 0 ? (
               techStack.map((stack: ISubcode) => <NormalTag key={stack.subcode} tagContent={stack.subcodeName} />)
@@ -141,14 +141,14 @@ export default function StudentDetailPage() {
           </div>
         </div>
         <div className="flex flex-col gap-1">
-          <div className="text-text text-sm font-normal">강점 & MBTI</div>
+          <div className="text-text text-base font-bold">강점 & MBTI</div>
           <div className="flex flex-wrap gap-2">
             {strength.length > 0 ? strength.map((s) => <NormalTag key={s} tagContent={s} />) : <></>}
             {mbti && <NormalTag key={mbti.subcode} tagContent={mbti.subcodeName} />}
           </div>
         </div>
         <div className="flex flex-col gap-1">
-          <div className="text-text text-sm font-normal">첨부파일</div>
+          <div className="text-text text-base font-bold">첨부파일</div>
           <div className="text-subtext text-xs font-light">
             {portfolio !== null ? portfolio.originalFileName : "파일 없음"}
           </div>

@@ -18,7 +18,7 @@ function NavBtn({ navIcon: Icon, navTitle, to }: INavProps) {
       }
     >
       <Icon className="h-5 w-5" />
-      <div className="text-sm">{navTitle}</div>
+      <div className="text-base">{navTitle}</div>
     </NavLink>
   )
 }
