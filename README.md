@@ -127,6 +127,7 @@ SSAFY On Find는 삼성 청년 SW 아카데미(SSAFY) 교육생들의 효율적�
 - 팀 빌딩 현황 실시간 동기화
 
 ## 🛠 기술 스택
+<img width="2307" height="1359" alt="SSAFY on Find" src="https://github.com/user-attachments/assets/31842378-8dbc-4718-a245-0ae082e3aec0" />
 
 ### Frontend
 - **React** - 사용자 인터페이스
@@ -203,4 +204,5 @@ cd ai-service
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
+
 
