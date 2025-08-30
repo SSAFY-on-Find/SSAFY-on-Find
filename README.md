@@ -28,7 +28,7 @@ SSAFY On Find는 삼성 청년 SW 아카데미(SSAFY) 교육생들의 효율적�
 <br/>
 <b>김정연</b>
 <br/>
-<i>Frontend</i>
+<i>Frontend & AI </i>
 <br/>
 <a href="https://github.com/blueconecell">
 <img src="https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white"/>
@@ -89,14 +89,7 @@ SSAFY On Find는 삼성 청년 SW 아카데미(SSAFY) 교육생들의 효율적�
 
 설문조사 결과, **93%의 교육생이 팀 빌딩 과정을 어려워함**
 
-#### 주요 어려움 요인
-- **의사소통의 번거로움** (75명)
-- **교육생 특성 파악 어려움** (61명)
-- **실시간 팀 빌딩 현황 파악 불가** (61명)
-- **정보 접근성 부족** (50명)
-- **응답 지연/부재** (46명)
-- **빠른 마감** (36명)
-- **거절의 부담** (25명)
+- **의사소통의 번거로움** /  **교육생 특성 파악 어려움** / **실시간 팀 빌딩 현황 파악 불가** / **정보 접근성 부족**
 
 ## 🚀 주요 기능
 
@@ -130,24 +123,16 @@ SSAFY On Find는 삼성 청년 SW 아카데미(SSAFY) 교육생들의 효율적�
 <img width="2307" height="1359" alt="SSAFY on Find" src="https://github.com/user-attachments/assets/31842378-8dbc-4718-a245-0ae082e3aec0" />
 
 ### Frontend
-- **React** - 사용자 인터페이스
-- **Nginx** - 웹 서버
+- ![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black) ![Zustand](https://img.shields.io/badge/Zustand-FF6B35?style=flat-square&logo=zustand&logoColor=white) ![React Query](https://img.shields.io/badge/React_Query-FF4154?style=flat-square&logo=react-query&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)
 
 ### Backend
-- **Spring Boot** - 백엔드 프레임워크
-- **FastAPI** - AI 추천 서비스
+- ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=flat-square&logo=spring-boot&logoColor=white) ![SSE](https://img.shields.io/badge/SSE-FF6B6B?style=flat-square&logo=SSE&logoColor=white) ![STOMP](https://img.shields.io/badge/STOMP-010101?style=flat-square&logo=Stomp&logoColor=white) ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white) ![LANGCHAIN](https://img.shields.io/badge/LANGCHAIN-009688?style=flat-square&logo=LANGCHAIN&logoColor=white) 
 
 ### Database
-- **MySQL** - 관계형 데이터베이스
-- **MongoDB** - 문서형 데이터베이스
-- **Redis** - 캐시 및 세션 관리
+- ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white) ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white) 
 
-### Infrastructure
-- **Amazon EC2** - 클라우드 서버
-- **Jenkins** - CI/CD 파이프라인
-
-### Communication
-- **Server Sent Events (SSE)** - 실시간 통신
+### Infras
+- ![Amazon EC2](https://img.shields.io/badge/Amazon_EC2-FF9900?style=flat-square&logo=amazon-ec2&logoColor=white) ![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=flat-square&logo=jenkins&logoColor=white) ![Nginx](https://img.shields.io/badge/Nginx-009639?style=flat-square&logo=nginx&logoColor=white) ![GItLab](https://img.shields.io/badge/GItLab-FF6B35?style=flat-square&logo=GItLab&logoColor=white)
 
 ## 📈 기대 효과
 
@@ -166,43 +151,5 @@ SSAFY On Find는 삼성 청년 SW 아카데미(SSAFY) 교육생들의 효율적�
 ### 📊 실시간 현황 파악 불가 문제 해결
 - **기존**: 이미 팀 빌딩 완료된 교육생에게 중복 초대 요청
 - **개선**: 대시보드를 통한 실시간 팀 빌딩 진행률 확인
-
-## 🔧 설치 및 실행
-
-### 사전 요구사항
-- Node.js 22.x 이상
-- Java 21 이상
-- Python 3.8 이상
-- MySQL 8.0 이상
-- MongoDB 4.4 이상
-- Redis 6.x 이상
-
-### 설치 방법
-
-1. **저장소 클론**
-```bash
-git clone https://github.com/your-repo/ssafy-on-find.git
-cd ssafy-on-find
-```
-
-2. **Frontend 설정**
-```bash
-cd frontend
-npm install
-npm start
-```
-
-3. **Backend 설정**
-```bash
-cd backend
-./gradlew bootRun
-```
-
-4. **AI 서비스 설정(준비중)**
-```bash
-cd ai-service
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
 
 
